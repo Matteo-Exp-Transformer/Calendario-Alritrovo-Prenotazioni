@@ -1,8 +1,7 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { usePendingBookings } from '../hooks/useBookingQueries'
 import { useAcceptBooking, useRejectBooking } from '../hooks/useBookingMutations'
 import { BookingRequestCard } from './BookingRequestCard'
-import { RejectBookingModal } from './RejectBookingModal'
 import { toast } from 'react-toastify'
 import type { BookingRequest } from '@/types/booking'
 
@@ -10,8 +9,6 @@ export const PendingRequestsTab: React.FC = () => {
   const { data: pendingBookings, isLoading, error } = usePendingBookings()
   const acceptMutation = useAcceptBooking()
   const rejectMutation = useRejectBooking()
-
-  const [rejectingBooking, setRejectingBooking] = useState<BookingRequest | null>(null)
 
   const handleAccept = (booking: BookingRequest) => {
     console.log('🔵 [PendingRequestsTab] handleAccept called with:', booking)
@@ -63,41 +60,21 @@ export const PendingRequestsTab: React.FC = () => {
     )
   }
 
-  const handleReject = (booking: BookingRequest) => {
-    console.log('🔵 [PendingRequestsTab] handleReject called with:', booking)
-    setRejectingBooking(booking)
-    console.log('🔵 [PendingRequestsTab] Setting rejectingBooking to:', booking.id)
-  }
-
-  const handleConfirmReject = (reason: string) => {
-    console.log('🔵 [PendingRequestsTab] handleConfirmReject called with reason:', reason)
-    console.log('🔵 [PendingRequestsTab] rejectingBooking:', rejectingBooking)
+  const handleReject = async (booking: BookingRequest) => {
+    console.log('🔵 [PendingRequestsTab] handleReject called with:', booking.id)
     
-    if (!rejectingBooking) {
-      console.error('❌ [PendingRequestsTab] No rejectingBooking set!')
-      return
+    try {
+      await rejectMutation.mutateAsync({
+        bookingId: booking.id,
+        rejectionReason: 'Rifiutata dall\'amministratore',
+      })
+      
+      console.log('✅ [PendingRequestsTab] Reject mutation success')
+      toast.success('Prenotazione rifiutata con successo!')
+    } catch (error) {
+      console.error('❌ [PendingRequestsTab] Reject mutation error:', error)
+      toast.error('Errore nel rifiuto della prenotazione')
     }
-
-    console.log('🔵 [PendingRequestsTab] Calling rejectMutation.mutate...')
-    rejectMutation.mutate(
-      {
-        bookingId: rejectingBooking.id,
-        rejectionReason: reason,
-      },
-      {
-        onSuccess: () => {
-          console.log('✅ [PendingRequestsTab] Reject mutation success')
-          toast.success('Prenotazione rifiutata con successo!')
-          setRejectingBooking(null)
-          // Le queries vengono invalidate automaticamente dalla mutation
-        },
-        onError: (error) => {
-          console.error('❌ [PendingRequestsTab] Reject mutation error:', error)
-          toast.error('Errore nel rifiuto della prenotazione')
-          // Non chiudere il modale in caso di errore, così l'utente può riprovare
-        },
-      }
-    )
   }
 
   if (isLoading) {
@@ -155,15 +132,6 @@ export const PendingRequestsTab: React.FC = () => {
           />
         ))}
       </div>
-
-      {/* Modal for reject */}
-      <RejectBookingModal
-        isOpen={!!rejectingBooking}
-        onClose={() => setRejectingBooking(null)}
-        booking={rejectingBooking}
-        onConfirm={handleConfirmReject}
-        isLoading={rejectMutation.isPending}
-      />
     </div>
   )
 }

@@ -21,7 +21,9 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
 
   // Reset form when modal closes
   React.useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      console.log('✅ [RejectModal] Modal opened!')
+    } else {
       setRejectionReason('')
       console.log('🔵 [RejectModal] Modal closed, resetting form')
     }
@@ -37,7 +39,18 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
     console.log('✅ [RejectModal] onConfirm called successfully')
   }
 
-  if (!booking || !isOpen) return null
+  console.log('🔵 [RejectModal] Render check:', { 
+    isOpen, 
+    bookingId: booking?.id, 
+    hasBooking: !!booking
+  })
+
+  if (!booking || !isOpen) {
+    console.log('⛔ [RejectModal] Returning null because:', { hasBooking: !!booking, isOpen })
+    return null
+  }
+  
+  console.log('✅ [RejectModal] Rendering modal!')
 
   return (
     <Modal
