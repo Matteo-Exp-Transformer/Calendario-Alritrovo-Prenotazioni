@@ -21,3 +21,4 @@ export {
   SelectOption 
 } from './Select'
 export { Textarea } from './Textarea'
+export { Modal, ModalActions } from './Modal'
