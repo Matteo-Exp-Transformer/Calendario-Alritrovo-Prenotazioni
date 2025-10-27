@@ -11,8 +11,6 @@ const EVENT_TYPES: { value: EventType; label: string }[] = [
   { value: 'laurea', label: 'Laurea' }
 ]
 
-const GUEST_COUNTS = Array.from({ length: 50 }, (_, i) => i + 1)
-
 interface BookingRequestFormProps {
   onSubmit?: () => void
 }
@@ -207,18 +205,22 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Numero Ospiti */}
       <div className="space-y-2">
-        <Label htmlFor="num_guests">Numero Ospiti *</Label>
-        <Select
-          value={formData.num_guests.toString()}
-          onValueChange={(value) => setFormData({ ...formData, num_guests: parseInt(value) })}
+        <Label htmlFor="num_guests">Numero Ospiti * (da 1 a 110)</Label>
+        <Input
+          id="num_guests"
+          type="number"
+          min="1"
+          max="110"
+          value={formData.num_guests}
+          onChange={(e) => {
+            const value = parseInt(e.target.value) || 0
+            if (value >= 1 && value <= 110) {
+              setFormData({ ...formData, num_guests: value })
+            }
+          }}
           required
-        >
-          {GUEST_COUNTS.map((count) => (
-            <option key={count} value={count}>
-              {count} {count === 1 ? 'persona' : 'persone'}
-            </option>
-          ))}
-        </Select>
+          placeholder="Inserisci numero ospiti"
+        />
       </div>
 
       {/* Note Speciali */}
