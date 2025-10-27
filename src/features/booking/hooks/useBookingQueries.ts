@@ -37,17 +37,32 @@ export const useAcceptedBookings = () => {
   return useQuery({
     queryKey: ['bookings', 'accepted'],
     queryFn: async () => {
+      console.log('🔵 [useAcceptedBookings] Fetching accepted bookings...')
+      
+      // Get today's date at 00:00:00 to include all bookings for today
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      
       const { data, error } = await supabasePublic
         .from('booking_requests')
         .select('*')
         .eq('status', 'accepted')
-        .gte('confirmed_end', new Date().toISOString()) // Solo future
+        .gte('confirmed_end', today.toISOString()) // Include today and future
         .order('confirmed_start', { ascending: true })
 
+      console.log('🔵 [useAcceptedBookings] Query result:', { 
+        data, 
+        error, 
+        count: data?.length,
+        today: today.toISOString() 
+      })
+
       if (error) {
+        console.error('❌ [useAcceptedBookings] Error:', error)
         throw new Error(handleSupabaseError(error))
       }
 
+      console.log('✅ [useAcceptedBookings] Returning', data?.length, 'accepted bookings')
       return data as BookingRequest[]
     },
     refetchInterval: 60000, // Refetch ogni minuto
