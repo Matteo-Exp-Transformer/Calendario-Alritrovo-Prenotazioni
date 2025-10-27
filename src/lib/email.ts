@@ -1,9 +1,8 @@
 // Email client using Resend API
 // https://resend.com/docs/api-reference
-
-const RESEND_API_KEY = import.meta.env.RESEND_API_KEY || import.meta.env.VITE_RESEND_API_KEY
-const SENDER_EMAIL = import.meta.env.SENDER_EMAIL || import.meta.env.VITE_SENDER_EMAIL || 'noreply@resend.dev'
-const SENDER_NAME = import.meta.env.SENDER_NAME || import.meta.env.VITE_SENDER_NAME || 'Al Ritrovo'
+// 
+// Note: Email sending is handled via Supabase Edge Function
+// Environment variables are configured in Supabase Secrets, not used directly in this file
 
 interface SendEmailOptions {
   to: string

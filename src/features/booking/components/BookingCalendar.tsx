@@ -18,7 +18,11 @@ interface BookingCalendarProps {
 export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) => {
   const [selectedBooking, setSelectedBooking] = useState<BookingRequest | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    // Set today's date as default
+    return new Date().toISOString().split('T')[0]
+  })
+  const [calendarKey, setCalendarKey] = useState(0) // Force re-render key
 
   // Aggiorna il selectedBooking quando i bookings cambiano (dopo modifica)
   useEffect(() => {
@@ -29,6 +33,11 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
       }
     }
   }, [bookings])
+
+  // Force calendar re-render when selectedDate changes
+  useEffect(() => {
+    setCalendarKey(prev => prev + 1)
+  }, [selectedDate])
 
   const events = transformBookingsToCalendarEvents(bookings)
 
@@ -45,13 +54,12 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
 
   const handleDateClick = (clickInfo: any) => {
     const date = clickInfo.dateStr
+    console.log('Date clicked:', date, 'clickInfo:', clickInfo)
     setSelectedDate(date)
   }
 
   // Get bookings and capacity for selected date
   const selectedDateData = useMemo(() => {
-    if (!selectedDate) return null
-
     const acceptedBookings = bookings.filter(b => b.status === 'accepted')
     const dayCapacity = calculateDailyCapacity(selectedDate, acceptedBookings)
     
@@ -110,25 +118,50 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
       hour: '2-digit' as const,
       minute: '2-digit' as const,
     },
-    // Highlight today
+    // Highlight today and selected date
     dayCellDidMount: (arg: any) => {
       const today = new Date()
-      const cellDate = arg.date
-      if (cellDate.toDateString() === today.toDateString()) {
-        arg.el.style.backgroundColor = '#fef3c7'
-        arg.el.style.border = '2px solid #f59e0b'
-        arg.el.style.borderRadius = '8px'
-        arg.el.style.fontWeight = 'bold'
-      }
-      // Highlight selected date
-      if (selectedDate) {
-        const cellDateStr = cellDate.toISOString().split('T')[0]
-        if (cellDateStr === selectedDate) {
-          arg.el.style.backgroundColor = '#dbeafe'
-          arg.el.style.border = '2px solid #3b82f6'
-          arg.el.style.borderRadius = '8px'
-          arg.el.style.boxShadow = '0 2px 4px rgba(59, 130, 246, 0.3)'
-        }
+      // Use FullCalendar's dateStr to avoid timezone issues
+      const cellDateStr = arg.dateStr || arg.date.toISOString().split('T')[0]
+      const cellDate = new Date(arg.date)
+      const isToday = cellDate.toDateString() === today.toDateString()
+      const isSelected = cellDateStr === selectedDate
+      
+      // Remove FullCalendar's default today class
+      arg.el.classList.remove('fc-day-today')
+      
+      // Clear any previous styles
+      arg.el.style.cssText = ''
+      
+      if (isToday && isSelected) {
+        // Today + Selected: blue darker for selected on today
+        arg.el.style.cssText = `
+          background-color: #93c5fd !important;
+          border: 3px solid #1d4ed8 !important;
+          border-radius: 10px !important;
+          font-weight: bold !important;
+          box-shadow: 0 4px 8px rgba(29, 78, 216, 0.5) !important;
+          transform: scale(1.02) !important;
+          z-index: 10 !important;
+        `
+      } else if (isToday) {
+        // Today only - YELLOW background (not blue!)
+        arg.el.style.cssText = `
+          background-color: #fef9c3 !important;
+          border: 3px solid #f59e0b !important;
+          border-radius: 8px !important;
+          font-weight: bold !important;
+        `
+      } else if (isSelected) {
+        // Selected only - DARKER blue background
+        arg.el.style.cssText = `
+          background-color: #60a5fa !important;
+          border: 3px solid #1e40af !important;
+          border-radius: 8px !important;
+          box-shadow: 0 2px 8px rgba(30, 64, 175, 0.4) !important;
+          transform: scale(1.01) !important;
+          z-index: 9 !important;
+        `
       }
     },
     // Custom event rendering per card eventi migliorate
@@ -170,108 +203,103 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
             </span>
           </div>
 
-          <FullCalendar {...config} events={events} />
+          <FullCalendar key={calendarKey} {...config} events={events} />
         </div>
 
         {/* Sezione Disponibilità */}
-        {selectedDateData && (
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-warm-beige">
-            <h3 className="text-lg font-serif font-semibold text-warm-wood mb-4">
-              Disponibilità - {format(new Date(selectedDateData.date), 'dd MMMM yyyy')}
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Mattina */}
-              <div className="border-2 border-green-200 rounded-xl p-4 bg-green-50">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-bold text-green-700">🌅 Mattina (10:00 - 14:30)</h4>
-                  <span className="px-3 py-1 bg-green-100 text-green-700 font-bold rounded-lg text-sm">
-                    {selectedDateData.capacity.morning.available}/{selectedDateData.capacity.morning.capacity}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {selectedDateData.morningBookings.length > 0 ? (
-                    selectedDateData.morningBookings.map((booking) => (
-                      <div key={booking.id} className="bg-white p-2 rounded border border-green-200">
-                        <p className="font-semibold text-sm">{booking.client_name}</p>
-                        <p className="text-xs text-gray-600">{booking.num_guests} ospiti</p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500 italic">Nessuna prenotazione</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Pomeriggio */}
-              <div className="border-2 border-blue-200 rounded-xl p-4 bg-blue-50">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-bold text-blue-700">☀️ Pomeriggio (14:31 - 18:30)</h4>
-                  <span className="px-3 py-1 bg-blue-100 text-blue-700 font-bold rounded-lg text-sm">
-                    {selectedDateData.capacity.afternoon.available}/{selectedDateData.capacity.afternoon.capacity}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {selectedDateData.afternoonBookings.length > 0 ? (
-                    selectedDateData.afternoonBookings.map((booking) => (
-                      <div key={booking.id} className="bg-white p-2 rounded border border-blue-200">
-                        <p className="font-semibold text-sm">{booking.client_name}</p>
-                        <p className="text-xs text-gray-600">{booking.num_guests} ospiti</p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500 italic">Nessuna prenotazione</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Sera */}
-              <div className="border-2 border-purple-200 rounded-xl p-4 bg-purple-50">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-bold text-purple-700">🌙 Sera (18:31 - 23:30)</h4>
-                  <span className="px-3 py-1 bg-purple-100 text-purple-700 font-bold rounded-lg text-sm">
-                    {selectedDateData.capacity.evening.available}/{selectedDateData.capacity.evening.capacity}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {selectedDateData.eveningBookings.length > 0 ? (
-                    selectedDateData.eveningBookings.map((booking) => (
-                      <div key={booking.id} className="bg-white p-2 rounded border border-purple-200">
-                        <p className="font-semibold text-sm">{booking.client_name}</p>
-                        <p className="text-xs text-gray-600">{booking.num_guests} ospiti</p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-gray-500 italic">Nessuna prenotazione</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Legenda con Nuova Palette */}
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-warm-beige">
-          <h3 className="text-lg font-serif font-semibold text-warm-wood mb-4">Legenda Tipologie</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-warm-cream/30 transition-colors">
-              <div className="w-5 h-5 rounded-md bg-[#8B4513] shadow-sm"></div>
-              <span className="text-sm font-medium text-gray-700">Cena</span>
+          <h3 className="text-lg font-serif font-semibold text-warm-wood mb-4">
+            Disponibilità - {format(new Date(selectedDateData.date), 'dd MMMM yyyy')}
+          </h3>
+          
+          <div className="space-y-6">
+            {/* Mattina */}
+            <div className="border-l-4 border-green-500 bg-gradient-to-r from-green-50 to-white rounded-r-lg p-5 shadow-md">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-green-200">
+                <h4 className="text-xl font-bold text-green-700 flex items-center gap-2">
+                  <span className="text-2xl">🌅</span>
+                  <span>Mattina</span>
+                  <span className="text-base font-normal text-green-600">(10:00 - 14:30)</span>
+                </h4>
+                <div className="px-4 py-2 bg-green-100 border-2 border-green-300 rounded-lg">
+                  <span className="text-lg font-extrabold text-green-700">
+                    {selectedDateData.capacity.morning.available}/{selectedDateData.capacity.morning.capacity} disponibili
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {selectedDateData.morningBookings.length > 0 ? (
+                  selectedDateData.morningBookings.map((booking) => (
+                    <div key={booking.id} className="bg-white p-3 rounded-lg border-l-4 border-green-400 shadow-sm hover:shadow-md transition-shadow">
+                      <p className="font-bold text-base text-gray-800">{booking.client_name}</p>
+                      <p className="text-sm text-gray-600 mt-1">{booking.num_guests} ospiti</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500 italic text-center py-2">Nessuna prenotazione</p>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-warm-cream/30 transition-colors">
-              <div className="w-5 h-5 rounded-md bg-[#DAA520] shadow-sm"></div>
-              <span className="text-sm font-medium text-gray-700">Aperitivo</span>
+
+            {/* Pomeriggio */}
+            <div className="border-l-4 border-blue-500 bg-gradient-to-r from-blue-50 to-white rounded-r-lg p-5 shadow-md">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-blue-200">
+                <h4 className="text-xl font-bold text-blue-700 flex items-center gap-2">
+                  <span className="text-2xl">☀️</span>
+                  <span>Pomeriggio</span>
+                  <span className="text-base font-normal text-blue-600">(14:31 - 18:30)</span>
+                </h4>
+                <div className="px-4 py-2 bg-blue-100 border-2 border-blue-300 rounded-lg">
+                  <span className="text-lg font-extrabold text-blue-700">
+                    {selectedDateData.capacity.afternoon.available}/{selectedDateData.capacity.afternoon.capacity} disponibili
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {selectedDateData.afternoonBookings.length > 0 ? (
+                  selectedDateData.afternoonBookings.map((booking) => (
+                    <div key={booking.id} className="bg-white p-3 rounded-lg border-l-4 border-blue-400 shadow-sm hover:shadow-md transition-shadow">
+                      <p className="font-bold text-base text-gray-800">{booking.client_name}</p>
+                      <p className="text-sm text-gray-600 mt-1">{booking.num_guests} ospiti</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500 italic text-center py-2">Nessuna prenotazione</p>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-warm-cream/30 transition-colors">
-              <div className="w-5 h-5 rounded-md bg-[#E07041] shadow-sm"></div>
-              <span className="text-sm font-medium text-gray-700">Evento</span>
-            </div>
-            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-warm-cream/30 transition-colors">
-              <div className="w-5 h-5 rounded-md bg-[#6B8E23] shadow-sm"></div>
-              <span className="text-sm font-medium text-gray-700">Laurea</span>
+
+            {/* Sera */}
+            <div className="border-l-4 border-purple-500 bg-gradient-to-r from-purple-50 to-white rounded-r-lg p-5 shadow-md">
+              <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-purple-200">
+                <h4 className="text-xl font-bold text-purple-700 flex items-center gap-2">
+                  <span className="text-2xl">🌙</span>
+                  <span>Sera</span>
+                  <span className="text-base font-normal text-purple-600">(18:31 - 23:30)</span>
+                </h4>
+                <div className="px-4 py-2 bg-purple-100 border-2 border-purple-300 rounded-lg">
+                  <span className="text-lg font-extrabold text-purple-700">
+                    {selectedDateData.capacity.evening.available}/{selectedDateData.capacity.evening.capacity} disponibili
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {selectedDateData.eveningBookings.length > 0 ? (
+                  selectedDateData.eveningBookings.map((booking) => (
+                    <div key={booking.id} className="bg-white p-3 rounded-lg border-l-4 border-purple-400 shadow-sm hover:shadow-md transition-shadow">
+                      <p className="font-bold text-base text-gray-800">{booking.client_name}</p>
+                      <p className="text-sm text-gray-600 mt-1">{booking.num_guests} ospiti</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500 italic text-center py-2">Nessuna prenotazione</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
+
+
       </div>
 
       {/* Modal */}

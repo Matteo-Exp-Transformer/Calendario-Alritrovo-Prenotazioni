@@ -1,7 +1,7 @@
 // Type definitions for Al Ritrovo Booking System
 
 export type BookingStatus = 'pending' | 'accepted' | 'rejected'
-export type EventType = 'cena' | 'aperitivo' | 'evento' | 'laurea'
+export type EventType = 'cena' | 'aperitivo' | 'evento' | 'laurea' | 'drink_caraffe' | 'drink_rinfresco_leggero' | 'drink_rinfresco_completo' | 'drink_rinfresco_completo_primo' | 'menu_pranzo_cena'
 export type AdminRole = 'admin' | 'staff'
 
 export interface BookingRequest {
@@ -80,6 +80,7 @@ export interface CalendarEvent {
   end: Date
   backgroundColor: string
   borderColor: string
+  textColor?: string
   extendedProps: BookingRequest
 }
 

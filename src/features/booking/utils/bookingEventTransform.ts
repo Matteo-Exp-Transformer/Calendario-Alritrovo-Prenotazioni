@@ -76,16 +76,21 @@ export const transformBookingToCalendarEvent = (
 
   const color = getTimeSlotColor(startDate)
 
-  return {
+  const event: CalendarEvent = {
     id: booking.id,
     title: `${booking.client_name} - ${booking.num_guests} ospiti`,
     start: startDate,
     end: endDate,
     backgroundColor: color.bg,
     borderColor: color.border,
-    textColor: color.text,
     extendedProps: booking,
   }
+  
+  if (color.text) {
+    event.textColor = color.text
+  }
+  
+  return event
 }
 
 export const transformBookingsToCalendarEvents = (

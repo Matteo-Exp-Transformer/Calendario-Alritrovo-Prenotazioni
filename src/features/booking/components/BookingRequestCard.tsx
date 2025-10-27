@@ -3,7 +3,7 @@ import type { BookingRequest } from '@/types/booking'
 import { Button } from '@/components/ui'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { Calendar, Clock, Users, Tag, MessageSquare, CheckCircle, XCircle, UtensilsCrossed, Wine, PartyPopper, GraduationCap, ChevronDown, ChevronUp, User, Mail, Phone } from 'lucide-react'
+import { Calendar, Clock, Users, Tag, MessageSquare, CheckCircle, XCircle, UtensilsCrossed, ChevronDown, ChevronUp, User, Mail, Phone } from 'lucide-react'
 
 interface BookingRequestCardProps {
   booking: BookingRequest
@@ -25,23 +25,7 @@ const STATUS_CONFIG: Record<string, { label: string; bgColor: string; textColor:
   rejected: { label: 'Rifiutata', bgColor: 'bg-status-rejected/20', textColor: 'text-status-rejected' },
 }
 
-interface InfoItemProps {
-  icon: React.ElementType
-  label: string
-  value: string | number
-}
-
-const InfoItem: React.FC<InfoItemProps> = ({ icon: Icon, label, value }) => (
-  <div className="flex items-center gap-3">
-    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-warm-cream flex items-center justify-center">
-      <Icon className="w-5 h-5 text-warm-orange" />
-    </div>
-    <div>
-      <p className="text-xs text-gray-500 uppercase tracking-wide">{label}</p>
-      <p className="text-base font-semibold text-warm-wood-dark">{value}</p>
-    </div>
-  </div>
-)
+// InfoItem component was removed as it's not used
 
 export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
   booking,

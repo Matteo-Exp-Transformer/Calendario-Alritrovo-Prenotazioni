@@ -81,19 +81,21 @@ export const CookieConsent: React.FC = () => {
 }
 
 // Animation classes (add to Tailwind config if not present)
-const styles = `
-@keyframes slide-up {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out;
-}
-`
+// Note: CSS animations are defined here but currently inline styles are used directly
+// This can be used in the future if needed
+// const styles = `
+// @keyframes slide-up {
+//   from {
+//     transform: translateY(100%);
+//     opacity: 0;
+//   }
+//   to {
+//     transform: translateY(0);
+//     opacity: 1;
+//   }
+// }
+// 
+// .animate-slide-up {
+//   animation: slide-up 0.3s ease-out;
+// }
+// `
