@@ -11,6 +11,10 @@ export const usePendingBookings = () => {
     queryFn: async () => {
       console.log('🔵 [usePendingBookings] Fetching pending bookings...')
       
+      console.log('🔵 [usePendingBookings] Checking auth state...')
+      const { data: { user } } = await supabase.auth.getUser()
+      console.log('🔵 [usePendingBookings] Current user:', user?.email)
+      
       // Use authenticated supabase client (admin dashboard)
       const { data, error } = await supabase
         .from('booking_requests')
@@ -80,6 +84,10 @@ export const useBookingStats = () => {
     queryKey: ['bookings', 'stats'],
     queryFn: async () => {
       console.log('🔵 [useBookingStats] Fetching stats...')
+      
+      console.log('🔵 [useBookingStats] Checking auth state...')
+      const { data: { user } } = await supabase.auth.getUser()
+      console.log('🔵 [useBookingStats] Current user:', user?.email)
       
       // Use authenticated supabase client (admin dashboard)
       const { data: allBookings, error } = await supabase
