@@ -6,22 +6,23 @@ Sistema di gestione prenotazioni per ristorante con calendario integrato, svilup
 
 ## 📊 Status Progetto
 
-**Versione**: 1.0.0 (Fase 1-2 Completata)
+**Versione**: 1.0.0 (Fase 3-4 Completata)
 **Ultimo Aggiornamento**: 27 Ottobre 2025
+**Branch Attivo**: `cursor-branch`
 
 | Fase | Nome | Status | Tempo |
 |------|------|--------|-------|
 | 1-2  | Setup Iniziale + UI Base | ✅ COMPLETATO | 4h |
-| 3    | Autenticazione Admin | ⏳ Pending | 2h |
-| 4    | Form Richiesta Pubblica | ⏳ Pending | 3h |
-| 5    | Admin Dashboard | ⏳ Pending | 3h |
-| 6    | Calendario Integrazione | ⏳ Pending | 2h |
-| 7    | Sistema Email | ⏳ Pending | 3h |
+| 3    | Autenticazione Admin | ✅ COMPLETATO | 2.5h |
+| 4    | Form Richiesta Pubblica | ✅ COMPLETATO | 3h |
+| 5-6  | Admin Dashboard + Calendario | ⏳ Pending | 5h |
+| 7    | Sistema Email Automatico | ⏳ Pending | 3h |
 | 8    | Security & GDPR | ⏳ Pending | 1.5h |
 | 9    | Testing & Polish | ⏳ Pending | 2h |
-| 10   | Deploy & Integrazione | ⏳ Pending | 1h |
+| 10   | Deploy & Integrazione Wix | ⏳ Pending | 1h |
 
 **Totale**: 21.5 ore stimate
+**Completate**: 9.5h (44%)
 
 ---
 
