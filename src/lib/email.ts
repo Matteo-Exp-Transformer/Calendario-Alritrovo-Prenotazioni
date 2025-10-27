@@ -59,12 +59,20 @@ export const sendEmail = async (options: SendEmailOptions): Promise<{ success: b
 
     const data = await response.json()
 
+    console.log('[Email] Edge Function response:', data)
+
     if (!response.ok) {
       console.error('[Email] Edge Function error:', data)
-      return { success: false, error: data.error || 'Failed to send email' }
+      return { success: false, error: data.error || data.message || 'Failed to send email' }
     }
 
-    console.log('[Email] Email sent successfully via Edge Function')
+    // Check if Resend API returned an error
+    if (data.error) {
+      console.error('[Email] Resend API error:', data.error)
+      return { success: false, error: data.error }
+    }
+
+    console.log('[Email] Email sent successfully via Edge Function, ID:', data.id)
     return { success: true }
   } catch (error) {
     console.error('[Email] Exception:', error)
