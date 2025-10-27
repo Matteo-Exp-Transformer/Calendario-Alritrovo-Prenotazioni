@@ -1,6 +1,7 @@
 // @ts-nocheck - Supabase auto-generated types are incomplete
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { supabase, handleSupabaseError } from '@/lib/supabase'
+import { supabasePublic } from '@/lib/supabasePublic'
 import type { BookingRequest, BookingRequestInput } from '@/types/booking'
 import { toast } from 'react-toastify'
 
@@ -26,8 +27,11 @@ export const useCreateBookingRequest = () => {
       console.log('🔵 [useCreateBookingRequest] Insert data:', insertData)
       console.log('🔵 [useCreateBookingRequest] Calling Supabase insert...')
 
+      // Use public client to bypass RLS
+      console.log('🔵 [useCreateBookingRequest] Using supabasePublic client...')
+
       // @ts-ignore - Supabase types are not fully generated
-      const { data: result, error } = await supabase
+      const { data: result, error } = await supabasePublic
         .from('booking_requests')
         .insert(insertData)
         .select()
