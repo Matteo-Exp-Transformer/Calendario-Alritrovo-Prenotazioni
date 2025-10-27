@@ -84,8 +84,22 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
     
     if (!validate() || !booking) return
 
-    const confirmedStart = `${formData.date}T${formData.startTime}:00`
-    const confirmedEnd = `${formData.date}T${formData.endTime}:00`
+      // Ensure time format is HH:mm (not HH:mm:ss)
+      const startTimeFormatted = formData.startTime.includes(':') 
+        ? formData.startTime.split(':').slice(0, 2).join(':') 
+        : formData.startTime
+      const endTimeFormatted = formData.endTime.includes(':')
+        ? formData.endTime.split(':').slice(0, 2).join(':')
+        : formData.endTime
+      
+      const confirmedStart = `${formData.date}T${startTimeFormatted}:00`
+      const confirmedEnd = `${formData.date}T${endTimeFormatted}:00`
+      
+      console.log('🔵 [AcceptModal] Submitting with:', { 
+        confirmedStart, 
+        confirmedEnd, 
+        numGuests: formData.numGuests 
+      })
 
     onConfirm({
       confirmedStart,
