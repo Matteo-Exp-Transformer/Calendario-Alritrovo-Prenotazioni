@@ -41,8 +41,11 @@ export const sendEmail = async (options: SendEmailOptions): Promise<{ success: b
       throw new Error('VITE_SUPABASE_URL not configured')
     }
 
+    const edgeFunctionUrl = `${supabaseUrl}/functions/v1/send-email`
+    console.log('🔵 [sendEmail] Calling Edge Function:', edgeFunctionUrl)
+
     // Call Supabase Edge Function for email sending
-    const response = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+    const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -56,6 +59,8 @@ export const sendEmail = async (options: SendEmailOptions): Promise<{ success: b
         emailType: options.emailType || 'manual',
       }),
     })
+
+    console.log('🔵 [sendEmail] Edge Function response status:', response.status)
 
     const data = await response.json()
 
