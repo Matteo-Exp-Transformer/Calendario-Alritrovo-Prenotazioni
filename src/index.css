@@ -92,3 +92,12 @@ body {
 .btn-hover:active {
   transform: translateY(0);
 }
+
+/* FullCalendar - Event cursor pointer */
+.fc-event {
+  cursor: pointer !important;
+}
+
+.fc-event:hover {
+  opacity: 0.8;
+}

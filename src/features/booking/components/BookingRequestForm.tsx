@@ -315,7 +315,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         fullWidth
         disabled={isPending || isBlocked}
         className="mt-6"
-        style={{ backgroundColor: '#8B6914', color: '#FFFFFF' }}
+        style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}
       >
         {isPending ? 'Invio in corso...' : isBlocked ? 'Limite richieste raggiunto' : 'INVIA RICHIESTA PRENOTAZIONE'}
       </Button>

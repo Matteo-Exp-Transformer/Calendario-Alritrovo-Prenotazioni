@@ -20,21 +20,22 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
   const events = transformBookingsToCalendarEvents(bookings)
 
   const handleEventClick = (clickInfo: any) => {
-    console.log('🔵 BookingCalendar: Event clicked!', clickInfo)
-    console.log('🔵 BookingCalendar: clickInfo.event:', clickInfo.event)
-    console.log('🔵 BookingCalendar: clickInfo.event.extendedProps:', clickInfo.event.extendedProps)
+    console.log('🔵 handleEventClick called', {
+      selectedBooking: selectedBooking?.id,
+      isModalOpen,
+      newBookingId: clickInfo.event.extendedProps?.id
+    })
     
     const booking = clickInfo.event.extendedProps as BookingRequest
     
     if (!booking) {
-      console.error('❌ BookingCalendar: No booking found in extendedProps!')
+      console.error('No booking found in extendedProps')
       return
     }
     
-    console.log('✅ BookingCalendar: Setting booking:', booking)
+    console.log('🔵 Setting booking and opening modal')
     setSelectedBooking(booking)
     setIsModalOpen(true)
-    console.log('✅ BookingCalendar: isModalOpen set to true')
   }
 
   const config = {
@@ -58,6 +59,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
     eventClick: handleEventClick,
     eventDisplay: 'block',
     eventTextColor: '#fff',
+    eventCursor: 'pointer',
     eventTimeFormat: {
       hour: '2-digit' as const,
       minute: '2-digit' as const,
@@ -108,6 +110,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
         <BookingDetailsModal
           isOpen={isModalOpen}
           onClose={() => {
+            console.log('🔵 Closing modal')
             setIsModalOpen(false)
             setSelectedBooking(null)
           }}

@@ -36,7 +36,7 @@ export const BookingRequestPage: React.FC = () => {
         {/* Info Box */}
         <div className="rounded-xl p-6 md:p-8 animate-fade-in" style={{ backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: '15px', backdropFilter: 'blur(10px)' }}>
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#8B6914' }}>
+            <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#DC2626' }}>
               <Clock className="w-6 h-6 text-white" />
             </div>
             <div className="flex-1">

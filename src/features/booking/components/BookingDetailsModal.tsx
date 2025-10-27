@@ -23,18 +23,23 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   onClose,
   booking,
 }) => {
+  console.log('🔵 BookingDetailsModal render', { isOpen, bookingId: booking.id })
+  
   const [isEditMode, setIsEditMode] = useState(false)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
 
   const updateMutation = useUpdateBooking()
   const cancelMutation = useCancelBooking()
 
-  const [formData, setFormData] = useState({
-    date: booking.confirmed_start ? format(new Date(booking.confirmed_start), 'yyyy-MM-dd') : '',
-    startTime: booking.confirmed_start ? format(new Date(booking.confirmed_start), 'HH:mm') : '',
-    endTime: booking.confirmed_end ? format(new Date(booking.confirmed_end), 'HH:mm') : '',
-    numGuests: booking.num_guests,
-    specialRequests: booking.special_requests || '',
+  const [formData, setFormData] = useState(() => {
+    console.log('🔵 Initializing formData for booking:', booking.id)
+    return {
+      date: booking.confirmed_start ? format(new Date(booking.confirmed_start), 'yyyy-MM-dd') : '',
+      startTime: booking.confirmed_start ? format(new Date(booking.confirmed_start), 'HH:mm') : '',
+      endTime: booking.confirmed_end ? format(new Date(booking.confirmed_end), 'HH:mm') : '',
+      numGuests: booking.num_guests,
+      specialRequests: booking.special_requests || '',
+    }
   })
 
   const handleSave = () => {
@@ -72,8 +77,6 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       return dateStr
     }
   }
-
-  console.log('🔍 BookingDetailsModal render - isOpen:', isOpen, 'booking:', booking)
 
   if (!isOpen) {
     return null
