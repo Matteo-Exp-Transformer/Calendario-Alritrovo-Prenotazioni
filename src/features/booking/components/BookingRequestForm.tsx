@@ -205,7 +205,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Numero Ospiti */}
       <div className="space-y-2">
-        <Label htmlFor="num_guests">Numero Ospiti * (da 1 a 110)</Label>
+        <Label htmlFor="num_guests">Numero Ospiti *</Label>
         <Input
           id="num_guests"
           type="number"
