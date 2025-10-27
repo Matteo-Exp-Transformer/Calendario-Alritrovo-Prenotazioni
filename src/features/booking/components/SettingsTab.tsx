@@ -2,9 +2,11 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui'
 import { Settings, Mail, Bell, Database, Shield } from 'lucide-react'
 import { EmailLogsModal } from './EmailLogsModal'
+import { TestEmailModal } from './TestEmailModal'
 
 export const SettingsTab: React.FC = () => {
   const [showEmailLogs, setShowEmailLogs] = useState(false)
+  const [showTestEmail, setShowTestEmail] = useState(false)
 
   const emailNotificationsEnabled = !!(
     import.meta.env.RESEND_API_KEY || import.meta.env.VITE_RESEND_API_KEY
@@ -127,7 +129,7 @@ export const SettingsTab: React.FC = () => {
       <div className="bg-white rounded-lg shadow-md p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Azioni Disponibili</h3>
         <div className="flex gap-3 flex-wrap">
-          <Button variant="primary" size="md" onClick={() => alert('Test email: da implementare')}>
+          <Button variant="primary" size="md" onClick={() => setShowTestEmail(true)}>
             📧 Test Email Notifications
           </Button>
           <Button
@@ -145,6 +147,9 @@ export const SettingsTab: React.FC = () => {
 
       {/* Email Logs Modal */}
       <EmailLogsModal isOpen={showEmailLogs} onClose={() => setShowEmailLogs(false)} />
+
+      {/* Test Email Modal */}
+      <TestEmailModal isOpen={showTestEmail} onClose={() => setShowTestEmail(false)} />
     </div>
   )
 }
