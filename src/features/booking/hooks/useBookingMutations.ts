@@ -63,8 +63,20 @@ export const useAcceptBooking = () => {
       console.log('✅ [useAcceptBooking] All bookings queries invalidated')
 
       // Send email notification
-      if (areEmailNotificationsEnabled()) {
-        await sendBookingAcceptedEmail(booking)
+      console.log('🔵 [useAcceptBooking] Checking email notifications...')
+      const emailEnabled = areEmailNotificationsEnabled()
+      console.log('🔵 [useAcceptBooking] Email enabled:', emailEnabled)
+      
+      if (emailEnabled) {
+        console.log('🔵 [useAcceptBooking] Sending email to:', booking.client_email)
+        try {
+          const emailResult = await sendBookingAcceptedEmail(booking)
+          console.log('✅ [useAcceptBooking] Email sent:', emailResult)
+        } catch (error) {
+          console.error('❌ [useAcceptBooking] Email error:', error)
+        }
+      } else {
+        console.log('⚠️ [useAcceptBooking] Email disabled')
       }
     },
     onError: (error: Error) => {

@@ -65,22 +65,29 @@ export const sendEmail = async (options: SendEmailOptions): Promise<{ success: b
  */
 export const logEmailToDatabase = async (log: EmailLog): Promise<void> => {
   try {
+    console.log('🔵 [logEmailToDatabase] Importing supabase...')
     const { supabase } = await import('./supabase')
 
-    const { error } = await supabase.from('email_logs').insert({
+    const logData = {
       booking_id: log.booking_id || null,
       email_type: log.email_type,
       recipient_email: log.recipient_email,
       status: log.status,
       provider_response: log.provider_response || null,
       error_message: log.error_message || null,
-    } as any)
+    }
+
+    console.log('🔵 [logEmailToDatabase] Inserting log:', logData)
+
+    const { data, error } = await supabase.from('email_logs').insert(logData as any).select()
 
     if (error) {
-      console.error('[Email] Error logging to database:', error)
+      console.error('❌ [logEmailToDatabase] Error:', error)
+    } else {
+      console.log('✅ [logEmailToDatabase] Log inserted successfully:', data)
     }
   } catch (error) {
-    console.error('[Email] Exception logging to database:', error)
+    console.error('❌ [logEmailToDatabase] Exception:', error)
   }
 }
 
@@ -91,6 +98,11 @@ export const sendAndLogEmail = async (
   options: SendEmailOptions,
   emailType: string
 ): Promise<{ success: boolean; error?: string }> => {
+  console.log('🔵 [sendAndLogEmail] Starting email send...')
+  console.log('🔵 [sendAndLogEmail] To:', options.to)
+  console.log('🔵 [sendAndLogEmail] Type:', emailType)
+  console.log('🔵 [sendAndLogEmail] Booking ID:', options.bookingId)
+
   const log: EmailLog = {
     booking_id: options.bookingId,
     email_type: emailType,
@@ -98,17 +110,23 @@ export const sendAndLogEmail = async (
     status: 'pending',
   }
 
+  console.log('🔵 [sendAndLogEmail] Calling sendEmail...')
   const result = await sendEmail(options)
+  console.log('🔵 [sendAndLogEmail] Send result:', result)
 
   if (result.success) {
     log.status = 'sent'
     log.provider_response = { success: true }
+    console.log('✅ [sendAndLogEmail] Email sent successfully')
   } else {
     log.status = 'failed'
     log.error_message = result.error
+    console.error('❌ [sendAndLogEmail] Email failed:', result.error)
   }
 
+  console.log('🔵 [sendAndLogEmail] Saving log to database:', log)
   await logEmailToDatabase(log)
+  console.log('✅ [sendAndLogEmail] Log saved to database')
 
   return result
 }
