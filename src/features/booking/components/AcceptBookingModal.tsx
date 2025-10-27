@@ -96,7 +96,16 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!validate() || !booking) return
+    console.log('🔵 [AcceptModal] handleSubmit called')
+    console.log('🔵 [AcceptModal] formData:', formData)
+    console.log('🔵 [AcceptModal] booking:', booking)
+    
+    if (!validate() || !booking) {
+      console.error('❌ [AcceptModal] Validation failed or no booking')
+      return
+    }
+    
+    console.log('✅ [AcceptModal] Validation passed')
 
       // Ensure time format is HH:mm (not HH:mm:ss)
       const startTimeFormatted = formData.startTime.includes(':') 
@@ -109,17 +118,19 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
       const confirmedStart = `${formData.date}T${startTimeFormatted}:00`
       const confirmedEnd = `${formData.date}T${endTimeFormatted}:00`
       
-      console.log('🔵 [AcceptModal] Submitting with:', { 
-        confirmedStart, 
-        confirmedEnd, 
-        numGuests: formData.numGuests 
-      })
+    console.log('🔵 [AcceptModal] Submitting with:', { 
+      confirmedStart, 
+      confirmedEnd, 
+      numGuests: formData.numGuests 
+    })
 
+    console.log('🔵 [AcceptModal] Calling onConfirm callback...')
     onConfirm({
       confirmedStart,
       confirmedEnd,
       numGuests: formData.numGuests,
     })
+    console.log('✅ [AcceptModal] onConfirm called successfully')
   }
 
   if (!booking) return null

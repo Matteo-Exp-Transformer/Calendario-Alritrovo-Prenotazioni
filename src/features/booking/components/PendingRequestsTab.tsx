@@ -15,7 +15,9 @@ export const PendingRequestsTab: React.FC = () => {
   const [rejectingBooking, setRejectingBooking] = useState<BookingRequest | null>(null)
 
   const handleAccept = (booking: BookingRequest) => {
+    console.log('🔵 [PendingRequestsTab] handleAccept called with:', booking)
     setAcceptingBooking(booking)
+    console.log('🔵 [PendingRequestsTab] Setting acceptingBooking to:', booking.id)
   }
 
   const handleReject = (booking: BookingRequest) => {
@@ -27,15 +29,23 @@ export const PendingRequestsTab: React.FC = () => {
     confirmedEnd: string
     numGuests: number
   }) => {
-    if (!acceptingBooking) return
+    console.log('🔵 [PendingRequestsTab] handleConfirmAccept called with:', data)
+    console.log('🔵 [PendingRequestsTab] acceptingBooking:', acceptingBooking)
+    
+    if (!acceptingBooking) {
+      console.error('❌ [PendingRequestsTab] No acceptingBooking set!')
+      return
+    }
 
+    console.log('🔵 [PendingRequestsTab] Calling acceptMutation.mutate...')
     acceptMutation.mutate({
       bookingId: acceptingBooking.id,
       confirmedStart: data.confirmedStart,
       confirmedEnd: data.confirmedEnd,
       numGuests: data.numGuests,
     })
-
+    
+    console.log('✅ [PendingRequestsTab] Mutation called, resetting acceptingBooking')
     setAcceptingBooking(null)
   }
 
