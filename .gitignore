@@ -1,0 +1,48 @@
+# Environment variables
+.env
+.env.local
+.env.local
+.env*.local
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+.nyc_output
+
+# Production
+build/
+dist/
+.out/
+
+# Misc
+.DS_Store
+*.log
+*.local
+.vscode/
+.idea/
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Supabase
+.supabase/
+
+# Vercel
+.vercel/
+
+# Generated files
+*.tsbuildinfo
+
+# Calendar backup specific
+alritrovo_fullpage.png
+.playwright-mcp/
+
+# Keep the docs
+!PRD.md
+!PLANNING_TASKS.md

@@ -1,0 +1,391 @@
+/**
+ * 🎨 Calendar Modern Professional Styles
+ * Design moderno e professionale per BHM Calendario
+ */
+
+/* ============================================
+   VARIABILI CSS PERSONALIZZATE
+   ============================================ */
+:root {
+  --calendar-primary: #6366f1;
+  --calendar-primary-light: #818cf8;
+  --calendar-primary-dark: #4f46e5;
+  --calendar-secondary: #8b5cf6;
+  --calendar-success: #10b981;
+  --calendar-warning: #f59e0b;
+  --calendar-danger: #ef4444;
+  --calendar-border: #e5e7eb;
+  --calendar-shadow: rgba(0, 0, 0, 0.1);
+  --calendar-radius: 12px;
+}
+
+/* ============================================
+   GIORNO CORRENTE - Design moderno con gradiente
+   ============================================ */
+.fc .fc-daygrid-day.fc-day-today {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%) !important;
+  border: 3px solid transparent !important;
+  background-clip: padding-box;
+  box-shadow: 
+    0 0 0 3px rgba(99, 102, 241, 0.4) inset,
+    0 4px 12px rgba(99, 102, 241, 0.25),
+    0 0 0 1px rgba(99, 102, 241, 0.1) !important;
+  position: relative !important;
+  z-index: 12 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fc .fc-daygrid-day.fc-day-today::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border: 3px solid var(--calendar-primary);
+  border-radius: var(--calendar-radius);
+  pointer-events: none;
+  z-index: 13;
+  opacity: 0.8;
+}
+
+/* Badge del numero del giorno corrente - Design più elegante */
+.fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  background: linear-gradient(135deg, var(--calendar-primary) 0%, var(--calendar-secondary) 100%) !important;
+  color: white !important;
+  font-weight: 700 !important;
+  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin: 6px;
+  box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(99, 102, 241, 0.4);
+}
+
+/* ============================================
+   GIORNO SELEZIONATO - Stile verde moderno
+   ============================================ */
+.fc .fc-daygrid-day.fc-day-selected {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(5, 150, 105, 0.06) 100%) !important;
+  border: 2px solid transparent !important;
+  box-shadow: 
+    0 0 0 2px rgba(16, 185, 129, 0.5) inset,
+    0 3px 10px rgba(16, 185, 129, 0.2) !important;
+  position: relative !important;
+  z-index: 10 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fc .fc-daygrid-day.fc-day-selected::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid var(--calendar-success);
+  border-radius: var(--calendar-radius);
+  pointer-events: none;
+  z-index: 11;
+  opacity: 0.7;
+}
+
+/* Se giorno corrente è anche selezionato, mantieni stile blu */
+.fc .fc-daygrid-day.fc-day-today.fc-day-selected {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%) !important;
+  box-shadow: 
+    0 0 0 3px rgba(99, 102, 241, 0.5) inset,
+    0 5px 15px rgba(99, 102, 241, 0.3) !important;
+  z-index: 14 !important;
+}
+
+.fc .fc-daygrid-day.fc-day-today.fc-day-selected::before {
+  border-color: var(--calendar-primary) !important;
+  z-index: 15;
+  opacity: 1;
+}
+
+/* ============================================
+   HOVER sui giorni - Effetto moderno
+   ============================================ */
+.fc .fc-daygrid-day:hover {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(139, 92, 246, 0.03) 100%) !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  transform: translateY(-1px);
+}
+
+.fc .fc-daygrid-day:not(.fc-day-today):not(.fc-day-selected):hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================
+   VISUALIZZAZIONI ALTERNATIVE (Settimana, Giorno)
+   ============================================ */
+.fc .fc-timegrid-col.fc-day-today {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.04) 0%, rgba(139, 92, 246, 0.04) 100%) !important;
+}
+
+.fc .fc-timegrid-col.fc-day-today .fc-col-header-cell-cushion {
+  background: linear-gradient(135deg, var(--calendar-primary) 0%, var(--calendar-secondary) 100%) !important;
+  color: white !important;
+  font-weight: 700 !important;
+  border-radius: 8px;
+  padding: 8px 16px;
+  box-shadow: 0 3px 8px rgba(99, 102, 241, 0.3);
+}
+
+.fc .fc-timegrid-col.fc-day-selected {
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%) !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4) inset !important;
+}
+
+.fc .fc-timegrid-col.fc-day-selected .fc-col-header-cell-cushion {
+  background: linear-gradient(135deg, var(--calendar-success) 0%, #059669 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border-radius: 8px;
+  padding: 8px 16px;
+  box-shadow: 0 3px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* ============================================
+   VISTA LISTA
+   ============================================ */
+.fc .fc-list-day.fc-day-today {
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%) !important;
+  border-left: 4px solid var(--calendar-primary) !important;
+}
+
+.fc .fc-list-day.fc-day-today .fc-list-day-cushion {
+  background: linear-gradient(135deg, var(--calendar-primary) 0%, var(--calendar-secondary) 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 8px 16px;
+  border-radius: 6px;
+}
+
+.fc .fc-list-day.fc-day-selected {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.08) 100%) !important;
+  border-left: 4px solid var(--calendar-success) !important;
+}
+
+.fc .fc-list-day.fc-day-selected .fc-list-day-cushion {
+  background: linear-gradient(135deg, var(--calendar-success) 0%, #059669 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 8px 16px;
+  border-radius: 6px;
+}
+
+/* ============================================
+   UNIFORMITÀ GIORNI SETTIMANA
+   ============================================ */
+.fc .fc-day-sun,
+.fc .fc-day-sat,
+.fc .fc-non-business {
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.fc .fc-daygrid-day.fc-day-sun,
+.fc .fc-daygrid-day.fc-day-sat {
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.fc-daygrid-day.fc-day-sun:not(.fc-day-today):not(.fc-day-selected),
+.fc-daygrid-day.fc-day-sat:not(.fc-day-today):not(.fc-day-selected) {
+  background-color: #fafafa !important;
+}
+
+.fc .fc-timegrid-col.fc-day-sun,
+.fc .fc-timegrid-col.fc-day-sat {
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+.fc .fc-list-day.fc-day-sun,
+.fc .fc-list-day.fc-day-sat {
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+}
+
+/* ============================================
+   ACCESSIBILITÀ - Focus
+   ============================================ */
+.fc .fc-daygrid-day:focus {
+  outline: 3px solid var(--calendar-primary);
+  outline-offset: -3px;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+}
+
+/* ============================================
+   ANIMAZIONI FLUIDE
+   ============================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+}
+
+.fc-event {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.fc-daygrid-day-events {
+  animation: slideIn 0.2s ease-out;
+}
+
+/* ============================================
+   GIORNI CHIUSI - Design elegante
+   ============================================ */
+.fc-day-closed {
+  background: linear-gradient(135deg, 
+    rgba(224, 242, 254, 0.95) 0%, 
+    rgba(186, 230, 253, 0.95) 50%,
+    rgba(224, 242, 254, 0.95) 100%) !important;
+  position: relative;
+  opacity: 1 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+.fc-day-closed::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(circle at 20% 80%, rgba(251, 191, 36, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(96, 165, 250, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(147, 197, 253, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Icona spiaggia per giorni chiusi - più elegante */
+.fc-day-beach-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 56px;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: all 0.3s ease;
+}
+
+.fc-day-closed:hover .fc-day-beach-icon {
+  opacity: 0.7;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* ============================================
+   ORARI NEL HEADER - Design migliorato
+   ============================================ */
+.fc-col-header-hours {
+  font-size: 11px;
+  color: var(--calendar-primary-dark);
+  text-align: center;
+  font-weight: 600;
+  white-space: normal;
+  padding: 6px 8px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+  border-radius: 8px;
+  margin-top: 8px;
+  line-height: 1.4;
+  display: block;
+  word-break: break-word;
+  letter-spacing: 0.3px;
+  box-shadow: 0 1px 3px rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+.fc-col-header-cell {
+  vertical-align: top !important;
+  padding-bottom: 10px !important;
+  background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+}
+
+.fc-col-header-cell-cushion {
+  padding: 6px 4px !important;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* ============================================
+   RESPONSIVE - Mobile
+   ============================================ */
+@media (max-width: 768px) {
+  .fc .fc-daygrid-day.fc-day-today {
+    border-width: 2px !important;
+  }
+  
+  .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+  
+  .fc-day-beach-icon {
+    font-size: 42px;
+  }
+}
+
+/* ============================================
+   DARK MODE (preparazione futura)
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --calendar-primary: #818cf8;
+    --calendar-primary-light: #a5b4fc;
+    --calendar-primary-dark: #6366f1;
+    --calendar-border: #374151;
+  }
+  
+  .fc .fc-daygrid-day.fc-day-today {
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.15) 0%, rgba(167, 139, 250, 0.15) 100%) !important;
+  }
+  
+  .fc-col-header-cell {
+    background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+  }
+}
