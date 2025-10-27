@@ -10,13 +10,6 @@ interface AdminAuthUser {
   role: AdminRole
 }
 
-interface AdminUserData {
-  id: string
-  email: string
-  name: string | null
-  role: string
-}
-
 interface UseAdminAuthReturn {
   user: AdminAuthUser | null
   isLoading: boolean

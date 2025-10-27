@@ -12,6 +12,38 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      csrf_tokens: {
+        Row: {
+          id: string
+          token: string
+          expires_at: string
+          created_at: string | null
+          ip_address: string | null
+          user_id: string | null
+          used_at: string | null
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          token: string
+          expires_at: string
+          created_at?: string | null
+          ip_address?: string | null
+          user_id?: string | null
+          used_at?: string | null
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          token?: string
+          expires_at?: string
+          created_at?: string | null
+          ip_address?: string | null
+          user_id?: string | null
+          used_at?: string | null
+          created_by?: string | null
+        }
+      }
       booking_requests: {
         Row: {
           id: string
