@@ -2,6 +2,7 @@ import { RouterProvider } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { router } from './router'
 import { ToastContainer } from 'react-toastify'
+import { CookieConsent } from './components/CookieConsent'
 import 'react-toastify/dist/ReactToastify.css'
 
 // Create QueryClient instance for React Query
@@ -19,6 +20,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <CookieConsent />
       <ToastContainer
         position="top-right"
         autoClose={3000}

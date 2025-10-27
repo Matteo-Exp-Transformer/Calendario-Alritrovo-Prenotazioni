@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Button, Input, Textarea, Label } from '@/components/ui'
 import type { BookingRequestInput, EventType } from '@/types/booking'
 import { useCreateBookingRequest } from '../hooks/useBookingRequests'
+import { useRateLimit } from '@/hooks/useRateLimit'
 import { toast } from 'react-toastify'
 
 const EVENT_TYPES: { value: EventType; label: string }[] = [
@@ -45,6 +46,10 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     }
   }
   const { mutate, isPending } = useCreateBookingRequest()
+  const { checkRateLimit, isBlocked } = useRateLimit({ 
+    maxAttempts: 3, 
+    timeWindow: 60000 // 1 minuto
+  })
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {}
@@ -104,6 +109,11 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     console.log('🔵 [BookingForm] Submit click')
     console.log('🔵 [BookingForm] Form data:', formData)
     console.log('🔵 [BookingForm] Privacy accepted:', privacyAccepted)
+
+    // Check rate limit first
+    if (!checkRateLimit()) {
+      return
+    }
 
     if (!validate()) {
       if (!privacyAccepted) {
@@ -294,10 +304,10 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         type="submit"
         variant="primary"
         fullWidth
-        disabled={isPending}
+        disabled={isPending || isBlocked}
         className="mt-6"
       >
-        {isPending ? 'Invio in corso...' : 'Invia Richiesta Prenotazione'}
+        {isPending ? 'Invio in corso...' : isBlocked ? 'Limite richieste raggiunto' : 'Invia Richiesta Prenotazione'}
       </Button>
 
       <p className="text-xs text-gray-500 text-center">
