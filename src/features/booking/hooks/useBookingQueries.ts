@@ -40,21 +40,23 @@ export const useAcceptedBookings = () => {
       console.log('🔵 [useAcceptedBookings] Fetching accepted bookings...')
       
       // Get today's date at 00:00:00 to include all bookings for today
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
+      const now = new Date()
+      now.setHours(0, 0, 0, 0)
+      
+      console.log('🔵 [useAcceptedBookings] Current date:', now.toISOString())
       
       const { data, error } = await supabasePublic
         .from('booking_requests')
         .select('*')
         .eq('status', 'accepted')
-        .gte('confirmed_end', today.toISOString()) // Include today and future
+        .gte('confirmed_end', now.toISOString()) // Include today and future
         .order('confirmed_start', { ascending: true })
 
       console.log('🔵 [useAcceptedBookings] Query result:', { 
         data, 
         error, 
         count: data?.length,
-        today: today.toISOString() 
+        today: now.toISOString() 
       })
 
       if (error) {
