@@ -43,30 +43,61 @@ export const PendingRequestsTab: React.FC = () => {
     })
     
     console.log('🔵 [PendingRequestsTab] Calling acceptMutation.mutate...')
-    acceptMutation.mutate({
-      bookingId: booking.id,
-      confirmedStart,
-      confirmedEnd,
-      numGuests: booking.num_guests,
-    })
-    
-    console.log('✅ [PendingRequestsTab] Mutation called')
-    toast.success('Prenotazione accettata con successo!')
+    acceptMutation.mutate(
+      {
+        bookingId: booking.id,
+        confirmedStart,
+        confirmedEnd,
+        numGuests: booking.num_guests,
+      },
+      {
+        onSuccess: () => {
+          console.log('✅ [PendingRequestsTab] Accept mutation success')
+          toast.success('Prenotazione accettata con successo!')
+        },
+        onError: (error) => {
+          console.error('❌ [PendingRequestsTab] Accept mutation error:', error)
+          toast.error('Errore nell\'accettazione della prenotazione')
+        },
+      }
+    )
   }
 
   const handleReject = (booking: BookingRequest) => {
+    console.log('🔵 [PendingRequestsTab] handleReject called with:', booking)
     setRejectingBooking(booking)
+    console.log('🔵 [PendingRequestsTab] Setting rejectingBooking to:', booking.id)
   }
 
   const handleConfirmReject = (reason: string) => {
-    if (!rejectingBooking) return
+    console.log('🔵 [PendingRequestsTab] handleConfirmReject called with reason:', reason)
+    console.log('🔵 [PendingRequestsTab] rejectingBooking:', rejectingBooking)
+    
+    if (!rejectingBooking) {
+      console.error('❌ [PendingRequestsTab] No rejectingBooking set!')
+      return
+    }
 
-    rejectMutation.mutate({
-      bookingId: rejectingBooking.id,
-      rejectionReason: reason,
-    })
-
-    setRejectingBooking(null)
+    console.log('🔵 [PendingRequestsTab] Calling rejectMutation.mutate...')
+    rejectMutation.mutate(
+      {
+        bookingId: rejectingBooking.id,
+        rejectionReason: reason,
+      },
+      {
+        onSuccess: () => {
+          console.log('✅ [PendingRequestsTab] Reject mutation success')
+          toast.success('Prenotazione rifiutata con successo!')
+          setRejectingBooking(null)
+          // Le queries vengono invalidate automaticamente dalla mutation
+        },
+        onError: (error) => {
+          console.error('❌ [PendingRequestsTab] Reject mutation error:', error)
+          toast.error('Errore nel rifiuto della prenotazione')
+          // Non chiudere il modale in caso di errore, così l'utente può riprovare
+        },
+      }
+    )
   }
 
   if (isLoading) {

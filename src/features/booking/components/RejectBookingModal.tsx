@@ -19,12 +19,25 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
 }) => {
   const [rejectionReason, setRejectionReason] = useState('')
 
+  // Reset form when modal closes
+  React.useEffect(() => {
+    if (!isOpen) {
+      setRejectionReason('')
+      console.log('🔵 [RejectModal] Modal closed, resetting form')
+    }
+  }, [isOpen])
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('🔵 [RejectModal] handleSubmit called')
+    console.log('🔵 [RejectModal] rejectionReason:', rejectionReason)
+    console.log('🔵 [RejectModal] booking:', booking)
+    console.log('🔵 [RejectModal] Calling onConfirm with reason:', rejectionReason)
     onConfirm(rejectionReason)
+    console.log('✅ [RejectModal] onConfirm called successfully')
   }
 
-  if (!booking) return null
+  if (!booking || !isOpen) return null
 
   return (
     <Modal

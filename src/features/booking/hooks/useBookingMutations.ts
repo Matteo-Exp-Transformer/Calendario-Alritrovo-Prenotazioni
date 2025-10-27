@@ -58,8 +58,9 @@ export const useAcceptBooking = () => {
       return data as BookingRequest
     },
     onSuccess: async (booking: BookingRequest) => {
-      queryClient.invalidateQueries({ queryKey: ['bookings'] })
-      toast.success('Prenotazione accettata con successo!')
+      // Invalida tutte le queries per refresh automatico
+      await queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      console.log('✅ [useAcceptBooking] All bookings queries invalidated')
 
       // Send email notification
       if (areEmailNotificationsEnabled()) {
@@ -67,7 +68,8 @@ export const useAcceptBooking = () => {
       }
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Errore nell\'accettazione della prenotazione')
+      console.error('❌ [useAcceptBooking] Mutation error:', error)
+      // Toast error già gestito nel componente
     },
   })
 }
@@ -96,16 +98,18 @@ export const useRejectBooking = () => {
       return data as BookingRequest
     },
     onSuccess: async (booking: BookingRequest) => {
-      queryClient.invalidateQueries({ queryKey: ['bookings'] })
-      toast.success('Prenotazione rifiutata')
-
+      // Invalida tutte le queries per refresh automatico
+      await queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      console.log('✅ [useRejectBooking] All bookings queries invalidated')
+      
       // Send email notification
       if (areEmailNotificationsEnabled()) {
         await sendBookingRejectedEmail(booking)
       }
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Errore nel rifiuto della prenotazione')
+      console.error('❌ [useRejectBooking] Mutation error:', error)
+      // Toast error già gestito nel componente
     },
   })
 }
