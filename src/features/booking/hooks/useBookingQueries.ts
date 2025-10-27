@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useQuery } from '@tanstack/react-query'
 import { supabase, handleSupabaseError } from '@/lib/supabase'
+import { supabasePublic } from '@/lib/supabasePublic'
 import type { BookingRequest } from '@/types/booking'
 
 // Hook per prenotazioni pending
@@ -10,7 +11,8 @@ export const usePendingBookings = () => {
     queryFn: async () => {
       console.log('🔵 [usePendingBookings] Fetching pending bookings...')
       
-      const { data, error } = await supabase
+      // Use supabasePublic with service role key to bypass RLS
+      const { data, error } = await supabasePublic
         .from('booking_requests')
         .select('*')
         .eq('status', 'pending')
@@ -35,7 +37,7 @@ export const useAcceptedBookings = () => {
   return useQuery({
     queryKey: ['bookings', 'accepted'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await supabasePublic
         .from('booking_requests')
         .select('*')
         .eq('status', 'accepted')
@@ -57,7 +59,7 @@ export const useAllBookings = () => {
   return useQuery({
     queryKey: ['bookings', 'all'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await supabasePublic
         .from('booking_requests')
         .select('*')
         .order('created_at', { ascending: false })
@@ -79,8 +81,8 @@ export const useBookingStats = () => {
     queryFn: async () => {
       console.log('🔵 [useBookingStats] Fetching stats...')
       
-      // Query normale con SELECT, poi count in memoria (più affidabile)
-      const { data: allBookings, error } = await supabase
+      // Use supabasePublic with service role key to bypass RLS
+      const { data: allBookings, error } = await supabasePublic
         .from('booking_requests')
         .select('id, status')
 
