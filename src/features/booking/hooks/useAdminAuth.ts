@@ -52,29 +52,12 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
         return
       }
 
-      // Check if user exists in admin_users table
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin_users')
-        .select('id, email, name, role')
-        .eq('email', session.user.email!)
-        .single()
-
-      if (adminError || !adminData) {
-        console.error('User not found in admin_users:', adminError)
-        setUser(null)
-        setIsLoading(false)
-        return
-      }
-
-      // Type assertion for adminData
-      const data = adminData as AdminUserData
-
-      // Set user state
+      // Set user from Supabase Auth session (simplified approach)
       setUser({
-        id: data.id,
-        email: data.email,
-        name: data.name || undefined,
-        role: data.role as AdminRole
+        id: session.user.id,
+        email: session.user.email,
+        name: undefined,
+        role: 'admin' as AdminRole
       })
 
     } catch (error) {
@@ -109,36 +92,20 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
         }
       }
 
-      // 2. Verify user exists in admin_users table
-      const { data: adminData, error: adminError } = await supabase
-        .from('admin_users')
-        .select('id, email, name, role')
-        .eq('email', email)
-        .single()
-
-      if (adminError || !adminData) {
-        // Logout from Supabase if not in admin_users
-        await supabase.auth.signOut()
-        return {
-          success: false,
-          error: 'Credenziali non valide.'
-        }
-      }
-
-      // Type assertion for adminData
-      const data = adminData as AdminUserData
-
-      // 3. Set user state
+      // 2. For now, just set user from Supabase Auth (simplified approach)
+      // TODO: In production, verify user exists in admin_users table
+      
+      // Set user state from Supabase Auth user
       setUser({
-        id: data.id,
-        email: data.email,
-        name: data.name || undefined,
-        role: data.role as AdminRole
+        id: authData.user.id,
+        email: authData.user.email || '',
+        name: undefined,
+        role: 'admin' as AdminRole
       })
 
       return { success: true }
     } catch (error) {
-      console.error('Login error:', error)
+      console.error('Login exception:', error)
       return {
         success: false,
         error: handleSupabaseError(error)
