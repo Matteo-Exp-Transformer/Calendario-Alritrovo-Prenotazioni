@@ -135,7 +135,10 @@ export const SettingsTab: React.FC = () => {
           <Button
             variant="secondary"
             size="md"
-            onClick={() => setShowEmailLogs(true)}
+            onClick={() => {
+              console.log('🔵 [SettingsTab] Clicked View Email Logs, opening modal')
+              setShowEmailLogs(true)
+            }}
           >
             📋 View Email Logs
           </Button>

@@ -20,9 +20,21 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
   const events = transformBookingsToCalendarEvents(bookings)
 
   const handleEventClick = (clickInfo: any) => {
+    console.log('🔵 BookingCalendar: Event clicked!', clickInfo)
+    console.log('🔵 BookingCalendar: clickInfo.event:', clickInfo.event)
+    console.log('🔵 BookingCalendar: clickInfo.event.extendedProps:', clickInfo.event.extendedProps)
+    
     const booking = clickInfo.event.extendedProps as BookingRequest
+    
+    if (!booking) {
+      console.error('❌ BookingCalendar: No booking found in extendedProps!')
+      return
+    }
+    
+    console.log('✅ BookingCalendar: Setting booking:', booking)
     setSelectedBooking(booking)
     setIsModalOpen(true)
+    console.log('✅ BookingCalendar: isModalOpen set to true')
   }
 
   const config = {

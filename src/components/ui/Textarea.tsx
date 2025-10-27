@@ -12,9 +12,18 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <textarea
         className={cn(
-          'flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+          'flex rounded-3xl border bg-white shadow-sm transition-all',
           className
         )}
+        style={{ 
+          borderColor: 'rgba(0,0,0,0.2)', 
+          maxWidth: '600px', 
+          minHeight: '120px',
+          padding: '16px',
+          fontSize: '16px'
+        }}
+        onFocus={(e) => e.target.style.borderColor = '#8B6914'}
+        onBlur={(e) => e.target.style.borderColor = 'rgba(0,0,0,0.2)'}
         ref={ref}
         {...props}
       />

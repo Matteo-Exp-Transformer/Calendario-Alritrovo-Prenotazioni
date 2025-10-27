@@ -150,7 +150,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Nome */}
       <div className="space-y-2">
-        <Label htmlFor="client_name">Nome Completo *</Label>
+        <Label htmlFor="client_name" style={{ color: '#654321' }}>Nome Completo *</Label>
         <Input
           id="client_name"
           value={formData.client_name}
@@ -160,7 +160,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           }}
           placeholder="Mario Rossi"
           required
-          className={errors.client_name ? 'border-red-500' : ''}
+          className={errors.client_name ? '!border-red-500' : ''}
         />
         {errors.client_name && (
           <p className="text-sm text-red-500">{errors.client_name}</p>
@@ -169,7 +169,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Email */}
       <div className="space-y-2">
-        <Label htmlFor="client_email">Email *</Label>
+        <Label htmlFor="client_email" style={{ color: '#654321' }}>Email *</Label>
         <Input
           id="client_email"
           type="email"
@@ -180,7 +180,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           }}
           placeholder="nome@email.com"
           required
-          className={errors.client_email ? 'border-red-500' : ''}
+          className={errors.client_email ? '!border-red-500' : ''}
         />
         {errors.client_email && (
           <p className="text-sm text-red-500">{errors.client_email}</p>
@@ -189,7 +189,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Telefono */}
       <div className="space-y-2">
-        <Label htmlFor="client_phone">Telefono (Opzionale)</Label>
+        <Label htmlFor="client_phone" style={{ color: '#654321' }}>Telefono (Opzionale)</Label>
         <Input
           id="client_phone"
           type="tel"
@@ -201,13 +201,22 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Tipo Evento */}
       <div className="space-y-2">
-        <Label htmlFor="event_type">Tipo Evento *</Label>
+        <Label htmlFor="event_type" style={{ color: '#654321' }}>Tipo Evento *</Label>
         <select
           id="event_type"
           value={formData.event_type}
           onChange={(e) => setFormData({ ...formData, event_type: e.target.value as EventType })}
           required
-          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex rounded-full border bg-white shadow-sm transition-all"
+          style={{ 
+            borderColor: 'rgba(0,0,0,0.2)', 
+            maxWidth: '600px', 
+            height: '56px',
+            padding: '16px',
+            fontSize: '16px'
+          }}
+          onFocus={(e) => e.target.style.borderColor = '#8B6914'}
+          onBlur={(e) => e.target.style.borderColor = 'rgba(0,0,0,0.2)'}
         >
           {EVENT_TYPES.map((type) => (
             <option key={type.value} value={type.value}>
@@ -219,7 +228,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Data */}
       <div className="space-y-2">
-        <Label htmlFor="desired_date">Data Desiderata *</Label>
+        <Label htmlFor="desired_date" style={{ color: '#654321' }}>Data Desiderata *</Label>
         <Input
           id="desired_date"
           type="date"
@@ -229,7 +238,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             setErrors({ ...errors, desired_date: '' })
           }}
           required
-          className={errors.desired_date ? 'border-red-500' : ''}
+          className={errors.desired_date ? '!border-red-500' : ''}
         />
         {errors.desired_date && (
           <p className="text-sm text-red-500">{errors.desired_date}</p>
@@ -238,7 +247,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Ora */}
       <div className="space-y-2">
-        <Label htmlFor="desired_time">Orario Desiderato</Label>
+        <Label htmlFor="desired_time" style={{ color: '#654321' }}>Orario Desiderato</Label>
         <Input
           id="desired_time"
           type="time"
@@ -249,7 +258,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Numero Ospiti */}
       <div className="space-y-2">
-        <Label htmlFor="num_guests">Numero Ospiti *</Label>
+        <Label htmlFor="num_guests" style={{ color: '#654321' }}>Numero Ospiti *</Label>
         <Input
           id="num_guests"
           type="number"
@@ -259,7 +268,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           onChange={handleNumGuestsChange}
           required
           placeholder="Inserisci numero ospiti"
-          className={errors.num_guests ? 'border-red-500' : ''}
+          className={errors.num_guests ? '!border-red-500' : ''}
         />
         {errors.num_guests && (
           <p className="text-sm text-red-500">{errors.num_guests}</p>
@@ -268,7 +277,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Note Speciali */}
       <div className="space-y-2">
-        <Label htmlFor="special_requests">Note o Richieste Speciali</Label>
+        <Label htmlFor="special_requests" style={{ color: '#654321' }}>Note o Richieste Speciali</Label>
         <Textarea
           id="special_requests"
           value={formData.special_requests}
@@ -279,7 +288,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       </div>
 
       {/* Privacy Policy */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div className="rounded-lg p-4" style={{ backgroundColor: 'rgba(255,255,255,0.3)', border: '1px solid rgba(101, 67, 33, 0.3)', backdropFilter: 'blur(10px)' }}>
         <div className="flex items-start gap-3">
           <input
             type="checkbox"
@@ -289,9 +298,9 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             required
             className="mt-1"
           />
-          <label htmlFor="privacy-consent" className="text-sm text-gray-700 cursor-pointer">
+          <label htmlFor="privacy-consent" className="text-sm cursor-pointer" style={{ color: '#654321' }}>
             Accetto la{' '}
-            <a href="/privacy" target="_blank" className="underline text-blue-600 hover:text-blue-800">
+            <a href="/privacy" target="_blank" className="underline" style={{ color: '#654321' }}>
               Privacy Policy
             </a>
             {' '}di Al Ritrovo *
@@ -306,11 +315,12 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         fullWidth
         disabled={isPending || isBlocked}
         className="mt-6"
+        style={{ backgroundColor: '#8B6914', color: '#FFFFFF' }}
       >
-        {isPending ? 'Invio in corso...' : isBlocked ? 'Limite richieste raggiunto' : 'Invia Richiesta Prenotazione'}
+        {isPending ? 'Invio in corso...' : isBlocked ? 'Limite richieste raggiunto' : 'INVIA RICHIESTA PRENOTAZIONE'}
       </Button>
 
-      <p className="text-xs text-gray-500 text-center">
+      <p className="text-xs text-center" style={{ color: '#8B6914' }}>
         * I campi contrassegnati sono obbligatori.
       </p>
     </form>

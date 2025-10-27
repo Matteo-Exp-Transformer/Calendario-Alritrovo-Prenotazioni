@@ -11,6 +11,7 @@ interface ModalProps {
   showCloseButton?: boolean
   closeOnOverlayClick?: boolean
   closeOnEscape?: boolean
+  position?: 'center' | 'right'
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -22,6 +23,7 @@ export const Modal: React.FC<ModalProps> = ({
   showCloseButton = true,
   closeOnOverlayClick = true,
   closeOnEscape = true,
+  position = 'center',
 }) => {
   // LOCKED: 2025-01-16 - Modal.tsx completamente testato
   // Test eseguiti: 39 test, tutti passati (100%)
@@ -82,7 +84,7 @@ export const Modal: React.FC<ModalProps> = ({
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div className="flex min-h-full items-center justify-center p-4">
+      <div className={`flex min-h-full ${position === 'right' ? 'items-start justify-end' : 'items-center justify-center'} p-4`}>
         {/* Overlay */}
         <div
           className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
@@ -93,7 +95,7 @@ export const Modal: React.FC<ModalProps> = ({
         {/* Modal */}
         <div
           ref={modalRef}
-          className={`relative bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]} focus:outline-none`}
+          className={`relative bg-white ${position === 'right' ? 'shadow-2xl w-full max-w-2xl h-full' : 'rounded-lg shadow-xl w-full'} ${sizeClasses[size]} focus:outline-none`}
           tabIndex={-1}
         >
           {/* Header */}

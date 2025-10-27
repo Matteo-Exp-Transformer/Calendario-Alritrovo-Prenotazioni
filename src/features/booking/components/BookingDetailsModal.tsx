@@ -73,11 +73,18 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     }
   }
 
+  console.log('🔍 BookingDetailsModal render - isOpen:', isOpen, 'booking:', booking)
+
+  if (!isOpen) {
+    return null
+  }
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={isEditMode ? 'Modifica Prenotazione' : 'Dettagli Prenotazione'}
+      position="right"
     >
       {showCancelConfirm ? (
         <div className="space-y-4">

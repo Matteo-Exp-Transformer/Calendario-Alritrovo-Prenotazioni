@@ -86,6 +86,13 @@ export const areEmailNotificationsEnabled = (): boolean => {
   // In production, this should check restaurant_settings table
   // For now, return true if RESEND_API_KEY is configured
   const apiKey = import.meta.env.RESEND_API_KEY || import.meta.env.VITE_RESEND_API_KEY
+  console.log('🔵 [areEmailNotificationsEnabled] Checking:', {
+    RESEND_API_KEY: !!import.meta.env.RESEND_API_KEY,
+    VITE_RESEND_API_KEY: !!import.meta.env.VITE_RESEND_API_KEY,
+    RESEND_API_KEY_value: import.meta.env.RESEND_API_KEY ? 'presente' : 'mancante',
+    VITE_RESEND_API_KEY_value: import.meta.env.VITE_RESEND_API_KEY ? 'presente' : 'mancante',
+    result: !!apiKey
+  })
   return !!apiKey
 }
 

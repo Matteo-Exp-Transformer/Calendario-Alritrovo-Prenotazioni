@@ -11,7 +11,12 @@ interface EmailLogsModalProps {
 }
 
 export const EmailLogsModal: React.FC<EmailLogsModalProps> = ({ isOpen, onClose }) => {
+  console.log('🔵 [EmailLogsModal] Modal open:', isOpen)
   const { data: logs, isLoading, error } = useEmailLogs(100)
+  
+  console.log('🔵 [EmailLogsModal] Logs data:', logs)
+  console.log('🔵 [EmailLogsModal] Loading:', isLoading)
+  console.log('🔵 [EmailLogsModal] Error:', error)
 
   const getStatusIcon = (status: string) => {
     switch (status) {
