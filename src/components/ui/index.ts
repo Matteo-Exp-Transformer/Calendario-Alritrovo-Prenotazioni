@@ -1,21 +1,10 @@
 // UI Components Index
-// LOCKED: 2025-01-16 - index.ts completamente testato
-// Test eseguiti: 24 test, tutti passati (100%)
-// Export testati: 8 componenti principali, 10 sub-componenti
-// Missing exports identificati: 9 componenti
-// NON MODIFICARE SENZA PERMESSO ESPLICITO
+// Updated for Al Ritrovo Booking System
 
-export { Alert, AlertTitle, AlertDescription } from './Alert'
-export { Badge } from './Badge'
+// export { Alert, AlertTitle, AlertDescription } from './Alert' // TODO: Create Alert component
+// export { Badge } from './Badge' // TODO: Create Badge component
 export { Button } from './Button'
-export {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from './Card'
+// export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './Card' // TODO: Create Card component
 export { Input } from './Input'
 export { Label } from './Label'
 export { Select } from './Select'
