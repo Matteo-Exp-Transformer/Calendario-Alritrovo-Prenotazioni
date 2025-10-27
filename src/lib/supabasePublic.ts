@@ -4,13 +4,13 @@ import { createClient } from '@supabase/supabase-js'
 import type { Database } from '../types/database'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-// Use SERVICE_ROLE_KEY to completely bypass RLS for public inserts
-const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY
+// Use ANON KEY for public inserts (now that RLS policy allows it)
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-console.log('🔧 [Supabase Public Client] Service Role Key presente:', !!supabaseServiceKey)
+console.log('🔧 [Supabase Public Client] Anon Key presente:', !!supabaseAnonKey)
 
-// Fallback to anon key if service role not available
-const supabaseKey = supabaseServiceKey || import.meta.env.VITE_SUPABASE_ANON_KEY
+// Use anon key for public inserts
+const supabaseKey = supabaseAnonKey
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('❌ [Supabase Public Client] Credenziali mancanti!')
