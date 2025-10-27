@@ -116,7 +116,7 @@ export const EmailLogsModal: React.FC<EmailLogsModalProps> = ({ isOpen, onClose 
                   <div className="flex items-center gap-2">
                     <span className="font-medium">Data:</span>
                     <span>
-                      {format(new Date(log.created_at), 'dd MMM yyyy HH:mm', { locale: it })}
+                      {format(new Date(log.sent_at), 'dd MMM yyyy HH:mm', { locale: it })}
                     </span>
                   </div>
 

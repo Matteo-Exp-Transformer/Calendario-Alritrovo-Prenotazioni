@@ -9,7 +9,7 @@ interface EmailLog {
   status: 'sent' | 'failed' | 'pending'
   provider_response: any
   error_message: string | null
-  created_at: string
+  sent_at: string
 }
 
 /**
@@ -22,7 +22,7 @@ export const useEmailLogs = (limit: number = 50) => {
       const { data, error } = await supabasePublic
         .from('email_logs')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('sent_at', { ascending: false })
         .limit(limit)
 
       if (error) {

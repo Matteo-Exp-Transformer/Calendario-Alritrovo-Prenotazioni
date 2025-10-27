@@ -79,12 +79,12 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto"
+      className={`fixed inset-0 z-50 ${position === 'right' ? 'overflow-hidden' : 'overflow-y-auto'}`}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div className={`flex min-h-full ${position === 'right' ? 'items-start justify-end' : 'items-center justify-center'} p-4`}>
+      <div className={`flex min-h-full ${position === 'right' ? 'items-start justify-end' : 'items-center justify-center'} ${position === 'right' ? '' : 'p-4'}`}>
         {/* Overlay */}
         <div
           className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
@@ -95,11 +95,11 @@ export const Modal: React.FC<ModalProps> = ({
         {/* Modal */}
         <div
           ref={modalRef}
-          className={`relative bg-white ${position === 'right' ? 'shadow-2xl w-full max-w-2xl h-full' : 'rounded-lg shadow-xl w-full'} ${sizeClasses[size]} focus:outline-none`}
+          className={`relative bg-white ${position === 'right' ? 'shadow-2xl w-full max-w-2xl h-full flex flex-col' : 'rounded-lg shadow-xl w-full'} ${sizeClasses[size]} focus:outline-none`}
           tabIndex={-1}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className={`flex items-center justify-between p-6 border-b border-gray-200 ${position === 'right' ? 'flex-shrink-0' : ''}`}>
             <h2
               id="modal-title"
               className="text-lg font-semibold text-gray-900"
@@ -120,7 +120,7 @@ export const Modal: React.FC<ModalProps> = ({
           </div>
 
           {/* Content */}
-          <div className="p-6">{children}</div>
+          <div className={`p-6 ${position === 'right' ? 'overflow-y-auto flex-1' : ''}`}>{children}</div>
         </div>
       </div>
     </div>
