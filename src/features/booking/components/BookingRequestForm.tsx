@@ -6,10 +6,11 @@ import { useRateLimit } from '@/hooks/useRateLimit'
 import { toast } from 'react-toastify'
 
 const EVENT_TYPES: { value: EventType; label: string }[] = [
-  { value: 'cena', label: 'Cena' },
-  { value: 'aperitivo', label: 'Aperitivo' },
-  { value: 'evento', label: 'Evento Privato' },
-  { value: 'laurea', label: 'Laurea' }
+  { value: 'drink_caraffe', label: 'Drink/Caraffe' },
+  { value: 'drink_rinfresco_leggero', label: 'Drink/Caraffe + rinfresco leggero' },
+  { value: 'drink_rinfresco_completo', label: 'Drink/Caraffe + rinfresco completo' },
+  { value: 'drink_rinfresco_completo_primo', label: 'Drink/Caraffe + rinfresco completo + primo piatto' },
+  { value: 'menu_pranzo_cena', label: 'Menu Pranzo / Menù Cena' }
 ]
 
 interface BookingRequestFormProps {

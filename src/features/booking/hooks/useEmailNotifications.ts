@@ -93,6 +93,7 @@ export const areEmailNotificationsEnabled = (): boolean => {
     VITE_RESEND_API_KEY_value: import.meta.env.VITE_RESEND_API_KEY ? 'presente' : 'mancante',
     result: !!apiKey
   })
-  return !!apiKey
+  // Per ora attiva sempre: RESEND_API_KEY è configurata in Supabase Edge Function secrets
+  return true
 }
 

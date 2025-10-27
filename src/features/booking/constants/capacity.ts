@@ -1,0 +1,12 @@
+// Capacity configuration for the restaurant
+export const CAPACITY_CONFIG = {
+  MORNING_CAPACITY: 100,
+  AFTERNOON_CAPACITY: 100,
+  EVENING_CAPACITY: 100,
+  MORNING_START: '10:00',
+  MORNING_END: '14:30',
+  AFTERNOON_START: '14:31',
+  AFTERNOON_END: '18:30',
+  EVENING_START: '18:31',
+  EVENING_END: '23:30',
+} 

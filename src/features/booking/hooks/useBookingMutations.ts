@@ -1,7 +1,6 @@
 // @ts-nocheck
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase, handleSupabaseError } from '@/lib/supabase'
-import { supabasePublic } from '@/lib/supabasePublic'
 import type { BookingRequest } from '@/types/booking'
 import { toast } from 'react-toastify'
 import {
@@ -26,9 +25,9 @@ interface RejectBookingInput {
 
 interface UpdateBookingInput {
   bookingId: string
-  confirmedStart?: string
-  confirmedEnd?: string
-  numGuests?: number
+  confirmedStart: string
+  confirmedEnd: string
+  numGuests: number
   specialRequests?: string
 }
 
@@ -38,7 +37,7 @@ export const useAcceptBooking = () => {
 
   return useMutation({
     mutationFn: async (input: AcceptBookingInput) => {
-      const { data, error } = await supabasePublic
+      const { data, error } = await supabase
         .from('booking_requests')
         .update({
           status: 'accepted',
@@ -60,6 +59,8 @@ export const useAcceptBooking = () => {
     onSuccess: async (booking: BookingRequest) => {
       // Invalida tutte le queries per refresh automatico
       await queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      // Invalida specificamente la query pending per forzare il refresh
+      await queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'] })
       console.log('✅ [useAcceptBooking] All bookings queries invalidated')
 
       // Send email notification
@@ -92,7 +93,7 @@ export const useRejectBooking = () => {
 
   return useMutation({
     mutationFn: async (input: RejectBookingInput) => {
-      const { data, error } = await supabasePublic
+      const { data, error } = await supabase
         .from('booking_requests')
         .update({
           status: 'rejected',
@@ -112,6 +113,8 @@ export const useRejectBooking = () => {
     onSuccess: async (booking: BookingRequest) => {
       // Invalida tutte le queries per refresh automatico
       await queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      // Invalida specificamente la query pending per forzare il refresh
+      await queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'] })
       console.log('✅ [useRejectBooking] All bookings queries invalidated')
       
       // Send email notification
@@ -132,33 +135,46 @@ export const useUpdateBooking = () => {
 
   return useMutation({
     mutationFn: async (input: UpdateBookingInput) => {
+      console.log('🔵 [useUpdateBooking] Updating booking:', input.bookingId)
+      console.log('🔵 [useUpdateBooking] Data:', input)
+      
       const updateData: any = {
         updated_at: new Date().toISOString(),
+        confirmed_start: input.confirmedStart,
+        confirmed_end: input.confirmedEnd,
+        num_guests: input.numGuests,
       }
 
-      if (input.confirmedStart) updateData.confirmed_start = input.confirmedStart
-      if (input.confirmedEnd) updateData.confirmed_end = input.confirmedEnd
-      if (input.numGuests) updateData.num_guests = input.numGuests
-      if (input.specialRequests !== undefined) updateData.special_requests = input.specialRequests
+      if (input.specialRequests !== undefined) {
+        updateData.special_requests = input.specialRequests
+      }
+      
+      console.log('🔵 [useUpdateBooking] Update payload:', updateData)
 
-      const { data, error } = await supabasePublic
+      const { data, error } = await supabase
         .from('booking_requests')
         .update(updateData)
         .eq('id', input.bookingId)
         .select()
         .single()
 
+      console.log('🔵 [useUpdateBooking] Supabase response:', { data, error })
+
       if (error) {
+        console.error('❌ [useUpdateBooking] Error:', error)
         throw new Error(handleSupabaseError(error))
       }
 
+      console.log('✅ [useUpdateBooking] Booking updated successfully:', data)
       return data as BookingRequest
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('✅ [useUpdateBooking] onSuccess triggered:', data)
       queryClient.invalidateQueries({ queryKey: ['bookings'] })
       toast.success('Prenotazione aggiornata con successo!')
     },
     onError: (error: Error) => {
+      console.error('❌ [useUpdateBooking] onError:', error)
       toast.error(error.message || 'Errore nell\'aggiornamento della prenotazione')
     },
   })
@@ -170,10 +186,12 @@ export const useCancelBooking = () => {
 
   return useMutation({
     mutationFn: async ({ bookingId, cancellationReason }: { bookingId: string; cancellationReason?: string }) => {
-      const { data, error } = await supabasePublic
+      console.log('🔵 [useCancelBooking] Cancelling booking:', bookingId)
+      
+      const { data, error } = await supabase
         .from('booking_requests')
         .update({
-          status: 'cancelled',
+          status: 'rejected',
           cancellation_reason: cancellationReason || null,
           cancelled_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -183,9 +201,11 @@ export const useCancelBooking = () => {
         .single()
 
       if (error) {
+        console.error('❌ [useCancelBooking] Error:', error)
         throw new Error(handleSupabaseError(error))
       }
 
+      console.log('✅ [useCancelBooking] Booking cancelled:', data)
       return data as BookingRequest
     },
     onSuccess: async (booking: BookingRequest) => {

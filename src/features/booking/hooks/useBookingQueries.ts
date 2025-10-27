@@ -1,7 +1,6 @@
 // @ts-nocheck
 import { useQuery } from '@tanstack/react-query'
 import { supabase, handleSupabaseError } from '@/lib/supabase'
-import { supabasePublic } from '@/lib/supabasePublic'
 import type { BookingRequest } from '@/types/booking'
 
 // Hook per prenotazioni pending
@@ -11,8 +10,14 @@ export const usePendingBookings = () => {
     queryFn: async () => {
       console.log('🔵 [usePendingBookings] Fetching pending bookings...')
       
-      // TEMP: Use supabasePublic to bypass RLS until we fix the policy
-      const { data, error } = await supabasePublic
+      // Check session first
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('🔵 [usePendingBookings] Session:', session ? `✅ User ${session.user.email}` : '❌ No session')
+      console.log('🔵 [usePendingBookings] Session token exists:', session ? !!session.access_token : false)
+      console.log('🔵 [usePendingBookings] Session token preview:', session?.access_token?.substring(0, 20) || 'No token')
+      
+      // Use authenticated supabase client (respects RLS policies)
+      const { data, error } = await supabase
         .from('booking_requests')
         .select('*')
         .eq('status', 'pending')
@@ -39,9 +44,13 @@ export const useAcceptedBookings = () => {
     queryFn: async () => {
       console.log('🔵 [useAcceptedBookings] Fetching accepted bookings...')
       
+      // Check session first
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('🔵 [useAcceptedBookings] Session:', session ? `✅ User ${session.user.email}` : '❌ No session')
+      
       // Show ALL accepted bookings (past, present, and future)
       // For a restaurant calendar, we want to show historical data too
-      const { data, error } = await supabasePublic
+      const { data, error } = await supabase
         .from('booking_requests')
         .select('*')
         .eq('status', 'accepted')
@@ -70,7 +79,11 @@ export const useAllBookings = () => {
   return useQuery({
     queryKey: ['bookings', 'all'],
     queryFn: async () => {
-      const { data, error } = await supabasePublic
+      // Check session
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('🔵 [useAllBookings] Session:', session ? `✅ User ${session.user.email}` : '❌ No session')
+      
+      const { data, error } = await supabase
         .from('booking_requests')
         .select('*')
         .order('created_at', { ascending: false })
@@ -92,8 +105,12 @@ export const useBookingStats = () => {
     queryFn: async () => {
       console.log('🔵 [useBookingStats] Fetching stats...')
       
-      // TEMP: Use supabasePublic to bypass RLS until we fix the policy
-      const { data: allBookings, error } = await supabasePublic
+      // Check session first  
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('🔵 [useBookingStats] Session:', session ? `✅ User ${session.user.email}` : '❌ No session')
+      
+      // Use authenticated supabase client
+      const { data: allBookings, error } = await supabase
         .from('booking_requests')
         .select('id, status')
 
@@ -104,10 +121,18 @@ export const useBookingStats = () => {
         throw new Error(handleSupabaseError(error))
       }
 
+      // Calculate stats
+      const now = new Date()
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      
       const stats = {
         pending: allBookings?.filter(b => b.status === 'pending').length || 0,
         accepted: allBookings?.filter(b => b.status === 'accepted').length || 0,
         total: allBookings?.length || 0,
+        totalMonth: allBookings?.filter(b => {
+          const createdDate = new Date(b.created_at)
+          return createdDate >= startOfMonth
+        }).length || 0,
       }
 
       console.log('✅ [useBookingStats] Stats computed:', stats)

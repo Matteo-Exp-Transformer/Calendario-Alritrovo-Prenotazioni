@@ -12,36 +12,43 @@ interface BookingDetailsModalProps {
 }
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
-  cena: '🍽️ Cena',
-  aperitivo: '🥂 Aperitivo',
-  evento: '🎉 Evento Privato',
-  laurea: '🎓 Laurea',
+  drink_caraffe: '🥤 Drink/Caraffe',
+  drink_rinfresco_leggero: '🥤 Drink/Caraffe + rinfresco leggero',
+  drink_rinfresco_completo: '🥤 Drink/Caraffe + rinfresco completo',
+  drink_rinfresco_completo_primo: '🥤 Drink/Caraffe + rinfresco completo + primo piatto',
+  menu_pranzo_cena: '🍽️ Menu Pranzo / Menù Cena',
 }
 
 const EVENT_TYPE_COLORS: Record<string, { bg: string; border: string; text: string; icon: string }> = {
-  cena: { 
-    bg: 'bg-red-50', 
-    border: 'border-red-200', 
-    text: 'text-red-700',
-    icon: '🍽️'
+  drink_caraffe: { 
+    bg: 'bg-blue-50', 
+    border: 'border-blue-200', 
+    text: 'text-blue-700',
+    icon: '🥤'
   },
-  aperitivo: { 
-    bg: 'bg-yellow-50', 
-    border: 'border-yellow-200', 
-    text: 'text-yellow-700',
-    icon: '🥂'
+  drink_rinfresco_leggero: { 
+    bg: 'bg-cyan-50', 
+    border: 'border-cyan-200', 
+    text: 'text-cyan-700',
+    icon: '🥤'
   },
-  evento: { 
-    bg: 'bg-purple-50', 
-    border: 'border-purple-200', 
-    text: 'text-purple-700',
-    icon: '🎉'
-  },
-  laurea: { 
+  drink_rinfresco_completo: { 
     bg: 'bg-teal-50', 
     border: 'border-teal-200', 
     text: 'text-teal-700',
-    icon: '🎓'
+    icon: '🥤'
+  },
+  drink_rinfresco_completo_primo: { 
+    bg: 'bg-emerald-50', 
+    border: 'border-emerald-200', 
+    text: 'text-emerald-700',
+    icon: '🥤'
+  },
+  menu_pranzo_cena: { 
+    bg: 'bg-amber-50', 
+    border: 'border-amber-200', 
+    text: 'text-amber-700',
+    icon: '🍽️'
   },
 }
 
@@ -80,8 +87,21 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   const handleSave = () => {
     if (!booking.confirmed_start) return
 
-    const confirmedStart = `${formData.date}T${formData.startTime}:00`
-    const confirmedEnd = `${formData.date}T${formData.endTime}:00`
+    // Create ISO strings WITH explicit local timezone offset
+    // This prevents PostgreSQL from converting to UTC incorrectly
+    const [year, month, day] = formData.date.split('-').map(Number)
+    const [startHours, startMinutes] = formData.startTime.split(':').map(Number)
+    const [endHours, endMinutes] = formData.endTime.split(':').map(Number)
+    
+    // Get timezone offset (e.g., +01:00 for Italy)
+    const tzOffset = new Date().getTimezoneOffset()
+    const tzHours = Math.floor(Math.abs(tzOffset) / 60)
+    const tzMinutes = Math.abs(tzOffset) % 60
+    const tzSign = tzOffset <= 0 ? '+' : '-'
+    const tzString = `${tzSign}${String(tzHours).padStart(2, '0')}:${String(tzMinutes).padStart(2, '0')}`
+    
+    const confirmedStart = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(startHours).padStart(2, '0')}:${String(startMinutes).padStart(2, '0')}:00${tzString}`
+    const confirmedEnd = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}:00${tzString}`
 
     updateMutation.mutate(
       {
@@ -92,9 +112,13 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         specialRequests: formData.specialRequests,
       },
       {
-        onSuccess: () => {
+        onSuccess: (updatedBooking) => {
+          console.log('✅ [BookingDetailsModal] Save successful:', updatedBooking)
           setIsEditMode(false)
-          // Modal rimane aperto, i dati si aggiornano automaticamente
+          // Modal rimane aperto, i dati si aggiornano automaticamente tramite useEffect
+        },
+        onError: (error) => {
+          console.error('❌ [BookingDetailsModal] Save failed:', error)
         },
       }
     )
@@ -129,7 +153,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     return null
   }
 
-  const eventConfig = EVENT_TYPE_COLORS[booking.event_type] || EVENT_TYPE_COLORS.cena
+  const eventConfig = EVENT_TYPE_COLORS[booking.event_type] || EVENT_TYPE_COLORS.drink_caraffe
 
   return (
     <div 
@@ -146,10 +170,10 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
 
       <div 
-        className="absolute right-0 top-0 bottom-0 w-full max-w-3xl bg-white shadow-2xl overflow-hidden flex flex-col"
+        className="absolute right-0 top-0 bottom-0 w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col"
         style={{ 
-          backgroundColor: '#ffffff',
-          position: 'absolute'
+          position: 'absolute',
+          backgroundColor: '#FEF3C7' // bg-amber-100
         }}
       >
         {/* Header */}
@@ -170,9 +194,9 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+              className="p-2.5 hover:bg-gray-100 rounded-full transition-all hover:scale-110 shadow-sm border border-gray-300 bg-white"
             >
-              <X className="h-6 w-6 text-gray-600" />
+              <X className="h-5 w-5 text-gray-600" />
             </button>
           </div>
 
@@ -190,74 +214,57 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {showCancelConfirm ? (
-            <div className="space-y-4">
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-sm text-red-800">
-                  ⚠️ <strong>Attenzione!</strong> Stai per cancellare questa prenotazione.
-                  Questa azione non può essere annullata.
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowCancelConfirm(false)}
-                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
-                >
-                  Annulla
-                </button>
-                <button
-                  onClick={handleCancelBooking}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                  disabled={cancelMutation.isPending}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  {cancelMutation.isPending ? 'Cancellazione...' : 'Conferma Cancellazione'}
-                </button>
-              </div>
-            </div>
-          ) : (
+        <div className="flex-1 overflow-y-auto p-6 bg-amber-100">
+          {!showCancelConfirm && (
             <div className="space-y-6">
-              {/* Client Info */}
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                  <User className="h-5 w-5 mr-2" />
+              {/* Sezione Header */}
+              <div className="border-b-2 border-gray-100 pb-4">
+                <h3 className="font-serif font-bold text-xl text-gray-900 flex items-center">
+                  <User className="h-6 w-6 mr-3 text-gray-600" />
                   Informazioni Cliente
                 </h3>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-3">
-                    <User className="h-4 w-4 text-gray-500" />
-                    <div>
-                      <p className="text-xs text-gray-500">Nome</p>
-                      <p className="font-medium text-gray-900">{booking.client_name}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <Mail className="h-4 w-4 text-gray-500" />
-                    <div>
-                      <p className="text-xs text-gray-500">Email</p>
-                      <p className="font-medium text-gray-900">{booking.client_email}</p>
-                    </div>
-                  </div>
-                  {booking.client_phone && (
-                    <div className="flex items-center space-x-3">
-                      <Phone className="h-4 w-4 text-gray-500" />
-                      <div>
-                        <p className="text-xs text-gray-500">Telefono</p>
-                        <p className="font-medium text-gray-900">{booking.client_phone}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
               </div>
 
-              {/* Event Details */}
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                  <Calendar className="h-5 w-5 mr-2" />
+              {/* Client Info */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3 py-2">
+                  <User className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">Nome</p>
+                    <p className="text-base font-normal text-gray-900">{booking.client_name}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 py-2">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">Email</p>
+                    <p className="text-base font-normal text-gray-900">{booking.client_email}</p>
+                  </div>
+                </div>
+                {booking.client_phone && (
+                  <div className="flex items-center space-x-3 py-2">
+                    <Phone className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">Telefono</p>
+                      <p className="text-base font-normal text-gray-900">{booking.client_phone}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Divider */}
+              <div className="border-t-2 border-gray-100 my-6"></div>
+
+              {/* Sezione Header Event Details */}
+              <div className="border-b-2 border-gray-100 pb-4">
+                <h3 className="font-serif font-bold text-xl text-gray-900 flex items-center">
+                  <Calendar className="h-6 w-6 mr-3 text-gray-600" />
                   Dettagli Evento
                 </h3>
-                
+              </div>
+
+              {/* Event Details Content */}
+              <div>
                 {isEditMode ? (
                   <div className="space-y-4">
                     <div>
@@ -313,41 +320,44 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                     )}
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    <div className="flex items-start space-x-3">
-                      <Calendar className="h-4 w-4 text-gray-500 mt-0.5" />
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3 py-2">
+                      <Calendar className="h-5 w-5 text-gray-400" />
                       <div>
-                        <p className="text-xs text-gray-500">Data e Ora</p>
-                        <p className="font-medium text-gray-900">{formatDateTime(booking.confirmed_start)}</p>
+                        <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">Data e Ora</p>
+                        <p className="text-base font-normal text-gray-900">{formatDateTime(booking.confirmed_start)}</p>
                       </div>
                     </div>
-                    <div className="flex items-start space-x-3">
-                      <Clock className="h-4 w-4 text-gray-500 mt-0.5" />
+                    <div className="flex items-start space-x-3 py-2">
+                      <Clock className="h-5 w-5 text-gray-400" />
                       <div>
-                        <p className="text-xs text-gray-500">Fine Evento</p>
-                        <p className="font-medium text-gray-900">{formatDateTime(booking.confirmed_end)}</p>
+                        <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">Fine Evento</p>
+                        <p className="text-base font-normal text-gray-900">{formatDateTime(booking.confirmed_end)}</p>
                       </div>
                     </div>
-                    <div className="flex items-start space-x-3">
-                      <Users className="h-4 w-4 text-gray-500 mt-0.5" />
+                    <div className="flex items-start space-x-3 py-2">
+                      <Users className="h-5 w-5 text-gray-400" />
                       <div>
-                        <p className="text-xs text-gray-500">Numero Ospiti</p>
-                        <p className="font-medium text-gray-900">{booking.num_guests} persone</p>
+                        <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">Numero Ospiti</p>
+                        <p className="text-base font-normal text-gray-900">{booking.num_guests} persone</p>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Notes */}
+              {/* Notes Section */}
               {booking.special_requests && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-blue-900 mb-2 flex items-center">
-                    📝 Note Speciali
-                  </h4>
-                  <p className="text-sm text-blue-800 whitespace-pre-wrap">
-                    {booking.special_requests}
-                  </p>
+                <div>
+                  <div className="border-t-2 border-gray-100 my-6"></div>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-blue-900 mb-2 flex items-center">
+                      📝 Note Speciali
+                    </h4>
+                    <p className="text-sm text-blue-800 whitespace-pre-wrap">
+                      {booking.special_requests}
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -356,23 +366,23 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
         {/* Footer Actions */}
         {!showCancelConfirm && (
-          <div className="border-t border-gray-200 p-6 bg-gray-50">
+          <div className="border-t border-gray-200 p-6 bg-amber-100">
             <div className="flex gap-3">
               {isEditMode ? (
                 <>
                   <button
                     onClick={() => setIsEditMode(false)}
-                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-all shadow hover:shadow-md flex items-center justify-center gap-2 font-semibold text-base"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-5 w-5" />
                     Annulla
                   </button>
                   <button
                     onClick={handleSave}
-                    className="flex-1 px-4 py-2 bg-al-ritrovo-primary text-white rounded-md hover:bg-al-ritrovo-primary-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 px-6 py-3 bg-al-ritrovo-primary text-white rounded-lg hover:bg-al-ritrovo-primary-dark transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 font-semibold text-base"
                     disabled={updateMutation.isPending}
                   >
-                    <Save className="h-4 w-4" />
+                    <Save className="h-5 w-5" />
                     {updateMutation.isPending ? 'Salvataggio...' : 'Salva Modifiche'}
                   </button>
                 </>
@@ -380,16 +390,26 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                 <>
                   <button
                     onClick={() => setIsEditMode(true)}
-                    className="flex-1 px-4 py-2 bg-al-ritrovo-primary text-white rounded-md hover:bg-al-ritrovo-primary-dark transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 px-8 py-4 text-white rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-3 font-semibold text-base"
+                    style={{ 
+                      minHeight: '56px',
+                      backgroundColor: '#60A5FA',
+                      border: 'none'
+                    }}
                   >
-                    <Edit className="h-4 w-4" />
+                    <Edit className="h-5 w-5" />
                     Modifica
                   </button>
                   <button
                     onClick={() => setShowCancelConfirm(true)}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center justify-center gap-2"
+                    className="flex-1 px-8 py-4 text-white rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-3 font-semibold text-base"
+                    style={{ 
+                      minHeight: '56px',
+                      backgroundColor: '#EF4444',
+                      border: 'none'
+                    }}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-5 w-5" />
                     Cancella
                   </button>
                 </>
@@ -398,6 +418,57 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
           </div>
         )}
       </div>
+
+      {/* Confirmation dialog overlay - renders on top of everything */}
+      {showCancelConfirm && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center">
+          {/* Dark overlay background */}
+          <div 
+            className="absolute inset-0 bg-black bg-opacity-60" 
+            onClick={() => setShowCancelConfirm(false)}
+          />
+          
+          {/* Confirmation dialog */}
+          <div className="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 border-2 border-red-200">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <span className="text-2xl">⚠️</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Conferma Cancellazione</h3>
+                <p className="text-sm text-gray-600 mt-1">Questa azione non può essere annullata</p>
+              </div>
+            </div>
+            
+            <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-red-800 font-medium">
+                ⚠️ <strong>Attenzione!</strong> Stai per cancellare questa prenotazione.
+              </p>
+              <p className="text-sm text-red-700 mt-2">
+                Questa azione non può essere annullata e il cliente riceverà una notifica email.
+              </p>
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowCancelConfirm(false)}
+                className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <X className="h-5 w-5" />
+                Annulla
+              </button>
+              <button
+                onClick={handleCancelBooking}
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+                disabled={cancelMutation.isPending}
+              >
+                <Trash2 className="h-5 w-5" />
+                {cancelMutation.isPending ? 'Cancellazione...' : 'Conferma Cancellazione'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

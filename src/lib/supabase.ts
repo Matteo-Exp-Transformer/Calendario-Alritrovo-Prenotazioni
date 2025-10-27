@@ -14,11 +14,22 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
+// Client per utenti autenticati (admin)
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
-    autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage,
+    flowType: 'pkce'
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'booking-admin'
+    }
+  },
+  db: {
+    schema: 'public'
   }
 })
 

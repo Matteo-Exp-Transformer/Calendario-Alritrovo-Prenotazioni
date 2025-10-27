@@ -5,7 +5,7 @@ import { supabasePublic } from '@/lib/supabasePublic'
 import type { BookingRequest, BookingRequestInput } from '@/types/booking'
 import { toast } from 'react-toastify'
 
-// Hook for creating booking requests (public)
+// Hook for creating booking requests (public - needs to use ANON key)
 export const useCreateBookingRequest = () => {
   return useMutation({
     mutationFn: async (data: BookingRequestInput) => {
@@ -27,7 +27,8 @@ export const useCreateBookingRequest = () => {
       console.log('🔵 [useCreateBookingRequest] Insert data:', insertData)
       console.log('🔵 [useCreateBookingRequest] Calling Supabase insert...')
 
-      // Use public client to bypass RLS
+      // Use supabasePublic client (ANON key) for public form submissions
+      // This respects the INSERT policy for anon role
       console.log('🔵 [useCreateBookingRequest] Using supabasePublic client...')
 
       // @ts-ignore - Supabase types are not fully generated

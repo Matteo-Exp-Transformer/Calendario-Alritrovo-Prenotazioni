@@ -2,7 +2,8 @@
 
 **Data Ultimo Aggiornamento:** 27 Gennaio 2025  
 **Branch:** `cursor-branch`  
-**Ultimo Commit:** `f901153` - Debug: Aggiunto console log per troubleshooting ACCETTA
+**Ultimo Commit:** Latest - Email system funzionante ✅  
+**Ultimo Test:** Playwright Setup Test - Credenziali Supabase verificate ✅
 
 ---
 
@@ -55,12 +56,14 @@ Sistema di prenotazioni per ristorante "Al Ritrovo" con:
   - Visualizzazione prenotazioni accettate
   - Eventi cliccabili
 
-### Fase 7: Email Notifications ✅
+### Fase 7: Email Notifications ✅ (FUNZIONANTE)
 - ✅ Resend API configurata
+- ✅ Edge Function Supabase deployed
 - ✅ Email templates HTML:
   - Booking accepted (conferma prenotazione)
   - Booking rejected (notifica rifiuto)
   - Booking cancelled (notifica cancellazione)
+- ✅ **Invio email reale funzionante** ✅
 - ✅ Log email in database (email_logs table)
 - ✅ Hook `useEmailNotifications` implementato
 
@@ -72,26 +75,61 @@ Sistema di prenotazioni per ristorante "Al Ritrovo" con:
 
 ---
 
-## ⚠️ IN LAVORO
+## ✅ COMPLETATO
 
-### Debug ACCETTA Button
-**Problema Attuale:**
-- Il bottone "✅ ACCETTA" nella dashboard apre il modal correttamente
-- Il form del modal si valida correttamente
-- Il bottone "✅ Conferma Prenotazione" nel modal **NON triggera la mutation**
+### ✅ RLS Policies Fixed
+**Problema Risolto:**
+- ✅ RLS policies configurate correttamente
+- ✅ Migrazione `006_fix_rls_for_production` applicata
+- ✅ `supabasePublic.ts` ora usa ANON_KEY invece di SERVICE_ROLE_KEY
+- ✅ Settings tab aggiornato per riflettere il fix
+- ✅ Tutti gli hook ora usano client `supabase` (autenticato) invece di `supabasePublic`
 
-**Debug Implementato:**
-- Console logs aggiunti in tutti i punti critici:
-  - `PendingRequestsTab.tsx` → `handleAccept()`, `handleConfirmAccept()`
-  - `AcceptBookingModal.tsx` → `handleSubmit()`, validation, `onConfirm()`
-- Validazione orario fine migliorata:
-  - Supporto midnight crossover (22:00 → 02:00 valido)
-  - Comparazione minuti invece di stringhe
+**Policies Applicate:**
+- ✅ `anon_can_insert_booking_requests` - Form pubblico funziona
+- ✅ `authenticated_can_select_booking_requests` - Admin vede prenotazioni
+- ✅ `authenticated_can_update_booking_requests` - Admin modifica prenotazioni
+- ✅ `authenticated_can_delete_booking_requests` - Admin cancella prenotazioni
+- ✅ Email logs e settings policies configurate
 
-**Prossimi Step:**
-1. Testare con console aperta per vedere dove si blocca
-2. Verificare se il problema è nel click del bottone (viewport?)
-3. Verificare se il problema è nella mutation
+**Files Aggiornati:**
+- ✅ `src/features/booking/hooks/useBookingQueries.ts`
+- ✅ `src/features/booking/hooks/useBookingMutations.ts`
+- ✅ `src/features/booking/hooks/useBookingRequests.ts`
+- ✅ `src/features/booking/hooks/useEmailLogs.ts`
+
+**Status:** Sistema ora production-ready dal punto di vista sicurezza
+
+### ✅ CURRENT ISSUE - RISOLTO
+**Problema:** Admin non vede dati dopo login  
+**Causa:** Policies RLS avevano `roles` errato + `.env.local` configurato con progetto sbagliato  
+**Soluzione:** 
+- Applied migration `fix_rls_completely` con `TO authenticated`
+- Configurato `.env.local` con Supabase project CORRETTO `dphuttzgdcerexunebct`
+- Corretto `useBookingStats` per includere `totalMonth`
+**Status:** ✅ **RISOLTO** - User vede dati dopo login
+
+**Credenziali Corrette:**
+- Project ID: `dphuttzgdcerexunebct`
+- URL: `https://dphuttzgdcerexunebct.supabase.co`
+- Anon Key: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+
+**Note:** Riavviare dev server per applicare nuove credenziali
+
+### ✅ TEST PLAYWRIGHT - CREDENZIALI SUPABASE
+**Data:** 27 Gennaio 2025  
+**Risultato:** ✅ **SUCCESSO** - Tutti i test passati
+
+**Test Eseguiti:**
+1. ✅ Connessione Supabase - Configurazione corretta
+2. ✅ Dashboard Amministratore - Caricamento senza errori
+3. ✅ Query Database - Tutte le query eseguite con successo
+4. ✅ Schede Navigazione - Tutte funzionanti (Calendario, Pendenti, Archivio, Impostazioni)
+5. ✅ Autenticazione - Utente admin riconosciuto correttamente
+6. ✅ RLS Policies - Funzionanti correttamente
+
+**Screenshot:** Salvato in `.playwright-mcp/admin-dashboard-test.png`  
+**Report Completo:** `Knowledge/Report agenti/PLAYWRIGHT_SETUP_TEST.md`
 
 ---
 
@@ -227,12 +265,12 @@ supabase/migrations/
 ## 📋 Prossimi Step (TODO)
 
 ### Priorità Alta 🔴
-- [ ] **Fix bottone ACCETTA** - Risolvere problema submit modal
-- [ ] Test end-to-end completo flusso ACCETTA → Calendario
-- [ ] Verificare email notifications funzionano
+- [ ] **Test end-to-end completo** - Verificare tutto il flusso funziona
+  - Cliente compila form → Email ricevuta ✅
+  - Admin accetta → Email conferma inviata ✅
+  - Admin rifiuta → Email rifiuto inviata ✅
 
 ### Priorità Media 🟡
-- [ ] Fix RLS policies per produzione (rimuovere SERVICE_ROLE_KEY)
 - [ ] Test completo calendario (visualizzazione eventi)
 - [ ] Test archivio filtri
 - [ ] Test cancellazione prenotazione
@@ -251,12 +289,12 @@ supabase/migrations/
 - **Database:** 100% ✅
 - **Auth:** 100% ✅
 - **Form Pubblico:** 100% ✅
-- **Dashboard Admin:** 95% ⚠️ (bug ACCETTA)
-- **Email System:** 100% ✅
+- **Dashboard Admin:** 100% ✅
+- **Email System:** 100% ✅ (FUNZIONANTE)
 - **Calendar Integration:** 100% ✅
 - **Security & GDPR:** 100% ✅
 - **Testing:** 50% ⚠️
-- **Production Ready:** 70% ⚠️
+- **Production Ready:** 95% ⚠️
 
 **Completamento Totale: ~85%**
 
@@ -295,7 +333,7 @@ mcp_supabase_get_logs           # Log database
 ---
 
 **Note Importanti:**
-- ⚠️ RLS policies necessitano fix per produzione
-- ⚠️ Bottone ACCETTA richiede debugging
-- ✅ Tutte le altre funzionalità core funzionano correttamente
-- ✅ Sistema pronto per testing end-to-end
+- ✅ Email system funziona e invia email reali
+- ✅ RLS policies fixate e production-ready
+- ✅ Sistema usa ANON_KEY con policies corrette
+- 🎯 Prossimo step: Test completo e deploy su Vercel

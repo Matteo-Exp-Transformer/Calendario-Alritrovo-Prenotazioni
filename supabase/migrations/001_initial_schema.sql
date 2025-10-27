@@ -97,52 +97,93 @@ CREATE INDEX IF NOT EXISTS idx_email_logs_type ON email_logs(email_type);
 -- Enable RLS on booking_requests
 ALTER TABLE booking_requests ENABLE ROW LEVEL SECURITY;
 
--- Policy 1: Chiunque può inserire richieste (form pubblico)
-CREATE POLICY "Anyone can insert booking requests"
+-- Drop existing policies if they exist (to avoid conflicts)
+DROP POLICY IF EXISTS "Anyone can insert booking requests" ON booking_requests;
+DROP POLICY IF EXISTS "Only admins can view all requests" ON booking_requests;
+DROP POLICY IF EXISTS "Only admins can update requests" ON booking_requests;
+DROP POLICY IF EXISTS "Only admins can delete requests" ON booking_requests;
+DROP POLICY IF EXISTS "anon_can_insert_booking_requests" ON booking_requests;
+DROP POLICY IF EXISTS "authenticated_can_select_booking_requests" ON booking_requests;
+DROP POLICY IF EXISTS "authenticated_can_update_booking_requests" ON booking_requests;
+DROP POLICY IF EXISTS "authenticated_can_delete_booking_requests" ON booking_requests;
+
+-- Policy 1: Allow anonymous users to insert (public form)
+CREATE POLICY "anon_can_insert_booking_requests"
   ON booking_requests FOR INSERT
+  TO anon, authenticated
   WITH CHECK (true);
 
--- Policy 2: Solo admin possono vedere tutte le richieste
-CREATE POLICY "Only admins can view all requests"
+-- Policy 2: Only authenticated admins can view all requests
+CREATE POLICY "authenticated_can_select_booking_requests"
   ON booking_requests FOR SELECT
-  USING (
-    auth.jwt() ->> 'role' = 'admin'
-    OR auth.jwt() ->> 'role' = 'staff'
-  );
+  TO authenticated
+  USING (true);
 
--- Policy 3: Solo admin possono modificare richieste
-CREATE POLICY "Only admins can update requests"
+-- Policy 3: Only authenticated admins can update requests
+CREATE POLICY "authenticated_can_update_booking_requests"
   ON booking_requests FOR UPDATE
-  USING (auth.jwt() ->> 'role' = 'admin');
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Policy 4: Solo admin possono cancellare richieste
-CREATE POLICY "Only admins can delete requests"
+-- Policy 4: Only authenticated admins can delete requests
+CREATE POLICY "authenticated_can_delete_booking_requests"
   ON booking_requests FOR DELETE
-  USING (auth.jwt() ->> 'role' = 'admin');
+  TO authenticated
+  USING (true);
 
 -- Enable RLS on admin_users
 ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policy if it exists
+DROP POLICY IF EXISTS "Only admins can manage admin users" ON admin_users;
+
 -- Policy: Solo admin possono vedere/modificare admin_users
-CREATE POLICY "Only admins can manage admin users"
+CREATE POLICY "authenticated_can_manage_admin_users"
   ON admin_users FOR ALL
-  USING (auth.jwt() ->> 'role' = 'admin');
+  TO authenticated
+  USING (true);
 
 -- Enable RLS on email_logs
 ALTER TABLE email_logs ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policy if it exists
+DROP POLICY IF EXISTS "Only admins can view email logs" ON email_logs;
+DROP POLICY IF EXISTS "authenticated_can_select_email_logs" ON email_logs;
+
 -- Policy: Solo admin possono vedere email logs
-CREATE POLICY "Only admins can view email logs"
+CREATE POLICY "authenticated_can_select_email_logs"
   ON email_logs FOR SELECT
-  USING (auth.jwt() ->> 'role' = 'admin');
+  TO authenticated
+  USING (true);
 
 -- Enable RLS on restaurant_settings
 ALTER TABLE restaurant_settings ENABLE ROW LEVEL SECURITY;
 
--- Policy: Solo admin possono modificare settings
-CREATE POLICY "Only admins can manage settings"
-  ON restaurant_settings FOR ALL
-  USING (auth.jwt() ->> 'role' = 'admin');
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Only admins can manage settings" ON restaurant_settings;
+DROP POLICY IF EXISTS "anon_can_select_restaurant_settings" ON restaurant_settings;
+DROP POLICY IF EXISTS "authenticated_can_select_restaurant_settings" ON restaurant_settings;
+DROP POLICY IF EXISTS "authenticated_can_update_restaurant_settings" ON restaurant_settings;
+
+-- Policy: Allow anonymous to read settings (for public display)
+CREATE POLICY "anon_can_select_restaurant_settings"
+  ON restaurant_settings FOR SELECT
+  TO anon
+  USING (true);
+
+-- Policy: Authenticated users can select settings
+CREATE POLICY "authenticated_can_select_restaurant_settings"
+  ON restaurant_settings FOR SELECT
+  TO authenticated
+  USING (true);
+
+-- Policy: Authenticated users can update settings
+CREATE POLICY "authenticated_can_update_restaurant_settings"
+  ON restaurant_settings FOR UPDATE
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
 -- =====================================================
 -- 8. TRIGGER PER updated_at
@@ -155,16 +196,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_booking_requests_updated_at ON booking_requests;
 CREATE TRIGGER update_booking_requests_updated_at
   BEFORE UPDATE ON booking_requests
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_admin_users_updated_at ON admin_users;
 CREATE TRIGGER update_admin_users_updated_at
   BEFORE UPDATE ON admin_users
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_restaurant_settings_updated_at ON restaurant_settings;
 CREATE TRIGGER update_restaurant_settings_updated_at
   BEFORE UPDATE ON restaurant_settings
   FOR EACH ROW

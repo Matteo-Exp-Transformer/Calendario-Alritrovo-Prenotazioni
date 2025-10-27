@@ -27,11 +27,6 @@ interface EmailLog {
  */
 export const sendEmail = async (options: SendEmailOptions): Promise<{ success: boolean; error?: string }> => {
   try {
-    if (!RESEND_API_KEY) {
-      console.error('[Email] RESEND_API_KEY not configured')
-      return { success: false, error: 'Email service not configured' }
-    }
-
     console.log('🔵 [sendEmail] Attempting to send via Supabase Edge Function...')
     console.log('🔵 [sendEmail] To:', options.to)
     console.log('🔵 [sendEmail] Subject:', options.subject)
@@ -44,6 +39,19 @@ export const sendEmail = async (options: SendEmailOptions): Promise<{ success: b
     const edgeFunctionUrl = `${supabaseUrl}/functions/v1/send-email`
     console.log('🔵 [sendEmail] Calling Edge Function:', edgeFunctionUrl)
 
+    const payload = {
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      bookingId: options.bookingId,
+      emailType: options.emailType || 'manual',
+    }
+
+    console.log('🔵 [sendEmail] Payload being sent:', {
+      to: payload.to,
+      subject: payload.subject,
+    })
+
     // Call Supabase Edge Function for email sending
     const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
@@ -51,13 +59,7 @@ export const sendEmail = async (options: SendEmailOptions): Promise<{ success: b
         'Content-Type': 'application/json',
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
-      body: JSON.stringify({
-        to: options.to,
-        subject: options.subject,
-        html: options.html,
-        bookingId: options.bookingId,
-        emailType: options.emailType || 'manual',
-      }),
+      body: JSON.stringify(payload),
     })
 
     console.log('🔵 [sendEmail] Edge Function response status:', response.status)
@@ -90,8 +92,8 @@ export const sendEmail = async (options: SendEmailOptions): Promise<{ success: b
  */
 export const logEmailToDatabase = async (log: EmailLog): Promise<void> => {
   try {
-    console.log('🔵 [logEmailToDatabase] Using supabasePublic to bypass RLS...')
-    const { supabasePublic } = await import('./supabasePublic')
+    console.log('🔵 [logEmailToDatabase] Using authenticated supabase client...')
+    const { supabase } = await import('./supabase')
 
     const logData = {
       booking_id: log.booking_id || null,
@@ -104,7 +106,7 @@ export const logEmailToDatabase = async (log: EmailLog): Promise<void> => {
 
     console.log('🔵 [logEmailToDatabase] Inserting log:', logData)
 
-    const { data, error } = await supabasePublic.from('email_logs').insert(logData as any).select()
+    const { data, error } = await supabase.from('email_logs').insert(logData as any).select()
 
     if (error) {
       console.error('❌ [logEmailToDatabase] Error:', error)

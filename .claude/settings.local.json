@@ -12,7 +12,10 @@
       "Bash(npx supabase db push)",
       "Bash(cat:*)",
       "Bash(awk:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npx playwright:*)",
+      "Bash(npx tsx:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

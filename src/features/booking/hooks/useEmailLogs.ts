@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabasePublic } from '@/lib/supabasePublic'
+import { supabase } from '@/lib/supabase'
 
 interface EmailLog {
   id: string
@@ -19,7 +19,7 @@ export const useEmailLogs = (limit: number = 50) => {
   return useQuery({
     queryKey: ['email_logs', limit],
     queryFn: async () => {
-      const { data, error } = await supabasePublic
+      const { data, error } = await supabase
         .from('email_logs')
         .select('*')
         .order('sent_at', { ascending: false })

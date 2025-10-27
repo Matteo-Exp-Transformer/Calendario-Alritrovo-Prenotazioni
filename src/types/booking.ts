@@ -107,3 +107,26 @@ export interface PaginatedResponse<T> {
   page: number
   pageSize: number
 }
+
+// Capacity management types
+export type TimeSlot = 'morning' | 'afternoon' | 'evening'
+
+export interface TimeSlotCapacity {
+  slot: TimeSlot
+  capacity: number
+  occupied: number
+  available: number
+}
+
+export interface DailyCapacity {
+  date: string
+  morning: TimeSlotCapacity
+  afternoon: TimeSlotCapacity
+  evening: TimeSlotCapacity
+}
+
+export interface AvailabilityCheck {
+  isAvailable: boolean
+  slotsStatus: TimeSlotCapacity[]
+  errorMessage?: string
+}

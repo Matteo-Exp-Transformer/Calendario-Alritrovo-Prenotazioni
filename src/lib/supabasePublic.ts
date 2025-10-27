@@ -1,31 +1,31 @@
-// Supabase client with service role key for public booking inserts
-// This bypasses RLS completely
+// Supabase client for public booking inserts
+// Uses ANON_KEY with proper RLS policies
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '../types/database'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-// TEMP: Use SERVICE_ROLE_KEY until RLS policies are properly configured
-const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-console.log('🔧 [Supabase Public Client] Service Role Key presente:', !!supabaseServiceKey)
+console.log('🔧 [Supabase Public Client] Using ANON_KEY for public inserts')
 
-// TEMP: Use service role key
-const supabaseKey = supabaseServiceKey
-
-if (!supabaseUrl || !supabaseKey) {
+if (!supabaseUrl || !supabaseAnonKey) {
   console.error('❌ [Supabase Public Client] Credenziali mancanti!')
   throw new Error('Missing Supabase environment variables')
 }
 
-// Create client with SERVICE ROLE KEY to bypass RLS completely
+// Client per operazioni pubbliche (solo INSERT dal form)
 export const supabasePublic = createClient<Database>(
   supabaseUrl, 
-  supabaseKey,
+  supabaseAnonKey,
   {
     auth: {
-      autoRefreshToken: false,
       persistSession: false,
-      detectSessionInUrl: false
+      autoRefreshToken: false
+    },
+    global: {
+      headers: {
+        'X-Client-Info': 'booking-public'
+      }
     },
     db: {
       schema: 'public'
@@ -33,5 +33,5 @@ export const supabasePublic = createClient<Database>(
   }
 )
 
-console.log('✅ [Supabase Public Client] Client creato con SERVICE_ROLE_KEY per bypassare RLS')
+console.log('✅ [Supabase Public Client] Client creato per form pubblico')
 

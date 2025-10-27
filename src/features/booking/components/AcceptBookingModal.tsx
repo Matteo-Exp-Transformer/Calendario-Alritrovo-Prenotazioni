@@ -2,11 +2,13 @@ import React, { useState } from 'react'
 import { Modal } from '@/components/ui'
 import type { BookingRequest } from '@/types/booking'
 import { format } from 'date-fns'
+import { useCapacityCheck } from '../hooks/useCapacityCheck'
 
 interface AcceptBookingModalProps {
   isOpen: boolean
   onClose: () => void
   booking: BookingRequest | null
+  acceptedBookings: BookingRequest[]
   onConfirm: (data: {
     confirmedStart: string
     confirmedEnd: string
@@ -19,6 +21,7 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
   isOpen,
   onClose,
   booking,
+  acceptedBookings,
   onConfirm,
   isLoading = false,
 }) => {
@@ -30,15 +33,25 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  // Check capacity in real-time
+  const capacityCheck = useCapacityCheck({
+    date: formData.date,
+    startTime: formData.startTime,
+    endTime: formData.endTime,
+    numGuests: formData.numGuests,
+    acceptedBookings,
+    excludeBookingId: booking?.id,
+  })
+
   // Initialize form when booking changes
   React.useEffect(() => {
     if (booking) {
       const date = booking.desired_date
       const startTime = booking.desired_time || '20:00'
       
-      // Calculate end time (default +2 hours)
+      // Calculate end time (default +3 hours)
       const [hours, minutes] = startTime.split(':').map(Number)
-      const endHours = (hours + 2) % 24
+      const endHours = (hours + 3) % 24
       const endTime = `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
 
       setFormData({
@@ -104,19 +117,30 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
       console.error('❌ [AcceptModal] Validation failed or no booking')
       return
     }
+
+    // Check capacity before submitting
+    if (!capacityCheck.isAvailable) {
+      console.error('❌ [AcceptModal] Capacity check failed')
+      return
+    }
     
     console.log('✅ [AcceptModal] Validation passed')
 
-      // Ensure time format is HH:mm (not HH:mm:ss)
-      const startTimeFormatted = formData.startTime.includes(':') 
-        ? formData.startTime.split(':').slice(0, 2).join(':') 
-        : formData.startTime
-      const endTimeFormatted = formData.endTime.includes(':')
-        ? formData.endTime.split(':').slice(0, 2).join(':')
-        : formData.endTime
+      // Create ISO strings WITH explicit local timezone offset
+      // This prevents PostgreSQL from converting to UTC incorrectly
+      const [year, month, day] = formData.date.split('-').map(Number)
+      const [startHours, startMinutes] = formData.startTime.split(':').map(Number)
+      const [endHours, endMinutes] = formData.endTime.split(':').map(Number)
       
-      const confirmedStart = `${formData.date}T${startTimeFormatted}:00`
-      const confirmedEnd = `${formData.date}T${endTimeFormatted}:00`
+      // Get timezone offset (e.g., +01:00 for Italy)
+      const tzOffset = new Date().getTimezoneOffset()
+      const tzHours = Math.floor(Math.abs(tzOffset) / 60)
+      const tzMinutes = Math.abs(tzOffset) % 60
+      const tzSign = tzOffset <= 0 ? '+' : '-'
+      const tzString = `${tzSign}${String(tzHours).padStart(2, '0')}:${String(tzMinutes).padStart(2, '0')}`
+      
+      const confirmedStart = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(startHours).padStart(2, '0')}:${String(startMinutes).padStart(2, '0')}:00${tzString}`
+      const confirmedEnd = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}:00${tzString}`
       
     console.log('🔵 [AcceptModal] Submitting with:', { 
       confirmedStart, 
@@ -214,6 +238,26 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
           {errors.numGuests && <p className="text-sm text-red-500">{errors.numGuests}</p>}
         </div>
 
+        {/* Capacity Warning */}
+        {capacityCheck.errorMessage && (
+          <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
+            <div className="flex items-start gap-2">
+              <span className="text-2xl">⚠️</span>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-red-800 mb-1">
+                  Capacità insufficiente
+                </p>
+                <p className="text-sm text-red-700">
+                  {capacityCheck.errorMessage}
+                </p>
+                <p className="text-xs text-red-600 mt-2">
+                  Verifica la disponibilità nel calendario per questa fascia oraria.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-3 pt-4">
           <button
             type="button"
@@ -225,10 +269,10 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
           </button>
           <button
             type="submit"
-            className="flex-1 px-4 py-2 bg-al-ritrovo-primary text-white rounded-md hover:bg-al-ritrovo-primary-dark transition-colors disabled:opacity-50"
-            disabled={isLoading}
+            className="flex-1 px-4 py-2 bg-al-ritrovo-primary text-white rounded-md hover:bg-al-ritrovo-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isLoading || !capacityCheck.isAvailable}
           >
-            {isLoading ? 'Conferma...' : '✅ Conferma Prenotazione'}
+            {isLoading ? 'Conferma...' : capacityCheck.isAvailable ? '✅ Conferma Prenotazione' : '❌ Capacità Insufficiente'}
           </button>
         </div>
       </form>

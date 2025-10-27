@@ -42,7 +42,7 @@ export const SettingsTab: React.FC = () => {
       description: 'Row Level Security per sicurezza database',
       enabled: true,
       icon: <Shield className="h-8 w-8 text-red-500" />,
-      status: '⚠️ Temporaneo (SERVICE_ROLE_KEY)',
+      status: '✅ Configurato correttamente',
       color: 'text-yellow-600',
     },
   ]
@@ -123,11 +123,9 @@ export const SettingsTab: React.FC = () => {
             </span>
           </div>
           <div className="flex items-center justify-between py-2">
-            <span className="text-gray-600">VITE_SUPABASE_SERVICE_ROLE_KEY</span>
-            <span className="font-mono text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-              {!!import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY
-                ? '⚠️ Temporaneo'
-                : '❌ Mancante'}
+            <span className="text-gray-600">VITE_SUPABASE_SERVICE_ROLE_KEY (obsoleto)</span>
+            <span className="font-mono text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+              ✅ Non più necessario
             </span>
           </div>
         </div>

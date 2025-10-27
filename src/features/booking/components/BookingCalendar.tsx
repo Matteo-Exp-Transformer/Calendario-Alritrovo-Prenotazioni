@@ -1,13 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
 import { Calendar, Users } from 'lucide-react'
+import { format } from 'date-fns'
 import type { BookingRequest } from '@/types/booking'
 import { transformBookingsToCalendarEvents } from '../utils/bookingEventTransform'
 import { BookingDetailsModal } from './BookingDetailsModal'
+import { calculateDailyCapacity, getSlotsOccupiedByBooking } from '../utils/capacityCalculator'
 
 interface BookingCalendarProps {
   bookings: BookingRequest[]
@@ -16,6 +18,17 @@ interface BookingCalendarProps {
 export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) => {
   const [selectedBooking, setSelectedBooking] = useState<BookingRequest | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+
+  // Aggiorna il selectedBooking quando i bookings cambiano (dopo modifica)
+  useEffect(() => {
+    if (selectedBooking) {
+      const updatedBooking = bookings.find(b => b.id === selectedBooking.id)
+      if (updatedBooking) {
+        setSelectedBooking(updatedBooking)
+      }
+    }
+  }, [bookings])
 
   const events = transformBookingsToCalendarEvents(bookings)
 
@@ -29,6 +42,46 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
     setSelectedBooking(booking)
     setIsModalOpen(true)
   }
+
+  const handleDateClick = (clickInfo: any) => {
+    const date = clickInfo.dateStr
+    setSelectedDate(date)
+  }
+
+  // Get bookings and capacity for selected date
+  const selectedDateData = useMemo(() => {
+    if (!selectedDate) return null
+
+    const acceptedBookings = bookings.filter(b => b.status === 'accepted')
+    const dayCapacity = calculateDailyCapacity(selectedDate, acceptedBookings)
+    
+    const dayBookings = acceptedBookings.filter((booking) => {
+      if (!booking.confirmed_start) return false
+      const bookingDate = new Date(booking.confirmed_start).toISOString().split('T')[0]
+      return bookingDate === selectedDate
+    })
+
+    // Group bookings by time slot
+    const morningBookings: BookingRequest[] = []
+    const afternoonBookings: BookingRequest[] = []
+    const eveningBookings: BookingRequest[] = []
+
+    for (const booking of dayBookings) {
+      if (!booking.confirmed_start || !booking.confirmed_end) continue
+      const slots = getSlotsOccupiedByBooking(booking.confirmed_start, booking.confirmed_end)
+      if (slots.includes('morning')) morningBookings.push(booking)
+      if (slots.includes('afternoon')) afternoonBookings.push(booking)
+      if (slots.includes('evening')) eveningBookings.push(booking)
+    }
+
+    return {
+      date: selectedDate,
+      capacity: dayCapacity,
+      morningBookings,
+      afternoonBookings,
+      eveningBookings,
+    }
+  }, [selectedDate, bookings])
 
   const config = {
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
@@ -49,12 +102,34 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
       endTime: '22:00',
     },
     eventClick: handleEventClick,
+    dateClick: handleDateClick,
     eventDisplay: 'block',
     eventTextColor: '#fff',
     eventCursor: 'pointer',
     eventTimeFormat: {
       hour: '2-digit' as const,
       minute: '2-digit' as const,
+    },
+    // Highlight today
+    dayCellDidMount: (arg: any) => {
+      const today = new Date()
+      const cellDate = arg.date
+      if (cellDate.toDateString() === today.toDateString()) {
+        arg.el.style.backgroundColor = '#fef3c7'
+        arg.el.style.border = '2px solid #f59e0b'
+        arg.el.style.borderRadius = '8px'
+        arg.el.style.fontWeight = 'bold'
+      }
+      // Highlight selected date
+      if (selectedDate) {
+        const cellDateStr = cellDate.toISOString().split('T')[0]
+        if (cellDateStr === selectedDate) {
+          arg.el.style.backgroundColor = '#dbeafe'
+          arg.el.style.border = '2px solid #3b82f6'
+          arg.el.style.borderRadius = '8px'
+          arg.el.style.boxShadow = '0 2px 4px rgba(59, 130, 246, 0.3)'
+        }
+      }
     },
     // Custom event rendering per card eventi migliorate
     eventContent: (arg: any) => {
@@ -97,6 +172,83 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
 
           <FullCalendar {...config} events={events} />
         </div>
+
+        {/* Sezione Disponibilità */}
+        {selectedDateData && (
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-warm-beige">
+            <h3 className="text-lg font-serif font-semibold text-warm-wood mb-4">
+              Disponibilità - {format(new Date(selectedDateData.date), 'dd MMMM yyyy')}
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Mattina */}
+              <div className="border-2 border-green-200 rounded-xl p-4 bg-green-50">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-bold text-green-700">🌅 Mattina (10:00 - 14:30)</h4>
+                  <span className="px-3 py-1 bg-green-100 text-green-700 font-bold rounded-lg text-sm">
+                    {selectedDateData.capacity.morning.available}/{selectedDateData.capacity.morning.capacity}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {selectedDateData.morningBookings.length > 0 ? (
+                    selectedDateData.morningBookings.map((booking) => (
+                      <div key={booking.id} className="bg-white p-2 rounded border border-green-200">
+                        <p className="font-semibold text-sm">{booking.client_name}</p>
+                        <p className="text-xs text-gray-600">{booking.num_guests} ospiti</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500 italic">Nessuna prenotazione</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Pomeriggio */}
+              <div className="border-2 border-blue-200 rounded-xl p-4 bg-blue-50">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-bold text-blue-700">☀️ Pomeriggio (14:31 - 18:30)</h4>
+                  <span className="px-3 py-1 bg-blue-100 text-blue-700 font-bold rounded-lg text-sm">
+                    {selectedDateData.capacity.afternoon.available}/{selectedDateData.capacity.afternoon.capacity}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {selectedDateData.afternoonBookings.length > 0 ? (
+                    selectedDateData.afternoonBookings.map((booking) => (
+                      <div key={booking.id} className="bg-white p-2 rounded border border-blue-200">
+                        <p className="font-semibold text-sm">{booking.client_name}</p>
+                        <p className="text-xs text-gray-600">{booking.num_guests} ospiti</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500 italic">Nessuna prenotazione</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Sera */}
+              <div className="border-2 border-purple-200 rounded-xl p-4 bg-purple-50">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-bold text-purple-700">🌙 Sera (18:31 - 23:30)</h4>
+                  <span className="px-3 py-1 bg-purple-100 text-purple-700 font-bold rounded-lg text-sm">
+                    {selectedDateData.capacity.evening.available}/{selectedDateData.capacity.evening.capacity}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {selectedDateData.eveningBookings.length > 0 ? (
+                    selectedDateData.eveningBookings.map((booking) => (
+                      <div key={booking.id} className="bg-white p-2 rounded border border-purple-200">
+                        <p className="font-semibold text-sm">{booking.client_name}</p>
+                        <p className="text-xs text-gray-600">{booking.num_guests} ospiti</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500 italic">Nessuna prenotazione</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Legenda con Nuova Palette */}
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-warm-beige">

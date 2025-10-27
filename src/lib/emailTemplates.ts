@@ -5,10 +5,11 @@ import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
-  cena: 'Cena',
-  aperitivo: 'Aperitivo',
-  evento: 'Evento Privato',
-  laurea: 'Laurea',
+  drink_caraffe: 'Drink/Caraffe',
+  drink_rinfresco_leggero: 'Drink/Caraffe + rinfresco leggero',
+  drink_rinfresco_completo: 'Drink/Caraffe + rinfresco completo',
+  drink_rinfresco_completo_primo: 'Drink/Caraffe + rinfresco completo + primo piatto',
+  menu_pranzo_cena: 'Menu Pranzo / Menù Cena',
 }
 
 const formatDateTime = (dateStr: string) => {

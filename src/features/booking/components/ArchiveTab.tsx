@@ -234,6 +234,7 @@ export const ArchiveTab: React.FC = () => {
           {(['all', 'accepted', 'rejected'] as ArchiveFilter[]).map((f) => (
             <button
               key={f}
+              data-filter={f}
               onClick={() => setFilter(f)}
               className={`px-6 py-3 rounded-xl text-sm font-bold transition-all ${
                 filter === f
