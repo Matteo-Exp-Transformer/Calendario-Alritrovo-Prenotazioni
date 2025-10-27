@@ -353,7 +353,8 @@ npm run build
 - `PRD.md` - Product Requirements Document completo
 - `PLANNING_TASKS.md` - Task breakdown dettagliato (21.5h)
 - `SETUP_REPORT.md` - Report tecnico setup Fase 1-2
-- `PHASE_1-2_COMPLETED.md` - Report completamento Fase 1-2
+- `Knowledge/Report agenti/PHASE_1-2_COMPLETED.md` - Report completamento Fase 1-2
+- `Knowledge/Report agenti/PHASE_3-4_COMPLETED.md` - Report completamento Fase 3-4 ✅
 - `supabase/SETUP_DATABASE.md` - Istruzioni database setup
 
 ---
