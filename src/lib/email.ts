@@ -65,8 +65,8 @@ export const sendEmail = async (options: SendEmailOptions): Promise<{ success: b
  */
 export const logEmailToDatabase = async (log: EmailLog): Promise<void> => {
   try {
-    console.log('🔵 [logEmailToDatabase] Importing supabase...')
-    const { supabase } = await import('./supabase')
+    console.log('🔵 [logEmailToDatabase] Using supabasePublic to bypass RLS...')
+    const { supabasePublic } = await import('./supabasePublic')
 
     const logData = {
       booking_id: log.booking_id || null,
@@ -79,7 +79,7 @@ export const logEmailToDatabase = async (log: EmailLog): Promise<void> => {
 
     console.log('🔵 [logEmailToDatabase] Inserting log:', logData)
 
-    const { data, error } = await supabase.from('email_logs').insert(logData as any).select()
+    const { data, error } = await supabasePublic.from('email_logs').insert(logData as any).select()
 
     if (error) {
       console.error('❌ [logEmailToDatabase] Error:', error)
