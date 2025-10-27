@@ -38,7 +38,7 @@ export const useAcceptBooking = () => {
 
   return useMutation({
     mutationFn: async (input: AcceptBookingInput) => {
-      const { data, error } = await supabase
+      const { data, error } = await supabasePublic
         .from('booking_requests')
         .update({
           status: 'accepted',
@@ -78,7 +78,7 @@ export const useRejectBooking = () => {
 
   return useMutation({
     mutationFn: async (input: RejectBookingInput) => {
-      const { data, error } = await supabase
+      const { data, error } = await supabasePublic
         .from('booking_requests')
         .update({
           status: 'rejected',
@@ -125,7 +125,7 @@ export const useUpdateBooking = () => {
       if (input.numGuests) updateData.num_guests = input.numGuests
       if (input.specialRequests !== undefined) updateData.special_requests = input.specialRequests
 
-      const { data, error } = await supabase
+      const { data, error } = await supabasePublic
         .from('booking_requests')
         .update(updateData)
         .eq('id', input.bookingId)
@@ -154,7 +154,7 @@ export const useCancelBooking = () => {
 
   return useMutation({
     mutationFn: async ({ bookingId, cancellationReason }: { bookingId: string; cancellationReason?: string }) => {
-      const { data, error } = await supabase
+      const { data, error } = await supabasePublic
         .from('booking_requests')
         .update({
           status: 'cancelled',

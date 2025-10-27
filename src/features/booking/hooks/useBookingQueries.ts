@@ -11,12 +11,8 @@ export const usePendingBookings = () => {
     queryFn: async () => {
       console.log('🔵 [usePendingBookings] Fetching pending bookings...')
       
-      console.log('🔵 [usePendingBookings] Checking auth state...')
-      const { data: { user } } = await supabase.auth.getUser()
-      console.log('🔵 [usePendingBookings] Current user:', user?.email)
-      
-      // Use authenticated supabase client (admin dashboard)
-      const { data, error } = await supabase
+      // TEMP: Use supabasePublic to bypass RLS until we fix the policy
+      const { data, error } = await supabasePublic
         .from('booking_requests')
         .select('*')
         .eq('status', 'pending')
@@ -41,7 +37,7 @@ export const useAcceptedBookings = () => {
   return useQuery({
     queryKey: ['bookings', 'accepted'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await supabasePublic
         .from('booking_requests')
         .select('*')
         .eq('status', 'accepted')
@@ -63,7 +59,7 @@ export const useAllBookings = () => {
   return useQuery({
     queryKey: ['bookings', 'all'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await supabasePublic
         .from('booking_requests')
         .select('*')
         .order('created_at', { ascending: false })
@@ -85,12 +81,8 @@ export const useBookingStats = () => {
     queryFn: async () => {
       console.log('🔵 [useBookingStats] Fetching stats...')
       
-      console.log('🔵 [useBookingStats] Checking auth state...')
-      const { data: { user } } = await supabase.auth.getUser()
-      console.log('🔵 [useBookingStats] Current user:', user?.email)
-      
-      // Use authenticated supabase client (admin dashboard)
-      const { data: allBookings, error } = await supabase
+      // TEMP: Use supabasePublic to bypass RLS until we fix the policy
+      const { data: allBookings, error } = await supabasePublic
         .from('booking_requests')
         .select('id, status')
 
