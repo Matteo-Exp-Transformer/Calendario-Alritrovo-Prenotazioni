@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import { usePendingBookings } from '../hooks/useBookingQueries'
 import { useAcceptBooking, useRejectBooking } from '../hooks/useBookingMutations'
 import { BookingRequestCard } from './BookingRequestCard'
-import { AcceptBookingModal } from './AcceptBookingModal'
 import { RejectBookingModal } from './RejectBookingModal'
+import { toast } from 'react-toastify'
 import type { BookingRequest } from '@/types/booking'
 
 export const PendingRequestsTab: React.FC = () => {
@@ -11,42 +11,51 @@ export const PendingRequestsTab: React.FC = () => {
   const acceptMutation = useAcceptBooking()
   const rejectMutation = useRejectBooking()
 
-  const [acceptingBooking, setAcceptingBooking] = useState<BookingRequest | null>(null)
   const [rejectingBooking, setRejectingBooking] = useState<BookingRequest | null>(null)
 
   const handleAccept = (booking: BookingRequest) => {
     console.log('🔵 [PendingRequestsTab] handleAccept called with:', booking)
-    setAcceptingBooking(booking)
-    console.log('🔵 [PendingRequestsTab] Setting acceptingBooking to:', booking.id)
+    
+    // Calcola i dati per l'accettazione usando la stessa logica del modale
+    const date = booking.desired_date
+    const startTime = booking.desired_time || '20:00'
+    
+    // Calculate end time (default +2 hours)
+    const [hours, minutes] = startTime.split(':').map(Number)
+    const endHours = (hours + 2) % 24
+    const endTime = `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+    
+    // Ensure time format is HH:mm (not HH:mm:ss)
+    const startTimeFormatted = startTime.includes(':') 
+      ? startTime.split(':').slice(0, 2).join(':') 
+      : startTime
+    const endTimeFormatted = endTime.includes(':')
+      ? endTime.split(':').slice(0, 2).join(':')
+      : endTime
+    
+    const confirmedStart = `${date}T${startTimeFormatted}:00`
+    const confirmedEnd = `${date}T${endTimeFormatted}:00`
+    
+    console.log('🔵 [PendingRequestsTab] Submitting with:', {
+      confirmedStart,
+      confirmedEnd,
+      numGuests: booking.num_guests,
+    })
+    
+    console.log('🔵 [PendingRequestsTab] Calling acceptMutation.mutate...')
+    acceptMutation.mutate({
+      bookingId: booking.id,
+      confirmedStart,
+      confirmedEnd,
+      numGuests: booking.num_guests,
+    })
+    
+    console.log('✅ [PendingRequestsTab] Mutation called')
+    toast.success('Prenotazione accettata con successo!')
   }
 
   const handleReject = (booking: BookingRequest) => {
     setRejectingBooking(booking)
-  }
-
-  const handleConfirmAccept = (data: {
-    confirmedStart: string
-    confirmedEnd: string
-    numGuests: number
-  }) => {
-    console.log('🔵 [PendingRequestsTab] handleConfirmAccept called with:', data)
-    console.log('🔵 [PendingRequestsTab] acceptingBooking:', acceptingBooking)
-    
-    if (!acceptingBooking) {
-      console.error('❌ [PendingRequestsTab] No acceptingBooking set!')
-      return
-    }
-
-    console.log('🔵 [PendingRequestsTab] Calling acceptMutation.mutate...')
-    acceptMutation.mutate({
-      bookingId: acceptingBooking.id,
-      confirmedStart: data.confirmedStart,
-      confirmedEnd: data.confirmedEnd,
-      numGuests: data.numGuests,
-    })
-    
-    console.log('✅ [PendingRequestsTab] Mutation called, resetting acceptingBooking')
-    setAcceptingBooking(null)
   }
 
   const handleConfirmReject = (reason: string) => {
@@ -101,7 +110,7 @@ export const PendingRequestsTab: React.FC = () => {
           📋 Richieste in Attesa ({pendingBookings.length})
         </h3>
         <p className="text-sm text-gray-500">
-          Clicca su ACCETTA o RIFIUTA per gestire le prenotazioni
+          Clicca su ACCETTA per confermare immediatamente o RIFIUTA per rifiutare la prenotazione
         </p>
       </div>
 
@@ -116,15 +125,7 @@ export const PendingRequestsTab: React.FC = () => {
         ))}
       </div>
 
-      {/* Modals */}
-      <AcceptBookingModal
-        isOpen={!!acceptingBooking}
-        onClose={() => setAcceptingBooking(null)}
-        booking={acceptingBooking}
-        onConfirm={handleConfirmAccept}
-        isLoading={acceptMutation.isPending}
-      />
-
+      {/* Modal for reject */}
       <RejectBookingModal
         isOpen={!!rejectingBooking}
         onClose={() => setRejectingBooking(null)}

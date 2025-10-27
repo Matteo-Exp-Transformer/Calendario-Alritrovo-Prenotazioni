@@ -4,8 +4,9 @@ import { useBookingStats } from '@/features/booking/hooks/useBookingQueries'
 import { PendingRequestsTab } from '@/features/booking/components/PendingRequestsTab'
 import { ArchiveTab } from '@/features/booking/components/ArchiveTab'
 import { BookingCalendarTab } from '@/features/booking/components/BookingCalendarTab'
+import { SettingsTab } from '@/features/booking/components/SettingsTab'
 
-type Tab = 'calendar' | 'pending' | 'archive'
+type Tab = 'calendar' | 'pending' | 'archive' | 'settings'
 
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('calendar')
@@ -78,25 +79,36 @@ export const AdminDashboard: React.FC = () => {
                   </span>
                 )}
               </button>
-              <button
-                onClick={() => setActiveTab('archive')}
-                className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'archive'
-                    ? 'border-al-ritrovo-primary text-al-ritrovo-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                📚 Archivio
-              </button>
-            </nav>
-          </div>
+                      <button
+                        onClick={() => setActiveTab('archive')}
+                        className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
+                          activeTab === 'archive'
+                            ? 'border-al-ritrovo-primary text-al-ritrovo-primary'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        📚 Archivio
+                      </button>
+                      <button
+                        onClick={() => setActiveTab('settings')}
+                        className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
+                          activeTab === 'settings'
+                            ? 'border-al-ritrovo-primary text-al-ritrovo-primary'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        ⚙️ Impostazioni
+                      </button>
+                    </nav>
+                  </div>
 
-          {/* Tab Content */}
-          <div className="p-6">
-            {activeTab === 'calendar' && <BookingCalendarTab />}
-            {activeTab === 'pending' && <PendingRequestsTab />}
-            {activeTab === 'archive' && <ArchiveTab />}
-          </div>
+                  {/* Tab Content */}
+                  <div className="p-6">
+                    {activeTab === 'calendar' && <BookingCalendarTab />}
+                    {activeTab === 'pending' && <PendingRequestsTab />}
+                    {activeTab === 'archive' && <ArchiveTab />}
+                    {activeTab === 'settings' && <SettingsTab />}
+                  </div>
         </div>
       </div>
     </div>
