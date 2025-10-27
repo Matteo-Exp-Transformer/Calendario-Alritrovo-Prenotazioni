@@ -39,23 +39,18 @@ export const useAcceptedBookings = () => {
     queryFn: async () => {
       console.log('🔵 [useAcceptedBookings] Fetching accepted bookings...')
       
-      // Use current timestamp - includes all bookings that end today or in the future
-      const now = new Date().toISOString()
-      
-      console.log('🔵 [useAcceptedBookings] Current timestamp:', now)
-      
+      // Show ALL accepted bookings (past, present, and future)
+      // For a restaurant calendar, we want to show historical data too
       const { data, error } = await supabasePublic
         .from('booking_requests')
         .select('*')
         .eq('status', 'accepted')
-        .gte('confirmed_end', now) // Booking must end >= now (includes today)
         .order('confirmed_start', { ascending: true })
 
       console.log('🔵 [useAcceptedBookings] Query result:', { 
         data, 
         error, 
-        count: data?.length,
-        today: now 
+        count: data?.length
       })
 
       if (error) {
