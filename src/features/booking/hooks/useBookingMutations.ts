@@ -3,6 +3,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase, handleSupabaseError } from '@/lib/supabase'
 import type { BookingRequest } from '@/types/booking'
 import { toast } from 'react-toastify'
+import {
+  sendBookingAcceptedEmail,
+  sendBookingRejectedEmail,
+  sendBookingCancelledEmail,
+  areEmailNotificationsEnabled,
+} from './useEmailNotifications'
 
 interface AcceptBookingInput {
   bookingId: string
@@ -50,9 +56,14 @@ export const useAcceptBooking = () => {
 
       return data as BookingRequest
     },
-    onSuccess: () => {
+    onSuccess: async (booking: BookingRequest) => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] })
       toast.success('Prenotazione accettata con successo!')
+
+      // Send email notification
+      if (areEmailNotificationsEnabled()) {
+        await sendBookingAcceptedEmail(booking)
+      }
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Errore nell\'accettazione della prenotazione')
@@ -83,9 +94,14 @@ export const useRejectBooking = () => {
 
       return data as BookingRequest
     },
-    onSuccess: () => {
+    onSuccess: async (booking: BookingRequest) => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] })
       toast.success('Prenotazione rifiutata')
+
+      // Send email notification
+      if (areEmailNotificationsEnabled()) {
+        await sendBookingRejectedEmail(booking)
+      }
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Errore nel rifiuto della prenotazione')
@@ -155,9 +171,14 @@ export const useCancelBooking = () => {
 
       return data as BookingRequest
     },
-    onSuccess: () => {
+    onSuccess: async (booking: BookingRequest) => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] })
       toast.success('Prenotazione cancellata con successo!')
+
+      // Send email notification
+      if (areEmailNotificationsEnabled()) {
+        await sendBookingCancelledEmail(booking)
+      }
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Errore nella cancellazione della prenotazione')
