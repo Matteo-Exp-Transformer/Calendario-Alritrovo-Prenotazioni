@@ -8,6 +8,9 @@ import { toast } from 'react-toastify'
 export const useCreateBookingRequest = () => {
   return useMutation({
     mutationFn: async (data: BookingRequestInput) => {
+      console.log('🔵 [useCreateBookingRequest] Starting mutation...')
+      console.log('🔵 [useCreateBookingRequest] Input data:', data)
+      
       const insertData = {
         client_name: data.client_name,
         client_email: data.client_email,
@@ -20,6 +23,9 @@ export const useCreateBookingRequest = () => {
         status: 'pending' as const
       }
 
+      console.log('🔵 [useCreateBookingRequest] Insert data:', insertData)
+      console.log('🔵 [useCreateBookingRequest] Calling Supabase insert...')
+
       // @ts-ignore - Supabase types are not fully generated
       const { data: result, error } = await supabase
         .from('booking_requests')
@@ -27,10 +33,20 @@ export const useCreateBookingRequest = () => {
         .select()
         .single()
 
+      console.log('🔵 [useCreateBookingRequest] Supabase response:', { result, error })
+
       if (error) {
+        console.error('❌ [useCreateBookingRequest] Error:', error)
+        console.error('❌ [useCreateBookingRequest] Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        })
         throw new Error(handleSupabaseError(error))
       }
 
+      console.log('✅ [useCreateBookingRequest] Success! Result:', result)
       return result as BookingRequest
     },
     onSuccess: () => {

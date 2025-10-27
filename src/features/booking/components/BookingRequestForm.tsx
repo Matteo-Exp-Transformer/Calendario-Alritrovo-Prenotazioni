@@ -101,6 +101,10 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    console.log('🔵 [BookingForm] Submit click')
+    console.log('🔵 [BookingForm] Form data:', formData)
+    console.log('🔵 [BookingForm] Privacy accepted:', privacyAccepted)
+
     if (!validate()) {
       if (!privacyAccepted) {
         toast.error('È necessario accettare la Privacy Policy per inviare la richiesta')
@@ -108,8 +112,10 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       return
     }
 
+    console.log('✅ [BookingForm] Validation passed, calling mutate...')
     mutate(formData, {
       onSuccess: () => {
+        console.log('✅ [BookingForm] Mutation successful!')
         // Reset form
         setFormData({
           client_name: '',
@@ -123,6 +129,9 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         })
         setPrivacyAccepted(false)
         onSubmit?.()
+      },
+      onError: (error) => {
+        console.error('❌ [BookingForm] Mutation error:', error)
       }
     })
   }
