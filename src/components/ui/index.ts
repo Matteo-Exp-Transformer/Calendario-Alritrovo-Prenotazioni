@@ -7,6 +7,17 @@ export { Button } from './Button'
 // export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './Card' // TODO: Create Card component
 export { Input } from './Input'
 export { Label } from './Label'
-export { Select } from './Select'
-export { SelectOption } from './Select'
+export { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectGroup,
+  SelectLabel,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
+  SelectOption 
+} from './Select'
 export { Textarea } from './Textarea'
