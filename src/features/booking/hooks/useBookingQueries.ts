@@ -39,17 +39,16 @@ export const useAcceptedBookings = () => {
     queryFn: async () => {
       console.log('🔵 [useAcceptedBookings] Fetching accepted bookings...')
       
-      // Get today's date at 00:00:00 to include all bookings for today
-      // IMPORTANT: No need to set hours, just use current timestamp
+      // Use current timestamp - includes all bookings that end today or in the future
       const now = new Date().toISOString()
       
-      console.log('🔵 [useAcceptedBookings] Current date:', now)
+      console.log('🔵 [useAcceptedBookings] Current timestamp:', now)
       
       const { data, error } = await supabasePublic
         .from('booking_requests')
         .select('*')
         .eq('status', 'accepted')
-        .gte('confirmed_end', now) // Include today and future
+        .gte('confirmed_end', now) // Booking must end >= now (includes today)
         .order('confirmed_start', { ascending: true })
 
       console.log('🔵 [useAcceptedBookings] Query result:', { 
