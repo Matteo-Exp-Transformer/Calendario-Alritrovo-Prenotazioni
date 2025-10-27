@@ -39,7 +39,7 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
       // Calculate end time (default +2 hours)
       const [hours, minutes] = startTime.split(':').map(Number)
       const endHours = (hours + 2) % 24
-      const endTime = `${endHours.toString().padStart(2, '0')}:${minutes}`
+      const endTime = `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
 
       setFormData({
         date: date,
