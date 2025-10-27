@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Modal } from '@/components/ui'
 import { useUpdateBooking, useCancelBooking } from '../hooks/useBookingMutations'
 import type { BookingRequest } from '@/types/booking'
@@ -23,8 +23,6 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   onClose,
   booking,
 }) => {
-  console.log('🔵 BookingDetailsModal render', { isOpen, bookingId: booking.id })
-  
   const [isEditMode, setIsEditMode] = useState(false)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
 
@@ -32,7 +30,6 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   const cancelMutation = useCancelBooking()
 
   const [formData, setFormData] = useState(() => {
-    console.log('🔵 Initializing formData for booking:', booking.id)
     return {
       date: booking.confirmed_start ? format(new Date(booking.confirmed_start), 'yyyy-MM-dd') : '',
       startTime: booking.confirmed_start ? format(new Date(booking.confirmed_start), 'HH:mm') : '',
@@ -41,6 +38,17 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       specialRequests: booking.special_requests || '',
     }
   })
+
+  // Aggiorna formData quando cambia il booking
+  useEffect(() => {
+    setFormData({
+      date: booking.confirmed_start ? format(new Date(booking.confirmed_start), 'yyyy-MM-dd') : '',
+      startTime: booking.confirmed_start ? format(new Date(booking.confirmed_start), 'HH:mm') : '',
+      endTime: booking.confirmed_end ? format(new Date(booking.confirmed_end), 'HH:mm') : '',
+      numGuests: booking.num_guests,
+      specialRequests: booking.special_requests || '',
+    })
+  }, [booking.id, booking.confirmed_start, booking.confirmed_end, booking.num_guests, booking.special_requests])
 
   const handleSave = () => {
     if (!booking.confirmed_start) return

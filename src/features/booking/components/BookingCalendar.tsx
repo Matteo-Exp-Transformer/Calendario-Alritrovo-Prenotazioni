@@ -20,12 +20,6 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
   const events = transformBookingsToCalendarEvents(bookings)
 
   const handleEventClick = (clickInfo: any) => {
-    console.log('🔵 handleEventClick called', {
-      selectedBooking: selectedBooking?.id,
-      isModalOpen,
-      newBookingId: clickInfo.event.extendedProps?.id
-    })
-    
     const booking = clickInfo.event.extendedProps as BookingRequest
     
     if (!booking) {
@@ -33,7 +27,6 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
       return
     }
     
-    console.log('🔵 Setting booking and opening modal')
     setSelectedBooking(booking)
     setIsModalOpen(true)
   }
@@ -110,7 +103,6 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
         <BookingDetailsModal
           isOpen={isModalOpen}
           onClose={() => {
-            console.log('🔵 Closing modal')
             setIsModalOpen(false)
             setSelectedBooking(null)
           }}

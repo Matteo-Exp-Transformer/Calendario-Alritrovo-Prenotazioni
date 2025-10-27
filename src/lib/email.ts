@@ -10,6 +10,7 @@ interface SendEmailOptions {
   subject: string
   html: string
   bookingId?: string
+  emailType?: string
 }
 
 interface EmailLog {
@@ -31,17 +32,39 @@ export const sendEmail = async (options: SendEmailOptions): Promise<{ success: b
       return { success: false, error: 'Email service not configured' }
     }
 
-    console.log('🔵 [sendEmail] Attempting to send via Resend API...')
+    console.log('🔵 [sendEmail] Attempting to send via Supabase Edge Function...')
     console.log('🔵 [sendEmail] To:', options.to)
     console.log('🔵 [sendEmail] Subject:', options.subject)
 
-    // Try to send via Supabase Edge Function if available
-    // For now, we'll log but not send due to CORS restrictions
-    console.warn('⚠️ [sendEmail] Direct API calls from browser blocked by CORS')
-    console.warn('⚠️ [sendEmail] Need to implement Supabase Edge Function for email sending')
-    
-    // Return success for now to allow logging
-    // TODO: Implement Edge Function for actual email sending
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+    if (!supabaseUrl) {
+      throw new Error('VITE_SUPABASE_URL not configured')
+    }
+
+    // Call Supabase Edge Function for email sending
+    const response = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({
+        to: options.to,
+        subject: options.subject,
+        html: options.html,
+        bookingId: options.bookingId,
+        emailType: options.emailType || 'manual',
+      }),
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      console.error('[Email] Edge Function error:', data)
+      return { success: false, error: data.error || 'Failed to send email' }
+    }
+
+    console.log('[Email] Email sent successfully via Edge Function')
     return { success: true }
   } catch (error) {
     console.error('[Email] Exception:', error)
@@ -99,8 +122,16 @@ export const sendAndLogEmail = async (
     status: 'pending',
   }
 
-  console.log('🔵 [sendAndLogEmail] Calling sendEmail...')
-  const result = await sendEmail(options)
+  console.log('🔵 [sendAndLogEmail] Calling sendEmail (Edge Function)...')
+  const emailOptions = {
+    to: options.to,
+    subject: options.subject,
+    html: options.html,
+    bookingId: options.bookingId,
+  }
+  
+  // Set emailType for Edge Function
+  const result = await sendEmail({ ...emailOptions, emailType })
   console.log('🔵 [sendAndLogEmail] Send result:', result)
 
   if (result.success) {
