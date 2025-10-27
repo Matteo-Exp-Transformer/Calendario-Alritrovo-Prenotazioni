@@ -167,7 +167,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           <SelectTrigger>
             <SelectValue placeholder="Seleziona tipo evento" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="item-aligned">
             {EVENT_TYPES.map((type) => (
               <SelectItem key={type.value} value={type.value}>
                 {type.label}
