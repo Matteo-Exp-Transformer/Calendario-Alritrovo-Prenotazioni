@@ -70,9 +70,23 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
       newErrors.numGuests = 'Numero ospiti minimo 1'
     }
 
-    // Check if end time is before start time
-    if (formData.startTime && formData.endTime && formData.startTime >= formData.endTime) {
-      newErrors.endTime = 'Orario fine deve essere dopo orario inizio'
+    // Check if end time is before start time (convert to Date for proper comparison)
+    if (formData.startTime && formData.endTime) {
+      const startHour = parseInt(formData.startTime.split(':')[0])
+      const endHour = parseInt(formData.endTime.split(':')[0])
+      const startMin = parseInt(formData.startTime.split(':')[1])
+      const endMin = parseInt(formData.endTime.split(':')[1])
+      
+      const startMinutes = startHour * 60 + startMin
+      const endMinutes = endHour * 60 + endMin
+      
+      // Check if end time is before start time (handling midnight crossover)
+      // If start is late (22:00+) and end is early (00:00-06:00), it's valid
+      const isCrossMidnight = startHour >= 22 && endHour <= 6
+      
+      if (!isCrossMidnight && endMinutes <= startMinutes) {
+        newErrors.endTime = 'Orario fine deve essere dopo orario inizio'
+      }
     }
 
     setErrors(newErrors)
