@@ -173,10 +173,16 @@ export const CategoryEventsModal: React.FC<CategoryEventsModalProps> = ({
   const shouldShowOverdue = overdueItems.length > 0
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div 
+      className="fixed inset-0 overflow-hidden"
+      style={{ zIndex: 9999 }}
+    >
       <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
 
-      <div className="absolute right-0 top-0 bottom-0 w-full max-w-3xl bg-white shadow-2xl overflow-hidden flex flex-col">
+      <div 
+        className="absolute right-0 top-0 bottom-0 w-full max-w-3xl bg-white shadow-2xl overflow-hidden flex flex-col"
+        style={{ zIndex: 9999 }}
+      >
         <div className={`${config.bgColor} border-b ${config.borderColor} p-6`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">

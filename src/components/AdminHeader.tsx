@@ -1,41 +1,46 @@
 import React from 'react'
 import { useAdminAuth } from '@/features/booking/hooks/useAdminAuth'
 import { Button } from './ui'
+import { LogOut, User, Shield } from 'lucide-react'
 
 export const AdminHeader: React.FC = () => {
   const { user, logout } = useAdminAuth()
 
   return (
-    <header className="bg-white text-gray-800 border-b border-gray-200 p-4 shadow-sm">
-      <div className="container mx-auto flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-extrabold text-al-ritrovo-primary">Al Ritrovo</h1>
-          <p className="text-sm text-gray-500">Dashboard Admin</p>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="text-sm font-semibold">
-              {user?.name || user?.email}
-            </p>
-            {user?.name && (
-              <p className="text-xs text-gray-500">{user.email}</p>
-            )}
-            <p className="text-xs text-gray-500">
-              {user?.role === 'admin' ? 'Amministratore' : 'Staff'}
-            </p>
+    <div className="flex items-center gap-4">
+      {/* User Info Card */}
+      <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+        <div className="flex items-center gap-3">
+          {/* Avatar Icon */}
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-400 flex items-center justify-center shadow-lg">
+            <User className="w-6 h-6 text-indigo-900" />
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={logout}
-            className="text-gray-600 hover:bg-gray-100 border-gray-300"
-          >
-            Logout
-          </Button>
+          {/* User Details */}
+          <div className="text-right">
+            <p className="text-sm font-bold text-white">
+              {user?.name || user?.email}
+            </p>
+            <div className="flex items-center gap-1.5 justify-end">
+              <Shield className="w-3 h-3 text-yellow-300" />
+              <p className="text-xs text-yellow-200 font-medium">
+                {user?.role === 'admin' ? 'Amministratore' : 'Staff'}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    </header>
+
+      {/* Logout Button */}
+      <Button
+        variant="outline"
+        size="md"
+        onClick={logout}
+        className="bg-white/10 border-2 border-white/30 text-white hover:bg-red-500 hover:border-red-400 hover:scale-105 transition-all"
+      >
+        <LogOut className="w-4 h-4 mr-2" />
+        Logout
+      </Button>
+    </div>
   )
 }

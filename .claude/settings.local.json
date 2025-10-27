@@ -9,7 +9,10 @@
       "Bash(npx tailwindcss init -p)",
       "Bash(npm run build:*)",
       "Bash(timeout 15 npm run dev:*)",
-      "Bash(npx supabase db push)"
+      "Bash(npx supabase db push)",
+      "Bash(cat:*)",
+      "Bash(awk:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

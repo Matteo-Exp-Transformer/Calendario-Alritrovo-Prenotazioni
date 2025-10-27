@@ -1,3 +1,6 @@
+/* Import Google Fonts: Moderni e Professionali - DEVE STARE IN CIMA */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:wght@300;400;700;900&family=Poppins:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -52,6 +55,19 @@ body {
   }
 }
 
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+    transform: translateY(0);
+  }
+}
+
 /* Utility Classes */
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
@@ -63,6 +79,10 @@ body {
 
 .animate-slide-in-up {
   animation: slideInUp 0.4s ease-out;
+}
+
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out;
 }
 
 /* Card hover effects */

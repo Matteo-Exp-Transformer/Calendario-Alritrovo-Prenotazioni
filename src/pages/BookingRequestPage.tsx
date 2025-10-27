@@ -1,55 +1,71 @@
 import React from 'react'
 import { BookingRequestForm } from '@/features/booking/components/BookingRequestForm'
-import { UtensilsCrossed, MapPin, Clock } from 'lucide-react'
+import { UtensilsCrossed, MapPin, Clock, Phone, Mail } from 'lucide-react'
 
 export const BookingRequestPage: React.FC = () => {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#D2B48C', backgroundImage: 'linear-gradient(to bottom, #E8D5B7, #C9A87A)' }}>
-      <div className="container mx-auto px-4 md:px-8 max-w-xl py-12 md:py-16">
-        {/* Hero Section */}
-        <div className="text-center mb-10 md:mb-14 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-24 h-24 mb-8 rounded-full animate-slide-in-up" style={{ backgroundColor: '#8B6914', boxShadow: '0 10px 25px -5px rgba(139, 105, 20, 0.3)' }}>
-            <UtensilsCrossed className="w-12 h-12 text-white" />
-          </div>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4" style={{ color: '#654321' }}>
-            PRENOTA IL TUO TAVOLO
-          </h1>
-          <p className="text-xl md:text-2xl font-semibold mb-3" style={{ color: '#654321' }}>
-            Al Ritrovo
-          </p>
-          <div className="flex items-center justify-center gap-2 mb-8" style={{ color: '#8B6914' }}>
-            <MapPin className="w-5 h-5" />
-            <span className="text-base">Bologna, Italia</span>
-          </div>
-          <p className="text-base md:text-lg max-w-2xl mx-auto" style={{ color: '#654321' }}>
-            Compila il form e ti contatteremo al più presto per confermare la disponibilità.
-          </p>
-        </div>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Background con Gradient Caldo & Legno */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-warm-wood via-warm-orange to-terracotta opacity-90" />
+        {/* Pattern Texture (opzionale) */}
+        <div className="absolute inset-0 opacity-10" style={{
+          backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23000000" fill-opacity="0.1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
+        }} />
+      </div>
 
-        {/* Form Card */}
-        <div className="mb-8 animate-slide-in-up" style={{ borderRadius: '15px' }}>
-          <div className="p-6 md:p-10" style={{ backgroundColor: 'transparent', borderRadius: '15px' }}>
+      {/* Main Content */}
+      <div className="relative z-10 flex items-center justify-center min-h-screen p-4 md:p-8">
+        <div className="w-full max-w-6xl">
+          {/* Hero Section con Glassmorphism */}
+          <div className="text-center mb-8 animate-fade-in">
+            <div className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-warm-cream shadow-2xl animate-slide-in-up">
+              <UtensilsCrossed className="w-10 h-10 text-warm-wood" />
+            </div>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 text-warm-cream drop-shadow-lg">
+              Prenota il Tuo Tavolo
+            </h1>
+            <p className="text-2xl md:text-3xl font-serif font-semibold mb-3 text-gold-warm">
+              Al Ritrovo
+            </p>
+            <div className="flex items-center justify-center gap-2 mb-6 text-warm-beige">
+              <MapPin className="w-5 h-5" />
+              <span className="text-base md:text-lg">Bologna, Italia</span>
+            </div>
+          </div>
+
+          {/* Form Card con Glassmorphism e Layout 2 Colonne */}
+          <div className="bg-white/95 backdrop-blur-md shadow-2xl rounded-3xl p-8 md:p-12 mb-8 animate-slide-in-up">
             <BookingRequestForm />
           </div>
-        </div>
 
-        {/* Info Box */}
-        <div className="rounded-xl p-6 md:p-8 animate-fade-in" style={{ backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: '15px', backdropFilter: 'blur(10px)' }}>
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#DC2626' }}>
-              <Clock className="w-6 h-6 text-white" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg md:text-xl font-semibold mb-3" style={{ color: '#654321' }}>
-                Orari e Contatti
-              </h3>
-              <p className="text-sm md:text-base mb-4" style={{ color: '#8B6914' }}>
-                Per informazioni urgenti, chiamaci direttamente:
-              </p>
-              <div className="space-y-2 text-sm md:text-base" style={{ color: '#654321' }}>
-                <p className="font-medium">📧 Email: info@alritrovo.it</p>
-                <p className="font-medium">📞 Telefono: +39 051 123 4567</p>
-                <p className="font-medium">🕐 Orari: Martedì - Domenica, 19:00 - 24:00</p>
+          {/* Info Box Ridisegnata */}
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-6 md:p-8 animate-fade-in">
+            <div className="flex items-start gap-4 md:gap-6">
+              <div className="flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-terracotta to-warm-orange shadow-lg">
+                <Clock className="w-7 h-7 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl md:text-2xl font-serif font-semibold mb-4 text-warm-wood">
+                  Orari e Contatti
+                </h3>
+                <p className="text-base md:text-lg mb-6 text-gray-700">
+                  Per informazioni urgenti, chiamaci direttamente:
+                </p>
+                <div className="space-y-3 text-base md:text-lg text-warm-wood-dark">
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-5 h-5 text-warm-orange" />
+                    <span className="font-medium">info@alritrovo.it</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Phone className="w-5 h-5 text-warm-orange" />
+                    <span className="font-medium">+39 051 123 4567</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-warm-orange" />
+                    <span className="font-medium">Martedì - Domenica, 19:00 - 24:00</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -1,11 +1,12 @@
 import type { BookingRequest } from '@/types/booking'
 import type { CalendarEvent } from '@/types/booking'
 
+// Nuova Palette "Caldo & Legno"
 const EVENT_TYPE_COLORS: Record<string, { bg: string; border: string }> = {
-  cena: { bg: '#8B0000', border: '#6B0000' }, // bordeaux scuro
-  aperitivo: { bg: '#DAA520', border: '#B8860B' }, // oro
-  evento: { bg: '#9370DB', border: '#7B68EE' }, // viola
-  laurea: { bg: '#20B2AA', border: '#008B8B' }, // acquamarina
+  cena: { bg: '#8B4513', border: '#6B3410' },       // warm-wood / warm-wood-dark
+  aperitivo: { bg: '#DAA520', border: '#B8860B' },  // gold-warm
+  evento: { bg: '#E07041', border: '#C55A30' },     // terracotta
+  laurea: { bg: '#6B8E23', border: '#556B1A' },     // olive-green
 }
 
 export const transformBookingToCalendarEvent = (

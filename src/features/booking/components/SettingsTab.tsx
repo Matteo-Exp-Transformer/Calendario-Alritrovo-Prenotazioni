@@ -50,17 +50,21 @@ export const SettingsTab: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
-        <Settings className="h-8 w-8 text-al-ritrovo-primary" />
-        <h2 className="text-2xl font-bold text-gray-900">Impostazioni Sistema</h2>
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg">
+          <Settings className="h-7 w-7 text-white" />
+        </div>
+        <h2 className="text-3xl font-bold text-indigo-900">Impostazioni Sistema</h2>
       </div>
 
       {/* Info Box */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 border-2 border-blue-400 rounded-2xl p-6 shadow-xl">
         <div className="flex items-start gap-3">
-          <Bell className="h-5 w-5 text-blue-600 mt-0.5" />
+          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+            <Bell className="h-6 w-6 text-white" />
+          </div>
           <div>
-            <h3 className="font-semibold text-blue-900 mb-1">Stato Sistema</h3>
-            <p className="text-sm text-blue-800">
+            <h3 className="font-bold text-white mb-2 text-lg">Stato Sistema</h3>
+            <p className="text-sm text-blue-50 font-medium">
               Il sistema di prenotazioni è in produzione (95%). Tutti i moduli core sono
               funzionanti. Fix applicato per bottone ACCETTA con debug completo.
             </p>
@@ -73,16 +77,18 @@ export const SettingsTab: React.FC = () => {
         {settings.map((setting, index) => (
           <div
             key={index}
-            className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 border-l-4 border-al-ritrovo-primary"
+            className="bg-gradient-to-br from-white to-purple-50/50 rounded-2xl shadow-lg hover:shadow-xl transition-all p-6 border-2 border-purple-200"
           >
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">{setting.icon}</div>
+              <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center shadow-md">
+                {setting.icon}
+              </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                <h3 className="text-lg font-bold text-indigo-900 mb-1">
                   {setting.name}
                 </h3>
-                <p className="text-sm text-gray-600 mb-3">{setting.description}</p>
-                <p className={`text-sm font-medium ${setting.color}`}>{setting.status}</p>
+                <p className="text-sm text-gray-600 mb-3 font-medium">{setting.description}</p>
+                <p className={`text-sm font-bold ${setting.color}`}>{setting.status}</p>
               </div>
             </div>
           </div>
@@ -90,9 +96,11 @@ export const SettingsTab: React.FC = () => {
       </div>
 
       {/* Environment Variables Check */}
-      <div className="bg-gray-50 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <Database className="h-5 w-5" />
+      <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border-2 border-purple-200 shadow-lg">
+        <h3 className="text-lg font-bold text-indigo-900 mb-4 flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+            <Database className="h-5 w-5 text-white" />
+          </div>
           Variabili Ambiente
         </h3>
         <div className="space-y-2 text-sm">
@@ -126,23 +134,34 @@ export const SettingsTab: React.FC = () => {
       </div>
 
       {/* Actions */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Azioni Disponibili</h3>
+      <div className="bg-gradient-to-br from-white to-indigo-50/50 rounded-2xl shadow-lg p-6 border-2 border-indigo-200">
+        <h3 className="text-lg font-bold text-indigo-900 mb-4">Azioni Disponibili</h3>
         <div className="flex gap-3 flex-wrap">
-          <Button variant="primary" size="md" onClick={() => setShowTestEmail(true)}>
+          <Button
+            variant="solid"
+            size="lg"
+            onClick={() => setShowTestEmail(true)}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg hover:scale-105 transition-all"
+          >
             📧 Test Email Notifications
           </Button>
           <Button
-            variant="secondary"
-            size="md"
+            variant="solid"
+            size="lg"
             onClick={() => {
               console.log('🔵 [SettingsTab] Clicked View Email Logs, opening modal')
               setShowEmailLogs(true)
             }}
+            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg hover:scale-105 transition-all"
           >
             📋 View Email Logs
           </Button>
-          <Button variant="outline" size="md" onClick={() => alert('Export: da implementare')}>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => alert('Export: da implementare')}
+            className="border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 hover:scale-105 transition-all"
+          >
             💾 Export Settings
           </Button>
         </div>

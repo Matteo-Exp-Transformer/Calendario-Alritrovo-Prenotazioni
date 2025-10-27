@@ -5,112 +5,160 @@ import { PendingRequestsTab } from '@/features/booking/components/PendingRequest
 import { ArchiveTab } from '@/features/booking/components/ArchiveTab'
 import { BookingCalendarTab } from '@/features/booking/components/BookingCalendarTab'
 import { SettingsTab } from '@/features/booking/components/SettingsTab'
+import { Calendar, Clock, Archive, Settings, CheckCircle, TrendingUp } from 'lucide-react'
 
 type Tab = 'calendar' | 'pending' | 'archive' | 'settings'
+
+interface NavItemProps {
+  icon: React.ElementType
+  label: string
+  active?: boolean
+  badge?: number
+  onClick: () => void
+}
+
+const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, badge, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`
+      flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-xl transition-all font-medium
+      ${active
+        ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-indigo-900 shadow-lg scale-105'
+        : 'text-white hover:bg-white/20 hover:text-yellow-200 hover:scale-105'
+      }
+    `}
+  >
+    <Icon className="w-5 h-5" />
+    <span className="text-xs md:text-sm">{label}</span>
+    {badge && badge > 0 && (
+      <span className="ml-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
+        {badge}
+      </span>
+    )}
+  </button>
+)
+
+interface StatCardProps {
+  title: string
+  value: number | string
+  icon: React.ElementType
+  gradient: string
+  subtitle: string
+}
+
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, gradient, subtitle }) => (
+  <div className={`
+    bg-gradient-to-br ${gradient}
+    text-white rounded-2xl p-6
+    shadow-xl
+    border-2 border-white/20
+  `}>
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-white/90 text-xs font-bold uppercase tracking-wider">{title}</p>
+        <h3 className="text-5xl font-bold mt-2 mb-1 font-display drop-shadow-lg">{value}</h3>
+        <p className="text-white/80 text-sm font-medium">{subtitle}</p>
+      </div>
+      <div className="bg-white/30 rounded-xl p-4 shadow-lg backdrop-blur-sm">
+        <Icon className="w-10 h-10" />
+      </div>
+    </div>
+  </div>
+)
 
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('calendar')
   const { data: stats, isLoading: isLoadingStats } = useBookingStats()
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <AdminHeader />
-
-      <div className="container mx-auto p-8">
-        {/* Statistiche Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          <div className="bg-white rounded-lg shadow-xl rounded-xl p-8 hover:shadow-2xl transition-all border border-gray-200">
-            <h3 className="text-base font-medium text-gray-500 mb-2 uppercase tracking-wider">
-              Richieste Pendenti
-            </h3>
-            <p className="text-4xl font-extrabold text-status-pending">
-              {isLoadingStats ? '...' : stats?.pending || 0}
-            </p>
-            <p className="text-sm text-gray-500 mt-2">In attesa di conferma</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      {/* Header con Navbar Orizzontale - Tema Colorato Professionale */}
+      <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-2xl border-b-4 border-yellow-400/50">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
+          {/* Top Bar: Logo + User Info */}
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-serif font-bold text-white drop-shadow-lg">Al Ritrovo</h1>
+              <p className="text-yellow-200 text-xs md:text-sm mt-1 font-medium">Dashboard Amministratore</p>
+            </div>
+            <AdminHeader />
           </div>
 
-          <div className="bg-white rounded-lg shadow-xl rounded-xl p-8 hover:shadow-2xl transition-all border border-gray-200">
-            <h3 className="text-base font-medium text-gray-500 mb-2 uppercase tracking-wider">
-              Prenotazioni Accettate
-            </h3>
-            <p className="text-4xl font-extrabold text-status-accepted">
-              {isLoadingStats ? '...' : stats?.accepted || 0}
-            </p>
-            <p className="text-sm text-gray-500 mt-2">Prenotazioni attive</p>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-xl rounded-xl p-8 hover:shadow-2xl transition-all border border-gray-200">
-            <h3 className="text-base font-medium text-gray-500 mb-2 uppercase tracking-wider">
-              Totale Questo Mese
-            </h3>
-            <p className="text-4xl font-extrabold text-al-ritrovo-accent">
-              {isLoadingStats ? '...' : stats?.total || 0}
-            </p>
-            <p className="text-sm text-gray-500 mt-2">Tutte le prenotazioni</p>
-          </div>
+          {/* Navigation Tabs Orizzontale */}
+          <nav className="flex flex-wrap items-center gap-2 md:gap-3 pb-2">
+            <NavItem
+              icon={Calendar}
+              label="Calendario"
+              active={activeTab === 'calendar'}
+              onClick={() => setActiveTab('calendar')}
+            />
+            <NavItem
+              icon={Clock}
+              label="Prenotazioni Pendenti"
+              active={activeTab === 'pending'}
+              badge={stats?.pending}
+              onClick={() => setActiveTab('pending')}
+            />
+            <NavItem
+              icon={Archive}
+              label="Archivio"
+              active={activeTab === 'archive'}
+              onClick={() => setActiveTab('archive')}
+            />
+            <NavItem
+              icon={Settings}
+              label="Impostazioni"
+              active={activeTab === 'settings'}
+              onClick={() => setActiveTab('settings')}
+            />
+          </nav>
         </div>
+      </header>
 
-        {/* Tabs Navigation */}
-        <div className="bg-white rounded-xl shadow-xl mb-6 overflow-hidden border border-gray-200">
-          <div className="border-b border-gray-100">
-            <nav className="-mb-px flex" aria-label="Tabs">
-              <button
-                onClick={() => setActiveTab('calendar')}
-                className={`py-4 px-6 text-sm font-semibold border-b-2 transition-colors ${
-                  activeTab === 'calendar'
-                    ? 'border-al-ritrovo-primary text-al-ritrovo-primary bg-al-ritrovo-primary/5'
-                    : 'border-transparent text-gray-600 hover:text-al-ritrovo-primary hover:border-al-ritrovo-primary/50'
-                }`}
-              >
-                📅 Calendario
-              </button>
-              <button
-                onClick={() => setActiveTab('pending')}
-                className={`py-4 px-6 text-sm font-semibold border-b-2 transition-colors relative ${
-                  activeTab === 'pending'
-                    ? 'border-al-ritrovo-primary text-al-ritrovo-primary bg-al-ritrovo-primary/5'
-                    : 'border-transparent text-gray-600 hover:text-al-ritrovo-primary hover:border-al-ritrovo-primary/50'
-                }`}
-              >
-                ⏳ Prenotazioni Pendenti
-                {!isLoadingStats && stats && stats.pending > 0 && (
-                  <span className="ml-2 inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-status-pending text-yellow-900">
-                    {stats.pending}
-                  </span>
-                )}
-              </button>
-                      <button
-                        onClick={() => setActiveTab('archive')}
-                        className={`py-4 px-6 text-sm font-semibold border-b-2 transition-colors ${
-                          activeTab === 'archive'
-                            ? 'border-al-ritrovo-primary text-al-ritrovo-primary bg-al-ritrovo-primary/5'
-                            : 'border-transparent text-gray-600 hover:text-al-ritrovo-primary hover:border-al-ritrovo-primary/50'
-                        }`}
-                      >
-                        📚 Archivio
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('settings')}
-                        className={`py-4 px-6 text-sm font-semibold border-b-2 transition-colors ${
-                          activeTab === 'settings'
-                            ? 'border-al-ritrovo-primary text-al-ritrovo-primary bg-al-ritrovo-primary/5'
-                            : 'border-transparent text-gray-600 hover:text-al-ritrovo-primary hover:border-al-ritrovo-primary/50'
-                        }`}
-                      >
-                        ⚙️ Impostazioni
-                      </button>
-                    </nav>
-                  </div>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
+        {/* Statistiche Cards - Solo se non in modalità impostazioni */}
+        {activeTab !== 'settings' && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <StatCard
+              title="Pendenti"
+              value={isLoadingStats ? '...' : stats?.pending || 0}
+              subtitle="In attesa di conferma"
+              icon={Clock}
+              gradient="from-amber-500 to-orange-600"
+            />
+            <StatCard
+              title="Accettate"
+              value={isLoadingStats ? '...' : stats?.accepted || 0}
+              subtitle="Prenotazioni confermate"
+              icon={CheckCircle}
+              gradient="from-green-500 to-emerald-600"
+            />
+            <StatCard
+              title="Totale Mese"
+              value={isLoadingStats ? '...' : stats?.totalMonth || 0}
+              subtitle="Prenotazioni questo mese"
+              icon={TrendingUp}
+              gradient="from-blue-500 to-indigo-600"
+            />
+          </div>
+        )}
 
-                  {/* Tab Content */}
-                  <div className="p-8">
-                    {activeTab === 'calendar' && <BookingCalendarTab />}
-                    {activeTab === 'pending' && <PendingRequestsTab />}
-                    {activeTab === 'archive' && <ArchiveTab />}
-                    {activeTab === 'settings' && <SettingsTab />}
-                  </div>
+        {/* Tab Content */}
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 min-h-[600px] border-2 border-purple-100">
+          {activeTab === 'calendar' && <BookingCalendarTab />}
+          {activeTab === 'pending' && <PendingRequestsTab />}
+          {activeTab === 'archive' && <ArchiveTab />}
+          {activeTab === 'settings' && <SettingsTab />}
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="max-w-7xl mx-auto px-6 py-6">
+        <div className="text-center text-sm text-warm-wood/60">
+          <p>Al Ritrovo Booking System v2.0 - Dashboard Amministratore</p>
+        </div>
+      </footer>
     </div>
   )
 }

@@ -147,10 +147,18 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-8">
+      {/* Layout a 2 Colonne su schermi grandi */}
+      <div className="grid md:grid-cols-2 gap-6 md:gap-8">
+        {/* COLONNA SINISTRA: Dati Personali */}
+        <div className="space-y-6">
+          <h2 className="text-2xl font-serif font-semibold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige">
+            Dati Personali
+          </h2>
+
       {/* Nome */}
       <div className="space-y-2">
-        <Label htmlFor="client_name" style={{ color: '#654321' }}>Nome Completo *</Label>
+        <Label htmlFor="client_name" className="text-warm-wood-dark font-medium">Nome Completo *</Label>
         <Input
           id="client_name"
           value={formData.client_name}
@@ -169,7 +177,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Email */}
       <div className="space-y-2">
-        <Label htmlFor="client_email" style={{ color: '#654321' }}>Email *</Label>
+        <Label htmlFor="client_email" className="text-warm-wood-dark font-medium">Email *</Label>
         <Input
           id="client_email"
           type="email"
@@ -189,7 +197,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Telefono */}
       <div className="space-y-2">
-        <Label htmlFor="client_phone" style={{ color: '#654321' }}>Telefono (Opzionale)</Label>
+        <Label htmlFor="client_phone" className="text-warm-wood-dark font-medium">Telefono (Opzionale)</Label>
         <Input
           id="client_phone"
           type="tel"
@@ -198,10 +206,17 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           placeholder="351 123 4567"
         />
       </div>
+        </div>
+
+        {/* COLONNA DESTRA: Dettagli Prenotazione */}
+        <div className="space-y-6">
+          <h2 className="text-2xl font-serif font-semibold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige">
+            Dettagli Prenotazione
+          </h2>
 
       {/* Tipo Evento */}
       <div className="space-y-2">
-        <Label htmlFor="event_type" style={{ color: '#654321' }}>Tipo Evento *</Label>
+        <Label htmlFor="event_type" className="text-warm-wood-dark font-medium">Tipo Evento *</Label>
         <select
           id="event_type"
           value={formData.event_type}
@@ -228,7 +243,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Data */}
       <div className="space-y-2">
-        <Label htmlFor="desired_date" style={{ color: '#654321' }}>Data Desiderata *</Label>
+        <Label htmlFor="desired_date" className="text-warm-wood-dark font-medium">Data Desiderata *</Label>
         <Input
           id="desired_date"
           type="date"
@@ -247,7 +262,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Ora */}
       <div className="space-y-2">
-        <Label htmlFor="desired_time" style={{ color: '#654321' }}>Orario Desiderato</Label>
+        <Label htmlFor="desired_time" className="text-warm-wood-dark font-medium">Orario Desiderato</Label>
         <Input
           id="desired_time"
           type="time"
@@ -258,7 +273,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Numero Ospiti */}
       <div className="space-y-2">
-        <Label htmlFor="num_guests" style={{ color: '#654321' }}>Numero Ospiti *</Label>
+        <Label htmlFor="num_guests" className="text-warm-wood-dark font-medium">Numero Ospiti *</Label>
         <Input
           id="num_guests"
           type="number"
@@ -274,10 +289,12 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           <p className="text-sm text-red-500">{errors.num_guests}</p>
         )}
       </div>
+        </div>
+      </div>
 
-      {/* Note Speciali */}
+      {/* Note Speciali - Full Width sotto le 2 colonne */}
       <div className="space-y-2">
-        <Label htmlFor="special_requests" style={{ color: '#654321' }}>Note o Richieste Speciali</Label>
+        <Label htmlFor="special_requests" className="text-warm-wood-dark font-medium">Note o Richieste Speciali</Label>
         <Textarea
           id="special_requests"
           value={formData.special_requests}
@@ -288,7 +305,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       </div>
 
       {/* Privacy Policy */}
-      <div className="rounded-lg p-4" style={{ backgroundColor: 'rgba(255,255,255,0.3)', border: '1px solid rgba(101, 67, 33, 0.3)', backdropFilter: 'blur(10px)' }}>
+      <div className="rounded-xl p-5 bg-warm-cream/50 border-2 border-warm-beige">
         <div className="flex items-start gap-3">
           <input
             type="checkbox"
@@ -296,11 +313,11 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             checked={privacyAccepted}
             onChange={(e) => setPrivacyAccepted(e.target.checked)}
             required
-            className="mt-1"
+            className="mt-1 w-5 h-5 text-warm-wood focus:ring-warm-wood"
           />
-          <label htmlFor="privacy-consent" className="text-sm cursor-pointer" style={{ color: '#654321' }}>
+          <label htmlFor="privacy-consent" className="text-sm cursor-pointer text-warm-wood-dark font-medium">
             Accetto la{' '}
-            <a href="/privacy" target="_blank" className="underline" style={{ color: '#654321' }}>
+            <a href="/privacy" target="_blank" className="underline text-warm-orange hover:text-terracotta transition-colors">
               Privacy Policy
             </a>
             {' '}di Al Ritrovo *
@@ -311,16 +328,16 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       {/* Submit Button */}
       <Button
         type="submit"
-        variant="primary"
+        variant="solid"
+        size="xl"
         fullWidth
         disabled={isPending || isBlocked}
-        className="mt-6"
-        style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}
+        className="!mt-8"
       >
         {isPending ? 'Invio in corso...' : isBlocked ? 'Limite richieste raggiunto' : 'INVIA RICHIESTA PRENOTAZIONE'}
       </Button>
 
-      <p className="text-xs text-center" style={{ color: '#8B6914' }}>
+      <p className="text-xs text-center text-gray-600">
         * I campi contrassegnati sono obbligatori.
       </p>
     </form>
