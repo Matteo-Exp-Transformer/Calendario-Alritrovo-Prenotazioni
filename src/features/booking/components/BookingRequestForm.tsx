@@ -23,12 +23,27 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     event_type: 'cena',
     desired_date: '',
     desired_time: '',
-    num_guests: 2,
+    num_guests: 0,
     special_requests: ''
   })
 
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Reset num_guests to 0 when cleared
+  const handleNumGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value
+    if (inputValue === '') {
+      setFormData({ ...formData, num_guests: 0 })
+      setErrors({ ...errors, num_guests: '' })
+    } else {
+      const value = parseInt(inputValue) || 0
+      if (value >= 1 && value <= 110) {
+        setFormData({ ...formData, num_guests: value })
+        setErrors({ ...errors, num_guests: '' })
+      }
+    }
+  }
   const { mutate, isPending } = useCreateBookingRequest()
 
   const validate = (): boolean => {
@@ -65,6 +80,15 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       }
     }
 
+    // Num guests validation
+    if (!formData.num_guests || formData.num_guests < 1) {
+      newErrors.num_guests = 'Numero ospiti obbligatorio (min 1)'
+      isValid = false
+    } else if (formData.num_guests > 110) {
+      newErrors.num_guests = 'Massimo 110 ospiti'
+      isValid = false
+    }
+
     // Privacy consent validation
     if (!privacyAccepted) {
       isValid = false
@@ -94,7 +118,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           event_type: 'cena',
           desired_date: '',
           desired_time: '',
-          num_guests: 2,
+          num_guests: 0,
           special_requests: ''
         })
         setPrivacyAccepted(false)
@@ -215,16 +239,15 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           type="number"
           min="1"
           max="110"
-          value={formData.num_guests}
-          onChange={(e) => {
-            const value = parseInt(e.target.value) || 0
-            if (value >= 1 && value <= 110) {
-              setFormData({ ...formData, num_guests: value })
-            }
-          }}
+          value={formData.num_guests || ''}
+          onChange={handleNumGuestsChange}
           required
           placeholder="Inserisci numero ospiti"
+          className={errors.num_guests ? 'border-red-500' : ''}
         />
+        {errors.num_guests && (
+          <p className="text-sm text-red-500">{errors.num_guests}</p>
+        )}
       </div>
 
       {/* Note Speciali */}
