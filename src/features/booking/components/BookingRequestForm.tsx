@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Button, Input, Textarea, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Label } from '@/components/ui'
+import { Button, Input, Textarea, Label } from '@/components/ui'
 import type { BookingRequestInput, EventType } from '@/types/booking'
 import { useCreateBookingRequest } from '../hooks/useBookingRequests'
 import { toast } from 'react-toastify'
@@ -182,23 +182,20 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Tipo Evento */}
       <div className="space-y-2">
-        <Label>Tipo Evento *</Label>
-        <Select
+        <Label htmlFor="event_type">Tipo Evento *</Label>
+        <select
+          id="event_type"
           value={formData.event_type}
-          onValueChange={(value) => setFormData({ ...formData, event_type: value as EventType })}
+          onChange={(e) => setFormData({ ...formData, event_type: e.target.value as EventType })}
           required
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <SelectTrigger>
-            <SelectValue placeholder="Seleziona tipo evento" />
-          </SelectTrigger>
-          <SelectContent position="item-aligned">
-            {EVENT_TYPES.map((type) => (
-              <SelectItem key={type.value} value={type.value}>
-                {type.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          {EVENT_TYPES.map((type) => (
+            <option key={type.value} value={type.value}>
+              {type.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Data */}
