@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { X, User, Mail, Phone, Users, Clock, Calendar, Edit, Trash2, Save } from 'lucide-react'
+import { X, User, Mail, Phone, Users, Clock, Calendar, Edit, Trash2, Save, UtensilsCrossed } from 'lucide-react'
 import { useUpdateBooking, useCancelBooking } from '../hooks/useBookingMutations'
 import type { BookingRequest } from '@/types/booking'
 import { format } from 'date-fns'
@@ -309,6 +309,14 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-al-ritrovo-primary focus:border-transparent"
                       />
                     </div>
+                    {booking.menu && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Menù (solo visualizzazione)</label>
+                        <div className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
+                          {booking.menu}
+                        </div>
+                      </div>
+                    )}
                     {booking.special_requests && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Note Speciali</label>
@@ -344,6 +352,15 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                         <p className="text-base font-normal text-gray-900">{booking.num_guests} persone</p>
                       </div>
                     </div>
+                    {booking.menu && (
+                      <div className="flex items-start space-x-3 py-2">
+                        <UtensilsCrossed className="h-5 w-5 text-gray-400" />
+                        <div>
+                          <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">Menù</p>
+                          <p className="text-base font-normal text-gray-900 whitespace-pre-wrap">{booking.menu}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

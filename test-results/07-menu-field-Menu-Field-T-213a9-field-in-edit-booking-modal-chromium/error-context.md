@@ -1,0 +1,95 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - img [ref=e8]
+      - heading "Prenota il Tuo Tavolo" [level=1] [ref=e13]
+      - paragraph [ref=e14]: Al Ritrovo
+      - generic [ref=e15]:
+        - img [ref=e16]
+        - generic [ref=e19]: Bologna, Italia
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - generic [ref=e23]:
+          - heading "Dati Personali" [level=2] [ref=e24]
+          - generic [ref=e25]:
+            - text: Nome Completo *
+            - textbox "Nome Completo *" [ref=e26]:
+              - /placeholder: Mario Rossi
+          - generic [ref=e27]:
+            - text: Email *
+            - textbox "Email *" [ref=e28]:
+              - /placeholder: nome@email.com
+          - generic [ref=e29]:
+            - text: Telefono (Opzionale)
+            - textbox "Telefono (Opzionale)" [ref=e30]:
+              - /placeholder: 351 123 4567
+        - generic [ref=e31]:
+          - heading "Dettagli Prenotazione" [level=2] [ref=e32]
+          - generic [ref=e33]:
+            - text: Tipo Evento *
+            - combobox "Tipo Evento *" [ref=e34]:
+              - option "Drink/Caraffe" [selected]
+              - option "Drink/Caraffe + rinfresco leggero"
+              - option "Drink/Caraffe + rinfresco completo"
+              - option "Drink/Caraffe + rinfresco completo + primo piatto"
+              - option "Menu Pranzo / Menù Cena"
+          - generic [ref=e35]:
+            - text: Data Desiderata *
+            - textbox "Data Desiderata *" [ref=e36]
+          - generic [ref=e37]:
+            - text: Orario Desiderato
+            - textbox "Orario Desiderato" [ref=e38]
+          - generic [ref=e39]:
+            - text: Numero Ospiti *
+            - textbox "Numero Ospiti *" [ref=e40]:
+              - /placeholder: Inserisci numero ospiti
+      - generic [ref=e41]:
+        - text: Note o Richieste Speciali
+        - textbox "Note o Richieste Speciali" [ref=e42]:
+          - /placeholder: "Es: Menu vegetariano, intolleranze alimentari, tavolo specifico..."
+      - generic [ref=e44]:
+        - checkbox "Accetto la Privacy Policy di Al Ritrovo *" [ref=e46]
+        - generic [ref=e48] [cursor=pointer]:
+          - text: Accetto la
+          - link "Privacy Policy" [ref=e49]:
+            - /url: /privacy
+          - text: di Al Ritrovo *
+      - button "Invia Prenotazione" [ref=e51]:
+        - generic [ref=e52]:
+          - generic [ref=e53]: Invia Prenotazione
+          - img [ref=e54]
+      - paragraph [ref=e58]: "* I campi contrassegnati sono obbligatori."
+    - generic [ref=e60]:
+      - img [ref=e62]
+      - generic [ref=e65]:
+        - heading "Orari e Contatti" [level=3] [ref=e66]
+        - paragraph [ref=e67]: "Per informazioni urgenti, chiamaci direttamente:"
+        - generic [ref=e68]:
+          - generic [ref=e69]:
+            - img [ref=e70]
+            - generic [ref=e73]: info@alritrovo.it
+          - generic [ref=e74]:
+            - img [ref=e75]
+            - generic [ref=e77]: +39 051 123 4567
+          - generic [ref=e78]:
+            - img [ref=e79]
+            - generic [ref=e82]: Martedì - Domenica, 19:00 - 24:00
+  - generic [ref=e85]:
+    - img [ref=e87]
+    - generic [ref=e89]:
+      - heading "Utilizziamo i Cookie" [level=3] [ref=e90]
+      - paragraph [ref=e91]:
+        - text: Questo sito utilizza cookie tecnici necessari al funzionamento del sito e alla fornitura del servizio richiesto, come descritto nella nostra
+        - link "Privacy Policy" [ref=e92] [cursor=pointer]:
+          - /url: /privacy
+        - text: .
+      - generic [ref=e93]:
+        - button "Accetto" [ref=e94]
+        - button "Rifiuta" [ref=e95]
+        - link "Leggi di più" [ref=e96] [cursor=pointer]:
+          - /url: /privacy
+  - region "Notifications Alt+T"
+```
