@@ -49,18 +49,18 @@ interface StatCardProps {
 const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, gradient, subtitle }) => (
   <div className={`
     bg-gradient-to-br ${gradient}
-    text-white rounded-2xl p-6
+    text-white rounded-2xl p-4 md:p-6
     shadow-xl
     border-2 border-white/20
   `}>
     <div className="flex items-center justify-between">
-      <div>
+      <div className="flex-1 min-w-0">
         <p className="text-white/90 text-xs font-bold uppercase tracking-wider">{title}</p>
-        <h3 className="text-5xl font-bold mt-2 mb-1 font-display drop-shadow-lg">{value}</h3>
-        <p className="text-white/80 text-sm font-medium">{subtitle}</p>
+        <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mt-2 mb-1 font-display drop-shadow-lg truncate">{value}</h3>
+        <p className="text-white/80 text-xs md:text-sm font-medium">{subtitle}</p>
       </div>
-      <div className="bg-white/30 rounded-xl p-4 shadow-lg backdrop-blur-sm">
-        <Icon className="w-10 h-10" />
+      <div className="bg-white/30 rounded-xl p-3 md:p-4 shadow-lg backdrop-blur-sm flex-shrink-0 ml-2">
+        <Icon className="w-8 h-8 md:w-10 md:h-10" />
       </div>
     </div>
   </div>

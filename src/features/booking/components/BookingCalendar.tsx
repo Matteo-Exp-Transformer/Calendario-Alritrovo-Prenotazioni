@@ -240,14 +240,14 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
           </div>
 
           {/* Mattina CollapsibleCard */}
-          <div style={{ border: '4px solid #10B981', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.3), 0 2px 4px -1px rgba(16, 185, 129, 0.2)' }} className="overflow-hidden transition-all duration-200 hover:shadow-xl">
+          <div style={{ border: '5px solid #10B981', borderRadius: '12px', boxShadow: '0 8px 16px -2px rgba(16, 185, 129, 0.4), 0 4px 8px -2px rgba(16, 185, 129, 0.3)', backgroundColor: '#F0FDF4' }} className="overflow-hidden transition-all duration-200 hover:shadow-2xl">
             <CollapsibleCard
               title="Mattina"
               subtitle="10:00 - 14:30"
               icon={Sunrise}
               defaultExpanded={true}
-              className="!border-0 !rounded-none !shadow-none"
-              headerClassName="bg-white hover:bg-gray-50"
+              className="!border-0 !rounded-none !shadow-none !bg-transparent"
+              headerClassName="!bg-green-100 hover:!bg-green-200 transition-colors"
               actions={
               <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-green-600 shadow-md">
                 <div className="text-center">
@@ -266,7 +266,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
                   selectedDateData.morningBookings.map((booking) => (
                     <div
                       key={booking.id}
-                      className="group/card bg-white/80 backdrop-blur-sm p-5 rounded-xl border-l-4 border-green-500 shadow-md hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 cursor-pointer"
+                      className="group/card bg-white/95 backdrop-blur-sm p-5 rounded-xl border-2 border-l-6 border-green-500 shadow-lg hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 cursor-pointer"
                     >
                       {/* Header con Avatar e Nome */}
                       <div className="flex items-start gap-4 mb-4">
@@ -342,14 +342,14 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
           </div>
 
           {/* Pomeriggio CollapsibleCard */}
-          <div style={{ border: '4px solid #FDE047', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(253, 224, 71, 0.3), 0 2px 4px -1px rgba(253, 224, 71, 0.2)' }} className="overflow-hidden transition-all duration-200 hover:shadow-xl">
+          <div style={{ border: '5px solid #FDE047', borderRadius: '12px', boxShadow: '0 8px 16px -2px rgba(253, 224, 71, 0.4), 0 4px 8px -2px rgba(253, 224, 71, 0.3)', backgroundColor: '#FEFCE8' }} className="overflow-hidden transition-all duration-200 hover:shadow-2xl">
             <CollapsibleCard
             title="Pomeriggio"
             subtitle="14:31 - 18:30"
             icon={Sun}
             defaultExpanded={true}
-            className="!border-0 !rounded-none !shadow-none"
-            headerClassName="bg-white hover:bg-gray-50"
+            className="!border-0 !rounded-none !shadow-none !bg-transparent"
+            headerClassName="!bg-yellow-100 hover:!bg-yellow-200 transition-colors"
             actions={
               <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 shadow-md">
                 <div className="text-center">
@@ -368,7 +368,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
                   selectedDateData.afternoonBookings.map((booking) => (
                     <div
                       key={booking.id}
-                      className="group/card bg-white/80 backdrop-blur-sm p-5 rounded-xl border-l-4 border-yellow-400 shadow-md hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 cursor-pointer"
+                      className="group/card bg-white/95 backdrop-blur-sm p-5 rounded-xl border-2 border-l-6 border-yellow-400 shadow-lg hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 cursor-pointer"
                     >
                       <div className="flex items-start gap-4 mb-4">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 flex items-center justify-center text-gray-900 font-bold text-lg shadow-lg group-hover/card:scale-110 transition-transform flex-shrink-0">
@@ -432,14 +432,14 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
           </div>
 
           {/* Sera CollapsibleCard */}
-          <div style={{ border: '4px solid #93C5FD', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(147, 197, 253, 0.3), 0 2px 4px -1px rgba(147, 197, 253, 0.2)' }} className="overflow-hidden transition-all duration-200 hover:shadow-xl">
+          <div style={{ border: '5px solid #93C5FD', borderRadius: '12px', boxShadow: '0 8px 16px -2px rgba(147, 197, 253, 0.4), 0 4px 8px -2px rgba(147, 197, 253, 0.3)', backgroundColor: '#EFF6FF' }} className="overflow-hidden transition-all duration-200 hover:shadow-2xl">
             <CollapsibleCard
             title="Sera"
             subtitle="18:31 - 23:30"
             icon={Moon}
             defaultExpanded={true}
-            className="!border-0 !rounded-none !shadow-none"
-            headerClassName="bg-white hover:bg-gray-50"
+            className="!border-0 !rounded-none !shadow-none !bg-transparent"
+            headerClassName="!bg-blue-100 hover:!bg-blue-200 transition-colors"
             actions={
               <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 shadow-md">
                 <div className="text-center">
@@ -458,7 +458,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
                   selectedDateData.eveningBookings.map((booking) => (
                     <div
                       key={booking.id}
-                      className="group/card bg-white/80 backdrop-blur-sm p-5 rounded-xl border-l-4 border-blue-400 shadow-md hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 cursor-pointer"
+                      className="group/card bg-white/95 backdrop-blur-sm p-5 rounded-xl border-2 border-l-6 border-blue-400 shadow-lg hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 cursor-pointer"
                     >
                       <div className="flex items-start gap-4 mb-4">
                         <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-300 to-blue-500 flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover/card:scale-110 transition-transform flex-shrink-0">
