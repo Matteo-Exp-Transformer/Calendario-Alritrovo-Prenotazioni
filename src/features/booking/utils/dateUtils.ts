@@ -50,8 +50,8 @@ export function createBookingDateTime(
  * Checks if an end time crosses midnight (end before start)
  */
 export function crossesMidnight(startTime: string, endTime: string): boolean {
-  const [startHours, startMinutes] = startTime.split(':').map(Number)
-  const [endHours, endMinutes] = endTime.split(':').map(Number)
+  const [startHours] = startTime.split(':').map(Number)
+  const [endHours] = endTime.split(':').map(Number)
   
   // If end hour is significantly earlier than start hour (crossing midnight)
   // OR if start is late (22+) and end is early (0-6)
