@@ -10,9 +10,9 @@
     - generic [ref=e11]:
       - generic [ref=e12]:
         - text: Email
-        - textbox "Email" [active] [ref=e13]:
+        - textbox "Email" [ref=e13]:
           - /placeholder: admin@alritrovo.com
-          - text: 0cavu
+          - text: admin@alritrovo.com
       - generic [ref=e14]:
         - text: Password
         - textbox "Password" [ref=e15]:

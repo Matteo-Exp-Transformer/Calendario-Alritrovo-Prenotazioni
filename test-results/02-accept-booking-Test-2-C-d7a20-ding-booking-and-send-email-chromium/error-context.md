@@ -1,0 +1,110 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]:
+            - heading "Al Ritrovo" [level=1] [ref=e8]
+            - paragraph [ref=e9]: Dashboard Amministratore
+          - generic [ref=e10]:
+            - generic [ref=e12]:
+              - img [ref=e14]
+              - generic [ref=e17]:
+                - paragraph [ref=e18]: 0cavuz0@gmail.com
+                - generic [ref=e19]:
+                  - img [ref=e20]
+                  - paragraph [ref=e22]: Amministratore
+            - button "Logout" [ref=e23]:
+              - img [ref=e24]
+              - text: Logout
+        - navigation [ref=e27]:
+          - button "Calendario" [ref=e28]:
+            - img [ref=e29]
+            - generic [ref=e31]: Calendario
+          - button "Prenotazioni Pendenti 1" [ref=e32]:
+            - img [ref=e33]
+            - generic [ref=e36]: Prenotazioni Pendenti
+            - generic [ref=e37]: "1"
+          - button "Archivio" [ref=e38]:
+            - img [ref=e39]
+            - generic [ref=e42]: Archivio
+          - button "Impostazioni" [ref=e43]:
+            - img [ref=e44]
+            - generic [ref=e47]: Impostazioni
+    - main [ref=e48]:
+      - generic [ref=e50]:
+        - generic [ref=e52]:
+          - generic [ref=e53]:
+            - paragraph [ref=e54]: Totale Mese
+            - heading "0" [level=3] [ref=e55]
+            - paragraph [ref=e56]: Prenotazioni questo mese
+          - img [ref=e58]
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - paragraph [ref=e64]: Accettate
+            - heading "6" [level=3] [ref=e65]
+            - paragraph [ref=e66]: Prenotazioni confermate
+          - img [ref=e68]
+        - generic [ref=e72] [cursor=pointer]:
+          - generic [ref=e73]:
+            - paragraph [ref=e74]: Pendenti
+            - heading "1" [level=3] [ref=e75]
+            - paragraph [ref=e76]: In attesa di conferma
+          - img [ref=e78]
+      - generic [ref=e82]:
+        - heading "📋 Richieste in Attesa (1)" [level=3] [ref=e84]
+        - button "Drink/Caraffe Matteo Cavallaro Test matteo.cavallaro.work@gmail.com +39 333 1234567 4 novembre 2025 20:00 4 ospiti Test automatico Playwright - Prenotazione di prova Pendente" [ref=e88]:
+          - generic [ref=e89]:
+            - generic [ref=e90]:
+              - img [ref=e92]
+              - generic [ref=e98]:
+                - generic [ref=e99]:
+                  - generic [ref=e100]:
+                    - img [ref=e101]
+                    - generic [ref=e104]: Drink/Caraffe
+                  - generic [ref=e105]:
+                    - img [ref=e106]
+                    - generic [ref=e109]: Matteo Cavallaro Test
+                  - generic [ref=e110]:
+                    - img [ref=e111]
+                    - generic [ref=e114]: matteo.cavallaro.work@gmail.com
+                  - generic [ref=e115]:
+                    - img [ref=e116]
+                    - generic [ref=e118]: +39 333 1234567
+                - generic [ref=e119]:
+                  - generic [ref=e120]:
+                    - img [ref=e121]
+                    - generic [ref=e123]: 4 novembre 2025
+                  - generic [ref=e124]:
+                    - img [ref=e125]
+                    - generic [ref=e128]: 20:00
+                  - generic [ref=e129]:
+                    - img [ref=e130]
+                    - generic [ref=e135]: 4 ospiti
+                  - generic [ref=e136]:
+                    - img [ref=e137]
+                    - generic [ref=e139]: Test automatico Playwright - Prenotazione di prova
+            - generic [ref=e140]:
+              - generic [ref=e141]: Pendente
+              - img [ref=e142]
+    - contentinfo [ref=e144]:
+      - paragraph [ref=e146]: Al Ritrovo Booking System v2.0 - Dashboard Amministratore
+  - generic [ref=e149]:
+    - img [ref=e151]
+    - generic [ref=e153]:
+      - heading "Utilizziamo i Cookie" [level=3] [ref=e154]
+      - paragraph [ref=e155]:
+        - text: Questo sito utilizza cookie tecnici necessari al funzionamento del sito e alla fornitura del servizio richiesto, come descritto nella nostra
+        - link "Privacy Policy" [ref=e156] [cursor=pointer]:
+          - /url: /privacy
+        - text: .
+      - generic [ref=e157]:
+        - button "Accetto" [ref=e158]
+        - button "Rifiuta" [ref=e159]
+        - link "Leggi di più" [ref=e160] [cursor=pointer]:
+          - /url: /privacy
+  - region "Notifications Alt+T"
+```
