@@ -408,35 +408,32 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       </p>
     </form>
 
-    {/* Modal di Conferma Successo - DEBUG */}
-    {showSuccessModal && console.log('🔍 RENDERING MODAL, showSuccessModal:', showSuccessModal) && (
-      <Modal
-        isOpen={showSuccessModal}
-        onClose={() => {
-          console.log('🔴 [Modal] onClose chiamato')
-          setShowSuccessModal(false)
-          setTimeout(() => {
-            window.history.back()
-          }, 300)
-        }}
-        title="Prenotazione Inviata!"
-        showCloseButton={true}
-      >
-        {console.log('🔍 [Modal] Rendering content')}
-        <div className="text-center p-6">
-          <div className="flex justify-center mb-4">
-            <CheckCircle className="h-16 w-16 text-green-600" />
-          </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-3">
-            Prenotazione Inviata con Successo!
-          </h3>
-          <p className="text-lg text-gray-700 mb-6">
-            La tua richiesta di prenotazione è stata inoltrata correttamente.<br />
-            Ti contatteremo a breve per confermare i dettagli.
-          </p>
+    {/* Modal di Conferma Successo */}
+    <Modal
+      isOpen={showSuccessModal}
+      onClose={() => {
+        console.log('🔴 [Modal] onClose chiamato')
+        setShowSuccessModal(false)
+        setTimeout(() => {
+          window.history.back()
+        }, 300)
+      }}
+      title="Prenotazione Inviata!"
+      showCloseButton={true}
+    >
+      <div className="text-center p-6">
+        <div className="flex justify-center mb-4">
+          <CheckCircle className="h-16 w-16 text-green-600" />
         </div>
-      </Modal>
-    )}
+        <h3 className="text-2xl font-bold text-gray-900 mb-3">
+          Prenotazione Inviata con Successo!
+        </h3>
+        <p className="text-lg text-gray-700 mb-6">
+          La tua richiesta di prenotazione è stata inoltrata correttamente.<br />
+          Ti contatteremo a breve per confermare i dettagli.
+        </p>
+      </div>
+    </Modal>
     </>
   )
 }
