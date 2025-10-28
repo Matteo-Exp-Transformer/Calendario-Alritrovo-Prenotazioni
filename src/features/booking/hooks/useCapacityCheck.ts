@@ -66,10 +66,31 @@ export function useCapacityCheck(params: UseCapacityCheckParams): AvailabilityCh
     for (const booking of dayBookings) {
       if (!booking.confirmed_start || !booking.confirmed_end) continue
       
-      const startTimeStr = booking.confirmed_start.split('T')[1].substring(0, 5)
-      const endTimeStr = booking.confirmed_end.split('T')[1].substring(0, 5)
+      // Extract time directly from ISO string to avoid timezone issues
+      const startTimeMatch = booking.confirmed_start.match(/T(\d{2}):(\d{2}):(\d{2})/)
+      const endTimeMatch = booking.confirmed_end.match(/T(\d{2}):(\d{2}):(\d{2})/)
+      
+      let startTimeStr: string
+      let endTimeStr: string
+      
+      if (startTimeMatch && endTimeMatch) {
+        startTimeStr = `${startTimeMatch[1]}:${startTimeMatch[2]}`
+        endTimeStr = `${endTimeMatch[1]}:${endTimeMatch[2]}`
+      } else {
+        // Fallback to old method
+        startTimeStr = booking.confirmed_start.split('T')[1].substring(0, 5)
+        endTimeStr = booking.confirmed_end.split('T')[1].substring(0, 5)
+      }
+      
+      console.log('🔍 [useCapacityCheck] Booking times:', {
+        confirmed_start: booking.confirmed_start,
+        confirmed_end: booking.confirmed_end,
+        startTimeStr,
+        endTimeStr
+      })
       
       const slots = getSlotsOccupiedByTimeString(startTimeStr, endTimeStr)
+      console.log('📊 [useCapacityCheck] Booking slots:', slots)
       const guests = booking.num_guests || 0
 
       for (const slot of slots) {

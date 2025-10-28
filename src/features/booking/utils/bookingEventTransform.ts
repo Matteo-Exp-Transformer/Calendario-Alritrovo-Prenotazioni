@@ -36,43 +36,43 @@ export const transformBookingToCalendarEvent = (
   let startDate: Date
   let endDate: Date
   
-  // If dates are stored as ISO strings without timezone (local format)
-  if (startStr.includes('T') && !startStr.includes('Z')) {
-    // Parse local ISO format: "2024-01-15T20:00:00" -> local time components
-    const startParts = startStr.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
-    if (startParts) {
-      const [, year, month, day, hour, minute, second] = startParts
-      startDate = new Date(
-        parseInt(year), 
-        parseInt(month) - 1, 
-        parseInt(day), 
-        parseInt(hour), 
-        parseInt(minute),
-        parseInt(second)
-      )
-    } else {
-      startDate = new Date(startStr)
-    }
+  // Always extract time components directly from ISO string to avoid timezone issues
+  const startMatch = startStr.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
+  const endMatch = endStr.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
+  
+  if (startMatch && endMatch) {
+    // Extract time components directly from string to avoid timezone conversion
+    const [, year, month, day, hour, minute, second] = startMatch
+    startDate = new Date(
+      parseInt(year), 
+      parseInt(month) - 1, 
+      parseInt(day), 
+      parseInt(hour), 
+      parseInt(minute),
+      parseInt(second)
+    )
     
-    const endParts = endStr.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
-    if (endParts) {
-      const [, year, month, day, hour, minute, second] = endParts
-      endDate = new Date(
-        parseInt(year), 
-        parseInt(month) - 1, 
-        parseInt(day), 
-        parseInt(hour), 
-        parseInt(minute),
-        parseInt(second)
-      )
-    } else {
-      endDate = new Date(endStr)
-    }
+    const [, endYear, endMonth, endDay, endHour, endMinute, endSecond] = endMatch
+    endDate = new Date(
+      parseInt(endYear), 
+      parseInt(endMonth) - 1, 
+      parseInt(endDay), 
+      parseInt(endHour), 
+      parseInt(endMinute),
+      parseInt(endSecond)
+    )
   } else {
-    // Dates are in UTC or other format - parse normally (will be adjusted to local by browser)
+    // Fallback to Date parsing if format doesn't match
     startDate = new Date(startStr)
     endDate = new Date(endStr)
   }
+
+  console.log('🔍 [transformBookingToCalendarEvent]', {
+    startStr,
+    endStr,
+    startDate: startDate.toISOString(),
+    hour: startDate.getHours()
+  })
 
   const color = getTimeSlotColor(startDate)
 
