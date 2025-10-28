@@ -4,7 +4,7 @@ import { UtensilsCrossed, MapPin, Clock, Phone, Mail } from 'lucide-react'
 
 export const BookingRequestPage: React.FC = () => {
   useEffect(() => {
-    document.documentElement.style.backgroundImage = 'url("IMG20241127235924.jpg")';
+    document.documentElement.style.backgroundImage = 'url("/IMG20241127235924.jpg")';
     document.documentElement.style.backgroundSize = 'cover';
     document.documentElement.style.backgroundPosition = 'center';
     document.documentElement.style.backgroundRepeat = 'no-repeat';
