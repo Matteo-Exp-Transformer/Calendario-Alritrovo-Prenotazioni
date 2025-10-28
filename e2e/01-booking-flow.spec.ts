@@ -79,10 +79,10 @@ test.describe('Test 1: Flusso Prenotazione Utente', () => {
       console.log('✅ Notes filled');
     }
 
-    // Accept privacy checkbox (if exists)
-    const privacyCheckbox = page.locator('input[type="checkbox"]');
-    if (await privacyCheckbox.count() > 0) {
-      await privacyCheckbox.check();
+    // Accept privacy checkbox (if exists) - click the label instead (first one is the checkbox visual)
+    const privacyCheckboxLabel = page.locator('label[for="privacy-consent"]').first();
+    if (await privacyCheckboxLabel.count() > 0) {
+      await privacyCheckboxLabel.click();
       console.log('✅ Privacy checkbox checked');
     }
 
@@ -95,22 +95,57 @@ test.describe('Test 1: Flusso Prenotazione Utente', () => {
     const submitButton = page.locator('button[type="submit"], button:has-text("Invia")');
     await submitButton.click();
 
-    // Step 4: Wait for success response
+    // Step 4: Wait for success response and modal
+    console.log('⏳ Waiting for API call...');
     await page.waitForTimeout(2000); // Wait for API call
 
-    // Check for success toast or message
-    const successIndicators = [
-      page.locator('text=/successo|success|inviata/i'),
-      page.locator('[role="alert"]'),
-      page.locator('.toast, .notification')
-    ];
+    // Check for success modal
+    console.log('🔍 Checking for success modal...');
+    const modal = page.locator('[role="dialog"]');
+    let modalFound = false;
+    let modalVisible = false;
 
-    let successFound = false;
-    for (const indicator of successIndicators) {
-      if (await indicator.count() > 0) {
-        console.log('✅ Success message found');
-        successFound = true;
-        break;
+    // Try to find modal for up to 5 seconds
+    for (let i = 0; i < 10; i++) {
+      const count = await modal.count();
+      if (count > 0) {
+        modalFound = true;
+        console.log('✅ Modal DOM element found');
+        
+        // Check if modal is visible
+        const isVisible = await modal.first().isVisible();
+        if (isVisible) {
+          modalVisible = true;
+          console.log('✅ Modal is visible');
+          break;
+        } else {
+          console.log('⚠️ Modal found in DOM but not visible');
+        }
+      }
+      await page.waitForTimeout(500);
+    }
+
+    if (modalFound && modalVisible) {
+      console.log('✅ Success modal is shown and visible!');
+    } else if (modalFound) {
+      console.log('⚠️ Modal found in DOM but not visible - checking screenshot');
+    } else {
+      console.log('❌ Modal not found at all - checking alternatives');
+      
+      // Check for success indicators as fallback
+      const successIndicators = [
+        page.locator('text=/successo|success|inviata/i'),
+        page.locator('[role="alert"]'),
+        page.locator('.toast, .notification'),
+        page.locator('text=/Prenotazione Inviata/i')
+      ];
+
+      for (const indicator of successIndicators) {
+        if (await indicator.count() > 0) {
+          console.log('✅ Alternative success message found');
+          modalVisible = true;
+          break;
+        }
       }
     }
 
@@ -118,10 +153,16 @@ test.describe('Test 1: Flusso Prenotazione Utente', () => {
     await page.screenshot({ path: 'e2e/screenshots/01-after-submit.png', fullPage: true });
     console.log('📸 Screenshot saved: 01-after-submit.png');
 
-    if (successFound) {
-      console.log('✅ TEST 1 PASSED: Booking submitted successfully');
+    // Final verification
+    expect(modalVisible).toBeTruthy();
+    
+    if (modalVisible) {
+      console.log('✅ TEST 1 PASSED: Success modal is visible!');
     } else {
-      console.log('⚠️ Warning: No explicit success message found, but form submitted');
+      console.log('❌ TEST 1 FAILED: Success modal not found or not visible');
+      console.log('🔍 Debug info:');
+      console.log('- Modal found in DOM:', modalFound);
+      console.log('- Modal visible:', modalVisible);
     }
 
     // Verify form was cleared or redirected
