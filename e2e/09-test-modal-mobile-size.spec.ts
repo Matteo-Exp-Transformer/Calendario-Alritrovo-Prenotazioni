@@ -146,15 +146,15 @@ test.describe('Mobile Modal Size Test', () => {
     const modalFile = readFileSync('src/features/booking/components/BookingDetailsModal.tsx', 'utf-8');
     
     // Check that the modal has the responsive classes
-    expect(modalFile).toContain('max-w-[280px]');
+    expect(modalFile).toContain('w-full h-[50vh]');
     expect(modalFile).toContain('sm:max-w-md');
     
     // Verify the structure is correct for mobile
-    expect(modalFile).toMatch(/max-w-\[280px\]\s+sm:max-w-md/);
+    expect(modalFile).toMatch(/h-\[50vh\]/);
     
     console.log('✅ Modal has correct responsive classes:');
-    console.log('   - Mobile: max-w-[280px]');
-    console.log('   - Desktop: sm:max-w-md (448px)');
-    console.log('   - Reduction: 280px / 448px = 62.5% (approx 67%)');
+    console.log('   - Mobile: w-full h-[50vh] (full width, 50% height)');
+    console.log('   - Desktop: sm:max-w-md (448px width, full height)');
+    console.log('   - Mobile modal is now half the viewport height');
   });
 });
