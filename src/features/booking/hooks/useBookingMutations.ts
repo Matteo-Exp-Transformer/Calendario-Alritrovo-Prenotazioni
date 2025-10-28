@@ -225,10 +225,8 @@ export const useCancelBooking = () => {
       console.log('✅ [useCancelBooking] All bookings queries invalidated')
       toast.success('Prenotazione cancellata con successo!')
 
-      // Send email notification
-      if (areEmailNotificationsEnabled()) {
-        await sendBookingCancelledEmail(booking)
-      }
+      // Email notification disabled for cancellation
+      // No email will be sent when a booking is cancelled
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Errore nella cancellazione della prenotazione')

@@ -54,9 +54,11 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
 
   return (
     <div style={{ 
-      background: 'linear-gradient(to bottom right, #F0F4FF, #E0E7FF, #D8DCFE)',
-      border: '3px solid #818CF8',
-      boxShadow: '0 4px 12px -2px rgba(129, 140, 248, 0.2)'
+      background: 'linear-gradient(to bottom right, rgba(240, 244, 255, 0.9), rgba(224, 231, 255, 0.9), rgba(216, 220, 254, 0.9))',
+      border: '3px solid rgba(129, 140, 248, 0.6)',
+      boxShadow: '0 4px 12px -2px rgba(129, 140, 248, 0.2)',
+      backdropFilter: 'blur(10px)',
+      WebkitBackdropFilter: 'blur(10px)',
     }} className="rounded-2xl hover:shadow-2xl transition-all duration-300 relative">
       {/* Header Collapsible - MOSTRA TUTTI I DATI */}
       <button

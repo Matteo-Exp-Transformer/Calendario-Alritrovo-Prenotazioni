@@ -44,15 +44,20 @@ interface StatCardProps {
   icon: React.ElementType
   gradient: string
   subtitle: string
+  onClick?: () => void
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, gradient, subtitle }) => (
-  <div className={`
-    bg-gradient-to-br ${gradient}
-    text-white rounded-2xl p-4 md:p-6
-    shadow-xl
-    border-2 border-white/20
-  `}>
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, gradient, subtitle, onClick }) => (
+  <div 
+    onClick={onClick}
+    className={`
+      bg-gradient-to-br ${gradient}
+      text-white rounded-2xl p-4 md:p-6
+      shadow-xl
+      border-2 border-white/20
+      ${onClick ? 'cursor-pointer hover:scale-105 transition-all duration-300 hover:shadow-2xl' : ''}
+    `}
+  >
     <div className="flex items-center justify-between">
       <div className="flex-1 min-w-0">
         <p className="text-white/90 text-xs font-bold uppercase tracking-wider">{title}</p>
@@ -68,7 +73,16 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, gradient,
 
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('calendar')
+  const [showPendingPanel, setShowPendingPanel] = useState(false)
   const { data: stats, isLoading: isLoadingStats } = useBookingStats()
+
+  // Chiudi il pannello pendenti quando cambi tab
+  const handleTabChange = (tab: Tab) => {
+    setActiveTab(tab)
+    if (tab !== 'calendar') {
+      setShowPendingPanel(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
@@ -90,26 +104,26 @@ export const AdminDashboard: React.FC = () => {
               icon={Calendar}
               label="Calendario"
               active={activeTab === 'calendar'}
-              onClick={() => setActiveTab('calendar')}
+              onClick={() => handleTabChange('calendar')}
             />
             <NavItem
               icon={Clock}
               label="Prenotazioni Pendenti"
               active={activeTab === 'pending'}
               badge={stats?.pending}
-              onClick={() => setActiveTab('pending')}
+              onClick={() => handleTabChange('pending')}
             />
             <NavItem
               icon={Archive}
               label="Archivio"
               active={activeTab === 'archive'}
-              onClick={() => setActiveTab('archive')}
+              onClick={() => handleTabChange('archive')}
             />
             <NavItem
               icon={Settings}
               label="Impostazioni"
               active={activeTab === 'settings'}
-              onClick={() => setActiveTab('settings')}
+              onClick={() => handleTabChange('settings')}
             />
           </nav>
         </div>
@@ -119,33 +133,62 @@ export const AdminDashboard: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
         {/* Statistiche Cards - Solo se non in modalità impostazioni */}
         {activeTab !== 'settings' && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <StatCard
-              title="Pendenti"
-              value={isLoadingStats ? '...' : stats?.pending || 0}
-              subtitle="In attesa di conferma"
-              icon={Clock}
-              gradient="from-amber-500 to-orange-600"
-            />
-            <StatCard
-              title="Accettate"
-              value={isLoadingStats ? '...' : stats?.accepted || 0}
-              subtitle="Prenotazioni confermate"
-              icon={CheckCircle}
-              gradient="from-green-500 to-emerald-600"
-            />
-            <StatCard
-              title="Totale Mese"
-              value={isLoadingStats ? '...' : stats?.totalMonth || 0}
-              subtitle="Prenotazioni questo mese"
-              icon={TrendingUp}
-              gradient="from-blue-500 to-indigo-600"
-            />
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <StatCard
+                title="Totale Mese"
+                value={isLoadingStats ? '...' : stats?.totalMonth || 0}
+                subtitle="Prenotazioni questo mese"
+                icon={TrendingUp}
+                gradient="from-blue-500 to-indigo-600"
+              />
+              <StatCard
+                title="Accettate"
+                value={isLoadingStats ? '...' : stats?.accepted || 0}
+                subtitle="Prenotazioni confermate"
+                icon={CheckCircle}
+                gradient="from-green-500 to-emerald-600"
+              />
+              <StatCard
+                title="Pendenti"
+                value={isLoadingStats ? '...' : stats?.pending || 0}
+                subtitle="In attesa di conferma"
+                icon={Clock}
+                gradient="from-amber-500 to-orange-600"
+                onClick={() => setShowPendingPanel(!showPendingPanel)}
+              />
+            </div>
+
+            {/* Collapse Card con Prenotazioni Pendenti */}
+            {showPendingPanel && activeTab === 'calendar' && (
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border-2 border-amber-500 overflow-hidden mb-8 animate-slideDown">
+                {/* Header della Collapse Card */}
+                <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-4 border-b-2 border-amber-600 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Prenotazioni Pendenti</h2>
+                    <p className="text-sm text-white/90">{stats?.pending || 0} in attesa</p>
+                  </div>
+                  <button
+                    onClick={() => setShowPendingPanel(false)}
+                    className="p-2 hover:bg-white/20 rounded-full transition-all"
+                  >
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Content - Prenotazioni */}
+                <div className="p-4 max-h-[600px] overflow-y-auto">
+                  <PendingRequestsTab />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
         {/* Tab Content */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 min-h-[600px] border-2 border-purple-100">
+        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 min-h-[600px] border-2 border-purple-100 relative">
           {activeTab === 'calendar' && <BookingCalendarTab />}
           {activeTab === 'pending' && <PendingRequestsTab />}
           {activeTab === 'archive' && <ArchiveTab />}

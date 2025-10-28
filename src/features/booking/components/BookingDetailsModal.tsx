@@ -440,15 +440,28 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
       {/* Confirmation dialog overlay - renders on top of everything */}
       {showCancelConfirm && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center">
+        <div 
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            zIndex: 99999
+          }}
+          className="fixed inset-0"
+        >
           {/* Dark overlay background */}
           <div 
-            className="absolute inset-0 bg-black bg-opacity-60" 
+            style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}
             onClick={() => setShowCancelConfirm(false)}
           />
           
           {/* Confirmation dialog */}
-          <div className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 border-2 border-red-200">
+          <div style={{ backgroundColor: '#FFFFFF', position: 'relative', zIndex: 1 }} className="rounded-2xl shadow-2xl p-8 max-w-lg w-full mx-4 border-2 border-gray-300">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
                 <span className="text-2xl">⚠️</span>
@@ -468,17 +481,19 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
               </p>
             </div>
             
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               <button
                 onClick={() => setShowCancelConfirm(false)}
-                className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                style={{ backgroundColor: '#059669', color: 'white' }}
+                className="flex-1 px-6 py-4 hover:bg-green-700 font-bold text-lg rounded-xl transition-colors flex items-center justify-center gap-2 shadow-xl"
               >
                 <X className="h-5 w-5" />
                 Annulla
               </button>
               <button
                 onClick={handleCancelBooking}
-                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg"
+                style={{ backgroundColor: '#DC2626', color: 'white' }}
+                className="flex-1 px-6 py-4 hover:bg-red-700 font-bold text-lg rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-xl"
                 disabled={cancelMutation.isPending}
               >
                 <Trash2 className="h-5 w-5" />
