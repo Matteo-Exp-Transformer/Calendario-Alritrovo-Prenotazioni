@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react'
 
 export interface CollapsibleCardProps {
   title: string
-  subtitle?: string
+  subtitle?: string | ReactNode
   description?: string
   icon?: React.ComponentType<{ className?: string }>
   children: ReactNode
@@ -232,7 +232,7 @@ export const CollapsibleCard = ({
     >
       {/* Header */}
       <div
-        className={`flex cursor-pointer items-start justify-between gap-4 rounded-t-lg px-4 py-4 transition-colors hover:bg-gray-50 sm:px-6 ${headerClassName}`}
+        className={`flex cursor-pointer items-start justify-between gap-4 rounded-t-lg px-4 py-4 transition-colors hover:bg-gray-50 sm:px-6 relative ${headerClassName}`}
         onClick={toggleExpanded}
         role="button"
         tabIndex={0}
@@ -271,28 +271,30 @@ export const CollapsibleCard = ({
           {actions && (
             <div className="flex items-center space-x-2">{actions}</div>
           )}
-          <button
-            type="button"
-            className="p-1 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-            onClick={e => {
-              e.stopPropagation()
-              toggleExpanded()
-            }}
-            aria-label={isExpanded ? 'Collapse section' : 'Expand section'}
-            disabled={collapseDisabled}
-          >
-            {isExpanded ? (
-              <ChevronUp
-                className="h-4 w-4 text-gray-500 transition-transform duration-200"
-                aria-hidden="true"
-              />
-            ) : (
-              <ChevronDown
-                className="h-4 w-4 text-gray-500 transition-transform duration-200"
-                aria-hidden="true"
-              />
-            )}
-          </button>
+          {!collapseDisabled && (
+            <button
+              type="button"
+              className="p-1 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+              onClick={e => {
+                e.stopPropagation()
+                toggleExpanded()
+              }}
+              aria-label={isExpanded ? 'Collapse section' : 'Expand section'}
+              disabled={collapseDisabled}
+            >
+              {isExpanded ? (
+                <ChevronUp
+                  className="h-4 w-4 text-gray-500 transition-transform duration-200"
+                  aria-hidden="true"
+                />
+              ) : (
+                <ChevronDown
+                  className="h-4 w-4 text-gray-500 transition-transform duration-200"
+                  aria-hidden="true"
+                />
+              )}
+            </button>
+          )}
         </div>
       </div>
 

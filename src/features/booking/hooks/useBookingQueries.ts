@@ -109,10 +109,10 @@ export const useBookingStats = () => {
       const { data: { session } } = await supabase.auth.getSession()
       console.log('🔵 [useBookingStats] Session:', session ? `✅ User ${session.user.email}` : '❌ No session')
       
-      // Use authenticated supabase client
+      // Use authenticated supabase client - fetch confirmed_start for accepted bookings
       const { data: allBookings, error } = await supabase
         .from('booking_requests')
-        .select('id, status')
+        .select('id, status, confirmed_start')
 
       console.log('🔵 [useBookingStats] Query result:', { data: allBookings, error })
 
@@ -123,7 +123,12 @@ export const useBookingStats = () => {
 
       // Calculate stats
       const now = new Date()
+      
+      // Calculate start and end of current month
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      startOfMonth.setHours(0, 0, 0, 0)
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+      endOfMonth.setHours(23, 59, 59, 999)
       
       // Calculate start of week (Monday)
       const dayOfWeek = now.getDay() // 0 = Sunday, 1 = Monday, etc.
@@ -139,25 +144,48 @@ export const useBookingStats = () => {
       
       // Calculate start and end of today
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      startOfDay.setHours(0, 0, 0, 0)
       const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
+      
+      // Filter bookings based on confirmed_start date for accepted bookings
+      // Use confirmed_start for accepted bookings to show when bookings actually happen
+      const acceptedBookings = allBookings?.filter(b => b.status === 'accepted') || []
+      
+      // Helper to extract date from ISO string to avoid timezone issues
+      const getBookingDate = (confirmedStart: string | null): Date | null => {
+        if (!confirmedStart) return null
+        // Extract date directly from ISO string to avoid timezone conversion
+        const dateMatch = confirmedStart.match(/(\d{4})-(\d{2})-(\d{2})/)
+        if (!dateMatch) return null
+        
+        // Create date in local timezone using the extracted date components
+        const year = parseInt(dateMatch[1])
+        const month = parseInt(dateMatch[2]) - 1 // JS months are 0-indexed
+        const day = parseInt(dateMatch[3])
+        
+        return new Date(year, month, day)
+      }
       
       const stats = {
         pending: allBookings?.filter(b => b.status === 'pending').length || 0,
-        accepted: allBookings?.filter(b => b.status === 'accepted').length || 0,
+        accepted: acceptedBookings.length,
         rejected: allBookings?.filter(b => b.status === 'rejected').length || 0,
         total: allBookings?.length || 0,
-        totalMonth: allBookings?.filter(b => {
-          const createdDate = new Date(b.created_at)
-          return createdDate >= startOfMonth && createdDate <= now
-        }).length || 0,
-        totalWeek: allBookings?.filter(b => {
-          const createdDate = new Date(b.created_at)
-          return createdDate >= startOfWeek && createdDate <= endOfWeek
-        }).length || 0,
-        totalDay: allBookings?.filter(b => {
-          const createdDate = new Date(b.created_at)
-          return createdDate >= startOfDay && createdDate <= endOfDay
-        }).length || 0,
+        totalMonth: acceptedBookings.filter(b => {
+          const bookingDate = getBookingDate(b.confirmed_start)
+          if (!bookingDate) return false
+          return bookingDate >= startOfMonth && bookingDate <= endOfMonth
+        }).length,
+        totalWeek: acceptedBookings.filter(b => {
+          const bookingDate = getBookingDate(b.confirmed_start)
+          if (!bookingDate) return false
+          return bookingDate >= startOfWeek && bookingDate <= endOfWeek
+        }).length,
+        totalDay: acceptedBookings.filter(b => {
+          const bookingDate = getBookingDate(b.confirmed_start)
+          if (!bookingDate) return false
+          return bookingDate >= startOfDay && bookingDate <= endOfDay
+        }).length,
       }
 
       console.log('✅ [useBookingStats] Stats computed:', stats)

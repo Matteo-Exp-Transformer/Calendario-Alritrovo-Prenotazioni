@@ -278,20 +278,26 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
               subtitle="10:00 - 14:30"
               icon={Sunrise}
               defaultExpanded={true}
+              collapseDisabled={true}
               className="!border-0 !rounded-none !shadow-none !bg-transparent"
               headerClassName="!bg-green-100 hover:!bg-green-200 transition-colors"
               actions={
-              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-green-600 shadow-md">
-                <div className="text-center">
-                  <div className="text-lg font-extrabold text-white leading-none">
-                    {selectedDateData.capacity.morning.available}
-                  </div>
-                  <div className="text-[9px] font-medium text-green-100 leading-tight">
-                    /{selectedDateData.capacity.morning.capacity}
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex">
+                  <div className="rounded-full bg-transparent" style={{ padding: '12px', boxShadow: '0 0 0 3px #dc2626' }}>
+                    <div className="flex flex-col items-center justify-center bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-2xl w-48 h-48">
+                      <div className="text-6xl font-extrabold text-white leading-none mb-2">
+                        {selectedDateData.capacity.morning.available}
+                      </div>
+                      <div className="text-sm font-semibold text-green-100 uppercase tracking-wide">
+                        Posti liberi
+                      </div>
+                      <div className="text-2xl font-bold text-white mt-3 opacity-75">
+                        {selectedDateData.capacity.morning.capacity} totali
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            }
+              }
           >
               <div className="px-4 sm:px-6 py-4 space-y-10 bg-gradient-to-b from-white/40 via-white/20 to-transparent">
                 {selectedDateData.morningBookings.length > 0 ? (
@@ -409,16 +415,22 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
             subtitle="14:31 - 18:30"
             icon={Sun}
             defaultExpanded={true}
+            collapseDisabled={true}
             className="!border-0 !rounded-none !shadow-none !bg-transparent"
             headerClassName="!bg-yellow-100 hover:!bg-yellow-200 transition-colors"
             actions={
-              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 shadow-md">
-                <div className="text-center">
-                  <div className="text-lg font-extrabold text-gray-900 leading-none">
-                    {selectedDateData.capacity.afternoon.available}
-                  </div>
-                  <div className="text-[9px] font-medium text-yellow-800 leading-tight">
-                    /{selectedDateData.capacity.afternoon.capacity}
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex">
+                <div className="rounded-full bg-transparent" style={{ padding: '12px', boxShadow: '0 0 0 3px #dc2626' }}>
+                  <div className="flex flex-col items-center justify-center bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full shadow-2xl w-48 h-48">
+                    <div className="text-6xl font-extrabold text-gray-900 leading-none mb-2">
+                      {selectedDateData.capacity.afternoon.available}
+                    </div>
+                    <div className="text-sm font-semibold text-yellow-900 uppercase tracking-wide opacity-90">
+                      Posti liberi
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900 mt-3 opacity-75">
+                      {selectedDateData.capacity.afternoon.capacity} totali
+                    </div>
                   </div>
                 </div>
               </div>
@@ -539,16 +551,22 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
             subtitle="18:31 - 23:30"
             icon={Moon}
             defaultExpanded={true}
+            collapseDisabled={true}
             className="!border-0 !rounded-none !shadow-none !bg-transparent"
             headerClassName="!bg-blue-100 hover:!bg-blue-200 transition-colors"
             actions={
-              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 shadow-md">
-                <div className="text-center">
-                  <div className="text-lg font-extrabold text-white leading-none">
-                    {selectedDateData.capacity.evening.available}
-                  </div>
-                  <div className="text-[9px] font-medium text-blue-100 leading-tight">
-                    /{selectedDateData.capacity.evening.capacity}
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex">
+                <div className="rounded-full bg-transparent" style={{ padding: '12px', boxShadow: '0 0 0 3px #dc2626' }}>
+                  <div className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-400 to-blue-500 rounded-full shadow-2xl w-48 h-48">
+                    <div className="text-6xl font-extrabold text-white leading-none mb-2">
+                      {selectedDateData.capacity.evening.available}
+                    </div>
+                    <div className="text-sm font-semibold text-blue-100 uppercase tracking-wide">
+                      Posti liberi
+                    </div>
+                    <div className="text-2xl font-bold text-white mt-3 opacity-75">
+                      {selectedDateData.capacity.evening.capacity} totali
+                    </div>
                   </div>
                 </div>
               </div>
