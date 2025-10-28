@@ -200,7 +200,6 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
           </div>
           {booking.menu && (
             <div className="flex items-center gap-1 mt-0.5 opacity-80 text-[9px] truncate">
-              <UtensilsCrossed className="w-2.5 h-2.5 flex-shrink-0" />
               <span>{booking.menu}</span>
             </div>
           )}
