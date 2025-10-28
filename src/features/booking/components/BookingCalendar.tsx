@@ -278,7 +278,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
               subtitle="10:00 - 14:30"
               icon={Sunrise}
               defaultExpanded={true}
-              collapseDisabled={true}
+              collapseDisabled={false}
               className="!border-0 !rounded-none !shadow-none !bg-transparent"
               headerClassName="!bg-green-100 hover:!bg-green-200 transition-colors"
               actions={
