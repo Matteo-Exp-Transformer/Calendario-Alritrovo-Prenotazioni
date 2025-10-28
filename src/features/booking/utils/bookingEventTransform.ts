@@ -92,14 +92,25 @@ export const transformBookingToCalendarEvent = (
 
   const color = getTimeSlotColor(startDate)
 
+  // Ensure event ends before midnight of the same day to prevent overflow
+  const sameDay = startDate.toISOString().split('T')[0] === endDate.toISOString().split('T')[0]
+  
+  // If the event is multi-day, clamp it to end at 23:59:59 of the start day
+  let eventEnd = endDate
+  if (!sameDay) {
+    eventEnd = new Date(startDate)
+    eventEnd.setHours(23, 59, 59, 0)
+  }
+
   const event: CalendarEvent = {
     id: booking.id,
     title: `${booking.client_name} - ${booking.num_guests} ospiti`,
     start: startDate,
-    end: endDate,
+    end: eventEnd,
     backgroundColor: color.bg,
     borderColor: color.border,
     extendedProps: booking,
+    allDay: false, // Ensure it's not treated as an all-day event
   }
   
   if (color.text) {

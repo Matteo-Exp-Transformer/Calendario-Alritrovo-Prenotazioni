@@ -135,6 +135,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
       hour: '2-digit' as const,
       minute: '2-digit' as const,
     },
+    // Ensure events don't overflow to other days in month view
+    dayMaxEvents: 3,
+    moreLinkClick: 'popover',
     // Highlight today and selected date
     dayCellDidMount: (arg: any) => {
       // ✅ Fix: Estrai date string usando metodi locali per evitare problemi di timezone

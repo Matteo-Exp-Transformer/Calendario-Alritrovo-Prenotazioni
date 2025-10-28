@@ -5,7 +5,9 @@ import { PendingRequestsTab } from '@/features/booking/components/PendingRequest
 import { ArchiveTab } from '@/features/booking/components/ArchiveTab'
 import { BookingCalendarTab } from '@/features/booking/components/BookingCalendarTab'
 import { SettingsTab } from '@/features/booking/components/SettingsTab'
-import { Calendar, Clock, Archive, Settings, CheckCircle, TrendingUp } from 'lucide-react'
+import { AdminBookingForm } from '@/features/booking/components/AdminBookingForm'
+import { Calendar, Clock, Archive, Settings, Plus } from 'lucide-react'
+import { CollapsibleCard } from '@/components/ui/CollapsibleCard'
 
 type Tab = 'calendar' | 'pending' | 'archive' | 'settings'
 
@@ -38,42 +40,11 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, badge, onC
   </button>
 )
 
-interface StatCardProps {
-  title: string
-  value: number | string
-  icon: React.ElementType
-  gradient: string
-  subtitle: string
-  onClick?: () => void
-}
-
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, gradient, subtitle, onClick }) => (
-  <div 
-    onClick={onClick}
-    className={`
-      bg-gradient-to-br ${gradient}
-      text-white rounded-2xl p-4 md:p-6
-      shadow-xl
-      border-2 border-white/20
-      ${onClick ? 'cursor-pointer hover:scale-105 transition-all duration-300 hover:shadow-2xl' : ''}
-    `}
-  >
-    <div className="flex items-center justify-between">
-      <div className="flex-1 min-w-0">
-        <p className="text-white/90 text-xs font-bold uppercase tracking-wider">{title}</p>
-        <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mt-2 mb-1 font-display drop-shadow-lg truncate">{value}</h3>
-        <p className="text-white/80 text-xs md:text-sm font-medium">{subtitle}</p>
-      </div>
-      <div className="bg-white/30 rounded-xl p-3 md:p-4 shadow-lg backdrop-blur-sm flex-shrink-0 ml-2">
-        <Icon className="w-8 h-8 md:w-10 md:h-10" />
-      </div>
-    </div>
-  </div>
-)
 
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('calendar')
   const [showPendingPanel, setShowPendingPanel] = useState(false)
+  const [showNewBookingPanel, setShowNewBookingPanel] = useState(false)
   const { data: stats, isLoading: isLoadingStats } = useBookingStats()
 
   // Chiudi il pannello pendenti quando cambi tab
@@ -111,7 +82,10 @@ export const AdminDashboard: React.FC = () => {
               label="Prenotazioni Pendenti"
               active={activeTab === 'pending'}
               badge={stats?.pending}
-              onClick={() => handleTabChange('pending')}
+              onClick={() => {
+                handleTabChange('pending')
+                setShowPendingPanel(true)
+              }}
             />
             <NavItem
               icon={Archive}
@@ -133,57 +107,39 @@ export const AdminDashboard: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
         {/* Statistiche Cards - Solo se non in modalità impostazioni */}
         {activeTab !== 'settings' && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <StatCard
-                title="Totale Mese"
-                value={isLoadingStats ? '...' : stats?.totalMonth || 0}
-                subtitle="Prenotazioni questo mese"
-                icon={TrendingUp}
-                gradient="from-blue-500 to-indigo-600"
-              />
-              <StatCard
-                title="Accettate"
-                value={isLoadingStats ? '...' : stats?.accepted || 0}
-                subtitle="Prenotazioni confermate"
-                icon={CheckCircle}
-                gradient="from-green-500 to-emerald-600"
-              />
-              <StatCard
-                title="Pendenti"
-                value={isLoadingStats ? '...' : stats?.pending || 0}
-                subtitle="In attesa di conferma"
-                icon={Clock}
-                gradient="from-amber-500 to-orange-600"
-                onClick={() => setShowPendingPanel(!showPendingPanel)}
-              />
-            </div>
+          <div className="space-y-4 mb-8">
+            {/* Collapse Card per Inserisci nuova prenotazione */}
+            <CollapsibleCard
+              title="Inserisci nuova prenotazione"
+              subtitle="Crea una nuova prenotazione nel sistema"
+              icon={Plus}
+              defaultExpanded={false}
+              expanded={showNewBookingPanel}
+              onExpandedChange={setShowNewBookingPanel}
+              className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-300 shadow-xl"
+              headerClassName="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+            >
+              <div className="bg-white rounded-lg">
+                <AdminBookingForm />
+              </div>
+            </CollapsibleCard>
 
             {/* Collapse Card con Prenotazioni Pendenti */}
-            {showPendingPanel && activeTab === 'calendar' && (
-              <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl border-2 border-amber-500 overflow-hidden mb-8 animate-slideDown">
-                {/* Header della Collapse Card */}
-                <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-4 border-b-2 border-amber-600 flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-bold text-white">Prenotazioni Pendenti</h2>
-                    <p className="text-sm text-white/90">{stats?.pending || 0} in attesa</p>
-                  </div>
-                  <button
-                    onClick={() => setShowPendingPanel(false)}
-                    className="p-2 hover:bg-white/20 rounded-full transition-all"
-                  >
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Content - Prenotazioni */}
-                <div className="p-4 max-h-[600px] overflow-y-auto">
-                  <PendingRequestsTab />
-                </div>
+            <CollapsibleCard
+              title="Prenotazioni Pendenti"
+              subtitle={isLoadingStats ? 'Caricamento...' : `${stats?.pending || 0} in attesa`}
+              icon={Clock}
+              defaultExpanded={false}
+              expanded={showPendingPanel}
+              onExpandedChange={setShowPendingPanel}
+              counter={stats?.pending}
+              className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-300 shadow-xl"
+              headerClassName="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+            >
+              <div className="p-4 max-h-[600px] overflow-y-auto">
+                <PendingRequestsTab />
               </div>
-            )}
+            </CollapsibleCard>
           </div>
         )}
 

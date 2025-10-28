@@ -125,13 +125,38 @@ export const useBookingStats = () => {
       const now = new Date()
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
       
+      // Calculate start of week (Monday)
+      const dayOfWeek = now.getDay() // 0 = Sunday, 1 = Monday, etc.
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1 // Adjust for Monday = 0
+      const startOfWeek = new Date(now)
+      startOfWeek.setDate(now.getDate() - daysToMonday)
+      startOfWeek.setHours(0, 0, 0, 0)
+      
+      // Calculate end of week (Sunday)
+      const endOfWeek = new Date(startOfWeek)
+      endOfWeek.setDate(startOfWeek.getDate() + 6)
+      endOfWeek.setHours(23, 59, 59, 999)
+      
+      // Calculate start and end of today
+      const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
+      
       const stats = {
         pending: allBookings?.filter(b => b.status === 'pending').length || 0,
         accepted: allBookings?.filter(b => b.status === 'accepted').length || 0,
+        rejected: allBookings?.filter(b => b.status === 'rejected').length || 0,
         total: allBookings?.length || 0,
         totalMonth: allBookings?.filter(b => {
           const createdDate = new Date(b.created_at)
-          return createdDate >= startOfMonth
+          return createdDate >= startOfMonth && createdDate <= now
+        }).length || 0,
+        totalWeek: allBookings?.filter(b => {
+          const createdDate = new Date(b.created_at)
+          return createdDate >= startOfWeek && createdDate <= endOfWeek
+        }).length || 0,
+        totalDay: allBookings?.filter(b => {
+          const createdDate = new Date(b.created_at)
+          return createdDate >= startOfDay && createdDate <= endOfDay
         }).length || 0,
       }
 
