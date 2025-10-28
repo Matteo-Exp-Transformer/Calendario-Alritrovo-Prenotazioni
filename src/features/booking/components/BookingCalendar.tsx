@@ -199,28 +199,26 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
 
       return (
         <div className="px-2 py-1.5 rounded-lg text-white text-xs hover:opacity-90 transition-opacity cursor-pointer overflow-hidden">
-          <div className="flex gap-2">
-            {/* Left Column - Name, Guests, Menu */}
-            <div className="flex-1 overflow-hidden">
-              <div className="flex items-center gap-1.5 font-semibold truncate">
-                <Users className="w-3 h-3 flex-shrink-0" />
-                <span className="truncate">{booking.client_name}</span>
-              </div>
-              <div className="flex items-center gap-1 mt-0.5 opacity-90 text-[10px]">
-                <span>{booking.num_guests} ospiti</span>
-              </div>
-              {booking.menu && (
-                <div className="flex items-center gap-1 mt-0.5 opacity-80 text-[10px] truncate">
-                  <span>{booking.menu}</span>
-                </div>
-              )}
-            </div>
-            
-            {/* Right Column - Time */}
+          {/* Nome cliente */}
+          <div className="flex items-center gap-1.5 font-semibold truncate mb-1">
+            <Users className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">{booking.client_name}</span>
+          </div>
+          
+          {/* Dati in fila sotto */}
+          <div className="flex items-center gap-2 text-[10px] opacity-90 truncate">
+            <span>{booking.num_guests} ospiti</span>
+            {booking.menu && (
+              <>
+                <span>•</span>
+                <span className="truncate">{booking.menu}</span>
+              </>
+            )}
             {booking.confirmed_start && (
-              <div className="flex flex-col items-end justify-center">
-                <span className="text-[10px] font-semibold opacity-90">{formatTime(booking.confirmed_start)}</span>
-              </div>
+              <>
+                <span>•</span>
+                <span>{formatTime(booking.confirmed_start)}</span>
+              </>
             )}
           </div>
         </div>
