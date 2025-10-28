@@ -82,10 +82,23 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
   // Aggiorna formData quando cambia il booking
   useEffect(() => {
+    // Extract date and time directly from ISO strings to avoid timezone issues
+    const extractDate = (isoString: string | null | undefined) => {
+      if (!isoString) return ''
+      const match = isoString.match(/(\d{4})-(\d{2})-(\d{2})/)
+      return match ? `${match[1]}-${match[2]}-${match[3]}` : ''
+    }
+    
+    const extractTime = (isoString: string | null | undefined) => {
+      if (!isoString) return ''
+      const match = isoString.match(/T(\d{2}):(\d{2})/)
+      return match ? `${match[1]}:${match[2]}` : ''
+    }
+    
     setFormData({
-      date: booking.confirmed_start ? format(new Date(booking.confirmed_start), 'yyyy-MM-dd') : '',
-      startTime: booking.confirmed_start ? format(new Date(booking.confirmed_start), 'HH:mm') : '',
-      endTime: booking.confirmed_end ? format(new Date(booking.confirmed_end), 'HH:mm') : '',
+      date: extractDate(booking.confirmed_start),
+      startTime: extractTime(booking.confirmed_start),
+      endTime: extractTime(booking.confirmed_end),
       numGuests: booking.num_guests,
       specialRequests: booking.special_requests || '',
       menu: booking.menu || '',

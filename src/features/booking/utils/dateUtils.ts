@@ -21,12 +21,9 @@ export function createBookingDateTime(
   const [year, month, day] = date.split('-').map(Number)
   const [hours, minutes] = time.split(':').map(Number)
   
-  // Get timezone offset
-  const tzOffset = new Date().getTimezoneOffset()
-  const tzHours = Math.floor(Math.abs(tzOffset) / 60)
-  const tzMinutes = Math.abs(tzOffset) % 60
-  const tzSign = tzOffset <= 0 ? '+' : '-'
-  const tzString = `${tzSign}${String(tzHours).padStart(2, '0')}:${String(tzMinutes).padStart(2, '0')}`
+  // Always use UTC offset (+00:00) to avoid timezone conversion issues
+  // The time stored is the actual time as entered by the user
+  const tzString = '+00:00'
   
   // If this is an end time and we need to check for midnight crossover
   if (!isStart && startTime) {
@@ -43,6 +40,14 @@ export function createBookingDateTime(
   }
   
   // Normal case - same day
+  console.log('🔍 [createBookingDateTime] Creating datetime:', {
+    date,
+    time,
+    isStart,
+    startTime,
+    result: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00${tzString}`
+  })
+  
   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00${tzString}`
 }
 

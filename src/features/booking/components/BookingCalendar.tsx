@@ -13,6 +13,12 @@ import { BookingDetailsModal } from './BookingDetailsModal'
 import { calculateDailyCapacity, getSlotsOccupiedByBooking } from '../utils/capacityCalculator'
 import { CollapsibleCard } from '@/components/ui/CollapsibleCard'
 
+// Helper to extract time from ISO string without timezone conversion
+const extractTimeFromISO = (isoString: string): string => {
+  const match = isoString.match(/T(\d{2}):(\d{2})/)
+  return match ? `${match[1]}:${match[2]}` : ''
+}
+
 interface BookingCalendarProps {
   bookings: BookingRequest[]
 }
@@ -338,7 +344,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
                               <div className="flex-1 flex items-center gap-2">
                                 <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Orario:</span>
                                 <span className="text-gray-700 font-semibold">
-                                  {format(new Date(booking.confirmed_start), 'HH:mm')} - {booking.confirmed_end && format(new Date(booking.confirmed_end), 'HH:mm')}
+                                  {extractTimeFromISO(booking.confirmed_start)} - {booking.confirmed_end && extractTimeFromISO(booking.confirmed_end)}
                                 </span>
                               </div>
                             </div>
@@ -469,7 +475,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
                               <div className="flex-1 flex items-center gap-2">
                                 <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Orario:</span>
                                 <span className="text-gray-700 font-semibold">
-                                  {format(new Date(booking.confirmed_start), 'HH:mm')} - {booking.confirmed_end && format(new Date(booking.confirmed_end), 'HH:mm')}
+                                  {extractTimeFromISO(booking.confirmed_start)} - {booking.confirmed_end && extractTimeFromISO(booking.confirmed_end)}
                                 </span>
                               </div>
                             </div>
@@ -599,7 +605,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
                               <div className="flex-1 flex items-center gap-2">
                                 <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Orario:</span>
                                 <span className="text-gray-700 font-semibold">
-                                  {format(new Date(booking.confirmed_start), 'HH:mm')} - {booking.confirmed_end && format(new Date(booking.confirmed_end), 'HH:mm')}
+                                  {extractTimeFromISO(booking.confirmed_start)} - {booking.confirmed_end && extractTimeFromISO(booking.confirmed_end)}
                                 </span>
                               </div>
                             </div>
