@@ -341,6 +341,23 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
                         </div>
                       </div>
 
+                      {/* Menu (se presente) */}
+                      {booking.menu && (
+                        <div className="mt-3">
+                          <p className="text-xs text-gray-500 font-semibold mb-1">Menù:</p>
+                          <p className="text-sm text-gray-700 line-clamp-3">{booking.menu}</p>
+                        </div>
+                      )}
+
+                      {/* Note speciali (se presenti) */}
+                      {/* Menu (se presente) */}
+                      {booking.menu && (
+                        <div className="mt-3">
+                          <p className="text-xs text-gray-500 font-semibold mb-1">Menù:</p>
+                          <p className="text-sm text-gray-700 line-clamp-3">{booking.menu}</p>
+                        </div>
+                      )}
+
                       {/* Note speciali (se presenti) */}
                       {booking.special_requests && (
                         <div className="mt-3">
@@ -463,6 +480,15 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
                           </div>
                         </div>
                       </div>
+                      {/* Menu (se presente) */}
+                      {booking.menu && (
+                        <div className="mt-3">
+                          <p className="text-xs text-gray-500 font-semibold mb-1">Menù:</p>
+                          <p className="text-sm text-gray-700 line-clamp-3">{booking.menu}</p>
+                        </div>
+                      )}
+
+                      {/* Note speciali (se presenti) */}
                       {booking.special_requests && (
                         <div className="mt-3">
                           <p className="text-xs text-gray-500 font-semibold mb-1">Note speciali:</p>
@@ -584,6 +610,15 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
                           </div>
                         </div>
                       </div>
+                      {/* Menu (se presente) */}
+                      {booking.menu && (
+                        <div className="mt-3">
+                          <p className="text-xs text-gray-500 font-semibold mb-1">Menù:</p>
+                          <p className="text-sm text-gray-700 line-clamp-3">{booking.menu}</p>
+                        </div>
+                      )}
+
+                      {/* Note speciali (se presenti) */}
                       {booking.special_requests && (
                         <div className="mt-3">
                           <p className="text-xs text-gray-500 font-semibold mb-1">Note speciali:</p>

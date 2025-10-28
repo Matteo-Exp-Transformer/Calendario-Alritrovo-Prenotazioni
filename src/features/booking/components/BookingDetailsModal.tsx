@@ -71,6 +71,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       endTime: booking.confirmed_end ? format(new Date(booking.confirmed_end), 'HH:mm') : '',
       numGuests: booking.num_guests,
       specialRequests: booking.special_requests || '',
+      menu: booking.menu || '',
     }
   })
 
@@ -82,8 +83,9 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       endTime: booking.confirmed_end ? format(new Date(booking.confirmed_end), 'HH:mm') : '',
       numGuests: booking.num_guests,
       specialRequests: booking.special_requests || '',
+      menu: booking.menu || '',
     })
-  }, [booking.id, booking.confirmed_start, booking.confirmed_end, booking.num_guests, booking.special_requests])
+  }, [booking.id, booking.confirmed_start, booking.confirmed_end, booking.num_guests, booking.special_requests, booking.menu])
 
   const handleSave = () => {
     if (!booking.confirmed_start) return
@@ -99,6 +101,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         confirmedEnd,
         numGuests: formData.numGuests,
         specialRequests: formData.specialRequests,
+        menu: formData.menu,
       },
       {
         onSuccess: (updatedBooking) => {
@@ -293,6 +296,16 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                         max="110"
                         value={formData.numGuests}
                         onChange={(e) => setFormData({ ...formData, numGuests: Number(e.target.value) })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-al-ritrovo-primary focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Menù</label>
+                      <textarea
+                        value={formData.menu}
+                        onChange={(e) => setFormData({ ...formData, menu: e.target.value })}
+                        rows={4}
+                        placeholder="Es: Primi €15, Secondi €20..."
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-al-ritrovo-primary focus:border-transparent"
                       />
                     </div>

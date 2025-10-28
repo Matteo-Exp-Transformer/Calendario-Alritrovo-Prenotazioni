@@ -20,6 +20,7 @@ export interface BookingRequest {
   desired_time?: string
   num_guests: number
   special_requests?: string
+  menu?: string
 
   // Status management
   status: BookingStatus

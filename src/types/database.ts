@@ -57,6 +57,7 @@ export interface Database {
           desired_time: string | null
           num_guests: number | null
           special_requests: string | null
+          menu: string | null
           status: string
           confirmed_start: string | null
           confirmed_end: string | null
@@ -77,6 +78,7 @@ export interface Database {
           desired_time?: string | null
           num_guests?: number | null
           special_requests?: string | null
+          menu?: string | null
           status?: string
           confirmed_start?: string | null
           confirmed_end?: string | null
@@ -97,6 +99,7 @@ export interface Database {
           desired_time?: string | null
           num_guests?: number | null
           special_requests?: string | null
+          menu?: string | null
           status?: string
           confirmed_start?: string | null
           confirmed_end?: string | null

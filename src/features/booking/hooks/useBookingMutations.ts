@@ -29,6 +29,7 @@ interface UpdateBookingInput {
   confirmedEnd: string
   numGuests: number
   specialRequests?: string
+  menu?: string
 }
 
 // Mutation per accettare una prenotazione
@@ -147,6 +148,10 @@ export const useUpdateBooking = () => {
 
       if (input.specialRequests !== undefined) {
         updateData.special_requests = input.specialRequests
+      }
+      
+      if (input.menu !== undefined) {
+        updateData.menu = input.menu
       }
       
       console.log('🔵 [useUpdateBooking] Update payload:', updateData)
