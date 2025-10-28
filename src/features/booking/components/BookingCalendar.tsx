@@ -261,68 +261,89 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
               </div>
             }
           >
-              <div className="px-4 sm:px-6 py-4 space-y-4">
+              <div className="px-4 sm:px-6 py-4 space-y-10 bg-gradient-to-b from-white/40 via-white/20 to-transparent">
                 {selectedDateData.morningBookings.length > 0 ? (
                   selectedDateData.morningBookings.map((booking) => (
                     <div
                       key={booking.id}
-                      className="group/card bg-white/95 backdrop-blur-sm p-5 rounded-xl border-2 border-l-6 border-green-500 shadow-lg hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 cursor-pointer"
+                      className="bg-white/98 backdrop-blur-sm p-5 rounded-3xl relative"
+                      style={{
+                        border: '3px solid rgba(255, 255, 255, 0.9)',
+                        boxShadow: '0 0 0 1px rgba(255, 255, 255, 1), 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 3px rgba(255, 255, 255, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.08)',
+                        transform: 'translateY(-2px)',
+                      }}
                     >
-                      {/* Header con Avatar e Nome */}
-                      <div className="flex items-start gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover/card:scale-110 transition-transform flex-shrink-0">
-                          {booking.client_name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-lg text-gray-900 group-hover/card:text-green-700 transition-colors truncate">
-                            {booking.client_name}
-                          </h4>
-                          <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mt-0.5">
-                            ID: {booking.id.slice(0, 8)}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 rounded-full">
-                          <Users className="w-4 h-4 text-green-700" />
-                          <span className="font-bold text-green-800">{booking.num_guests}</span>
-                        </div>
+                      {/* Nome cliente */}
+                      <div className="mb-4">
+                        <h4 className="font-bold text-xl text-gray-900">
+                          {booking.client_name}
+                        </h4>
                       </div>
 
-                      {/* Grid con dati - 2 colonne su desktop */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        {/* Email */}
-                        <div className="flex items-center gap-2.5 bg-gray-50/80 rounded-lg px-3 py-2">
-                          <Mail className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                          <span className="text-gray-700 truncate font-medium">{booking.client_email}</span>
+                      {/* Two-column layout */}
+                      <div className="grid grid-cols-2 gap-6">
+                        {/* Left Column */}
+                        <div className="space-y-4">
+
+                          {/* Email */}
+                          <div className="flex items-center gap-10">
+                            <Mail className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                            <div className="flex-1 flex items-center gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Email:</span>
+                              <span className="text-gray-700 truncate font-medium">{booking.client_email}</span>
+                            </div>
+                          </div>
+
+                          {/* Phone */}
+                          {booking.client_phone && (
+                            <div className="flex items-center gap-10">
+                              <Phone className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                              <div className="flex-1 flex items-center gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Telefono:</span>
+                                <span className="text-gray-700 font-medium">{booking.client_phone}</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
-                        {/* Telefono */}
-                        {booking.client_phone && (
-                          <div className="flex items-center gap-2.5 bg-gray-50/80 rounded-lg px-3 py-2">
-                            <Phone className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                            <span className="text-gray-700 font-medium">{booking.client_phone}</span>
-                          </div>
-                        )}
+                        {/* Right Column */}
+                        <div className="space-y-4">
+                          {/* Time */}
+                          {booking.confirmed_start && (
+                            <div className="flex items-center gap-10">
+                              <Clock className="w-5 h-5 text-green-600 flex-shrink-0" />
+                              <div className="flex-1 flex items-center gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Orario:</span>
+                                <span className="text-gray-700 font-semibold">
+                                  {format(new Date(booking.confirmed_start), 'HH:mm')} - {booking.confirmed_end && format(new Date(booking.confirmed_end), 'HH:mm')}
+                                </span>
+                              </div>
+                            </div>
+                          )}
 
-                        {/* Orario */}
-                        {booking.confirmed_start && (
-                          <div className="flex items-center gap-2.5 bg-green-50/80 rounded-lg px-3 py-2">
-                            <Clock className="w-4 h-4 text-green-600 flex-shrink-0" />
-                            <span className="text-gray-700 font-semibold">
-                              {format(new Date(booking.confirmed_start), 'HH:mm')} - {booking.confirmed_end && format(new Date(booking.confirmed_end), 'HH:mm')}
-                            </span>
+                          {/* Event Type */}
+                          <div className="flex items-center gap-10">
+                            <UtensilsCrossed className="w-5 h-5 text-green-600 flex-shrink-0" />
+                            <div className="flex-1 flex items-center gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Evento:</span>
+                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type.replace(/_/g, ' ')}</span>
+                            </div>
                           </div>
-                        )}
 
-                        {/* Tipo Evento */}
-                        <div className="flex items-center gap-2.5 bg-green-50/80 rounded-lg px-3 py-2">
-                          <UtensilsCrossed className="w-4 h-4 text-green-600 flex-shrink-0" />
-                          <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type.replace(/_/g, ' ')}</span>
+                          {/* Guest Count */}
+                          <div className="flex items-center gap-10">
+                            <Users className="w-5 h-5 text-green-700 flex-shrink-0" />
+                            <div className="flex-1 flex items-center gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Ospiti:</span>
+                              <span className="font-bold text-green-800">{booking.num_guests}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
                       {/* Note speciali (se presenti) */}
                       {booking.special_requests && (
-                        <div className="mt-3 pt-3 border-t border-gray-200">
+                        <div className="mt-3">
                           <p className="text-xs text-gray-500 font-semibold mb-1">Note speciali:</p>
                           <p className="text-sm text-gray-700 italic line-clamp-2">{booking.special_requests}</p>
                         </div>
@@ -363,56 +384,87 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
               </div>
             }
           >
-              <div className="px-4 sm:px-6 py-4 space-y-4">
+              <div className="px-4 sm:px-6 py-4 space-y-10 bg-gradient-to-b from-white/40 via-white/20 to-transparent">
                 {selectedDateData.afternoonBookings.length > 0 ? (
                   selectedDateData.afternoonBookings.map((booking) => (
                     <div
                       key={booking.id}
-                      className="group/card bg-white/95 backdrop-blur-sm p-5 rounded-xl border-2 border-l-6 border-yellow-400 shadow-lg hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 cursor-pointer"
+                      className="bg-white/98 backdrop-blur-sm p-5 rounded-3xl relative"
+                      style={{
+                        border: '3px solid rgba(255, 255, 255, 0.9)',
+                        boxShadow: '0 0 0 1px rgba(255, 255, 255, 1), 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 3px rgba(255, 255, 255, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.08)',
+                        transform: 'translateY(-2px)',
+                      }}
                     >
-                      <div className="flex items-start gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 flex items-center justify-center text-gray-900 font-bold text-lg shadow-lg group-hover/card:scale-110 transition-transform flex-shrink-0">
-                          {booking.client_name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-lg text-gray-900 group-hover/card:text-yellow-700 transition-colors truncate">
-                            {booking.client_name}
-                          </h4>
-                          <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mt-0.5">
-                            ID: {booking.id.slice(0, 8)}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-100 rounded-full">
-                          <Users className="w-4 h-4 text-yellow-700" />
-                          <span className="font-bold text-yellow-800">{booking.num_guests}</span>
-                        </div>
+                      {/* Nome cliente */}
+                      <div className="mb-4">
+                        <h4 className="font-bold text-xl text-gray-900">
+                          {booking.client_name}
+                        </h4>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        <div className="flex items-center gap-2.5 bg-gray-50/80 rounded-lg px-3 py-2">
-                          <Mail className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                          <span className="text-gray-700 truncate font-medium">{booking.client_email}</span>
+
+                      {/* Two-column layout */}
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* Left Column */}
+                        <div className="space-y-4">
+
+                          {/* Email */}
+                          <div className="flex items-center gap-10">
+                            <Mail className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                            <div className="flex-1 flex items-center gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Email:</span>
+                              <span className="text-gray-700 truncate font-medium">{booking.client_email}</span>
+                            </div>
+                          </div>
+
+                          {/* Phone */}
+                          {booking.client_phone && (
+                            <div className="flex items-center gap-10">
+                              <Phone className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                              <div className="flex-1 flex items-center gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Telefono:</span>
+                                <span className="text-gray-700 font-medium">{booking.client_phone}</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        {booking.client_phone && (
-                          <div className="flex items-center gap-2.5 bg-gray-50/80 rounded-lg px-3 py-2">
-                            <Phone className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                            <span className="text-gray-700 font-medium">{booking.client_phone}</span>
+
+                        {/* Right Column */}
+                        <div className="space-y-4">
+                          {/* Time */}
+                          {booking.confirmed_start && (
+                            <div className="flex items-center gap-10">
+                              <Clock className="w-5 h-5 text-yellow-600 flex-shrink-0" />
+                              <div className="flex-1 flex items-center gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Orario:</span>
+                                <span className="text-gray-700 font-semibold">
+                                  {format(new Date(booking.confirmed_start), 'HH:mm')} - {booking.confirmed_end && format(new Date(booking.confirmed_end), 'HH:mm')}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Event Type */}
+                          <div className="flex items-center gap-10">
+                            <UtensilsCrossed className="w-5 h-5 text-yellow-600 flex-shrink-0" />
+                            <div className="flex-1 flex items-center gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Evento:</span>
+                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type.replace(/_/g, ' ')}</span>
+                            </div>
                           </div>
-                        )}
-                        {booking.confirmed_start && (
-                          <div className="flex items-center gap-2.5 bg-yellow-50/80 rounded-lg px-3 py-2">
-                            <Clock className="w-4 h-4 text-yellow-600 flex-shrink-0" />
-                            <span className="text-gray-700 font-semibold">
-                              {format(new Date(booking.confirmed_start), 'HH:mm')} - {booking.confirmed_end && format(new Date(booking.confirmed_end), 'HH:mm')}
-                            </span>
+
+                          {/* Guest Count */}
+                          <div className="flex items-center gap-10">
+                            <Users className="w-5 h-5 text-yellow-700 flex-shrink-0" />
+                            <div className="flex-1 flex items-center gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Ospiti:</span>
+                              <span className="font-bold text-yellow-800">{booking.num_guests}</span>
+                            </div>
                           </div>
-                        )}
-                        <div className="flex items-center gap-2.5 bg-yellow-50/80 rounded-lg px-3 py-2">
-                          <UtensilsCrossed className="w-4 h-4 text-yellow-600 flex-shrink-0" />
-                          <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type.replace(/_/g, ' ')}</span>
                         </div>
                       </div>
                       {booking.special_requests && (
-                        <div className="mt-3 pt-3 border-t border-gray-200">
+                        <div className="mt-3">
                           <p className="text-xs text-gray-500 font-semibold mb-1">Note speciali:</p>
                           <p className="text-sm text-gray-700 italic line-clamp-2">{booking.special_requests}</p>
                         </div>
@@ -453,56 +505,87 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
               </div>
             }
           >
-              <div className="px-4 sm:px-6 py-4 space-y-4">
+              <div className="px-4 sm:px-6 py-4 space-y-10 bg-gradient-to-b from-white/40 via-white/20 to-transparent">
                 {selectedDateData.eveningBookings.length > 0 ? (
                   selectedDateData.eveningBookings.map((booking) => (
                     <div
                       key={booking.id}
-                      className="group/card bg-white/95 backdrop-blur-sm p-5 rounded-xl border-2 border-l-6 border-blue-400 shadow-lg hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 cursor-pointer"
+                      className="bg-white/98 backdrop-blur-sm p-5 rounded-3xl relative"
+                      style={{
+                        border: '3px solid rgba(255, 255, 255, 0.9)',
+                        boxShadow: '0 0 0 1px rgba(255, 255, 255, 1), 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 3px rgba(255, 255, 255, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.08)',
+                        transform: 'translateY(-2px)',
+                      }}
                     >
-                      <div className="flex items-start gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-300 to-blue-500 flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover/card:scale-110 transition-transform flex-shrink-0">
-                          {booking.client_name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-lg text-gray-900 group-hover/card:text-blue-700 transition-colors truncate">
-                            {booking.client_name}
-                          </h4>
-                          <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mt-0.5">
-                            ID: {booking.id.slice(0, 8)}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-100 rounded-full">
-                          <Users className="w-4 h-4 text-blue-700" />
-                          <span className="font-bold text-blue-800">{booking.num_guests}</span>
-                        </div>
+                      {/* Nome cliente */}
+                      <div className="mb-4">
+                        <h4 className="font-bold text-xl text-gray-900">
+                          {booking.client_name}
+                        </h4>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                        <div className="flex items-center gap-2.5 bg-gray-50/80 rounded-lg px-3 py-2">
-                          <Mail className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                          <span className="text-gray-700 truncate font-medium">{booking.client_email}</span>
+
+                      {/* Two-column layout */}
+                      <div className="grid grid-cols-2 gap-6">
+                        {/* Left Column */}
+                        <div className="space-y-4">
+
+                          {/* Email */}
+                          <div className="flex items-center gap-10">
+                            <Mail className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                            <div className="flex-1 flex items-center gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Email:</span>
+                              <span className="text-gray-700 truncate font-medium">{booking.client_email}</span>
+                            </div>
+                          </div>
+
+                          {/* Phone */}
+                          {booking.client_phone && (
+                            <div className="flex items-center gap-10">
+                              <Phone className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                              <div className="flex-1 flex items-center gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Telefono:</span>
+                                <span className="text-gray-700 font-medium">{booking.client_phone}</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        {booking.client_phone && (
-                          <div className="flex items-center gap-2.5 bg-gray-50/80 rounded-lg px-3 py-2">
-                            <Phone className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                            <span className="text-gray-700 font-medium">{booking.client_phone}</span>
+
+                        {/* Right Column */}
+                        <div className="space-y-4">
+                          {/* Time */}
+                          {booking.confirmed_start && (
+                            <div className="flex items-center gap-10">
+                              <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                              <div className="flex-1 flex items-center gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Orario:</span>
+                                <span className="text-gray-700 font-semibold">
+                                  {format(new Date(booking.confirmed_start), 'HH:mm')} - {booking.confirmed_end && format(new Date(booking.confirmed_end), 'HH:mm')}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Event Type */}
+                          <div className="flex items-center gap-10">
+                            <UtensilsCrossed className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                            <div className="flex-1 flex items-center gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Evento:</span>
+                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type.replace(/_/g, ' ')}</span>
+                            </div>
                           </div>
-                        )}
-                        {booking.confirmed_start && (
-                          <div className="flex items-center gap-2.5 bg-blue-50/80 rounded-lg px-3 py-2">
-                            <Clock className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                            <span className="text-gray-700 font-semibold">
-                              {format(new Date(booking.confirmed_start), 'HH:mm')} - {booking.confirmed_end && format(new Date(booking.confirmed_end), 'HH:mm')}
-                            </span>
+
+                          {/* Guest Count */}
+                          <div className="flex items-center gap-10">
+                            <Users className="w-5 h-5 text-blue-700 flex-shrink-0" />
+                            <div className="flex-1 flex items-center gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Ospiti:</span>
+                              <span className="font-bold text-blue-800">{booking.num_guests}</span>
+                            </div>
                           </div>
-                        )}
-                        <div className="flex items-center gap-2.5 bg-blue-50/80 rounded-lg px-3 py-2">
-                          <UtensilsCrossed className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                          <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type.replace(/_/g, ' ')}</span>
                         </div>
                       </div>
                       {booking.special_requests && (
-                        <div className="mt-3 pt-3 border-t border-gray-200">
+                        <div className="mt-3">
                           <p className="text-xs text-gray-500 font-semibold mb-1">Note speciali:</p>
                           <p className="text-sm text-gray-700 italic line-clamp-2">{booking.special_requests}</p>
                         </div>
