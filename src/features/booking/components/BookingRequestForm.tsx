@@ -33,18 +33,27 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Reset num_guests to 0 when cleared
+  // Reset num_guests to 0 when cleared - only allow numeric input
   const handleNumGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value
+    
+    // Only allow numeric characters
     if (inputValue === '') {
       setFormData({ ...formData, num_guests: 0 })
       setErrors({ ...errors, num_guests: '' })
-    } else {
-      const value = parseInt(inputValue) || 0
+    } else if (/^\d+$/.test(inputValue)) {
+      const value = parseInt(inputValue, 10)
       if (value >= 1 && value <= 110) {
         setFormData({ ...formData, num_guests: value })
         setErrors({ ...errors, num_guests: '' })
       }
+    }
+  }
+  
+  const handleNumGuestsKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Only allow numbers
+    if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
+      e.preventDefault()
     }
   }
   const { mutate, isPending } = useCreateBookingRequest()
@@ -278,11 +287,14 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         <Label htmlFor="num_guests" className="text-warm-wood-dark !font-bold text-lg">Numero Ospiti *</Label>
         <Input
           id="num_guests"
-          type="number"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
           min="1"
           max="110"
           value={formData.num_guests || ''}
           onChange={handleNumGuestsChange}
+          onKeyPress={handleNumGuestsKeyPress}
           required
           placeholder="Inserisci numero ospiti"
           className={errors.num_guests ? '!border-red-500' : ''}
