@@ -405,39 +405,32 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       </p>
 
       {/* Modal di Conferma Successo */}
-      <Modal
-        isOpen={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
-        title=""
-        showCloseButton={false}
-        closeOnEscape={false}
-        closeOnOverlayClick={false}
-      >
-        <div className="text-center p-6">
-          <div className="flex justify-center mb-4">
-            <CheckCircle className="h-16 w-16 text-green-600" />
+      {showSuccessModal && (
+        <Modal
+          isOpen={showSuccessModal}
+          onClose={() => {
+            setShowSuccessModal(false)
+            setTimeout(() => {
+              window.history.back()
+            }, 300)
+          }}
+          title="Prenotazione Inviata!"
+          showCloseButton={true}
+        >
+          <div className="text-center p-6">
+            <div className="flex justify-center mb-4">
+              <CheckCircle className="h-16 w-16 text-green-600" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              Prenotazione Inviata con Successo!
+            </h3>
+            <p className="text-lg text-gray-700 mb-6">
+              La tua richiesta di prenotazione è stata inoltrata correttamente.<br />
+              Ti contatteremo a breve per confermare i dettagli.
+            </p>
           </div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-3">
-            Prenotazione Inviata con Successo!
-          </h3>
-          <p className="text-lg text-gray-700 mb-6">
-            La tua richiesta di prenotazione è stata inoltrata correttamente.<br />
-            Ti contatteremo a breve per confermare i dettagli.
-          </p>
-          <button
-            onClick={() => {
-              setShowSuccessModal(false)
-              // Torna alla pagina precedente dopo un breve delay
-              setTimeout(() => {
-                window.history.back()
-              }, 300)
-            }}
-            className="inline-flex items-center justify-center px-8 py-3 text-lg font-semibold text-white bg-green-600 rounded-full hover:bg-green-700 transition-colors shadow-lg"
-          >
-            Chiudi
-          </button>
-        </div>
-      </Modal>
+        </Modal>
+      )}
     </form>
   )
 }
