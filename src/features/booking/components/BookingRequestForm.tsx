@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Input, Textarea, Label } from '@/components/ui'
 import type { BookingRequestInput, EventType } from '@/types/booking'
 import { useCreateBookingRequest } from '../hooks/useBookingRequests'
@@ -348,13 +349,15 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           {/* Label */}
           <label htmlFor="privacy-consent" className="flex-1 cursor-pointer text-sm text-warm-wood-dark font-medium leading-relaxed">
             Accetto la{' '}
-            <a
-              href="/privacy"
+            <Link
+              to="/privacy"
               target="_blank"
+              rel="noopener noreferrer"
               className="font-semibold text-warm-orange hover:text-terracotta underline decoration-2 underline-offset-2 transition-colors"
+              onClick={(e) => e.stopPropagation()}
             >
               Privacy Policy
-            </a>
+            </Link>
             {' '}di Al Ritrovo *
           </label>
         </div>
@@ -365,7 +368,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         <button
           type="submit"
           disabled={isPending || isBlocked}
-          className="group relative overflow-hidden rounded-full bg-gradient-to-r from-warm-wood via-warm-orange to-terracotta px-64 py-40 text-xl font-bold uppercase tracking-wide text-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,105,20,0.4)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl md:w-auto"
+          className="group relative overflow-hidden rounded-full bg-gradient-to-r from-warm-wood via-warm-orange to-terracotta px-64 py-[80px] text-2xl font-bold uppercase tracking-wide text-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,105,20,0.4)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl md:w-auto"
         >
           {/* Glow effect on hover */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
@@ -381,8 +384,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               <span className="text-sm md:text-base">Limite richieste raggiunto</span>
             ) : (
               <>
-                <span className="text-lg">Invia Prenotazione</span>
-                <Send className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                <span className="text-2xl">Invia Prenotazione</span>
+                <Send className="h-6 w-6 transition-transform duration-300 group-hover:translate-x-1" />
               </>
             )}
           </div>
