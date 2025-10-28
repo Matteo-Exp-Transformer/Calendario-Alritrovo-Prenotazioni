@@ -4,12 +4,14 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
-import { Calendar, Users } from 'lucide-react'
+import { Calendar, Users, Sunrise, Sun, Moon, Mail, Phone, Clock, UtensilsCrossed } from 'lucide-react'
 import { format } from 'date-fns'
+import { it } from 'date-fns/locale'
 import type { BookingRequest } from '@/types/booking'
 import { transformBookingsToCalendarEvents } from '../utils/bookingEventTransform'
 import { BookingDetailsModal } from './BookingDetailsModal'
 import { calculateDailyCapacity, getSlotsOccupiedByBooking } from '../utils/capacityCalculator'
+import { CollapsibleCard } from '@/components/ui/CollapsibleCard'
 
 interface BookingCalendarProps {
   bookings: BookingRequest[]
@@ -53,8 +55,17 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
   }
 
   const handleDateClick = (clickInfo: any) => {
-    const date = clickInfo.dateStr
-    console.log('Date clicked:', date, 'clickInfo:', clickInfo)
+    // ✅ Fix: Normalizza la data per evitare problemi di timezone
+    // Ignora dateStr e forza l'estrazione locale dai metodi get* dell'oggetto Date
+    const d = new Date(clickInfo.date)
+    
+    // Usa i metodi locali per evitare conversioni UTC
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    const date = `${year}-${month}-${day}`
+    
+    console.log('Date clicked:', date, 'clickInfo.dateStr:', clickInfo.dateStr, 'arg.date:', clickInfo.date)
     setSelectedDate(date)
   }
 
@@ -120,11 +131,21 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
     },
     // Highlight today and selected date
     dayCellDidMount: (arg: any) => {
+      // ✅ Fix: Estrai date string usando metodi locali per evitare problemi di timezone
+      const d = new Date(arg.date)
+      const year = d.getFullYear()
+      const month = String(d.getMonth() + 1).padStart(2, '0')
+      const day = String(d.getDate()).padStart(2, '0')
+      const cellDateStr = `${year}-${month}-${day}`
+      
+      // Confronta oggi usando metodi locali
       const today = new Date()
-      // Use FullCalendar's dateStr to avoid timezone issues
-      const cellDateStr = arg.dateStr || arg.date.toISOString().split('T')[0]
-      const cellDate = new Date(arg.date)
-      const isToday = cellDate.toDateString() === today.toDateString()
+      const todayYear = today.getFullYear()
+      const todayMonth = String(today.getMonth() + 1).padStart(2, '0')
+      const todayDay = String(today.getDate()).padStart(2, '0')
+      const todayStr = `${todayYear}-${todayMonth}-${todayDay}`
+      
+      const isToday = cellDateStr === todayStr
       const isSelected = cellDateStr === selectedDate
       
       // Remove FullCalendar's default today class
@@ -207,95 +228,297 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
         </div>
 
         {/* Sezione Disponibilità */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-warm-beige">
-          <h3 className="text-lg font-serif font-semibold text-warm-wood mb-4">
-            Disponibilità - {format(new Date(selectedDateData.date), 'dd MMMM yyyy')}
-          </h3>
-          
-          <div className="space-y-6">
-            {/* Mattina */}
-            <div className="border-l-4 border-green-500 bg-gradient-to-r from-green-50 to-white rounded-r-lg p-5 shadow-md">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-green-200">
-                <h4 className="text-xl font-bold text-green-700 flex items-center gap-2">
-                  <span className="text-2xl">🌅</span>
-                  <span>Mattina</span>
-                  <span className="text-base font-normal text-green-600">(10:00 - 14:30)</span>
-                </h4>
-                <div className="px-4 py-2 bg-green-100 border-2 border-green-300 rounded-lg">
-                  <span className="text-lg font-extrabold text-green-700">
-                    {selectedDateData.capacity.morning.available}/{selectedDateData.capacity.morning.capacity} disponibili
-                  </span>
+        <div className="space-y-6">
+          {/* Header con data */}
+          <div className="text-center">
+            <h3 className="text-2xl font-serif font-bold text-warm-wood mb-2">
+              Disponibilità
+            </h3>
+            <p className="text-lg text-gray-600">
+              {format(new Date(selectedDateData.date), 'EEEE, dd MMMM yyyy', { locale: it })}
+            </p>
+          </div>
+
+          {/* Mattina CollapsibleCard */}
+          <div style={{ border: '4px solid #10B981', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.3), 0 2px 4px -1px rgba(16, 185, 129, 0.2)' }} className="overflow-hidden transition-all duration-200 hover:shadow-xl">
+            <CollapsibleCard
+              title="Mattina"
+              subtitle="10:00 - 14:30"
+              icon={Sunrise}
+              defaultExpanded={true}
+              className="!border-0 !rounded-none !shadow-none"
+              headerClassName="bg-white hover:bg-gray-50"
+              actions={
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-green-600 shadow-md">
+                <div className="text-center">
+                  <div className="text-lg font-extrabold text-white leading-none">
+                    {selectedDateData.capacity.morning.available}
+                  </div>
+                  <div className="text-[9px] font-medium text-green-100 leading-tight">
+                    /{selectedDateData.capacity.morning.capacity}
+                  </div>
                 </div>
               </div>
-              <div className="space-y-3">
+            }
+          >
+              <div className="px-4 sm:px-6 py-4 space-y-4">
                 {selectedDateData.morningBookings.length > 0 ? (
                   selectedDateData.morningBookings.map((booking) => (
-                    <div key={booking.id} className="bg-white p-3 rounded-lg border-l-4 border-green-400 shadow-sm hover:shadow-md transition-shadow">
-                      <p className="font-bold text-base text-gray-800">{booking.client_name}</p>
-                      <p className="text-sm text-gray-600 mt-1">{booking.num_guests} ospiti</p>
+                    <div
+                      key={booking.id}
+                      className="group/card bg-white/80 backdrop-blur-sm p-5 rounded-xl border-l-4 border-green-500 shadow-md hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 cursor-pointer"
+                    >
+                      {/* Header con Avatar e Nome */}
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover/card:scale-110 transition-transform flex-shrink-0">
+                          {booking.client_name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-lg text-gray-900 group-hover/card:text-green-700 transition-colors truncate">
+                            {booking.client_name}
+                          </h4>
+                          <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mt-0.5">
+                            ID: {booking.id.slice(0, 8)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 rounded-full">
+                          <Users className="w-4 h-4 text-green-700" />
+                          <span className="font-bold text-green-800">{booking.num_guests}</span>
+                        </div>
+                      </div>
+
+                      {/* Grid con dati - 2 colonne su desktop */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        {/* Email */}
+                        <div className="flex items-center gap-2.5 bg-gray-50/80 rounded-lg px-3 py-2">
+                          <Mail className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                          <span className="text-gray-700 truncate font-medium">{booking.client_email}</span>
+                        </div>
+
+                        {/* Telefono */}
+                        {booking.client_phone && (
+                          <div className="flex items-center gap-2.5 bg-gray-50/80 rounded-lg px-3 py-2">
+                            <Phone className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                            <span className="text-gray-700 font-medium">{booking.client_phone}</span>
+                          </div>
+                        )}
+
+                        {/* Orario */}
+                        {booking.confirmed_start && (
+                          <div className="flex items-center gap-2.5 bg-green-50/80 rounded-lg px-3 py-2">
+                            <Clock className="w-4 h-4 text-green-600 flex-shrink-0" />
+                            <span className="text-gray-700 font-semibold">
+                              {format(new Date(booking.confirmed_start), 'HH:mm')} - {booking.confirmed_end && format(new Date(booking.confirmed_end), 'HH:mm')}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Tipo Evento */}
+                        <div className="flex items-center gap-2.5 bg-green-50/80 rounded-lg px-3 py-2">
+                          <UtensilsCrossed className="w-4 h-4 text-green-600 flex-shrink-0" />
+                          <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type.replace(/_/g, ' ')}</span>
+                        </div>
+                      </div>
+
+                      {/* Note speciali (se presenti) */}
+                      {booking.special_requests && (
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <p className="text-xs text-gray-500 font-semibold mb-1">Note speciali:</p>
+                          <p className="text-sm text-gray-700 italic line-clamp-2">{booking.special_requests}</p>
+                        </div>
+                      )}
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500 italic text-center py-2">Nessuna prenotazione</p>
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-green-100 flex items-center justify-center">
+                      <Sunrise className="w-8 h-8 text-green-500" />
+                    </div>
+                    <p className="text-sm text-gray-500 italic">Nessuna prenotazione per questa fascia oraria</p>
+                  </div>
                 )}
               </div>
-            </div>
+            </CollapsibleCard>
+          </div>
 
-            {/* Pomeriggio */}
-            <div className="border-l-4 border-blue-500 bg-gradient-to-r from-blue-50 to-white rounded-r-lg p-5 shadow-md">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-blue-200">
-                <h4 className="text-xl font-bold text-blue-700 flex items-center gap-2">
-                  <span className="text-2xl">☀️</span>
-                  <span>Pomeriggio</span>
-                  <span className="text-base font-normal text-blue-600">(14:31 - 18:30)</span>
-                </h4>
-                <div className="px-4 py-2 bg-blue-100 border-2 border-blue-300 rounded-lg">
-                  <span className="text-lg font-extrabold text-blue-700">
-                    {selectedDateData.capacity.afternoon.available}/{selectedDateData.capacity.afternoon.capacity} disponibili
-                  </span>
+          {/* Pomeriggio CollapsibleCard */}
+          <div style={{ border: '4px solid #FDE047', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(253, 224, 71, 0.3), 0 2px 4px -1px rgba(253, 224, 71, 0.2)' }} className="overflow-hidden transition-all duration-200 hover:shadow-xl">
+            <CollapsibleCard
+            title="Pomeriggio"
+            subtitle="14:31 - 18:30"
+            icon={Sun}
+            defaultExpanded={true}
+            className="!border-0 !rounded-none !shadow-none"
+            headerClassName="bg-white hover:bg-gray-50"
+            actions={
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 shadow-md">
+                <div className="text-center">
+                  <div className="text-lg font-extrabold text-gray-900 leading-none">
+                    {selectedDateData.capacity.afternoon.available}
+                  </div>
+                  <div className="text-[9px] font-medium text-yellow-800 leading-tight">
+                    /{selectedDateData.capacity.afternoon.capacity}
+                  </div>
                 </div>
               </div>
-              <div className="space-y-3">
+            }
+          >
+              <div className="px-4 sm:px-6 py-4 space-y-4">
                 {selectedDateData.afternoonBookings.length > 0 ? (
                   selectedDateData.afternoonBookings.map((booking) => (
-                    <div key={booking.id} className="bg-white p-3 rounded-lg border-l-4 border-blue-400 shadow-sm hover:shadow-md transition-shadow">
-                      <p className="font-bold text-base text-gray-800">{booking.client_name}</p>
-                      <p className="text-sm text-gray-600 mt-1">{booking.num_guests} ospiti</p>
+                    <div
+                      key={booking.id}
+                      className="group/card bg-white/80 backdrop-blur-sm p-5 rounded-xl border-l-4 border-yellow-400 shadow-md hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 cursor-pointer"
+                    >
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-300 to-yellow-500 flex items-center justify-center text-gray-900 font-bold text-lg shadow-lg group-hover/card:scale-110 transition-transform flex-shrink-0">
+                          {booking.client_name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-lg text-gray-900 group-hover/card:text-yellow-700 transition-colors truncate">
+                            {booking.client_name}
+                          </h4>
+                          <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mt-0.5">
+                            ID: {booking.id.slice(0, 8)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-yellow-100 rounded-full">
+                          <Users className="w-4 h-4 text-yellow-700" />
+                          <span className="font-bold text-yellow-800">{booking.num_guests}</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div className="flex items-center gap-2.5 bg-gray-50/80 rounded-lg px-3 py-2">
+                          <Mail className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                          <span className="text-gray-700 truncate font-medium">{booking.client_email}</span>
+                        </div>
+                        {booking.client_phone && (
+                          <div className="flex items-center gap-2.5 bg-gray-50/80 rounded-lg px-3 py-2">
+                            <Phone className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                            <span className="text-gray-700 font-medium">{booking.client_phone}</span>
+                          </div>
+                        )}
+                        {booking.confirmed_start && (
+                          <div className="flex items-center gap-2.5 bg-yellow-50/80 rounded-lg px-3 py-2">
+                            <Clock className="w-4 h-4 text-yellow-600 flex-shrink-0" />
+                            <span className="text-gray-700 font-semibold">
+                              {format(new Date(booking.confirmed_start), 'HH:mm')} - {booking.confirmed_end && format(new Date(booking.confirmed_end), 'HH:mm')}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2.5 bg-yellow-50/80 rounded-lg px-3 py-2">
+                          <UtensilsCrossed className="w-4 h-4 text-yellow-600 flex-shrink-0" />
+                          <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type.replace(/_/g, ' ')}</span>
+                        </div>
+                      </div>
+                      {booking.special_requests && (
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <p className="text-xs text-gray-500 font-semibold mb-1">Note speciali:</p>
+                          <p className="text-sm text-gray-700 italic line-clamp-2">{booking.special_requests}</p>
+                        </div>
+                      )}
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500 italic text-center py-2">Nessuna prenotazione</p>
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-yellow-100 flex items-center justify-center">
+                      <Sun className="w-8 h-8 text-yellow-500" />
+                    </div>
+                    <p className="text-sm text-gray-500 italic">Nessuna prenotazione per questa fascia oraria</p>
+                  </div>
                 )}
               </div>
-            </div>
+            </CollapsibleCard>
+          </div>
 
-            {/* Sera */}
-            <div className="border-l-4 border-purple-500 bg-gradient-to-r from-purple-50 to-white rounded-r-lg p-5 shadow-md">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-purple-200">
-                <h4 className="text-xl font-bold text-purple-700 flex items-center gap-2">
-                  <span className="text-2xl">🌙</span>
-                  <span>Sera</span>
-                  <span className="text-base font-normal text-purple-600">(18:31 - 23:30)</span>
-                </h4>
-                <div className="px-4 py-2 bg-purple-100 border-2 border-purple-300 rounded-lg">
-                  <span className="text-lg font-extrabold text-purple-700">
-                    {selectedDateData.capacity.evening.available}/{selectedDateData.capacity.evening.capacity} disponibili
-                  </span>
+          {/* Sera CollapsibleCard */}
+          <div style={{ border: '4px solid #93C5FD', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(147, 197, 253, 0.3), 0 2px 4px -1px rgba(147, 197, 253, 0.2)' }} className="overflow-hidden transition-all duration-200 hover:shadow-xl">
+            <CollapsibleCard
+            title="Sera"
+            subtitle="18:31 - 23:30"
+            icon={Moon}
+            defaultExpanded={true}
+            className="!border-0 !rounded-none !shadow-none"
+            headerClassName="bg-white hover:bg-gray-50"
+            actions={
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 shadow-md">
+                <div className="text-center">
+                  <div className="text-lg font-extrabold text-white leading-none">
+                    {selectedDateData.capacity.evening.available}
+                  </div>
+                  <div className="text-[9px] font-medium text-blue-100 leading-tight">
+                    /{selectedDateData.capacity.evening.capacity}
+                  </div>
                 </div>
               </div>
-              <div className="space-y-3">
+            }
+          >
+              <div className="px-4 sm:px-6 py-4 space-y-4">
                 {selectedDateData.eveningBookings.length > 0 ? (
                   selectedDateData.eveningBookings.map((booking) => (
-                    <div key={booking.id} className="bg-white p-3 rounded-lg border-l-4 border-purple-400 shadow-sm hover:shadow-md transition-shadow">
-                      <p className="font-bold text-base text-gray-800">{booking.client_name}</p>
-                      <p className="text-sm text-gray-600 mt-1">{booking.num_guests} ospiti</p>
+                    <div
+                      key={booking.id}
+                      className="group/card bg-white/80 backdrop-blur-sm p-5 rounded-xl border-l-4 border-blue-400 shadow-md hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 cursor-pointer"
+                    >
+                      <div className="flex items-start gap-4 mb-4">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-300 to-blue-500 flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover/card:scale-110 transition-transform flex-shrink-0">
+                          {booking.client_name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-lg text-gray-900 group-hover/card:text-blue-700 transition-colors truncate">
+                            {booking.client_name}
+                          </h4>
+                          <p className="text-xs text-gray-500 uppercase tracking-wide font-medium mt-0.5">
+                            ID: {booking.id.slice(0, 8)}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-100 rounded-full">
+                          <Users className="w-4 h-4 text-blue-700" />
+                          <span className="font-bold text-blue-800">{booking.num_guests}</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div className="flex items-center gap-2.5 bg-gray-50/80 rounded-lg px-3 py-2">
+                          <Mail className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                          <span className="text-gray-700 truncate font-medium">{booking.client_email}</span>
+                        </div>
+                        {booking.client_phone && (
+                          <div className="flex items-center gap-2.5 bg-gray-50/80 rounded-lg px-3 py-2">
+                            <Phone className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                            <span className="text-gray-700 font-medium">{booking.client_phone}</span>
+                          </div>
+                        )}
+                        {booking.confirmed_start && (
+                          <div className="flex items-center gap-2.5 bg-blue-50/80 rounded-lg px-3 py-2">
+                            <Clock className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                            <span className="text-gray-700 font-semibold">
+                              {format(new Date(booking.confirmed_start), 'HH:mm')} - {booking.confirmed_end && format(new Date(booking.confirmed_end), 'HH:mm')}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2.5 bg-blue-50/80 rounded-lg px-3 py-2">
+                          <UtensilsCrossed className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                          <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type.replace(/_/g, ' ')}</span>
+                        </div>
+                      </div>
+                      {booking.special_requests && (
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <p className="text-xs text-gray-500 font-semibold mb-1">Note speciali:</p>
+                          <p className="text-sm text-gray-700 italic line-clamp-2">{booking.special_requests}</p>
+                        </div>
+                      )}
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500 italic text-center py-2">Nessuna prenotazione</p>
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-blue-100 flex items-center justify-center">
+                      <Moon className="w-8 h-8 text-blue-500" />
+                    </div>
+                    <p className="text-sm text-gray-500 italic">Nessuna prenotazione per questa fascia oraria</p>
+                  </div>
                 )}
               </div>
-            </div>
+            </CollapsibleCard>
           </div>
         </div>
 

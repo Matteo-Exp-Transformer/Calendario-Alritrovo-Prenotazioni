@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { Button, Input, Textarea, Label } from '@/components/ui'
+import { Input, Textarea, Label } from '@/components/ui'
 import type { BookingRequestInput, EventType } from '@/types/booking'
 import { useCreateBookingRequest } from '../hooks/useBookingRequests'
 import { useRateLimit } from '@/hooks/useRateLimit'
 import { toast } from 'react-toastify'
+import { Check, Send, Loader2 } from 'lucide-react'
 
 const EVENT_TYPES: { value: EventType; label: string }[] = [
   { value: 'drink_caraffe', label: 'Drink/Caraffe' },
@@ -305,20 +306,40 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         />
       </div>
 
-      {/* Privacy Policy */}
-      <div className="rounded-xl p-5 bg-warm-cream/50 border-2 border-warm-beige">
-        <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            id="privacy-consent"
-            checked={privacyAccepted}
-            onChange={(e) => setPrivacyAccepted(e.target.checked)}
-            required
-            className="mt-1 w-5 h-5 text-warm-wood focus:ring-warm-wood"
-          />
-          <label htmlFor="privacy-consent" className="text-sm cursor-pointer text-warm-wood-dark font-medium">
+      {/* Privacy Policy - Checkbox Piccolo e Stondato */}
+      <div className="rounded-xl p-4 bg-gradient-to-br from-warm-cream/60 via-warm-cream/40 to-transparent border-2 border-warm-beige shadow-sm">
+        <div className="flex items-center gap-3">
+          {/* Custom Checkbox - Più piccolo */}
+          <div className="relative flex-shrink-0">
+            <input
+              type="checkbox"
+              id="privacy-consent"
+              checked={privacyAccepted}
+              onChange={(e) => setPrivacyAccepted(e.target.checked)}
+              required
+              className="peer sr-only"
+            />
+            <label
+              htmlFor="privacy-consent"
+              className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-md border-2 border-warm-wood/40 bg-white shadow-sm transition-all duration-300 hover:border-warm-wood hover:shadow-md peer-checked:border-warm-orange peer-checked:bg-gradient-to-br peer-checked:from-warm-wood peer-checked:to-warm-orange peer-checked:shadow-lg peer-focus-visible:ring-4 peer-focus-visible:ring-warm-wood/20"
+            >
+              <Check
+                className={`h-3.5 w-3.5 text-white transition-all duration-300 ${
+                  privacyAccepted ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+                }`}
+                strokeWidth={3}
+              />
+            </label>
+          </div>
+
+          {/* Label */}
+          <label htmlFor="privacy-consent" className="flex-1 cursor-pointer text-sm text-warm-wood-dark font-medium leading-relaxed">
             Accetto la{' '}
-            <a href="/privacy" target="_blank" className="underline text-warm-orange hover:text-terracotta transition-colors">
+            <a
+              href="/privacy"
+              target="_blank"
+              className="font-semibold text-warm-orange hover:text-terracotta underline decoration-2 underline-offset-2 transition-colors"
+            >
               Privacy Policy
             </a>
             {' '}di Al Ritrovo *
@@ -326,17 +347,39 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         </div>
       </div>
 
-      {/* Submit Button */}
-      <Button
-        type="submit"
-        variant="solid"
-        size="xl"
-        fullWidth
-        disabled={isPending || isBlocked}
-        className="!mt-8"
-      >
-        {isPending ? 'Invio in corso...' : isBlocked ? 'Limite richieste raggiunto' : 'INVIA RICHIESTA PRENOTAZIONE'}
-      </Button>
+      {/* Submit Button - 1/3 larghezza, allineato a sinistra, più alto */}
+      <div className="flex justify-start">
+        <button
+          type="submit"
+          disabled={isPending || isBlocked}
+          className="group relative overflow-hidden rounded-full bg-gradient-to-r from-warm-wood via-warm-orange to-terracotta px-10 py-6 text-base font-bold uppercase tracking-wide text-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,105,20,0.4)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl md:w-auto w-full"
+        >
+          {/* Glow effect on hover */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+
+          {/* Content */}
+          <div className="relative flex items-center justify-center gap-3 whitespace-nowrap">
+            {isPending ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span className="text-sm md:text-base">Invio in corso...</span>
+              </>
+            ) : isBlocked ? (
+              <span className="text-sm md:text-base">Limite richieste raggiunto</span>
+            ) : (
+              <>
+                <span className="text-sm md:text-base">Invia Prenotazione</span>
+                <Send className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </>
+            )}
+          </div>
+
+          {/* Animated border glow */}
+          <div className="absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <div className="absolute inset-[-2px] rounded-full bg-gradient-to-r from-warm-wood via-warm-orange to-terracotta blur-sm"></div>
+          </div>
+        </button>
+      </div>
 
       <p className="text-xs text-center text-gray-600">
         * I campi contrassegnati sono obbligatori.
