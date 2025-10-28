@@ -363,12 +363,13 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         </div>
       </div>
 
-      {/* Submit Button - 1/3 larghezza, allineato a sinistra, più alto */}
+      {/* Submit Button - Ovale GRANDE e allungato orizzontalmente */}
       <div className="flex justify-start">
         <button
           type="submit"
           disabled={isPending || isBlocked}
-          className="group relative overflow-hidden rounded-full bg-gradient-to-r from-warm-wood via-warm-orange to-terracotta px-64 py-[80px] text-2xl font-bold uppercase tracking-wide text-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,105,20,0.4)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl md:w-auto"
+          style={{ backgroundColor: '#22c55e', paddingLeft: '256px', paddingRight: '256px', paddingTop: '100px', paddingBottom: '100px', borderRadius: '50px' }}
+          className="group relative overflow-hidden bg-green-600 px-[256px] py-[25px] text-2xl font-bold uppercase tracking-wide text-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(34,197,94,0.4)] hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl md:w-auto"
         >
           {/* Glow effect on hover */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>

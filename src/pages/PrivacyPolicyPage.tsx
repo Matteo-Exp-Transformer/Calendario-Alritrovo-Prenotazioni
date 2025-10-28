@@ -36,8 +36,8 @@ export const PrivacyPolicyPage: React.FC = () => {
               </p>
               <div className="bg-warm-cream/50 border-l-4 border-warm-wood p-4 rounded-lg mb-4">
                 <p className="font-bold text-warm-wood-dark text-lg">Al Ritrovo</p>
-                <p className="text-gray-700">Via degli Orefici, 4 - Bologna</p>
-                <p className="text-gray-700">40124 Bologna (BO), Italia</p>
+                <p className="text-gray-700">Via Centotrecento 1/1B</p>
+                <p className="text-gray-700">40126 Bologna (BO), Italia</p>
                 <p className="text-gray-700 mt-2">
                   Email: <a href="mailto:info@alritrovo.com" className="text-warm-orange hover:underline font-semibold">
                     info@alritrovo.com
