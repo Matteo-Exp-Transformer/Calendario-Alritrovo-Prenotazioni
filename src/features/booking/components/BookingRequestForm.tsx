@@ -139,6 +139,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     mutate(formData, {
       onSuccess: () => {
         console.log('✅ [BookingForm] Mutation successful!')
+        console.log('🔵 [BookingForm] Setting showSuccessModal to true')
         // Reset form
         setFormData({
           client_name: '',
@@ -153,6 +154,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         setPrivacyAccepted(false)
         // Mostra la modal di conferma invece del toast
         setShowSuccessModal(true)
+        console.log('✅ [BookingForm] showSuccessModal set to true')
         onSubmit?.()
       },
       onError: (error) => {
@@ -407,6 +409,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     </form>
 
     {/* Modal di Conferma Successo */}
+    {console.log('🔍 [BookingForm] Rendering, showSuccessModal:', showSuccessModal)}
     {showSuccessModal && (
       <Modal
         isOpen={showSuccessModal}
