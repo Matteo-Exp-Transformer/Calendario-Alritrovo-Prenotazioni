@@ -159,21 +159,21 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
 
       <div
-        className="absolute right-0 top-0 bottom-0 w-full max-w-lg shadow-2xl overflow-y-auto flex flex-col"
+        className="absolute right-0 top-0 bottom-0 w-full max-w-md shadow-2xl overflow-y-auto flex flex-col"
         style={{
           position: 'absolute',
           backgroundColor: '#FEF3C7' // bg-amber-100
         }}
       >
         {/* Header */}
-        <div className={`${eventConfig.bg} border-b ${eventConfig.border} p-4`}>
-          <div className="flex items-center justify-between mb-4">
+        <div className={`${eventConfig.bg} border-b ${eventConfig.border} p-3`}>
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-3">
               <div className={`p-3 ${eventConfig.bg} rounded-lg border ${eventConfig.border}`}>
                 <span className="text-2xl">{eventConfig.icon}</span>
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">
+                <h2 className="text-lg font-bold text-gray-900">
                   {EVENT_TYPE_LABELS[booking.event_type]}
                 </h2>
                 <p className="text-sm text-gray-600">
@@ -203,7 +203,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 bg-amber-100">
+        <div className="flex-1 overflow-y-auto p-3 bg-amber-100">
           {!showCancelConfirm && (
             <div className="space-y-6">
               {/* Sezione Header */}
@@ -355,7 +355,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
         {/* Footer Actions */}
         {!showCancelConfirm && (
-          <div className="border-t border-gray-200 p-4 bg-amber-100">
+          <div className="border-t border-gray-200 p-3 bg-amber-100">
             <div className="flex gap-3">
               {isEditMode ? (
                 <>
