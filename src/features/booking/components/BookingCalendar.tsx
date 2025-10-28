@@ -36,11 +36,11 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
   useEffect(() => {
     if (selectedBooking) {
       const updatedBooking = bookings.find(b => b.id === selectedBooking.id)
-      if (updatedBooking) {
+      if (updatedBooking && JSON.stringify(updatedBooking) !== JSON.stringify(selectedBooking)) {
         setSelectedBooking(updatedBooking)
       }
     }
-  }, [bookings])
+  }, [bookings, selectedBooking])
 
   // Force calendar re-render when selectedDate changes
   useEffect(() => {
