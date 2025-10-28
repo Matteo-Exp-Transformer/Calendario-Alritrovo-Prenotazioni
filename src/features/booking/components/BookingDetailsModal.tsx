@@ -261,7 +261,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
 
       <div
-        className="absolute right-0 bottom-0 w-full h-[50vh] sm:right-0 sm:top-0 sm:bottom-0 sm:h-auto sm:max-w-md sm:w-auto shadow-2xl overflow-y-auto flex flex-col"
+        className="absolute right-0 bottom-0 w-full h-[70vh] sm:right-0 sm:top-0 sm:bottom-0 sm:h-auto sm:max-w-md sm:w-auto shadow-2xl overflow-y-auto flex flex-col"
         style={{
           position: 'absolute',
           backgroundColor: '#FEF3C7' // bg-amber-100
