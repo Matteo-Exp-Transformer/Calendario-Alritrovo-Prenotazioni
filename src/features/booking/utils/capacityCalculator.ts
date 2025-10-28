@@ -9,25 +9,20 @@ function parseTime(time: string): number {
 
 // Extract time from ISO string - handles both local and UTC times properly
 function extractTimeFromISO(isoString: string): string {
-  // Parse ISO string and extract time components in UTC to avoid timezone conversion
-  // If string has +00 or Z, parse as UTC
-  let date: Date
+  // Always extract time components directly from the ISO string
+  // to avoid timezone conversion issues
+  const match = isoString.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
   
-  if (isoString.includes('+00') || isoString.endsWith('Z')) {
-    // Parse as UTC - extract components from string directly
-    const match = isoString.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
-    if (match) {
-      const hour = match[4]
-      const minute = match[5]
-      // Return hour directly from UTC string (no timezone conversion)
-      // This ensures consistency with how dates are stored in database
-      return `${hour}:${minute}`
-    }
-    date = new Date(isoString)
-  } else {
-    date = new Date(isoString)
+  if (match) {
+    const hour = match[4]
+    const minute = match[5]
+    console.log('🔍 [extractTimeFromISO] Extracted time:', `${hour}:${minute}`, 'from:', isoString)
+    // Return time directly from string (no timezone conversion)
+    return `${hour}:${minute}`
   }
   
+  // Fallback to Date parsing
+  const date = new Date(isoString)
   const hours = date.getHours().toString().padStart(2, '0')
   const minutes = date.getMinutes().toString().padStart(2, '0')
   return `${hours}:${minutes}`
@@ -46,16 +41,35 @@ export function getSlotsOccupiedByBooking(start: string, _end: string): TimeSlot
   const eveningStart = parseTime(CAPACITY_CONFIG.EVENING_START)
   const eveningEnd = parseTime(CAPACITY_CONFIG.EVENING_END)
   
+  console.log('🔍 [getSlotsOccupiedByBooking]', {
+    startISO: start,
+    startTime,
+    startMinutes,
+    morningStart,
+    morningEnd,
+    afternoonStart,
+    afternoonEnd,
+    eveningStart,
+    eveningEnd
+  })
+  
   const slots: TimeSlot[] = []
   
   // Simple rule: booking goes to the slot where it STARTS
   if (startMinutes >= morningStart && startMinutes <= morningEnd) {
+    console.log('✅ Added to morning')
     slots.push('morning')
   } else if (startMinutes >= afternoonStart && startMinutes <= afternoonEnd) {
+    console.log('✅ Added to afternoon')
     slots.push('afternoon')
   } else if (startMinutes >= eveningStart && startMinutes <= eveningEnd) {
+    console.log('✅ Added to evening')
     slots.push('evening')
+  } else {
+    console.log('⚠️ No slot matched!')
   }
+  
+  console.log('📊 Final slots:', slots)
   
   return slots
 }
