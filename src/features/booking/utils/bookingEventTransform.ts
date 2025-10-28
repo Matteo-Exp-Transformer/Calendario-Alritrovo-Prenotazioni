@@ -67,13 +67,6 @@ export const transformBookingToCalendarEvent = (
     endDate = new Date(endStr)
   }
 
-  console.log('🔍 [transformBookingToCalendarEvent]', {
-    startStr,
-    endStr,
-    startDate: startDate.toISOString(),
-    hour: startDate.getHours()
-  })
-
   const color = getTimeSlotColor(startDate)
 
   const event: CalendarEvent = {

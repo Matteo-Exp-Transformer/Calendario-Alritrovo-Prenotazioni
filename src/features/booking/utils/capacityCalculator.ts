@@ -9,23 +9,19 @@ function parseTime(time: string): number {
 
 // Extract time from ISO string - handles both local and UTC times properly
 function extractTimeFromISO(isoString: string): string {
-  // Always extract time components directly from the ISO string
-  // to avoid timezone conversion issues
+  // Always extract time components directly from the ISO string to avoid timezone issues
   const match = isoString.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
   
   if (match) {
     const hour = match[4]
     const minute = match[5]
-    console.log('🔍 [extractTimeFromISO] Extracted time:', `${hour}:${minute}`, 'from:', isoString)
     // Return time directly from string (no timezone conversion)
     return `${hour}:${minute}`
   }
   
-  // Fallback to Date parsing
-  const date = new Date(isoString)
-  const hours = date.getHours().toString().padStart(2, '0')
-  const minutes = date.getMinutes().toString().padStart(2, '0')
-  return `${hours}:${minutes}`
+  // Fallback: extract using substring
+  const timePart = isoString.split('T')[1]?.substring(0, 5)
+  return timePart || ''
 }
 
 // Get slots occupied by a booking
@@ -41,35 +37,16 @@ export function getSlotsOccupiedByBooking(start: string, _end: string): TimeSlot
   const eveningStart = parseTime(CAPACITY_CONFIG.EVENING_START)
   const eveningEnd = parseTime(CAPACITY_CONFIG.EVENING_END)
   
-  console.log('🔍 [getSlotsOccupiedByBooking]', {
-    startISO: start,
-    startTime,
-    startMinutes,
-    morningStart,
-    morningEnd,
-    afternoonStart,
-    afternoonEnd,
-    eveningStart,
-    eveningEnd
-  })
-  
   const slots: TimeSlot[] = []
   
   // Simple rule: booking goes to the slot where it STARTS
   if (startMinutes >= morningStart && startMinutes <= morningEnd) {
-    console.log('✅ Added to morning')
     slots.push('morning')
   } else if (startMinutes >= afternoonStart && startMinutes <= afternoonEnd) {
-    console.log('✅ Added to afternoon')
     slots.push('afternoon')
   } else if (startMinutes >= eveningStart && startMinutes <= eveningEnd) {
-    console.log('✅ Added to evening')
     slots.push('evening')
-  } else {
-    console.log('⚠️ No slot matched!')
   }
-  
-  console.log('📊 Final slots:', slots)
   
   return slots
 }

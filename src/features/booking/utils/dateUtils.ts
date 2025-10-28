@@ -40,14 +40,6 @@ export function createBookingDateTime(
   }
   
   // Normal case - same day
-  console.log('🔍 [createBookingDateTime] Creating datetime:', {
-    date,
-    time,
-    isStart,
-    startTime,
-    result: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00${tzString}`
-  })
-  
   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00${tzString}`
 }
 

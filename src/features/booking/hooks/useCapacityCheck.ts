@@ -82,15 +82,7 @@ export function useCapacityCheck(params: UseCapacityCheckParams): AvailabilityCh
         endTimeStr = booking.confirmed_end.split('T')[1].substring(0, 5)
       }
       
-      console.log('🔍 [useCapacityCheck] Booking times:', {
-        confirmed_start: booking.confirmed_start,
-        confirmed_end: booking.confirmed_end,
-        startTimeStr,
-        endTimeStr
-      })
-      
       const slots = getSlotsOccupiedByTimeString(startTimeStr, endTimeStr)
-      console.log('📊 [useCapacityCheck] Booking slots:', slots)
       const guests = booking.num_guests || 0
 
       for (const slot of slots) {
