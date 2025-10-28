@@ -54,9 +54,6 @@ export const useCreateBookingRequest = () => {
       console.log('✅ [useCreateBookingRequest] Success! Result:', result)
       return result as BookingRequest
     },
-    onSuccess: () => {
-      toast.success('Richiesta inviata con successo! Ti contatteremo a breve.')
-    },
     onError: (error: Error) => {
       toast.error(error.message || 'Errore nell\'invio della richiesta')
     }

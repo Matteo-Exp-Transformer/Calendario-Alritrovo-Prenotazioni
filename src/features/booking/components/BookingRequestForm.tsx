@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Input, Textarea } from '@/components/ui'
+import { Input, Textarea, Modal } from '@/components/ui'
 import type { BookingRequestInput, EventType } from '@/types/booking'
 import { useCreateBookingRequest } from '../hooks/useBookingRequests'
 import { useRateLimit } from '@/hooks/useRateLimit'
 import { toast } from 'react-toastify'
-import { Check, Send, Loader2 } from 'lucide-react'
+import { Check, Send, Loader2, CheckCircle } from 'lucide-react'
 
 const EVENT_TYPES: { value: EventType; label: string }[] = [
   { value: 'drink_caraffe', label: 'Drink/Caraffe' },
@@ -33,6 +33,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
 
   // Reset num_guests to 0 when cleared - only allow numeric input
   const handleNumGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,6 +151,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           special_requests: ''
         })
         setPrivacyAccepted(false)
+        // Mostra la modal di conferma invece del toast
+        setShowSuccessModal(true)
         onSubmit?.()
       },
       onError: (error) => {
@@ -400,6 +403,41 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       <p className="text-xs text-center text-gray-600">
         * I campi contrassegnati sono obbligatori.
       </p>
+
+      {/* Modal di Conferma Successo */}
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        title=""
+        showCloseButton={false}
+        closeOnEscape={false}
+        closeOnOverlayClick={false}
+      >
+        <div className="text-center p-6">
+          <div className="flex justify-center mb-4">
+            <CheckCircle className="h-16 w-16 text-green-600" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">
+            Prenotazione Inviata con Successo!
+          </h3>
+          <p className="text-lg text-gray-700 mb-6">
+            La tua richiesta di prenotazione è stata inoltrata correttamente.<br />
+            Ti contatteremo a breve per confermare i dettagli.
+          </p>
+          <button
+            onClick={() => {
+              setShowSuccessModal(false)
+              // Torna alla pagina precedente dopo un breve delay
+              setTimeout(() => {
+                window.history.back()
+              }, 300)
+            }}
+            className="inline-flex items-center justify-center px-8 py-3 text-lg font-semibold text-white bg-green-600 rounded-full hover:bg-green-700 transition-colors shadow-lg"
+          >
+            Chiudi
+          </button>
+        </div>
+      </Modal>
     </form>
   )
 }
