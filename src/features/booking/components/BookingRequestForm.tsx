@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Input, Textarea, Modal } from '@/components/ui'
+import { Input, Textarea } from '@/components/ui'
 import type { BookingRequestInput, EventType } from '@/types/booking'
 import { useCreateBookingRequest } from '../hooks/useBookingRequests'
 import { useRateLimit } from '@/hooks/useRateLimit'
@@ -409,31 +409,43 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     </form>
 
     {/* Modal di Conferma Successo */}
-    <Modal
-      isOpen={showSuccessModal}
-      onClose={() => {
-        console.log('🔴 [Modal] onClose chiamato')
-        setShowSuccessModal(false)
-        setTimeout(() => {
-          window.history.back()
-        }, 300)
-      }}
-      title="Prenotazione Inviata!"
-      showCloseButton={true}
-    >
-      <div className="text-center p-6">
-        <div className="flex justify-center mb-4">
-          <CheckCircle className="h-16 w-16 text-green-600" />
+    {showSuccessModal && (
+      <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '8px', maxWidth: '500px', textAlign: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+            <CheckCircle className="h-16 w-16 text-green-600" />
+          </div>
+          <h3 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px' }}>
+            Prenotazione Inviata con Successo!
+          </h3>
+          <p style={{ fontSize: '18px', marginBottom: '20px' }}>
+            La tua richiesta di prenotazione è stata inoltrata correttamente.<br />
+            Ti contatteremo a breve per confermare i dettagli.
+          </p>
+          <button
+            onClick={() => {
+              console.log('🔴 [Modal] Closing via button')
+              setShowSuccessModal(false)
+              setTimeout(() => {
+                window.history.back()
+              }, 300)
+            }}
+            style={{ 
+              padding: '12px 32px', 
+              fontSize: '18px', 
+              fontWeight: 'bold', 
+              color: 'white', 
+              backgroundColor: '#22c55e', 
+              border: 'none', 
+              borderRadius: '999px',
+              cursor: 'pointer'
+            }}
+          >
+            Chiudi
+          </button>
         </div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-3">
-          Prenotazione Inviata con Successo!
-        </h3>
-        <p className="text-lg text-gray-700 mb-6">
-          La tua richiesta di prenotazione è stata inoltrata correttamente.<br />
-          Ti contatteremo a breve per confermare i dettagli.
-        </p>
       </div>
-    </Modal>
+    )}
     </>
   )
 }
