@@ -39,14 +39,30 @@ export function getSlotsOccupiedByBooking(start: string, _end: string): TimeSlot
   
   const slots: TimeSlot[] = []
   
+  console.log('🔍 [getSlotsOccupiedByBooking]', {
+    startISO: start,
+    startTime,
+    startMinutes,
+    morning: `${morningStart}-${morningEnd}`,
+    afternoon: `${afternoonStart}-${afternoonEnd}`,
+    evening: `${eveningStart}-${eveningEnd}`
+  })
+  
   // Simple rule: booking goes to the slot where it STARTS
   if (startMinutes >= morningStart && startMinutes <= morningEnd) {
+    console.log('✅ Added to morning')
     slots.push('morning')
   } else if (startMinutes >= afternoonStart && startMinutes <= afternoonEnd) {
+    console.log('✅ Added to afternoon')
     slots.push('afternoon')
   } else if (startMinutes >= eveningStart && startMinutes <= eveningEnd) {
+    console.log('✅ Added to evening')
     slots.push('evening')
+  } else {
+    console.log('⚠️ NO SLOT MATCHED!')
   }
+  
+  console.log('📊 Final slots:', slots)
   
   return slots
 }
