@@ -423,15 +423,15 @@ export const Calendar: React.FC<CalendarProps> = ({
         <div className="flex flex-wrap items-center gap-3 text-xs">
           <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white border border-gray-200">
             <div className="w-8 h-3 rounded" style={{ background: 'linear-gradient(180deg, #10B981 0%, #059669 100%)' }}></div>
-            <span className="text-gray-700 font-medium">🌅 Mattina (08:00-12:00)</span>
+            <span className="text-gray-700 font-medium">🌅 Mattina (10:00-14:30)</span>
           </div>
           <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white border border-gray-200">
             <div className="w-8 h-3 rounded" style={{ background: 'linear-gradient(180deg, #FDE047 0%, #FACC15 100%)' }}></div>
-            <span className="text-gray-700 font-medium">🌆 Pomeriggio (12:01-17:00)</span>
+            <span className="text-gray-700 font-medium">🌆 Pomeriggio (14:31-18:30)</span>
           </div>
           <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white border border-gray-200">
             <div className="w-8 h-3 rounded" style={{ background: 'linear-gradient(180deg, #93C5FD 0%, #60A5FA 100%)' }}></div>
-            <span className="text-gray-700 font-medium">🌃 Sera (17:01-07:59)</span>
+            <span className="text-gray-700 font-medium">🌃 Sera (18:31-23:30)</span>
           </div>
         </div>
       </div>

@@ -1,27 +1,50 @@
 import type { BookingRequest } from '@/types/booking'
 import type { CalendarEvent } from '@/types/booking'
 
+import { CAPACITY_CONFIG } from '../constants/capacity'
+
 // Colori in base alla fascia oraria (delicati e leggibili)
 const TIME_SLOT_COLORS = {
-  morning: { bg: '#10B981', border: '#059669', text: '#000000' },           // Verde: 08:00-12:00
-  afternoon: { bg: '#FDE047', border: '#FACC15', text: '#000000' },          // Giallo delicato: 12:01-17:00
-  evening: { bg: '#93C5FD', border: '#60A5FA', text: '#000000' },           // Azzurro delicato: 17:01-07:59
+  morning: { bg: '#10B981', border: '#059669', text: '#000000' },           // Verde: 10:00-14:30
+  afternoon: { bg: '#FDE047', border: '#FACC15', text: '#000000' },          // Giallo: 14:31-18:30
+  evening: { bg: '#93C5FD', border: '#60A5FA', text: '#000000' },           // Azzurro: 18:31-23:30
 }
 
 /**
  * Determina il colore in base alla fascia oraria di inizio
- * - Verde: 08:00 - 12:00
- * - Arancione: 12:01 - 17:00
- * - Azzurro: 17:01 - 07:59
+ * Uses the same boundaries as capacity config for consistency:
+ * - Morning: 10:00 - 14:30
+ * - Afternoon: 14:31 - 18:30
+ * - Evening: 18:31 - 23:30
  */
 function getTimeSlotColor(startDate: Date): { bg: string; border: string; text: string } {
   const hour = startDate.getHours()
+  const minute = startDate.getMinutes()
+  const totalMinutes = hour * 60 + minute
   
-  if (hour >= 8 && hour < 12) {
+  // Parse capacity config boundaries
+  const [morningStartHour, morningStartMin] = CAPACITY_CONFIG.MORNING_START.split(':').map(Number)
+  const [morningEndHour, morningEndMin] = CAPACITY_CONFIG.MORNING_END.split(':').map(Number)
+  const [afternoonStartHour, afternoonStartMin] = CAPACITY_CONFIG.AFTERNOON_START.split(':').map(Number)
+  const [afternoonEndHour, afternoonEndMin] = CAPACITY_CONFIG.AFTERNOON_END.split(':').map(Number)
+  const [eveningStartHour, eveningStartMin] = CAPACITY_CONFIG.EVENING_START.split(':').map(Number)
+  const [eveningEndHour, eveningEndMin] = CAPACITY_CONFIG.EVENING_END.split(':').map(Number)
+  
+  const morningStart = morningStartHour * 60 + morningStartMin  // 10:00 = 600
+  const morningEnd = morningEndHour * 60 + morningEndMin         // 14:30 = 870
+  const afternoonStart = afternoonStartHour * 60 + afternoonStartMin  // 14:31 = 871
+  const afternoonEnd = afternoonEndHour * 60 + afternoonEndMin    // 18:30 = 1110
+  const eveningStart = eveningStartHour * 60 + eveningStartMin    // 18:31 = 1111
+  const eveningEnd = eveningEndHour * 60 + eveningEndMin         // 23:30 = 1410
+  
+  if (totalMinutes >= morningStart && totalMinutes <= morningEnd) {
     return TIME_SLOT_COLORS.morning
-  } else if (hour >= 12 && hour < 17) {
+  } else if (totalMinutes >= afternoonStart && totalMinutes <= afternoonEnd) {
     return TIME_SLOT_COLORS.afternoon
+  } else if (totalMinutes >= eveningStart && totalMinutes <= eveningEnd) {
+    return TIME_SLOT_COLORS.evening
   } else {
+    // Default to evening if outside all ranges
     return TIME_SLOT_COLORS.evening
   }
 }
