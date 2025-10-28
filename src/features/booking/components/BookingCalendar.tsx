@@ -218,7 +218,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
             
             {/* Right Column - Time */}
             {booking.confirmed_start && (
-              <div className="flex flex-col items-end justify-center border-l border-white/30 pl-2">
+              <div className="flex flex-col items-end justify-center">
                 <span className="text-[10px] font-semibold opacity-90">{formatTime(booking.confirmed_start)}</span>
               </div>
             )}
