@@ -34,12 +34,10 @@ function extractTimeFromISO(isoString: string): string {
 }
 
 // Get slots occupied by a booking
-export function getSlotsOccupiedByBooking(start: string, end: string): TimeSlot[] {
+export function getSlotsOccupiedByBooking(start: string, _end: string): TimeSlot[] {
   const startTime = extractTimeFromISO(start)
-  const endTime = extractTimeFromISO(end)
   
   const startMinutes = parseTime(startTime)
-  const endMinutes = parseTime(endTime)
   
   const morningStart = parseTime(CAPACITY_CONFIG.MORNING_START)
   const morningEnd = parseTime(CAPACITY_CONFIG.MORNING_END)
@@ -50,18 +48,12 @@ export function getSlotsOccupiedByBooking(start: string, end: string): TimeSlot[
   
   const slots: TimeSlot[] = []
   
-  // Check if booking overlaps with morning slot
-  if (startMinutes <= morningEnd && endMinutes >= morningStart) {
+  // Simple rule: booking goes to the slot where it STARTS
+  if (startMinutes >= morningStart && startMinutes <= morningEnd) {
     slots.push('morning')
-  }
-  
-  // Check if booking overlaps with afternoon slot
-  if (startMinutes <= afternoonEnd && endMinutes >= afternoonStart) {
+  } else if (startMinutes >= afternoonStart && startMinutes <= afternoonEnd) {
     slots.push('afternoon')
-  }
-  
-  // Check if booking overlaps with evening slot
-  if (startMinutes <= eveningEnd && endMinutes >= eveningStart) {
+  } else if (startMinutes >= eveningStart && startMinutes <= eveningEnd) {
     slots.push('evening')
   }
   
