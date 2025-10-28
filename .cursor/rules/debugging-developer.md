@@ -10,12 +10,20 @@
 **OGNI modifica AL CODICE DEVE ESSERE TESTATA CON MCP PLAYWRIGHT PRIMA DI ESSERE DICHIARATA COMPLETA.**
 
 Se modifichi il codice del frontend, DEVI:
-1. ✅ Eseguire test Playwright per verificare che funzioni
-2. ✅ Screenshot delle modifiche
-3. ✅ Verificare che non ci siano regressioni
-4. ✅ Solo DOPO i test puoi dichiarare "task completato"
+1. ✅ **Scrivere test Playwright specifici** per le modifiche richieste
+2. ✅ **Eseguire test Playwright** per verificare che funzioni (nuovi + esistenti)
+3. ✅ Screenshot delle modifiche
+4. ✅ Verificare che non ci siano regressioni nel flusso completo utente
+5. ✅ Solo DOPO i test puoi dichiarare "task completato"
 
 **NON MAI** dichiarare un task completato senza aver eseguito test di verifica.
+
+### ⚠️ REGOLA CRITICA
+Ogni volta che fai una modifica richiesta dall'utente:
+- **PRIMA** implementi la modifica nel codice
+- **POI** scrivi/aggiorna test Playwright che verificano quella specifica modifica
+- **INFINE** esegui sia il test della modifica che il flusso completo utente
+- Solo se tutti i test passano, dichiari completato
 
 ---
 
@@ -39,10 +47,11 @@ Se modifichi il codice del frontend, DEVI:
 
 ### 3. **Playwright E2E Testing**
 - **OBBLIGATORIO**: Usare MCP Playwright prima di dichiarare task completato
-- Scrivere/aggiornare test per nuovi feature
+- **OBBLIGATORIO**: Scrivere test specifici per ogni modifica richiesta dall'utente
+- Aggiornare test esistenti quando necessario
 - Screenshot automatizzati per verificare UI
 - Debug di test falliti (network requests, timing)
-- Verifica flusso end-to-end completo
+- Verifica flusso end-to-end completo E della modifica specifica
 
 ### 4. **Email System Debugging (Resend + Edge Functions)**
 - Supabase Edge Functions logs
@@ -91,15 +100,26 @@ Se modifichi il codice del frontend, DEVI:
 # Verifica TypeScript errors
 ```
 
+### Step 3.5: **SCRIVERE TEST PLAYWRIGHT SPECIFICI (OBBLIGATORIO)**
+```bash
+# PER OGNI MODIFICA RICHIESTA DEVI:
+# 1. Scrivere test Playwright che verifica quella specifica modifica
+# 2. Salvare il test in e2e/[nome-feature].spec.ts
+# 3. Il test deve verificare:
+#    - La modifica funziona come richiesto
+#    - Non ha rotto funzionalità esistenti
+#    - L'UI si comporta correttamente
+```
+
 ### Step 4: **TEST OBBLIGATORIO CON MCP PLAYWRIGHT**
 ```bash
-# Esegui test esistenti
+# Esegui TUTTI i test:
 npm run test:e2e
 
 # Oppure usa MCP Playwright direttamente
 # Verifica che:
-# - Il fix funziona
-# - Non ci sono regressioni
+# - Il test della modifica PASSANO
+# - I test esistenti PASSANO (no regressioni)
 # - Gli screenshot mostrano l'effetto del fix
 ```
 
@@ -473,12 +493,14 @@ console.error('❌ [COMPONENT] Critical error:', error)
 ## ⚠️ REGOLE D'ORO
 
 1. **NON dichiarare mai "completato" senza test Playwright**
-2. **NON rimuovere console.log senza sostituire con log critici**
-3. **SEMPRE fare screenshot delle modifiche**
-4. **SEMPRE verificare che non ci siano regressioni**
-5. **SEMPRE testare mobile + desktop**
-6. **SEMPRE verificare Network tab per failed requests**
-7. **SEMPRE controllare Supabase logs per errori**
+2. **SCRIVERE test Playwright specifici per OGNI modifica richiesta**
+3. **Verificare che il test della modifica E il flusso completo utente PASSANO**
+4. **NON rimuovere console.log senza sostituire con log critici**
+5. **SEMPRE fare screenshot delle modifiche**
+6. **SEMPRE verificare che non ci siano regressioni**
+7. **SEMPRE testare mobile + desktop**
+8. **SEMPRE verificare Network tab per failed requests**
+9. **SEMPRE controllare Supabase logs per errori**
 
 ---
 
@@ -499,7 +521,9 @@ Se dopo aver provato tutti i metodi di debug sopra, ancora non riesci a risolver
 ## ✅ CHECKLIST FINALE PRIMA DI CHIUDERE ISSUE
 
 - [ ] Bug identificato e fixato
-- [ ] Test Playwright eseguite e PASSANO
+- [ ] **Test Playwright SCRITTI per la modifica specifica** (OBBLIGATORIO)
+- [ ] Test Playwright eseguite e PASSANO (nuovi + esistenti)
+- [ ] **Flusso completo utente testato** (test esistenti PASSANO)
 - [ ] Screenshot delle modifiche salvati
 - [ ] Logs verificati (no errors)
 - [ ] Code review fatto (no TypeScript errors)
@@ -510,4 +534,54 @@ Se dopo aver provato tutti i metodi di debug sopra, ancora non riesci a risolver
 - [ ] Documentazione aggiornata
 
 **Solo DOPO aver completato TUTTA questa checklist puoi dichiarare "task completato".**
+
+### 📝 Esempio Pratico Completo
+
+**Scenario**: Utente chiede "Cambia il colore del bottone Submit da rosso a verde"
+
+#### Step 1: Implementare la Modifica
+```tsx
+// src/features/booking/components/BookingRequestForm.tsx
+<button 
+  className="bg-green-600 hover:bg-green-700" 
+  type="submit"
+>
+  Invia Richiesta
+</button>
+```
+
+#### Step 2: Scrivere Test Specifico (OBBLIGATORIO)
+```typescript
+// e2e/test-button-color.spec.ts
+test('should have green submit button', async ({ page }) => {
+  await page.goto('/prenota');
+  
+  const button = page.locator('button[type="submit"]');
+  
+  // Verifica che il colore sia verde
+  const backgroundColor = await button.evaluate((el) => 
+    window.getComputedStyle(el).backgroundColor
+  );
+  expect(backgroundColor).toBe('rgb(22, 163, 74)'); // green-600
+  
+  // Screenshot per documentare
+  await page.screenshot({ path: 'e2e/screenshots/button-green.png' });
+});
+```
+
+#### Step 3: Eseguire TUTTI i Test
+```bash
+# Esegui il test specifico della modifica
+npm run test:e2e test-button-color.spec.ts
+
+# Esegui TUTTI i test per verificare regressioni
+npm run test:e2e
+
+# Verifica che tutti PASSANO:
+# ✅ Test modifica (button color) → PASS
+# ✅ Test flusso utente completo → PASS
+# ✅ Test esistenti → PASS
+```
+
+#### Step 4: Solo se TUTTI i test passano, dichiarare completato
 
