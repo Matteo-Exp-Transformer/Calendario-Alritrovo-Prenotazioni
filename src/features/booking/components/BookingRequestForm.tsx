@@ -427,13 +427,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               console.log('🔴 [Modal] Closing via button')
               setShowSuccessModal(false)
               setTimeout(() => {
-                // Torna indietro nella history
-                if (window.history.length > 1) {
-                  window.history.back()
-                } else {
-                  // Se non c'è history, va alla home
-                  window.location.href = '/'
-                }
+                // Reindirizza al sito Wix di Al Ritrovo
+                window.location.href = 'https://alritrovobologna.wixsite.com/alritrovobologna'
               }, 300)
             }}
             style={{ 
