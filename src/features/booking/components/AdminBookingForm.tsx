@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Input, Textarea } from '@/components/ui'
 import type { BookingRequestInput, EventType } from '@/types/booking'
-import { useCreateBookingRequest } from '../hooks/useBookingRequests'
+import { useCreateAdminBooking } from '../hooks/useAdminBookingRequests'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { Check, Send, Loader2 } from 'lucide-react'
@@ -28,7 +28,7 @@ export const AdminBookingForm: React.FC = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const { mutate, isPending } = useCreateBookingRequest()
+  const { mutate, isPending } = useCreateAdminBooking()
   const queryClient = useQueryClient()
 
   const handleNumGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,6 +75,12 @@ export const AdminBookingForm: React.FC = () => {
         newErrors.desired_date = 'La data non può essere nel passato'
         isValid = false
       }
+    }
+
+    // Time validation - required for admin bookings
+    if (!formData.desired_time) {
+      newErrors.desired_time = 'Orario obbligatorio'
+      isValid = false
     }
 
     if (!formData.num_guests || formData.num_guests < 1) {
@@ -235,8 +241,16 @@ export const AdminBookingForm: React.FC = () => {
               id="desired_time"
               type="time"
               value={formData.desired_time}
-              onChange={(e) => setFormData({ ...formData, desired_time: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, desired_time: e.target.value })
+                setErrors({ ...errors, desired_time: '' })
+              }}
+              required
+              className={errors.desired_time ? '!border-red-500' : ''}
             />
+            {errors.desired_time && (
+              <p className="text-sm text-red-500">{errors.desired_time}</p>
+            )}
           </div>
 
           {/* Numero Ospiti */}
