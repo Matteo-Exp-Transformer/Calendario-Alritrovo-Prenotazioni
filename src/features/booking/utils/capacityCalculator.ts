@@ -7,30 +7,6 @@ function parseTime(time: string): number {
   return hours * 60 + minutes
 }
 
-// Helper: get time slot(s) from a time string
-function getTimeSlotFromTime(time: string): TimeSlot[] {
-  const timeMinutes = parseTime(time)
-  const morningStart = parseTime(CAPACITY_CONFIG.MORNING_START)
-  const morningEnd = parseTime(CAPACITY_CONFIG.MORNING_END)
-  const afternoonStart = parseTime(CAPACITY_CONFIG.AFTERNOON_START)
-  const afternoonEnd = parseTime(CAPACITY_CONFIG.AFTERNOON_END)
-  const eveningStart = parseTime(CAPACITY_CONFIG.EVENING_START)
-  const eveningEnd = parseTime(CAPACITY_CONFIG.EVENING_END)
-
-  const slots: TimeSlot[] = []
-
-  if (timeMinutes >= morningStart && timeMinutes <= morningEnd) {
-    slots.push('morning')
-  }
-  if (timeMinutes >= afternoonStart && timeMinutes <= afternoonEnd) {
-    slots.push('afternoon')
-  }
-  if (timeMinutes >= eveningStart && timeMinutes <= eveningEnd) {
-    slots.push('evening')
-  }
-  return slots
-}
-
 // Extract time from ISO string - handles both local and UTC times properly
 function extractTimeFromISO(isoString: string): string {
   // Parse ISO string and extract time components in UTC to avoid timezone conversion
@@ -62,12 +38,34 @@ export function getSlotsOccupiedByBooking(start: string, end: string): TimeSlot[
   const startTime = extractTimeFromISO(start)
   const endTime = extractTimeFromISO(end)
   
-  const startSlots = getTimeSlotFromTime(startTime)
-  const endSlots = getTimeSlotFromTime(endTime)
+  const startMinutes = parseTime(startTime)
+  const endMinutes = parseTime(endTime)
   
-  const allSlots = [...startSlots, ...endSlots]
+  const morningStart = parseTime(CAPACITY_CONFIG.MORNING_START)
+  const morningEnd = parseTime(CAPACITY_CONFIG.MORNING_END)
+  const afternoonStart = parseTime(CAPACITY_CONFIG.AFTERNOON_START)
+  const afternoonEnd = parseTime(CAPACITY_CONFIG.AFTERNOON_END)
+  const eveningStart = parseTime(CAPACITY_CONFIG.EVENING_START)
+  const eveningEnd = parseTime(CAPACITY_CONFIG.EVENING_END)
   
-  return Array.from(new Set(allSlots))
+  const slots: TimeSlot[] = []
+  
+  // Check if booking overlaps with morning slot
+  if (startMinutes <= morningEnd && endMinutes >= morningStart) {
+    slots.push('morning')
+  }
+  
+  // Check if booking overlaps with afternoon slot
+  if (startMinutes <= afternoonEnd && endMinutes >= afternoonStart) {
+    slots.push('afternoon')
+  }
+  
+  // Check if booking overlaps with evening slot
+  if (startMinutes <= eveningEnd && endMinutes >= eveningStart) {
+    slots.push('evening')
+  }
+  
+  return slots
 }
 
 // Calculate daily capacity for a specific date
