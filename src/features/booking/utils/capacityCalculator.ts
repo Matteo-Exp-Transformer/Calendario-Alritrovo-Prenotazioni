@@ -31,9 +31,27 @@ function getTimeSlotFromTime(time: string): TimeSlot[] {
   return slots
 }
 
-// Extract time from ISO string
+// Extract time from ISO string - handles both local and UTC times properly
 function extractTimeFromISO(isoString: string): string {
-  const date = new Date(isoString)
+  // Parse ISO string and extract time components in UTC to avoid timezone conversion
+  // If string has +00 or Z, parse as UTC
+  let date: Date
+  
+  if (isoString.includes('+00') || isoString.endsWith('Z')) {
+    // Parse as UTC - extract components from string directly
+    const match = isoString.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
+    if (match) {
+      const hour = match[4]
+      const minute = match[5]
+      // Return hour directly from UTC string (no timezone conversion)
+      // This ensures consistency with how dates are stored in database
+      return `${hour}:${minute}`
+    }
+    date = new Date(isoString)
+  } else {
+    date = new Date(isoString)
+  }
+  
   const hours = date.getHours().toString().padStart(2, '0')
   const minutes = date.getMinutes().toString().padStart(2, '0')
   return `${hours}:${minutes}`
