@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import type { BookingRequest } from '@/types/booking'
-import { Button } from '@/components/ui'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { Calendar, Clock, Users, Tag, MessageSquare, CheckCircle, XCircle, UtensilsCrossed, ChevronDown, ChevronUp, User, Mail, Phone } from 'lucide-react'
