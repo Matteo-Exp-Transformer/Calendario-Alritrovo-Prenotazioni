@@ -206,7 +206,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
           </div>
           
           {/* Dati in fila sotto */}
-          <div className="flex items-center gap-2 text-[10px] opacity-90 truncate">
+          <div className="flex items-center gap-2 text-xs opacity-90 truncate">
             <span>{booking.num_guests} ospiti</span>
             {booking.menu && (
               <>
