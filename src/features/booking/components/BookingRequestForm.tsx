@@ -162,6 +162,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
   }
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Layout a 2 Colonne su schermi grandi */}
       <div className="grid md:grid-cols-2 gap-6 md:gap-8">
@@ -403,35 +404,36 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       <p className="text-xs text-center text-gray-600">
         * I campi contrassegnati sono obbligatori.
       </p>
-
-      {/* Modal di Conferma Successo */}
-      {showSuccessModal && (
-        <Modal
-          isOpen={showSuccessModal}
-          onClose={() => {
-            setShowSuccessModal(false)
-            setTimeout(() => {
-              window.history.back()
-            }, 300)
-          }}
-          title="Prenotazione Inviata!"
-          showCloseButton={true}
-        >
-          <div className="text-center p-6">
-            <div className="flex justify-center mb-4">
-              <CheckCircle className="h-16 w-16 text-green-600" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
-              Prenotazione Inviata con Successo!
-            </h3>
-            <p className="text-lg text-gray-700 mb-6">
-              La tua richiesta di prenotazione è stata inoltrata correttamente.<br />
-              Ti contatteremo a breve per confermare i dettagli.
-            </p>
-          </div>
-        </Modal>
-      )}
     </form>
+
+    {/* Modal di Conferma Successo */}
+    {showSuccessModal && (
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => {
+          setShowSuccessModal(false)
+          setTimeout(() => {
+            window.history.back()
+          }, 300)
+        }}
+        title="Prenotazione Inviata!"
+        showCloseButton={true}
+      >
+        <div className="text-center p-6">
+          <div className="flex justify-center mb-4">
+            <CheckCircle className="h-16 w-16 text-green-600" />
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">
+            Prenotazione Inviata con Successo!
+          </h3>
+          <p className="text-lg text-gray-700 mb-6">
+            La tua richiesta di prenotazione è stata inoltrata correttamente.<br />
+            Ti contatteremo a breve per confermare i dettagli.
+          </p>
+        </div>
+      </Modal>
+    )}
+    </>
   )
 }
 
