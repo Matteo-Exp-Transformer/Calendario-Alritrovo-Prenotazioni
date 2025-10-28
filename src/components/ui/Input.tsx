@@ -9,7 +9,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     // Test eseguiti: 38 test, tutti passati (100%)
     // Combinazioni testate: tutti i tipi input, stati, edge cases, validazioni browser
     // UI aggiornato con design professionale moderno
-    return (
+  return (
+    <>
       <input
         type={type}
         className={cn(
@@ -22,14 +23,24 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           height: '56px',
           padding: '16px',
           fontSize: '16px',
-          fontWeight: '500'
+          fontWeight: '500',
+          backgroundColor: 'rgba(255, 255, 255, 0.5)',
+          backdropFilter: 'blur(6px)',
+          color: 'black'
         }}
         onFocus={(e) => e.target.style.borderColor = '#8B6914'}
         onBlur={(e) => e.target.style.borderColor = 'rgba(0,0,0,0.2)'}
         ref={ref}
         {...props}
       />
-    )
+      <style>{`
+        input::placeholder {
+          color: black !important;
+          opacity: 1 !important;
+        }
+      `}</style>
+    </>
+  )
   }
 )
 

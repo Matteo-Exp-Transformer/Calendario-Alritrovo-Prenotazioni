@@ -10,23 +10,34 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     // Funzionalità: Textarea base, forwardRef, focus management, resize
     // NON MODIFICARE SENZA PERMESSO ESPLICITO
     return (
-      <textarea
-        className={cn(
-          'flex rounded-3xl border bg-white shadow-sm transition-all',
-          className
-        )}
-        style={{ 
-          borderColor: 'rgba(0,0,0,0.2)', 
-          width: '100%', 
-          minHeight: '140px',
-          padding: '16px',
-          fontSize: '16px'
-        }}
-        onFocus={(e) => e.target.style.borderColor = '#8B6914'}
-        onBlur={(e) => e.target.style.borderColor = 'rgba(0,0,0,0.2)'}
-        ref={ref}
-        {...props}
-      />
+      <>
+        <textarea
+          className={cn(
+            'flex rounded-3xl border bg-white shadow-sm transition-all',
+            className
+          )}
+          style={{ 
+            borderColor: 'rgba(0,0,0,0.2)', 
+            width: '100%', 
+            minHeight: '140px',
+            padding: '16px',
+            fontSize: '16px',
+            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+            backdropFilter: 'blur(6px)',
+            color: 'black'
+          }}
+          onFocus={(e) => e.target.style.borderColor = '#8B6914'}
+          onBlur={(e) => e.target.style.borderColor = 'rgba(0,0,0,0.2)'}
+          ref={ref}
+          {...props}
+        />
+        <style>{`
+          textarea::placeholder {
+            color: black !important;
+            opacity: 1 !important;
+          }
+        `}</style>
+      </>
     )
   }
 )
