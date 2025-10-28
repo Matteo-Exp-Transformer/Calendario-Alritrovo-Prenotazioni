@@ -215,7 +215,7 @@ export const PendingRequestsTab: React.FC = () => {
 
       <div className="flex flex-col">
         {pendingBookings.map((booking) => (
-          <div key={booking.id} style={{ marginBottom: '120px' }}>
+          <div key={booking.id} style={{ marginBottom: '24px' }}>
             <BookingRequestCard
               booking={booking}
               onAccept={handleAccept}

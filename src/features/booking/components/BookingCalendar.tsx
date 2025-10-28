@@ -263,7 +263,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
           </div>
 
           {/* Mattina CollapsibleCard */}
-          <div style={{ border: '5px solid #10B981', borderRadius: '12px', boxShadow: '0 8px 16px -2px rgba(16, 185, 129, 0.4), 0 4px 8px -2px rgba(16, 185, 129, 0.3)', backgroundColor: '#F0FDF4' }} className="overflow-hidden transition-all duration-200 hover:shadow-2xl">
+          <div style={{ border: '5px solid #10B981', borderRadius: '12px', boxShadow: '0 8px 16px -2px rgba(16, 185, 129, 0.4), 0 4px 8px -2px rgba(16, 185, 129, 0.3)', backgroundColor: '#86EFAC' }} className="overflow-hidden transition-all duration-200 hover:shadow-2xl">
             <CollapsibleCard
               title="Mattina"
               subtitle="10:00 - 14:30"
@@ -394,7 +394,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
           </div>
 
           {/* Pomeriggio CollapsibleCard */}
-          <div style={{ border: '5px solid #FDE047', borderRadius: '12px', boxShadow: '0 8px 16px -2px rgba(253, 224, 71, 0.4), 0 4px 8px -2px rgba(253, 224, 71, 0.3)', backgroundColor: '#FEFCE8' }} className="overflow-hidden transition-all duration-200 hover:shadow-2xl">
+          <div style={{ border: '5px solid #FDE047', borderRadius: '12px', boxShadow: '0 8px 16px -2px rgba(253, 224, 71, 0.4), 0 4px 8px -2px rgba(253, 224, 71, 0.3)', backgroundColor: '#FEF08A' }} className="overflow-hidden transition-all duration-200 hover:shadow-2xl">
             <CollapsibleCard
             title="Pomeriggio"
             subtitle="14:31 - 18:30"
@@ -524,7 +524,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
           </div>
 
           {/* Sera CollapsibleCard */}
-          <div style={{ border: '5px solid #93C5FD', borderRadius: '12px', boxShadow: '0 8px 16px -2px rgba(147, 197, 253, 0.4), 0 4px 8px -2px rgba(147, 197, 253, 0.3)', backgroundColor: '#EFF6FF' }} className="overflow-hidden transition-all duration-200 hover:shadow-2xl">
+          <div style={{ border: '5px solid #93C5FD', borderRadius: '12px', boxShadow: '0 8px 16px -2px rgba(147, 197, 253, 0.4), 0 4px 8px -2px rgba(147, 197, 253, 0.3)', backgroundColor: '#A5B4FC' }} className="overflow-hidden transition-all duration-200 hover:shadow-2xl">
             <CollapsibleCard
             title="Sera"
             subtitle="18:31 - 23:30"

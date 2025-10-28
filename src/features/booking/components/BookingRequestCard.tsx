@@ -53,17 +53,16 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
   const statusConfig = STATUS_CONFIG[booking.status] || STATUS_CONFIG.pending
 
   return (
-    <div className="
-      bg-white rounded-2xl shadow-lg hover:shadow-xl
-      border-2 border-white/80
-      transition-all duration-300
-      relative
-      before:absolute before:inset-0 before:rounded-2xl before:border-2 before:border-white/40 before:content-['']
-    ">
+    <div style={{ 
+      background: 'linear-gradient(to bottom right, #F0F4FF, #E0E7FF, #D8DCFE)',
+      border: '3px solid #818CF8',
+      boxShadow: '0 4px 12px -2px rgba(129, 140, 248, 0.2)'
+    }} className="rounded-2xl hover:shadow-2xl transition-all duration-300 relative">
       {/* Header Collapsible - MOSTRA TUTTI I DATI */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-6 bg-gradient-to-r from-warm-cream/50 to-warm-beige/30 hover:from-warm-cream hover:to-warm-beige transition-all"
+        style={{ background: 'linear-gradient(to right, #F0F4FF, #E0E7FF)' }} 
+        className="w-full p-6 hover:opacity-90 transition-all"
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4 flex-1">
@@ -222,24 +221,24 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
 
           {/* Azioni con Bottoni Outline Grandi */}
           <div className="flex gap-4 pt-4 border-t border-warm-orange/20 mt-6">
-            <Button
-              variant="outlineAccent"
-              size="xl"
+            <button
+              type="button"
               onClick={() => onAccept(booking)}
-              className="flex-1 flex items-center justify-center gap-2"
+              style={{ backgroundColor: '#059669', color: 'white' }}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-4 hover:bg-green-700 text-white font-bold text-lg shadow-xl rounded-xl"
             >
               <CheckCircle className="w-5 h-5" />
               Accetta Prenotazione
-            </Button>
-            <Button
-              variant="outlineDanger"
-              size="xl"
+            </button>
+            <button
+              type="button"
               onClick={() => onReject(booking)}
-              className="flex-1 flex items-center justify-center gap-2"
+              style={{ backgroundColor: '#DC2626', color: 'white' }}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-4 hover:bg-red-700 text-white font-bold text-lg shadow-xl rounded-xl"
             >
               <XCircle className="w-5 h-5" />
               Rifiuta
-            </Button>
+            </button>
           </div>
         </div>
       )}
