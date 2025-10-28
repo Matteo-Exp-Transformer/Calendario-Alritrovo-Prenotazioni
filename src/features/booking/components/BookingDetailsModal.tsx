@@ -159,21 +159,21 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose} />
 
       <div
-        className="absolute right-0 top-0 bottom-0 w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col"
+        className="absolute right-0 top-0 bottom-0 w-full max-w-lg shadow-2xl overflow-y-auto flex flex-col"
         style={{
           position: 'absolute',
           backgroundColor: '#FEF3C7' // bg-amber-100
         }}
       >
         {/* Header */}
-        <div className={`${eventConfig.bg} border-b ${eventConfig.border} p-6`}>
+        <div className={`${eventConfig.bg} border-b ${eventConfig.border} p-4`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className={`p-3 ${eventConfig.bg} rounded-lg border ${eventConfig.border}`}>
                 <span className="text-2xl">{eventConfig.icon}</span>
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-xl font-bold text-gray-900">
                   {EVENT_TYPE_LABELS[booking.event_type]}
                 </h2>
                 <p className="text-sm text-gray-600">
@@ -203,12 +203,12 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 bg-amber-100">
+        <div className="flex-1 overflow-y-auto p-4 bg-amber-100">
           {!showCancelConfirm && (
             <div className="space-y-6">
               {/* Sezione Header */}
               <div className="border-b-2 border-gray-100 pb-4">
-                <h3 className="font-serif font-bold text-xl text-gray-900 flex items-center">
+                <h3 className="font-serif font-bold text-lg text-gray-900 flex items-center">
                   <User className="h-6 w-6 mr-3 text-gray-600" />
                   Informazioni Cliente
                 </h3>
@@ -246,7 +246,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
               {/* Sezione Header Event Details */}
               <div className="border-b-2 border-gray-100 pb-4">
-                <h3 className="font-serif font-bold text-xl text-gray-900 flex items-center">
+                <h3 className="font-serif font-bold text-lg text-gray-900 flex items-center">
                   <Calendar className="h-6 w-6 mr-3 text-gray-600" />
                   Dettagli Evento
                 </h3>
@@ -355,7 +355,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
         {/* Footer Actions */}
         {!showCancelConfirm && (
-          <div className="border-t border-gray-200 p-6 bg-amber-100">
+          <div className="border-t border-gray-200 p-4 bg-amber-100">
             <div className="flex gap-3">
               {isEditMode ? (
                 <>
@@ -418,7 +418,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
           />
           
           {/* Confirmation dialog */}
-          <div className="relative bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 border-2 border-red-200">
+          <div className="relative bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 border-2 border-red-200">
             <div className="flex items-center gap-4 mb-6">
               <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
                 <span className="text-2xl">⚠️</span>
