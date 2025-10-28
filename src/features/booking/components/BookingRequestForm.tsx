@@ -409,7 +409,6 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     </form>
 
     {/* Modal di Conferma Successo */}
-    {console.log('🔍 [FORM RETURN] showSuccessModal is:', showSuccessModal)}
     <Modal
       isOpen={showSuccessModal}
       onClose={() => {
