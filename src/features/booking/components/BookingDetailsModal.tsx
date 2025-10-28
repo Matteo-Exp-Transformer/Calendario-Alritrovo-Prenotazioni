@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { X, User, Mail, Phone, Users, Clock, Calendar, Edit, Trash2, Save, UtensilsCrossed } from 'lucide-react'
 import { useUpdateBooking, useCancelBooking } from '../hooks/useBookingMutations'
+import { useAcceptedBookings } from '../hooks/useBookingQueries'
 import type { BookingRequest } from '@/types/booking'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { createBookingDateTime } from '../utils/dateUtils'
+import { getSlotsOccupiedByBooking } from '../utils/capacityCalculator'
+import { CAPACITY_CONFIG } from '../constants/capacity'
+import { toast } from 'react-toastify'
 
 interface BookingDetailsModalProps {
   isOpen: boolean
@@ -63,6 +67,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
   const updateMutation = useUpdateBooking()
   const cancelMutation = useCancelBooking()
+  const { data: acceptedBookings = [] } = useAcceptedBookings()
 
   const [formData, setFormData] = useState(() => {
     return {
@@ -87,12 +92,92 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     })
   }, [booking.id, booking.confirmed_start, booking.confirmed_end, booking.num_guests, booking.special_requests, booking.menu])
 
+  // Function to check if there are enough seats available
+  const checkCapacity = (date: string, startTime: string, endTime: string, numGuests: number): boolean => {
+    // Get accepted bookings for this date (excluding current booking)
+    const dayBookings = acceptedBookings.filter((b) => {
+      if (b.id === booking.id) return false // Escludi la prenotazione corrente
+      if (!b.confirmed_start) return false
+      const bookingDate = new Date(b.confirmed_start).toISOString().split('T')[0]
+      return bookingDate === date
+    })
+
+    // Build the confirmed dates
+    const confirmedStart = `${date}T${startTime}:00`
+    const confirmedEnd = `${date}T${endTime}:00`
+
+    // Get which slots this new booking would occupy
+    const newBookingSlots = getSlotsOccupiedByBooking(confirmedStart, confirmedEnd)
+    
+    // Initialize slot capacities
+    const morning: { capacity: number; occupied: number } = { 
+      capacity: CAPACITY_CONFIG.MORNING_CAPACITY, 
+      occupied: 0 
+    }
+    const afternoon: { capacity: number; occupied: number } = { 
+      capacity: CAPACITY_CONFIG.AFTERNOON_CAPACITY, 
+      occupied: 0 
+    }
+    const evening: { capacity: number; occupied: number } = { 
+      capacity: CAPACITY_CONFIG.EVENING_CAPACITY, 
+      occupied: 0 
+    }
+
+    // Calculate occupied seats for each slot from existing bookings
+    for (const existingBooking of dayBookings) {
+      if (!existingBooking.confirmed_start || !existingBooking.confirmed_end) continue
+      
+      const slots = getSlotsOccupiedByBooking(existingBooking.confirmed_start, existingBooking.confirmed_end)
+      const guests = existingBooking.num_guests || 0
+
+      for (const slot of slots) {
+        if (slot === 'morning') morning.occupied += guests
+        else if (slot === 'afternoon') afternoon.occupied += guests
+        else if (slot === 'evening') evening.occupied += guests
+      }
+    }
+
+    // Check if new booking would exceed capacity in any slot
+    for (const slot of newBookingSlots) {
+      let available: number
+      
+      if (slot === 'morning') {
+        available = morning.capacity - morning.occupied
+      } else if (slot === 'afternoon') {
+        available = afternoon.capacity - afternoon.occupied
+      } else if (slot === 'evening') {
+        available = evening.capacity - evening.occupied
+      } else {
+        continue // Unknown slot
+      }
+
+      // If not enough seats available in this slot
+      if (available < numGuests) {
+        return false
+      }
+    }
+
+    return true
+  }
+
   const handleSave = () => {
     if (!booking.confirmed_start) return
 
     // Create ISO strings handling midnight crossover
     const confirmedStart = createBookingDateTime(formData.date, formData.startTime, true)
     const confirmedEnd = createBookingDateTime(formData.date, formData.endTime, false, formData.startTime)
+
+    // ✅ CHECK CAPACITY BEFORE SAVING
+    console.log('🔵 [BookingDetailsModal] Checking capacity before saving...')
+    const hasCapacity = checkCapacity(formData.date, formData.startTime, formData.endTime, formData.numGuests)
+    
+    if (!hasCapacity) {
+      console.error('❌ [BookingDetailsModal] Not enough seats available!')
+      toast.error(`❌ Posti non disponibili! La modifica richiede ${formData.numGuests} posti ma non ci sono abbastanza posti liberi nella fascia oraria selezionata.`)
+      return
+    }
+    
+    console.log('✅ [BookingDetailsModal] Capacity check passed!')
 
     updateMutation.mutate(
       {
@@ -107,6 +192,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         onSuccess: (updatedBooking) => {
           console.log('✅ [BookingDetailsModal] Save successful:', updatedBooking)
           setIsEditMode(false)
+          toast.success('Prenotazione modificata con successo!')
           // Modal rimane aperto, i dati si aggiornano automaticamente tramite useEffect
         },
         onError: (error) => {
