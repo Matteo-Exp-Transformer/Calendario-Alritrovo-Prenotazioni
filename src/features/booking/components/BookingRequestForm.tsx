@@ -408,11 +408,12 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       </p>
     </form>
 
-    {/* Modal di Conferma Successo */}
-    {showSuccessModal && (
+    {/* Modal di Conferma Successo - DEBUG */}
+    {showSuccessModal && console.log('🔍 RENDERING MODAL, showSuccessModal:', showSuccessModal) && (
       <Modal
         isOpen={showSuccessModal}
         onClose={() => {
+          console.log('🔴 [Modal] onClose chiamato')
           setShowSuccessModal(false)
           setTimeout(() => {
             window.history.back()
@@ -421,6 +422,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         title="Prenotazione Inviata!"
         showCloseButton={true}
       >
+        {console.log('🔍 [Modal] Rendering content')}
         <div className="text-center p-6">
           <div className="flex justify-center mb-4">
             <CheckCircle className="h-16 w-16 text-green-600" />
