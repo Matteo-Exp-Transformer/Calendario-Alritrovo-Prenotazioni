@@ -4,6 +4,7 @@ import { useUpdateBooking, useCancelBooking } from '../hooks/useBookingMutations
 import type { BookingRequest } from '@/types/booking'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
+import { createBookingDateTime } from '../utils/dateUtils'
 
 interface BookingDetailsModalProps {
   isOpen: boolean
@@ -87,21 +88,9 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   const handleSave = () => {
     if (!booking.confirmed_start) return
 
-    // Create ISO strings WITH explicit local timezone offset
-    // This prevents PostgreSQL from converting to UTC incorrectly
-    const [year, month, day] = formData.date.split('-').map(Number)
-    const [startHours, startMinutes] = formData.startTime.split(':').map(Number)
-    const [endHours, endMinutes] = formData.endTime.split(':').map(Number)
-    
-    // Get timezone offset (e.g., +01:00 for Italy)
-    const tzOffset = new Date().getTimezoneOffset()
-    const tzHours = Math.floor(Math.abs(tzOffset) / 60)
-    const tzMinutes = Math.abs(tzOffset) % 60
-    const tzSign = tzOffset <= 0 ? '+' : '-'
-    const tzString = `${tzSign}${String(tzHours).padStart(2, '0')}:${String(tzMinutes).padStart(2, '0')}`
-    
-    const confirmedStart = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(startHours).padStart(2, '0')}:${String(startMinutes).padStart(2, '0')}:00${tzString}`
-    const confirmedEnd = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}:00${tzString}`
+    // Create ISO strings handling midnight crossover
+    const confirmedStart = createBookingDateTime(formData.date, formData.startTime, true)
+    const confirmedEnd = createBookingDateTime(formData.date, formData.endTime, false, formData.startTime)
 
     updateMutation.mutate(
       {

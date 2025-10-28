@@ -23,7 +23,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     client_name: '',
     client_email: '',
     client_phone: '',
-    event_type: 'cena',
+    event_type: 'drink_caraffe',
     desired_date: '',
     desired_time: '',
     num_guests: 0,
@@ -133,7 +133,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           client_name: '',
           client_email: '',
           client_phone: '',
-          event_type: 'cena',
+          event_type: 'drink_caraffe',
           desired_date: '',
           desired_time: '',
           num_guests: 0,
@@ -154,13 +154,13 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       <div className="grid md:grid-cols-2 gap-6 md:gap-8">
         {/* COLONNA SINISTRA: Dati Personali */}
         <div className="space-y-6">
-          <h2 className="text-2xl font-serif font-semibold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige">
+          <h2 className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige">
             Dati Personali
           </h2>
 
       {/* Nome */}
       <div className="space-y-2">
-        <Label htmlFor="client_name" className="text-warm-wood-dark font-medium">Nome Completo *</Label>
+        <Label htmlFor="client_name" className="text-warm-wood-dark !font-bold text-lg">Nome Completo *</Label>
         <Input
           id="client_name"
           value={formData.client_name}
@@ -179,7 +179,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Email */}
       <div className="space-y-2">
-        <Label htmlFor="client_email" className="text-warm-wood-dark font-medium">Email *</Label>
+        <Label htmlFor="client_email" className="text-warm-wood-dark !font-bold text-lg">Email *</Label>
         <Input
           id="client_email"
           type="email"
@@ -199,7 +199,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Telefono */}
       <div className="space-y-2">
-        <Label htmlFor="client_phone" className="text-warm-wood-dark font-medium">Telefono (Opzionale)</Label>
+        <Label htmlFor="client_phone" className="text-warm-wood-dark !font-bold text-lg">Telefono (Opzionale)</Label>
         <Input
           id="client_phone"
           type="tel"
@@ -212,13 +212,13 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
         {/* COLONNA DESTRA: Dettagli Prenotazione */}
         <div className="space-y-6">
-          <h2 className="text-2xl font-serif font-semibold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige">
+          <h2 className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige">
             Dettagli Prenotazione
           </h2>
 
       {/* Tipo Evento */}
       <div className="space-y-2">
-        <Label htmlFor="event_type" className="text-warm-wood-dark font-medium">Tipo Evento *</Label>
+        <Label htmlFor="event_type" className="text-warm-wood-dark !font-bold text-lg">Tipo Evento *</Label>
         <select
           id="event_type"
           value={formData.event_type}
@@ -245,7 +245,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Data */}
       <div className="space-y-2">
-        <Label htmlFor="desired_date" className="text-warm-wood-dark font-medium">Data Desiderata *</Label>
+        <Label htmlFor="desired_date" className="text-warm-wood-dark !font-bold text-lg">Data Desiderata *</Label>
         <Input
           id="desired_date"
           type="date"
@@ -264,7 +264,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Ora */}
       <div className="space-y-2">
-        <Label htmlFor="desired_time" className="text-warm-wood-dark font-medium">Orario Desiderato</Label>
+        <Label htmlFor="desired_time" className="text-warm-wood-dark !font-bold text-lg">Orario Desiderato</Label>
         <Input
           id="desired_time"
           type="time"
@@ -275,7 +275,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Numero Ospiti */}
       <div className="space-y-2">
-        <Label htmlFor="num_guests" className="text-warm-wood-dark font-medium">Numero Ospiti *</Label>
+        <Label htmlFor="num_guests" className="text-warm-wood-dark !font-bold text-lg">Numero Ospiti *</Label>
         <Input
           id="num_guests"
           type="number"
@@ -296,7 +296,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Note Speciali - Full Width sotto le 2 colonne */}
       <div className="space-y-2">
-        <Label htmlFor="special_requests" className="text-warm-wood-dark font-medium">Note o Richieste Speciali</Label>
+        <Label htmlFor="special_requests" className="text-warm-wood-dark !font-bold text-lg">Note o Richieste Speciali</Label>
         <Textarea
           id="special_requests"
           value={formData.special_requests}
@@ -321,7 +321,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             />
             <label
               htmlFor="privacy-consent"
-              className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-md border-2 border-warm-wood/40 bg-white shadow-sm transition-all duration-300 hover:border-warm-wood hover:shadow-md peer-checked:border-warm-orange peer-checked:bg-gradient-to-br peer-checked:from-warm-wood peer-checked:to-warm-orange peer-checked:shadow-lg peer-focus-visible:ring-4 peer-focus-visible:ring-warm-wood/20"
+              className="flex h-5 w-5 cursor-pointer items-center justify-center border-2 border-warm-wood/40 shadow-sm transition-all duration-300 hover:border-warm-wood hover:shadow-md peer-checked:border-warm-orange peer-checked:shadow-lg peer-focus-visible:ring-4 peer-focus-visible:ring-warm-wood/20"
+              style={{ backgroundColor: 'white' }}
             >
               <Check
                 className={`h-3.5 w-3.5 text-white transition-all duration-300 ${
@@ -352,7 +353,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         <button
           type="submit"
           disabled={isPending || isBlocked}
-          className="group relative overflow-hidden rounded-full bg-gradient-to-r from-warm-wood via-warm-orange to-terracotta px-10 py-6 text-base font-bold uppercase tracking-wide text-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,105,20,0.4)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl md:w-auto w-full"
+          className="group relative overflow-hidden rounded-full bg-gradient-to-r from-warm-wood via-warm-orange to-terracotta px-64 py-40 text-xl font-bold uppercase tracking-wide text-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(139,105,20,0.4)] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl md:w-auto"
         >
           {/* Glow effect on hover */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
@@ -368,8 +369,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               <span className="text-sm md:text-base">Limite richieste raggiunto</span>
             ) : (
               <>
-                <span className="text-sm md:text-base">Invia Prenotazione</span>
-                <Send className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                <span className="text-lg">Invia Prenotazione</span>
+                <Send className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
               </>
             )}
           </div>

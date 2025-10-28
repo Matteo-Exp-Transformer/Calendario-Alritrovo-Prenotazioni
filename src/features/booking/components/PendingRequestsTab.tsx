@@ -1,14 +1,88 @@
 import React from 'react'
-import { usePendingBookings } from '../hooks/useBookingQueries'
+import { usePendingBookings, useAcceptedBookings } from '../hooks/useBookingQueries'
 import { useAcceptBooking, useRejectBooking } from '../hooks/useBookingMutations'
 import { BookingRequestCard } from './BookingRequestCard'
 import { toast } from 'react-toastify'
 import type { BookingRequest } from '@/types/booking'
+import { getSlotsOccupiedByBooking } from '../utils/capacityCalculator'
+import { CAPACITY_CONFIG } from '../constants/capacity'
+import { createBookingDateTime } from '../utils/dateUtils'
 
 export const PendingRequestsTab: React.FC = () => {
   const { data: pendingBookings, isLoading, error, refetch } = usePendingBookings()
+  const { data: acceptedBookings = [] } = useAcceptedBookings()
   const acceptMutation = useAcceptBooking()
   const rejectMutation = useRejectBooking()
+
+  // Function to check if there are enough seats available
+  const checkCapacity = (booking: BookingRequest, startTime: string, endTime: string): boolean => {
+    const date = booking.desired_date
+    const numGuests = booking.num_guests || 0
+    
+    // Get accepted bookings for this date
+    const dayBookings = acceptedBookings.filter((b) => {
+      if (!b.confirmed_start) return false
+      const bookingDate = new Date(b.confirmed_start).toISOString().split('T')[0]
+      return bookingDate === date
+    })
+
+    // Build the confirmed dates
+    const confirmedStart = `${date}T${startTime}:00`
+    const confirmedEnd = `${date}T${endTime}:00`
+
+    // Get which slots this new booking would occupy
+    const newBookingSlots = getSlotsOccupiedByBooking(confirmedStart, confirmedEnd)
+    
+    // Initialize slot capacities
+    const morning: { capacity: number; occupied: number } = { 
+      capacity: CAPACITY_CONFIG.MORNING_CAPACITY, 
+      occupied: 0 
+    }
+    const afternoon: { capacity: number; occupied: number } = { 
+      capacity: CAPACITY_CONFIG.AFTERNOON_CAPACITY, 
+      occupied: 0 
+    }
+    const evening: { capacity: number; occupied: number } = { 
+      capacity: CAPACITY_CONFIG.EVENING_CAPACITY, 
+      occupied: 0 
+    }
+
+    // Calculate occupied seats for each slot from existing bookings
+    for (const existingBooking of dayBookings) {
+      if (!existingBooking.confirmed_start || !existingBooking.confirmed_end) continue
+      
+      const slots = getSlotsOccupiedByBooking(existingBooking.confirmed_start, existingBooking.confirmed_end)
+      const guests = existingBooking.num_guests || 0
+
+      for (const slot of slots) {
+        if (slot === 'morning') morning.occupied += guests
+        else if (slot === 'afternoon') afternoon.occupied += guests
+        else if (slot === 'evening') evening.occupied += guests
+      }
+    }
+
+    // Check if new booking would exceed capacity in any slot
+    for (const slot of newBookingSlots) {
+      let available: number
+      
+      if (slot === 'morning') {
+        available = morning.capacity - morning.occupied
+      } else if (slot === 'afternoon') {
+        available = afternoon.capacity - afternoon.occupied
+      } else if (slot === 'evening') {
+        available = evening.capacity - evening.occupied
+      } else {
+        continue // Unknown slot
+      }
+
+      // If not enough seats available in this slot
+      if (available < numGuests) {
+        return false
+      }
+    }
+
+    return true
+  }
 
   const handleAccept = (booking: BookingRequest) => {
     console.log('🔵 [PendingRequestsTab] handleAccept called with:', booking)
@@ -30,8 +104,21 @@ export const PendingRequestsTab: React.FC = () => {
       ? endTime.split(':').slice(0, 2).join(':')
       : endTime
     
-    const confirmedStart = `${date}T${startTimeFormatted}:00`
-    const confirmedEnd = `${date}T${endTimeFormatted}:00`
+    // Create ISO strings handling midnight crossover
+    const confirmedStart = createBookingDateTime(date, startTimeFormatted, true)
+    const confirmedEnd = createBookingDateTime(date, endTimeFormatted, false, startTimeFormatted)
+    
+    // ✅ CHECK CAPACITY BEFORE ACCEPTING
+    console.log('🔵 [PendingRequestsTab] Checking capacity before accepting...')
+    const hasCapacity = checkCapacity(booking, startTimeFormatted, endTimeFormatted)
+    
+    if (!hasCapacity) {
+      console.error('❌ [PendingRequestsTab] Not enough seats available!')
+      toast.error(`❌ Posti non disponibili! La prenotazione richiede ${booking.num_guests} posti ma non ci sono abbastanza posti liberi nella fascia oraria selezionata.`)
+      return
+    }
+    
+    console.log('✅ [PendingRequestsTab] Capacity check passed!')
     
     console.log('🔵 [PendingRequestsTab] Submitting with:', {
       confirmedStart,
@@ -128,7 +215,7 @@ export const PendingRequestsTab: React.FC = () => {
 
       <div className="flex flex-col">
         {pendingBookings.map((booking) => (
-          <div key={booking.id} style={{ marginBottom: '24px' }}>
+          <div key={booking.id} style={{ marginBottom: '120px' }}>
             <BookingRequestCard
               booking={booking}
               onAccept={handleAccept}

@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react'
 import { BookingRequestForm } from '@/features/booking/components/BookingRequestForm'
 import { UtensilsCrossed, MapPin, Clock, Phone, Mail } from 'lucide-react'
+import bgImage from '@/assets/IMG20241127235924.jpg'
 
 export const BookingRequestPage: React.FC = () => {
   useEffect(() => {
-    document.documentElement.style.backgroundImage = 'url("https://calendario-alritrovo-prenotazioni.vercel.app/IMG20241127235924.jpg")';
+    document.documentElement.style.backgroundImage = `url("${bgImage}")`;
     document.documentElement.style.backgroundSize = 'cover';
     document.documentElement.style.backgroundPosition = 'center';
     document.documentElement.style.backgroundRepeat = 'no-repeat';

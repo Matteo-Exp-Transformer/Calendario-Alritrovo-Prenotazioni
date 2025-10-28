@@ -29,7 +29,7 @@ test.describe('Test 1: Flusso Prenotazione Utente', () => {
       name: 'Matteo Cavallaro Test',
       email: 'matteo.cavallaro.work@gmail.com',
       phone: '+39 333 1234567',
-      eventType: 'cena',
+      eventType: 'drink_caraffe',
       date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // +7 days
       time: '20:00',
       guests: '4',

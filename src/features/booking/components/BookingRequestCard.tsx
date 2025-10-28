@@ -55,8 +55,10 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
   return (
     <div className="
       bg-white rounded-2xl shadow-lg hover:shadow-xl
-      border-2 border-warm-orange/30
+      border-2 border-white/80
       transition-all duration-300
+      relative
+      before:absolute before:inset-0 before:rounded-2xl before:border-2 before:border-white/40 before:content-['']
     ">
       {/* Header Collapsible - MOSTRA TUTTI I DATI */}
       <button

@@ -237,8 +237,16 @@ export const Calendar: React.FC<CalendarProps> = ({
   // Handle date selection for new events
   const handleDateSelect = useCallback(
     (selectInfo: { start: Date; end: Date }) => {
-      const start = new Date(selectInfo.start)
-      const end = new Date(selectInfo.end)
+      // ✅ Fix: Normalizza le date per evitare problemi di timezone
+      const startYear = selectInfo.start.getFullYear()
+      const startMonth = selectInfo.start.getMonth()
+      const startDay = selectInfo.start.getDate()
+      const start = new Date(startYear, startMonth, startDay)
+      
+      const endYear = selectInfo.end.getFullYear()
+      const endMonth = selectInfo.end.getMonth()
+      const endDay = selectInfo.end.getDate()
+      const end = new Date(endYear, endMonth, endDay)
       
       // ✅ Aggiorna giorno selezionato
       setSelectedDate(start)
@@ -249,7 +257,7 @@ export const Calendar: React.FC<CalendarProps> = ({
   )
 
   // ✅ Handle click su giorno (per evidenziare il giorno selezionato)
-  const handleDayClick = useCallback((info: { date: Date; dayEl: HTMLElement }) => {
+  const handleDayClick = useCallback((info: { date: Date; dayEl: HTMLElement; dateStr?: string }) => {
     // Rimuovi classe da tutti i giorni in tutte le visualizzazioni
     const allDayGridDays = document.querySelectorAll('.fc-daygrid-day')
     const allTimeGridCols = document.querySelectorAll('.fc-timegrid-col')
@@ -261,10 +269,26 @@ export const Calendar: React.FC<CalendarProps> = ({
 
     // Aggiungi classe al giorno cliccato
     info.dayEl.classList.add('fc-day-selected')
-    setSelectedDate(info.date)
+    
+    // ✅ Fix: Normalizza la data per evitare problemi di timezone
+    // Usa dateStr se disponibile, altrimenti normalizza la Date
+    let normalizedDate = info.date
+    if (info.dateStr) {
+      // Usa dateStr per evitare problemi di timezone
+      const [year, month, day] = info.dateStr.split('-').map(Number)
+      normalizedDate = new Date(year, month - 1, day)
+    } else {
+      // Normalizza la data impostando l'ora locale
+      const year = info.date.getFullYear()
+      const month = info.date.getMonth()
+      const day = info.date.getDate()
+      normalizedDate = new Date(year, month, day)
+    }
+    
+    setSelectedDate(normalizedDate)
 
     if (onDateClick) {
-      onDateClick(info.date)
+      onDateClick(normalizedDate)
     }
   }, [onDateClick])
 
@@ -391,7 +415,26 @@ export const Calendar: React.FC<CalendarProps> = ({
         </div>
       )}
 
-      {/* Legenda rimossa: era duplicata con i filtri funzionanti */}
+      {/* Legenda Colori Prenotazioni - Fasce Orarie */}
+      <div className="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+        <div className="flex items-center gap-1 mb-2">
+          <span className="text-xs font-semibold text-gray-700">Legenda Fasce Orarie:</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-3 text-xs">
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white border border-gray-200">
+            <div className="w-8 h-3 rounded" style={{ background: 'linear-gradient(180deg, #10B981 0%, #059669 100%)' }}></div>
+            <span className="text-gray-700 font-medium">🌅 Mattina (08:00-12:00)</span>
+          </div>
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white border border-gray-200">
+            <div className="w-8 h-3 rounded" style={{ background: 'linear-gradient(180deg, #FDE047 0%, #FACC15 100%)' }}></div>
+            <span className="text-gray-700 font-medium">🌆 Pomeriggio (12:01-17:00)</span>
+          </div>
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white border border-gray-200">
+            <div className="w-8 h-3 rounded" style={{ background: 'linear-gradient(180deg, #93C5FD 0%, #60A5FA 100%)' }}></div>
+            <span className="text-gray-700 font-medium">🌃 Sera (17:01-07:59)</span>
+          </div>
+        </div>
+      </div>
 
       {/* Calendar Content */}
       <div className="p-4">

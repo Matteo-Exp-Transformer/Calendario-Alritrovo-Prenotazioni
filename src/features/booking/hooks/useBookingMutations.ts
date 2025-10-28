@@ -57,10 +57,10 @@ export const useAcceptBooking = () => {
       return data as BookingRequest
     },
     onSuccess: async (booking: BookingRequest) => {
-      // Invalida tutte le queries per refresh automatico
+      // Invalida tutte le queries per refresh automatico completo
       await queryClient.invalidateQueries({ queryKey: ['bookings'] })
-      // Invalida specificamente la query pending per forzare il refresh
       await queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'] })
+      await queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'] })
       console.log('✅ [useAcceptBooking] All bookings queries invalidated')
 
       // Send email notification
@@ -111,10 +111,10 @@ export const useRejectBooking = () => {
       return data as BookingRequest
     },
     onSuccess: async (booking: BookingRequest) => {
-      // Invalida tutte le queries per refresh automatico
+      // Invalida tutte le queries per refresh automatico completo
       await queryClient.invalidateQueries({ queryKey: ['bookings'] })
-      // Invalida specificamente la query pending per forzare il refresh
       await queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'] })
+      await queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'] })
       console.log('✅ [useRejectBooking] All bookings queries invalidated')
       
       // Send email notification
@@ -168,9 +168,13 @@ export const useUpdateBooking = () => {
       console.log('✅ [useUpdateBooking] Booking updated successfully:', data)
       return data as BookingRequest
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('✅ [useUpdateBooking] onSuccess triggered:', data)
-      queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      // Invalida tutte le queries per refresh automatico completo
+      await queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      await queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'] })
+      await queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'] })
+      console.log('✅ [useUpdateBooking] All bookings queries invalidated')
       toast.success('Prenotazione aggiornata con successo!')
     },
     onError: (error: Error) => {
@@ -209,7 +213,11 @@ export const useCancelBooking = () => {
       return data as BookingRequest
     },
     onSuccess: async (booking: BookingRequest) => {
-      queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      // Invalida tutte le queries per refresh automatico completo
+      await queryClient.invalidateQueries({ queryKey: ['bookings'] })
+      await queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'] })
+      await queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'] })
+      console.log('✅ [useCancelBooking] All bookings queries invalidated')
       toast.success('Prenotazione cancellata con successo!')
 
       // Send email notification
