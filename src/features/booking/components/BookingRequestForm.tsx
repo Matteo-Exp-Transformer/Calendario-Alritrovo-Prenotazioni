@@ -427,7 +427,11 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               console.log('🔴 [Modal] Closing via button')
               setShowSuccessModal(false)
               setTimeout(() => {
-                window.history.back()
+                window.close()
+                // Se window.close() non funziona (pagina non aperta da script), torna alla home
+                setTimeout(() => {
+                  window.location.href = '/'
+                }, 100)
               }, 300)
             }}
             style={{ 
