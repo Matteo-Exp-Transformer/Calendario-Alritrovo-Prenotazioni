@@ -22,21 +22,41 @@ interface NavItemProps {
 const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, badge, onClick }) => (
   <button
     onClick={onClick}
-    className={`
-      flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-xl transition-all font-medium
-      ${active
-        ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-indigo-900 shadow-lg scale-105'
-        : 'text-white hover:bg-white/20 hover:text-yellow-200 hover:scale-105'
-      }
-    `}
+    className="group relative"
   >
-    <Icon className="w-5 h-5" />
-    <span className="text-xs md:text-sm">{label}</span>
-    {badge && badge > 0 && (
-      <span className="ml-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse">
-        {badge}
-      </span>
+    {/* Glow Effect on Active */}
+    {active && (
+      <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300 rounded-3xl blur-xl opacity-60"></div>
     )}
+
+    <div className={`
+      relative flex items-center gap-3 px-6 md:px-8 py-3.5 md:py-4 rounded-3xl transition-all font-black tracking-wide
+      ${active
+        ? 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 text-white shadow-[0_8px_32px_rgba(251,146,60,0.5)] border-2 border-white/50 scale-105'
+        : 'bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm border-2 border-white/20 hover:scale-105 hover:shadow-lg'
+      }
+    `}>
+      <div className={`
+        w-11 h-11 rounded-2xl flex items-center justify-center transition-all
+        ${active
+          ? 'bg-white/30 shadow-inner'
+          : 'bg-white/10 group-hover:bg-white/20'
+        }
+      `}>
+        <Icon className="w-6 h-6 md:w-7 md:h-7 drop-shadow-lg" />
+      </div>
+
+      <span className="text-sm md:text-base uppercase tracking-widest drop-shadow-md">{label}</span>
+
+      {badge && badge > 0 && (
+        <div className="relative">
+          <div className="absolute inset-0 bg-red-400 rounded-full blur-md opacity-75"></div>
+          <span className="relative inline-flex items-center justify-center min-w-[28px] h-7 bg-gradient-to-br from-red-500 to-rose-600 text-white text-xs font-black px-2.5 rounded-full shadow-[0_4px_16px_rgba(239,68,68,0.6)] border-2 border-white/50">
+            {badge}
+          </span>
+        </div>
+      )}
+    </div>
   </button>
 )
 
@@ -70,7 +90,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           {/* Navigation Tabs Orizzontale */}
-          <nav className="flex flex-wrap items-center gap-2 md:gap-3 pb-2">
+          <nav className="flex flex-wrap items-center gap-3 md:gap-4 pb-2">
             <NavItem
               icon={Calendar}
               label="Calendario"

@@ -110,7 +110,6 @@ export const transformBookingToCalendarEvent = (
     backgroundColor: color.bg,
     borderColor: color.border,
     extendedProps: booking,
-    allDay: false, // Ensure it's not treated as an all-day event
   }
   
   if (color.text) {

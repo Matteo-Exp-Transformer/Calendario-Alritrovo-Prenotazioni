@@ -4,7 +4,7 @@ import type { BookingRequestInput, EventType } from '@/types/booking'
 import { useCreateAdminBooking } from '../hooks/useAdminBookingRequests'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { Check, Send, Loader2 } from 'lucide-react'
+import { Send, Loader2 } from 'lucide-react'
 
 const EVENT_TYPES: { value: EventType; label: string }[] = [
   { value: 'drink_caraffe', label: 'Drink/Caraffe' },

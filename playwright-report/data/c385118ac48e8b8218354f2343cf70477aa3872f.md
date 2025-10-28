@@ -1,0 +1,44 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]
+      - heading "Al Ritrovo" [level=1] [ref=e9]
+      - paragraph [ref=e10]: Area Admin - Accedi al Dashboard
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - text: Email
+        - textbox "Email" [active] [ref=e13]:
+          - /placeholder: admin@alritrovo.com
+          - text: 0cavuz0@gmail.
+      - generic [ref=e14]:
+        - text: Password
+        - textbox "Password" [ref=e15]:
+          - /placeholder: ••••••••
+          - text: admin123
+      - button "Accedi" [ref=e16]:
+        - text: Accedi
+        - img [ref=e17]
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - img [ref=e21]
+        - paragraph [ref=e24]: Area riservata - Accesso protetto
+      - paragraph [ref=e25]: Hai dimenticato la password? Contatta il supporto tecnico
+  - generic [ref=e28]:
+    - img [ref=e30]
+    - generic [ref=e32]:
+      - heading "Utilizziamo i Cookie" [level=3] [ref=e33]
+      - paragraph [ref=e34]:
+        - text: Questo sito utilizza cookie tecnici necessari al funzionamento del sito e alla fornitura del servizio richiesto, come descritto nella nostra
+        - link "Privacy Policy" [ref=e35] [cursor=pointer]:
+          - /url: /privacy
+        - text: .
+      - generic [ref=e36]:
+        - button "Accetto" [ref=e37]
+        - button "Rifiuta" [ref=e38]
+        - link "Leggi di più" [ref=e39] [cursor=pointer]:
+          - /url: /privacy
+  - region "Notifications Alt+T"
+```
