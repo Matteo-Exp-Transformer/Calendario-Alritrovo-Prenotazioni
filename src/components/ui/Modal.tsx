@@ -25,6 +25,7 @@ export const Modal: React.FC<ModalProps> = ({
   closeOnEscape = true,
   position = 'center',
 }) => {
+  console.log('🔵 [Modal Component] isOpen:', isOpen, 'title:', title)
   // LOCKED: 2025-01-16 - Modal.tsx completamente testato
   // Test eseguiti: 39 test, tutti passati (100%)
   // Combinazioni testate: tutte le dimensioni, stati, focus management, accessibility, edge cases
@@ -69,7 +70,12 @@ export const Modal: React.FC<ModalProps> = ({
     }
   }, [isOpen, onClose, closeOnEscape])
 
-  if (!isOpen) return null
+  console.log('🔵 [Modal Component] Before return, isOpen:', isOpen)
+  if (!isOpen) {
+    console.log('❌ [Modal Component] Returning null because isOpen is false')
+    return null
+  }
+  console.log('✅ [Modal Component] isOpen is true, rendering modal')
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (closeOnOverlayClick && e.target === e.currentTarget) {
