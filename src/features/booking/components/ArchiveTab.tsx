@@ -4,8 +4,6 @@ import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { Calendar, Clock, Users, Tag, Mail, Phone, MessageSquare, ChevronDown, ChevronUp, User, UtensilsCrossed, Wine, PartyPopper, GraduationCap, Archive, CheckCircle, XCircle } from 'lucide-react'
 
-const ArchiveIcon = Archive
-
 type ArchiveFilter = 'all' | 'accepted' | 'rejected'
 
 const EVENT_TYPE_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {
@@ -37,17 +35,9 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
     }
   }
 
-  const formatDateTime = (dateStr: string) => {
-    try {
-      return format(new Date(dateStr), 'd MMMM yyyy HH:mm', { locale: it })
-    } catch {
-      return dateStr
-    }
-  }
-
   const formatTime = (timeStr?: string) => {
     if (!timeStr) return 'Non specificato'
-    return timeStr
+    return timeStr.split(':').slice(0, 2).join(':')
   }
 
   const eventConfig = EVENT_TYPE_CONFIG[booking.event_type] || EVENT_TYPE_CONFIG.cena
@@ -58,73 +48,101 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
   const displayTime = booking.desired_time || 'Non specificato'
 
   return (
-    <div className="relative bg-white rounded-modern border-2 border-gray-400 shadow-lg hover:shadow-xl hover:border-indigo-500 transition-all overflow-hidden">
-      {/* Status Badge - Floating Top Right */}
-      <div className="absolute top-5 right-5 z-20">
-        <span className={`inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap shadow-md ${statusConfig.bgColor} ${statusConfig.textColor} border ${booking.status === 'accepted' ? 'border-green-400' : booking.status === 'rejected' ? 'border-red-400' : 'border-yellow-400'}`}>
-          {statusConfig.label}
-        </span>
-      </div>
-
+    <div style={{
+      background: 'linear-gradient(to bottom right, rgba(240, 244, 255, 0.9), rgba(224, 231, 255, 0.9), rgba(216, 220, 254, 0.9))',
+      border: '3px solid rgba(129, 140, 248, 0.6)',
+      boxShadow: '0 4px 12px -2px rgba(129, 140, 248, 0.2)',
+      backdropFilter: 'blur(10px)',
+      WebkitBackdropFilter: 'blur(10px)',
+    }} className="rounded-2xl hover:shadow-2xl transition-all duration-300 relative">
       {/* Header Collapsible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-7 hover:bg-gray-50 transition-all"
+        style={{ background: 'linear-gradient(to right, #F0F4FF, #E0E7FF)' }}
+        className="w-full p-6 hover:opacity-90 transition-all"
       >
-        <div className="flex items-start justify-between gap-6 pr-32">
-          <div className="flex items-start gap-5 flex-1">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4 flex-1">
             {/* Icona Tipo Evento */}
-            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center ${eventConfig.color} shadow-md flex-shrink-0`}>
-              <EventIcon className="w-10 h-10 text-white" />
+            <div className={`w-16 h-16 rounded-xl flex items-center justify-center ${eventConfig.color} shadow-md flex-shrink-0`}>
+              <EventIcon className="w-8 h-8 text-white" />
             </div>
 
-            {/* Info Principali */}
-            <div className="text-left flex-1 space-y-3">
-              {/* Riga 1: Tipo + Cliente */}
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-indigo-600" />
-                  <span className="text-lg font-bold text-indigo-900">{eventConfig.label}</span>
-                </div>
-                <span className="text-gray-400">•</span>
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-indigo-600" />
-                  <span className="font-semibold text-gray-900">{booking.client_name}</span>
-                </div>
-              </div>
+            {/* Layout 2 colonne come BookingRequestCard */}
+            <div className="text-left flex-1">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                {/* Colonna Sinistra */}
+                <div className="space-y-3">
+                  {/* Tipo Evento */}
+                  <div className="flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-warm-orange flex-shrink-0" />
+                    <span className="text-base font-bold text-warm-wood">{eventConfig.label}</span>
+                  </div>
 
-              {/* Riga 2: Data, Ora, Ospiti */}
-              <div className="flex items-center gap-4 flex-wrap text-sm">
-                <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg shadow-sm">
-                  <Calendar className="w-4 h-4 text-indigo-600" />
-                  <span className="font-medium text-gray-900">{formatDate(displayDate)}</span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg shadow-sm">
-                  <Clock className="w-4 h-4 text-indigo-600" />
-                  <span className="font-medium text-gray-900">{formatTime(displayTime)}</span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg shadow-sm">
-                  <Users className="w-4 h-4 text-indigo-600" />
-                  <span className="font-medium text-gray-900">{booking.num_guests} ospiti</span>
-                </div>
-              </div>
+                  {/* Nome Cliente */}
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-warm-orange flex-shrink-0" />
+                    <span className="text-base font-semibold text-warm-wood-dark">{booking.client_name}</span>
+                  </div>
 
-              {/* Riga 3: Created Date */}
-              <div className="text-xs text-gray-500">
-                Creata: {formatDateTime(booking.created_at)}
+                  {/* Email */}
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-warm-orange flex-shrink-0" />
+                    <span className="text-sm text-gray-600 truncate">{booking.client_email}</span>
+                  </div>
+
+                  {/* Telefono */}
+                  {booking.client_phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-warm-orange flex-shrink-0" />
+                      <span className="text-sm text-gray-600">{booking.client_phone}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Colonna Destra */}
+                <div className="space-y-3">
+                  {/* Data */}
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-warm-orange flex-shrink-0" />
+                    <span className="text-base font-semibold text-warm-wood-dark">{formatDate(displayDate)}</span>
+                  </div>
+
+                  {/* Ora */}
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-warm-orange flex-shrink-0" />
+                    <span className="text-base font-semibold text-warm-wood-dark">{formatTime(displayTime)}</span>
+                  </div>
+
+                  {/* Ospiti */}
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-warm-orange flex-shrink-0" />
+                    <span className="text-base font-semibold text-warm-wood-dark">{booking.num_guests} ospiti</span>
+                  </div>
+
+                  {/* Note preview se presenti */}
+                  {booking.special_requests && (
+                    <div className="flex items-start gap-2">
+                      <MessageSquare className="w-4 h-4 text-warm-orange flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-gray-600 line-clamp-2 italic">
+                        {booking.special_requests}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
           {/* Badge Status + Chevron */}
           <div className="flex flex-col items-end gap-2 flex-shrink-0">
-            <span className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap ${statusConfig.bgColor} ${statusConfig.textColor}`}>
+            <span className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap ${statusConfig.bgColor} ${statusConfig.textColor}`}>
               {statusConfig.label}
             </span>
             {isExpanded ? (
-              <ChevronUp className="w-6 h-6 text-indigo-600" />
+              <ChevronUp className="w-6 h-6 text-warm-wood" />
             ) : (
-              <ChevronDown className="w-6 h-6 text-indigo-600" />
+              <ChevronDown className="w-6 h-6 text-warm-wood" />
             )}
           </div>
         </div>
@@ -132,62 +150,71 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
 
       {/* Contenuto Espandibile */}
       {isExpanded && (
-        <div className="p-6 space-y-4 bg-white border-t-2 border-indigo-100 animate-slideDown">
-          {/* Dati Cliente */}
-          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 border-2 border-indigo-200">
-            <div className="flex items-center gap-2 mb-4">
-              <User className="w-5 h-5 text-indigo-900" />
-              <h4 className="text-lg font-bold text-indigo-900">Dati Cliente</h4>
+        <div className="p-6 bg-white border-t-2 border-warm-orange/10 animate-slideDown">
+          {/* Dati Organizzati - Griglia a 2 colonne */}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+            {/* Nome */}
+            <div className="flex items-start gap-3 py-3">
+              <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Nome:</span>
+              <span className="text-base font-semibold text-warm-wood-dark">{booking.client_name}</span>
             </div>
 
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
-                  <Mail className="w-5 h-5 text-indigo-600" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">Email</p>
-                  <p className="text-base font-semibold text-gray-900">{booking.client_email}</p>
-                </div>
-              </div>
+            {/* Email */}
+            <div className="flex items-start gap-3 py-3">
+              <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Email:</span>
+              <span className="text-base font-semibold text-warm-wood-dark">{booking.client_email}</span>
+            </div>
 
-              {booking.client_phone && (
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
-                    <Phone className="w-5 h-5 text-indigo-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase tracking-wide">Telefono</p>
-                    <p className="text-base font-semibold text-gray-900">{booking.client_phone}</p>
-                  </div>
-                </div>
-              )}
+            {/* Telefono */}
+            {booking.client_phone && (
+              <div className="flex items-start gap-3 py-3">
+                <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Telefono:</span>
+                <span className="text-base font-semibold text-warm-wood-dark">{booking.client_phone}</span>
+              </div>
+            )}
+
+            {/* Data */}
+            <div className="flex items-start gap-3 py-3">
+              <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Data:</span>
+              <span className="text-base font-semibold text-warm-wood-dark">{formatDate(displayDate)}</span>
+            </div>
+
+            {/* Orario */}
+            <div className="flex items-start gap-3 py-3">
+              <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Orario:</span>
+              <span className="text-base font-semibold text-warm-wood-dark">{formatTime(displayTime)}</span>
+            </div>
+
+            {/* Pax */}
+            <div className="flex items-start gap-3 py-3">
+              <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Pax:</span>
+              <span className="text-base font-semibold text-warm-wood-dark">{booking.num_guests}</span>
+            </div>
+
+            {/* Tipo */}
+            <div className="flex items-start gap-3 py-3">
+              <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Tipo:</span>
+              <span className="text-base font-semibold text-warm-wood-dark">{eventConfig.label}</span>
             </div>
           </div>
 
-          {/* Note se presenti */}
+          {/* Note Richieste Speciali - Fuori dalla griglia */}
           {booking.special_requests && (
-            <div className="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
-              <div className="flex items-start gap-2">
-                <MessageSquare className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-2 font-semibold">Richieste Speciali</p>
-                  <p className="text-sm text-gray-700 leading-relaxed">{booking.special_requests}</p>
-                </div>
-              </div>
+            <div className="pt-6 mt-6 border-t border-warm-orange/20">
+              <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-3">Richieste Speciali</p>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {booking.special_requests}
+              </p>
             </div>
           )}
 
           {/* Motivo rifiuto se presente */}
           {booking.rejection_reason && (
-            <div className="bg-red-50 rounded-xl p-4 border-2 border-red-200">
-              <div className="flex items-start gap-2">
-                <MessageSquare className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-2 font-semibold">Motivo Rifiuto</p>
-                  <p className="text-sm text-red-700 leading-relaxed">{booking.rejection_reason}</p>
-                </div>
-              </div>
+            <div className="pt-6 mt-6 border-t border-red-300/30">
+              <p className="text-xs text-red-600 uppercase tracking-wide font-semibold mb-3">Motivo Rifiuto</p>
+              <p className="text-sm text-red-700 leading-relaxed">
+                {booking.rejection_reason}
+              </p>
             </div>
           )}
 
@@ -196,20 +223,21 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
             // Estrai data da confirmed_start senza conversioni timezone
             const dateMatch = booking.confirmed_start.match(/(\d{4})-(\d{2})-(\d{2})/)
             const dateStr = dateMatch ? `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}` : null
-            
+
             if (!dateStr) return null
-            
+
             return (
-              <div className="mt-4 pt-4 border-t-2 border-indigo-200">
+              <div className="flex gap-4 pt-4 border-t border-warm-orange/20 mt-6">
                 <button
                   onClick={(e) => {
-                    e.stopPropagation() // Previene chiusura card
+                    e.stopPropagation()
                     onViewInCalendar(dateStr)
                   }}
-                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                  style={{ backgroundColor: '#059669', color: 'white' }}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 hover:bg-green-700 font-bold text-lg shadow-xl rounded-xl transition-all"
                 >
                   <Calendar className="w-5 h-5" />
-                  <span>📅 Visualizza nel Calendario</span>
+                  Visualizza nel Calendario
                 </button>
               </div>
             )
@@ -263,16 +291,15 @@ export const ArchiveTab: React.FC<ArchiveTabProps> = ({ onViewInCalendar }) => {
 
   return (
     <div className="space-y-6">
-      {/* Filters - Stile Uniforme */}
-      <div className="bg-white rounded-modern border-2 border-gray-400 shadow-lg hover:shadow-xl transition-all p-7">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
-            <ArchiveIcon className="w-6 h-6 text-white" />
-          </div>
-          <label className="text-base font-bold text-gray-900 uppercase tracking-wide">
-            Filtra per Status
-          </label>
-        </div>
+      {/* Filters - Stile Allineato */}
+      <div style={{
+        background: 'linear-gradient(to bottom right, rgba(240, 244, 255, 0.9), rgba(224, 231, 255, 0.9), rgba(216, 220, 254, 0.9))',
+        border: '3px solid rgba(129, 140, 248, 0.6)',
+        boxShadow: '0 4px 12px -2px rgba(129, 140, 248, 0.2)',
+      }} className="rounded-2xl p-6">
+        <label className="text-base font-bold text-warm-wood uppercase tracking-wide mb-4 block">
+          Filtra per Status
+        </label>
 
         <div className="flex gap-4">
           {(['all', 'accepted', 'rejected'] as ArchiveFilter[]).map((f) => (
@@ -281,20 +308,20 @@ export const ArchiveTab: React.FC<ArchiveTabProps> = ({ onViewInCalendar }) => {
               data-filter={f}
               onClick={() => setFilter(f)}
               className={`
-                flex-1 flex items-center justify-center gap-3 px-7 py-5 rounded-modern border-2 shadow-lg hover:shadow-xl transition-all font-bold uppercase tracking-wide
+                flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl border-2 shadow-lg hover:shadow-xl transition-all font-bold uppercase tracking-wide
                 ${filter === f
                   ? f === 'all'
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-indigo-500 scale-105'
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-indigo-500'
                     : f === 'accepted'
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-500 scale-105'
-                    : 'bg-gradient-to-r from-rose-500 to-red-600 text-white border-rose-500 scale-105'
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-500'
+                    : 'bg-gradient-to-r from-rose-500 to-red-600 text-white border-rose-500'
                   : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
                 }
               `}
             >
-              {f === 'all' && <ArchiveIcon className="w-6 h-6" />}
-              {f === 'accepted' && <CheckCircle className="w-6 h-6" />}
-              {f === 'rejected' && <XCircle className="w-6 h-6" />}
+              {f === 'all' && <Archive className="w-5 h-5" />}
+              {f === 'accepted' && <CheckCircle className="w-5 h-5" />}
+              {f === 'rejected' && <XCircle className="w-5 h-5" />}
               {f === 'all' ? 'Tutte' : f === 'accepted' ? 'Accettate' : 'Rifiutate'}
             </button>
           ))}

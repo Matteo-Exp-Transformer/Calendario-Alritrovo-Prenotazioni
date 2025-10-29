@@ -1,13 +1,12 @@
 import React, { useState } from 'react'
 import { AdminHeader } from '@/components/AdminHeader'
-import { useAdminAuth } from '@/features/booking/hooks/useAdminAuth'
 import { useBookingStats } from '@/features/booking/hooks/useBookingQueries'
 import { PendingRequestsTab } from '@/features/booking/components/PendingRequestsTab'
 import { ArchiveTab } from '@/features/booking/components/ArchiveTab'
 import { BookingCalendarTab } from '@/features/booking/components/BookingCalendarTab'
 import { SettingsTab } from '@/features/booking/components/SettingsTab'
 import { AdminBookingForm } from '@/features/booking/components/AdminBookingForm'
-import { Calendar, Clock, Archive, Settings, Plus, LogOut } from 'lucide-react'
+import { Calendar, Clock, Archive, Settings, Plus } from 'lucide-react'
 import { CollapsibleCard } from '@/components/ui/CollapsibleCard'
 
 type Tab = 'calendar' | 'pending' | 'archive' | 'settings'
@@ -27,8 +26,8 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, badge, onC
     className={`
       relative flex items-center gap-3 px-6 md:px-8 py-3.5 md:py-4 rounded-3xl transition-all duration-200 font-black tracking-wide border-2 cursor-pointer
       ${active
-        ? 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 border-white/50'
-        : 'border-white/20 hover:bg-[#2D3A4D] hover:border-white/30 active:scale-95'
+        ? 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 border-gray-800'
+        : 'border-gray-800 hover:bg-[#2D3A4D] hover:border-gray-900 active:scale-95'
       }
     `}>
     <div className={`
@@ -61,7 +60,6 @@ export const AdminDashboard: React.FC = () => {
   const [showNewBookingPanel, setShowNewBookingPanel] = useState(false)
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null)
   const { data: stats, isLoading: isLoadingStats } = useBookingStats()
-  const { logout } = useAdminAuth()
 
   // Chiudi il pannello pendenti quando cambi tab
   const handleTabChange = (tab: Tab) => {
@@ -77,38 +75,28 @@ export const AdminDashboard: React.FC = () => {
   const handleViewInCalendar = (date: string) => {
     setSelectedCalendarDate(date)
     setActiveTab('calendar')
-    // Reset selectedCalendarDate dopo un breve delay per permettere al calendario di processarlo
+    // Reset selectedCalendarDate dopo un delay per permettere al calendario di processarlo
     setTimeout(() => {
       setSelectedCalendarDate(null)
-    }, 100)
+    }, 1000)
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       {/* Header con Navbar Orizzontale - Tema Colorato Professionale */}
       <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-2xl border-b-4 border-yellow-400/50">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 md:py-4">
-          {/* Top Bar: Logo + User Info */}
-          <div className="flex items-center justify-between mb-4 md:mb-6">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-2 md:py-3">
+          {/* Top Bar: Logo + Stats + User Info - Allineati a sinistra */}
+          <div className="flex items-center gap-6 mb-1">
             <div>
               <h1 className="text-2xl md:text-3xl font-serif font-bold text-white drop-shadow-lg">Al Ritrovo</h1>
-              <p className="text-yellow-200 text-xs md:text-sm mt-1 font-medium">Dashboard Amministratore</p>
-              {/* Logout Button sotto "Amministratore" */}
-              <button
-                onClick={logout}
-                className="mt-3 mb-2 bg-white/10 hover:bg-white/20 rounded-modern border-2 border-white/30 shadow-md hover:shadow-lg hover:border-white/50 transition-all px-3 py-1.5 flex items-center gap-2"
-              >
-                <div className="w-5 h-5 rounded-lg bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center shadow-sm">
-                  <LogOut className="w-3 h-3 text-white" />
-                </div>
-                <span className="text-[10px] font-bold text-white uppercase tracking-wide">Logout</span>
-              </button>
+              <p className="text-yellow-200 text-xs md:text-sm mt-0 font-medium leading-tight">Dashboard Amministratore</p>
             </div>
             <AdminHeader />
           </div>
 
           {/* Navigation Tabs Orizzontale */}
-          <nav className="flex flex-wrap items-center gap-5 md:gap-6 pb-2">
+          <nav className="flex flex-wrap items-center gap-5 md:gap-6 pb-2 mt-4">
             <NavItem
               icon={Calendar}
               label="Calendario"

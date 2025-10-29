@@ -207,7 +207,28 @@ export const AdminBookingForm: React.FC = () => {
               value={formData.event_type}
               onChange={(e) => setFormData({ ...formData, event_type: e.target.value as EventType })}
               required
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full"
+              style={{
+                borderRadius: '9999px',
+                border: '1px solid rgba(0,0,0,0.2)',
+                maxWidth: '600px',
+                height: '56px',
+                padding: '16px',
+                fontSize: '16px',
+                fontWeight: '500',
+                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(6px)',
+                color: 'black',
+                outline: 'none',
+                appearance: 'none',
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 16px center',
+                backgroundSize: '20px',
+                paddingRight: '48px'
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#8B6914'}
+              onBlur={(e) => e.target.style.borderColor = 'rgba(0,0,0,0.2)'}
             >
               {EVENT_TYPES.map((type) => (
                 <option key={type.value} value={type.value}>
@@ -215,6 +236,16 @@ export const AdminBookingForm: React.FC = () => {
                 </option>
               ))}
             </select>
+            <style>{`
+              select#event_type option {
+                color: black;
+                background-color: white;
+              }
+              select#event_type::placeholder {
+                color: black !important;
+                opacity: 1 !important;
+              }
+            `}</style>
           </div>
 
           {/* Data */}

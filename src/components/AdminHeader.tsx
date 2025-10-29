@@ -1,10 +1,10 @@
 import React from 'react'
 import { useAdminAuth } from '@/features/booking/hooks/useAdminAuth'
 import { useBookingStats } from '@/features/booking/hooks/useBookingQueries'
-import { User, Shield } from 'lucide-react'
+import { User, Shield, LogOut } from 'lucide-react'
 
 export const AdminHeader: React.FC = () => {
-  const { user } = useAdminAuth()
+  const { user, logout } = useAdminAuth()
   const { data: stats, isLoading: isLoadingStats } = useBookingStats()
 
   return (
@@ -65,6 +65,19 @@ export const AdminHeader: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Logout Button - Accanto a User Info */}
+        <button
+          onClick={logout}
+          className="bg-white rounded-modern border-2 border-gray-400 shadow-md hover:shadow-lg hover:border-red-500 transition-all px-2 lg:px-3 py-2 lg:py-2.5 flex-shrink-0"
+        >
+          <div className="flex items-center gap-1.5 lg:gap-2">
+            <div className="w-6 h-6 lg:w-7 lg:h-7 rounded-lg bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center shadow-sm">
+              <LogOut className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-white" />
+            </div>
+            <span className="text-[10px] lg:text-xs font-bold text-gray-900 uppercase tracking-wide">Logout</span>
+          </div>
+        </button>
       </div>
     </div>
   )
