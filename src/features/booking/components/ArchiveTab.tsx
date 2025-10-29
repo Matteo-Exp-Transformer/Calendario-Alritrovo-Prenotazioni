@@ -2,7 +2,9 @@ import React, { useState } from 'react'
 import { useAllBookings } from '../hooks/useBookingQueries'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { Calendar, Clock, Users, Tag, Mail, Phone, MessageSquare, ChevronDown, ChevronUp, User, UtensilsCrossed, Wine, PartyPopper, GraduationCap } from 'lucide-react'
+import { Calendar, Clock, Users, Tag, Mail, Phone, MessageSquare, ChevronDown, ChevronUp, User, UtensilsCrossed, Wine, PartyPopper, GraduationCap, Archive, CheckCircle, XCircle } from 'lucide-react'
+
+const ArchiveIcon = Archive
 
 type ArchiveFilter = 'all' | 'accepted' | 'rejected'
 
@@ -55,17 +57,24 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking }) => {
   const displayTime = booking.desired_time || 'Non specificato'
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border-2 border-indigo-200 overflow-hidden transition-all duration-300">
+    <div className="relative bg-white rounded-modern border-2 border-gray-400 shadow-lg hover:shadow-xl hover:border-indigo-500 transition-all overflow-hidden">
+      {/* Status Badge - Floating Top Right */}
+      <div className="absolute top-5 right-5 z-20">
+        <span className={`inline-flex items-center px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap shadow-md ${statusConfig.bgColor} ${statusConfig.textColor} border ${booking.status === 'accepted' ? 'border-green-400' : booking.status === 'rejected' ? 'border-red-400' : 'border-yellow-400'}`}>
+          {statusConfig.label}
+        </span>
+      </div>
+
       {/* Header Collapsible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-6 bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 transition-all"
+        className="w-full p-7 hover:bg-gray-50 transition-all"
       >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-start gap-4 flex-1">
+        <div className="flex items-start justify-between gap-6 pr-32">
+          <div className="flex items-start gap-5 flex-1">
             {/* Icona Tipo Evento */}
-            <div className={`w-16 h-16 rounded-xl flex items-center justify-center ${eventConfig.color} shadow-md flex-shrink-0`}>
-              <EventIcon className="w-8 h-8 text-white" />
+            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center ${eventConfig.color} shadow-md flex-shrink-0`}>
+              <EventIcon className="w-10 h-10 text-white" />
             </div>
 
             {/* Info Principali */}
@@ -225,28 +234,39 @@ export const ArchiveTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Filters */}
-      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl shadow-lg p-6 border-2 border-indigo-100">
-        <label className="text-sm font-bold text-indigo-900 block mb-3 uppercase tracking-wide">
-          Filtra per status:
-        </label>
-        <div className="flex gap-3">
+      {/* Filters - Stile Uniforme */}
+      <div className="bg-white rounded-modern border-2 border-gray-400 shadow-lg hover:shadow-xl transition-all p-7">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md">
+            <ArchiveIcon className="w-6 h-6 text-white" />
+          </div>
+          <label className="text-base font-bold text-gray-900 uppercase tracking-wide">
+            Filtra per Status
+          </label>
+        </div>
+
+        <div className="flex gap-4">
           {(['all', 'accepted', 'rejected'] as ArchiveFilter[]).map((f) => (
             <button
               key={f}
               data-filter={f}
               onClick={() => setFilter(f)}
-              className={`px-6 py-3 rounded-xl text-sm font-bold transition-all ${
-                filter === f
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg scale-105'
-                  : 'bg-white text-gray-700 hover:bg-indigo-100 hover:scale-105 shadow-md'
-              }`}
+              className={`
+                flex-1 flex items-center justify-center gap-3 px-7 py-5 rounded-modern border-2 shadow-lg hover:shadow-xl transition-all font-bold uppercase tracking-wide
+                ${filter === f
+                  ? f === 'all'
+                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-indigo-500 scale-105'
+                    : f === 'accepted'
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-500 scale-105'
+                    : 'bg-gradient-to-r from-rose-500 to-red-600 text-white border-rose-500 scale-105'
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+                }
+              `}
             >
-              {f === 'all'
-                ? '📚 Tutte'
-                : f === 'accepted'
-                ? '✅ Accettate'
-                : '❌ Rifiutate'}
+              {f === 'all' && <ArchiveIcon className="w-6 h-6" />}
+              {f === 'accepted' && <CheckCircle className="w-6 h-6" />}
+              {f === 'rejected' && <XCircle className="w-6 h-6" />}
+              {f === 'all' ? 'Tutte' : f === 'accepted' ? 'Accettate' : 'Rifiutate'}
             </button>
           ))}
         </div>

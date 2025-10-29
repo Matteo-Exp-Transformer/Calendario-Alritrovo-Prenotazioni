@@ -121,3 +121,12 @@ body {
 .fc-event:hover {
   opacity: 0.8;
 }
+
+/* FORCE ROUNDED BORDERS - Bordi Stondati Moderni */
+.rounded-modern {
+  border-radius: 24px !important;
+}
+
+.rounded-modern-xl {
+  border-radius: 32px !important;
+}

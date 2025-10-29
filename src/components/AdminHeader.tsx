@@ -1,110 +1,64 @@
 import React from 'react'
 import { useAdminAuth } from '@/features/booking/hooks/useAdminAuth'
 import { useBookingStats } from '@/features/booking/hooks/useBookingQueries'
-import { LogOut, User, Shield, TrendingUp, Calendar, BarChart3, XCircle } from 'lucide-react'
+import { User, Shield } from 'lucide-react'
 
 export const AdminHeader: React.FC = () => {
-  const { user, logout } = useAdminAuth()
+  const { user } = useAdminAuth()
   const { data: stats, isLoading: isLoadingStats } = useBookingStats()
 
   return (
-    <div className="flex items-center gap-6">
-      {/* Stats Cards - VERO DESIGN MODERNO CON NEUMORPHISM */}
-      <div className="flex items-center gap-4">
-        {/* Settimana - Neumorphic Card */}
-        <div className="group relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-400 to-fuchsia-500 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-          <div className="relative bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-600 rounded-3xl p-6 shadow-[8px_8px_24px_rgba(139,92,246,0.3),-8px_-8px_24px_rgba(236,72,153,0.2)] border-2 border-white/40">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-2xl bg-white/30 backdrop-blur-sm shadow-inner flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-white drop-shadow-lg" />
-                </div>
-                <p className="text-[9px] font-black text-white/90 uppercase tracking-[0.15em] leading-tight">Settimana</p>
-              </div>
-              <p className="text-4xl font-black text-white leading-none tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
-                {isLoadingStats ? '...' : stats?.totalWeek || 0}
-              </p>
-            </div>
-          </div>
+    <div className="flex items-center gap-2 lg:gap-3 w-full">
+      {/* Stats Cards - STILE UNIFORME MODERNO - Ridotte 3/4 */}
+      <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0">
+        {/* Settimana */}
+        <div className="bg-white rounded-modern border-2 border-gray-400 shadow-md hover:shadow-lg hover:border-violet-500 transition-all p-2 lg:p-3 flex flex-col items-center justify-center min-h-[60px] min-w-[70px] lg:min-h-[70px] lg:min-w-[85px]">
+          <p className="text-[8px] lg:text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 lg:mb-1 text-center">Settimana</p>
+          <p className="text-2xl lg:text-3xl font-black text-gray-900 leading-none text-center">
+            {isLoadingStats ? '...' : stats?.totalWeek || 0}
+          </p>
         </div>
 
-        {/* Oggi - Neumorphic Card */}
-        <div className="group relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-          <div className="relative bg-gradient-to-br from-cyan-500 via-blue-500 to-blue-600 rounded-3xl p-6 shadow-[8px_8px_24px_rgba(6,182,212,0.3),-8px_-8px_24px_rgba(59,130,246,0.2)] border-2 border-white/40">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-2xl bg-white/30 backdrop-blur-sm shadow-inner flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-white drop-shadow-lg" />
-                </div>
-                <p className="text-[9px] font-black text-white/90 uppercase tracking-[0.15em] leading-tight">Oggi</p>
-              </div>
-              <p className="text-4xl font-black text-white leading-none tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
-                {isLoadingStats ? '...' : stats?.totalDay || 0}
-              </p>
-            </div>
-          </div>
+        {/* Oggi */}
+        <div className="bg-white rounded-modern border-2 border-gray-400 shadow-md hover:shadow-lg hover:border-cyan-500 transition-all p-2 lg:p-3 flex flex-col items-center justify-center min-h-[60px] min-w-[70px] lg:min-h-[70px] lg:min-w-[85px]">
+          <p className="text-[8px] lg:text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 lg:mb-1 text-center">Oggi</p>
+          <p className="text-2xl lg:text-3xl font-black text-gray-900 leading-none text-center">
+            {isLoadingStats ? '...' : stats?.totalDay || 0}
+          </p>
         </div>
 
-        {/* Mese - Neumorphic Card */}
-        <div className="group relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-          <div className="relative bg-gradient-to-br from-blue-500 via-indigo-500 to-indigo-600 rounded-3xl p-6 shadow-[8px_8px_24px_rgba(59,130,246,0.3),-8px_-8px_24px_rgba(99,102,241,0.2)] border-2 border-white/40">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-2xl bg-white/30 backdrop-blur-sm shadow-inner flex items-center justify-center">
-                  <BarChart3 className="w-6 h-6 text-white drop-shadow-lg" />
-                </div>
-                <p className="text-[9px] font-black text-white/90 uppercase tracking-[0.15em] leading-tight">Mese</p>
-              </div>
-              <p className="text-4xl font-black text-white leading-none tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
-                {isLoadingStats ? '...' : stats?.totalMonth || 0}
-              </p>
-            </div>
-          </div>
+        {/* Mese */}
+        <div className="bg-white rounded-modern border-2 border-gray-400 shadow-md hover:shadow-lg hover:border-blue-500 transition-all p-2 lg:p-3 flex flex-col items-center justify-center min-h-[60px] min-w-[70px] lg:min-h-[70px] lg:min-w-[85px]">
+          <p className="text-[8px] lg:text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 lg:mb-1 text-center">Mese</p>
+          <p className="text-2xl lg:text-3xl font-black text-gray-900 leading-none text-center">
+            {isLoadingStats ? '...' : stats?.totalMonth || 0}
+          </p>
         </div>
 
-        {/* Rifiutate - Neumorphic Card */}
-        <div className="group relative">
-          <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-orange-500 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-          <div className="relative bg-gradient-to-br from-rose-500 via-pink-500 to-orange-600 rounded-3xl p-6 shadow-[8px_8px_24px_rgba(244,63,94,0.3),-8px_-8px_24px_rgba(249,115,22,0.2)] border-2 border-white/40">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-2xl bg-white/30 backdrop-blur-sm shadow-inner flex items-center justify-center">
-                  <XCircle className="w-6 h-6 text-white drop-shadow-lg" />
-                </div>
-                <p className="text-[9px] font-black text-white/90 uppercase tracking-[0.15em] leading-tight">Rifiutate</p>
-              </div>
-              <p className="text-4xl font-black text-white leading-none tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
-                {isLoadingStats ? '...' : stats?.rejected || 0}
-              </p>
-            </div>
-          </div>
+        {/* Rifiutate */}
+        <div className="bg-white rounded-modern border-2 border-gray-400 shadow-md hover:shadow-lg hover:border-rose-500 transition-all p-2 lg:p-3 flex flex-col items-center justify-center min-h-[60px] min-w-[70px] lg:min-h-[70px] lg:min-w-[85px]">
+          <p className="text-[8px] lg:text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 lg:mb-1 text-center">Rifiutate</p>
+          <p className="text-2xl lg:text-3xl font-black text-gray-900 leading-none text-center">
+            {isLoadingStats ? '...' : stats?.rejected || 0}
+          </p>
         </div>
-      </div>
 
-      {/* User Info Card - Design Elegante con Depth */}
-      <div className="relative group">
-        <div className="absolute inset-0 bg-gradient-to-br from-yellow-300 via-pink-300 to-purple-400 rounded-3xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity"></div>
-        <div className="relative bg-white/20 backdrop-blur-xl rounded-3xl px-6 py-4 border-2 border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-400 via-pink-400 to-purple-500 rounded-full blur-md opacity-75"></div>
-              <div className="relative w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center shadow-[0_0_24px_rgba(168,85,247,0.4)] ring-4 ring-white/50">
-                <User className="w-7 h-7 text-white drop-shadow-lg" />
-              </div>
+        {/* User Info - Accanto al count Rifiutate */}
+        <div className="bg-white rounded-modern border-2 border-gray-400 shadow-md hover:shadow-lg hover:border-purple-500 transition-all px-2 lg:px-3 py-2 lg:py-2.5">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 lg:w-9 lg:h-9 rounded-full bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center shadow-sm flex-shrink-0">
+              <User className="w-3.5 h-3.5 lg:w-4.5 lg:h-4.5 text-white" />
             </div>
 
-            <div className="text-left">
-              <p className="text-sm font-black text-white leading-tight tracking-wide drop-shadow-md">
+            <div className="text-left min-w-0">
+              <p className="text-[10px] lg:text-xs font-bold text-gray-900 leading-tight truncate">
                 {user?.name || user?.email}
               </p>
-              <div className="flex items-center gap-2 mt-1.5">
-                <div className="w-5 h-5 rounded-lg bg-yellow-400/80 backdrop-blur-sm flex items-center justify-center shadow-md">
-                  <Shield className="w-3 h-3 text-yellow-900" />
+              <div className="flex items-center gap-1 mt-0.5">
+                <div className="w-3 h-3 lg:w-3.5 lg:h-3.5 rounded-md bg-yellow-400 flex items-center justify-center shadow-sm flex-shrink-0">
+                  <Shield className="w-1.5 h-1.5 lg:w-2 lg:h-2 text-yellow-900" />
                 </div>
-                <p className="text-xs font-bold text-yellow-100 tracking-wider uppercase">
+                <p className="text-[8px] lg:text-[9px] font-semibold text-gray-600 tracking-wide uppercase">
                   {user?.role === 'admin' ? 'Admin' : 'Staff'}
                 </p>
               </div>
@@ -112,18 +66,6 @@ export const AdminHeader: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Logout Button - Design Distintivo */}
-      <button
-        onClick={logout}
-        className="group relative"
-      >
-        <div className="absolute inset-0 bg-gradient-to-br from-red-400 to-rose-500 rounded-2xl blur-md opacity-50 group-hover:opacity-75 transition-opacity"></div>
-        <div className="relative inline-flex items-center gap-3 px-6 py-3.5 bg-gradient-to-br from-rose-500 to-red-600 rounded-2xl text-white font-black tracking-wide shadow-[0_8px_24px_rgba(244,63,94,0.4)] border-2 border-white/30 hover:shadow-[0_12px_32px_rgba(244,63,94,0.6)] transition-all">
-          <LogOut className="w-5 h-5 drop-shadow-lg" />
-          <span className="text-sm uppercase tracking-widest drop-shadow-md">Logout</span>
-        </div>
-      </button>
     </div>
   )
 }

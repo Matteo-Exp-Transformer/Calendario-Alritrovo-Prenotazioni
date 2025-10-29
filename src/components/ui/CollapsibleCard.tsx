@@ -1,7 +1,6 @@
 import React, { ReactNode, useId, useMemo, useState } from 'react'
-import { ChevronDown, ChevronUp } from 'lucide-react'
 
-export interface CollapsibleCardProps {
+export interface CollapsibleCardProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string
   subtitle?: string | ReactNode
   description?: string
@@ -63,6 +62,8 @@ export const CollapsibleCard = ({
   onEmptyAction,
   collapseDisabled = false,
   id,
+  style,
+  ...restProps
 }: CollapsibleCardProps) => {
   // LOCKED: 2025-01-16 - CollapsibleCard.tsx completamente testato
   // Test eseguiti: 57 test, tutti passati (100%)
@@ -225,14 +226,16 @@ export const CollapsibleCard = ({
 
   return (
     <div
-      className={`rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow duration-200 focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-1 ${className}`}
+      className={`rounded-modern border-2 border-gray-400 bg-white shadow-lg hover:shadow-xl transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 ${className}`}
+      style={style}
       data-expanded={isExpanded}
       role="region"
       aria-labelledby={headerId}
+      {...restProps}
     >
       {/* Header */}
       <div
-        className={`flex cursor-pointer items-start justify-between gap-4 rounded-t-lg px-4 py-4 transition-colors hover:bg-gray-50 sm:px-6 relative ${headerClassName}`}
+        className={`flex cursor-pointer items-start justify-between gap-4 px-4 py-4 transition-colors sm:px-6 relative ${headerClassName}`}
         onClick={toggleExpanded}
         role="button"
         tabIndex={0}
@@ -247,7 +250,7 @@ export const CollapsibleCard = ({
             <Icon className="mt-1 h-5 w-5 text-gray-500" aria-hidden="true" />
           )}
           <div className="flex flex-col space-y-1">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
               </div>
@@ -270,30 +273,6 @@ export const CollapsibleCard = ({
         <div className="flex items-center space-x-2">
           {actions && (
             <div className="flex items-center space-x-2">{actions}</div>
-          )}
-          {!collapseDisabled && (
-            <button
-              type="button"
-              className="p-1 rounded-md hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-              onClick={e => {
-                e.stopPropagation()
-                toggleExpanded()
-              }}
-              aria-label={isExpanded ? 'Collapse section' : 'Expand section'}
-              disabled={collapseDisabled}
-            >
-              {isExpanded ? (
-                <ChevronUp
-                  className="h-4 w-4 text-gray-500 transition-transform duration-200"
-                  aria-hidden="true"
-                />
-              ) : (
-                <ChevronDown
-                  className="h-4 w-4 text-gray-500 transition-transform duration-200"
-                  aria-hidden="true"
-                />
-              )}
-            </button>
           )}
         </div>
       </div>

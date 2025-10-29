@@ -51,7 +51,7 @@ export const BookingRequestPage: React.FC = () => {
           </div>
 
           {/* Form Card con Glassmorphism e Layout 2 Colonne */}
-          <div className="bg-white/95 backdrop-blur-md shadow-2xl rounded-3xl p-8 md:p-12 mb-8 animate-slide-in-up">
+          <div className="bg-white/95 backdrop-blur-md shadow-2xl rounded-modern p-8 md:p-12 mb-8 animate-slide-in-up">
             <BookingRequestForm />
           </div>
 

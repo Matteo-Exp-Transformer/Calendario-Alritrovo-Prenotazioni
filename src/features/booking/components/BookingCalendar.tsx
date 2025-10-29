@@ -304,7 +304,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
                   selectedDateData.morningBookings.map((booking) => (
                     <div
                       key={booking.id}
-                      className="bg-white/98 backdrop-blur-sm p-5 rounded-3xl relative"
+                      className="bg-white/98 backdrop-blur-sm p-5 rounded-modern relative"
                       style={{
                         border: '3px solid rgba(255, 255, 255, 0.9)',
                         boxShadow: '0 0 0 1px rgba(255, 255, 255, 1), 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 3px rgba(255, 255, 255, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.08)',
@@ -441,7 +441,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
                   selectedDateData.afternoonBookings.map((booking) => (
                     <div
                       key={booking.id}
-                      className="bg-white/98 backdrop-blur-sm p-5 rounded-3xl relative"
+                      className="bg-white/98 backdrop-blur-sm p-5 rounded-modern relative"
                       style={{
                         border: '3px solid rgba(255, 255, 255, 0.9)',
                         boxShadow: '0 0 0 1px rgba(255, 255, 255, 1), 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 3px rgba(255, 255, 255, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.08)',
@@ -577,7 +577,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
                   selectedDateData.eveningBookings.map((booking) => (
                     <div
                       key={booking.id}
-                      className="bg-white/98 backdrop-blur-sm p-5 rounded-3xl relative"
+                      className="bg-white/98 backdrop-blur-sm p-5 rounded-modern relative"
                       style={{
                         border: '3px solid rgba(255, 255, 255, 0.9)',
                         boxShadow: '0 0 0 1px rgba(255, 255, 255, 1), 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 3px rgba(255, 255, 255, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.08)',
