@@ -22,40 +22,43 @@ interface NavItemProps {
 const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, badge, onClick }) => (
   <button
     onClick={onClick}
-    className="group relative"
-  >
-    {/* Glow Effect on Active */}
-    {active && (
-      <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 via-orange-300 to-pink-300 rounded-3xl blur-xl opacity-60"></div>
-    )}
-
-    <div className={`
-      relative flex items-center gap-3 px-6 md:px-8 py-3.5 md:py-4 rounded-3xl transition-all font-black tracking-wide
+    style={{ backgroundColor: '#1A252F' }}
+    className={`
+      rounded-modern border-2 shadow-lg hover:shadow-xl transition-all
+      px-10 py-6
       ${active
-        ? 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 text-white shadow-[0_8px_32px_rgba(251,146,60,0.5)] border-2 border-white/50 scale-105'
-        : 'bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm border-2 border-white/20 hover:scale-105 hover:shadow-lg'
+        ? 'border-blue-500 scale-105'
+        : 'border-gray-400 hover:border-blue-400'
       }
-    `}>
+    `}
+  >
+    <div className="flex items-center gap-5">
       <div className={`
-        w-11 h-11 rounded-2xl flex items-center justify-center transition-all
+        w-20 h-20 rounded-2xl flex items-center justify-center shadow-md
         ${active
-          ? 'bg-white/30 shadow-inner'
-          : 'bg-white/10 group-hover:bg-white/20'
+          ? 'bg-gradient-to-br from-blue-500 to-indigo-600'
+          : 'bg-gradient-to-br from-gray-400 to-gray-600'
         }
       `}>
-        <Icon className="w-6 h-6 md:w-7 md:h-7 drop-shadow-lg" />
+        <Icon className="w-11 h-11 text-white" />
       </div>
 
-      <span className="text-sm md:text-base uppercase tracking-widest drop-shadow-md">{label}</span>
+      <div className="text-left">
+        <span className={`
+          text-xl font-bold tracking-wide block
+          text-white
+        `}>
+          {label}
+        </span>
 
-      {badge && badge > 0 && (
-        <div className="relative">
-          <div className="absolute inset-0 bg-red-400 rounded-full blur-md opacity-75"></div>
-          <span className="relative inline-flex items-center justify-center min-w-[28px] h-7 bg-gradient-to-br from-red-500 to-rose-600 text-white text-xs font-black px-2.5 rounded-full shadow-[0_4px_16px_rgba(239,68,68,0.6)] border-2 border-white/50">
-            {badge}
-          </span>
-        </div>
-      )}
+        {badge && badge > 0 && (
+          <div className="mt-2">
+            <span className="inline-flex items-center justify-center min-w-[40px] h-9 bg-gradient-to-br from-red-500 to-rose-600 text-white text-base font-black px-4 rounded-full shadow-md">
+              {badge}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   </button>
 )
@@ -90,7 +93,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           {/* Navigation Tabs Orizzontale */}
-          <nav className="flex flex-wrap items-center gap-3 md:gap-4 pb-2">
+          <nav className="flex flex-wrap items-center gap-4 md:gap-6 pb-2">
             <NavItem
               icon={Calendar}
               label="Calendario"
@@ -136,8 +139,8 @@ export const AdminDashboard: React.FC = () => {
               defaultExpanded={false}
               expanded={showNewBookingPanel}
               onExpandedChange={setShowNewBookingPanel}
-              className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-300 shadow-xl"
-              headerClassName="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+              className="bg-white border-2 border-gray-400 shadow-lg hover:shadow-xl hover:border-purple-500 transition-all rounded-modern"
+              headerClassName="hover:bg-gray-50"
             >
               <div className="bg-white rounded-lg">
                 <AdminBookingForm />
@@ -153,8 +156,8 @@ export const AdminDashboard: React.FC = () => {
               expanded={showPendingPanel}
               onExpandedChange={setShowPendingPanel}
               counter={stats?.pending}
-              className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-300 shadow-xl"
-              headerClassName="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+              className="bg-white border-2 border-gray-400 shadow-lg hover:shadow-xl hover:border-amber-500 transition-all rounded-modern"
+              headerClassName="hover:bg-gray-50"
             >
               <div className="p-4 max-h-[600px] overflow-y-auto">
                 <PendingRequestsTab />
@@ -164,7 +167,7 @@ export const AdminDashboard: React.FC = () => {
         )}
 
         {/* Tab Content */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 min-h-[600px] border-2 border-purple-100 relative">
+        <div className="bg-white rounded-modern border-2 border-gray-400 shadow-lg hover:shadow-xl transition-all p-8 min-h-[600px] relative">
           {activeTab === 'calendar' && <BookingCalendarTab />}
           {activeTab === 'pending' && <PendingRequestsTab />}
           {activeTab === 'archive' && <ArchiveTab />}
