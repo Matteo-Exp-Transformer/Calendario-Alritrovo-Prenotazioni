@@ -17,19 +17,37 @@ test('Verifica casella utente accanto a Rifiutate', async ({ page }) => {
   // Trova l'header
   const header = page.locator('header')
   
-  // Trova la card "Rifiutate" nell'header
-  const rifiutateText = header.locator('text=Rifiutate').first()
-  await rifiutateText.waitFor({ timeout: 5000 })
+  // Trova tutte le stats cards nell'header - il container flex
+  const headerStatsContainer = header.locator('div.flex.items-center').first()
+  await headerStatsContainer.waitFor({ timeout: 5000 })
+  
+  // Trova la card "Rifiutate"
+  const rifiutateText = headerStatsContainer.locator('text=Rifiutate').first()
   const rifiutateCard = rifiutateText.locator('..').locator('..')
   
-  // Trova User Info card - cerca specificamente un div che contiene sia User icon che Admin/Staff text
-  // nell'header, escludendo le stats cards
-  const header = page.locator('header')
-  const userInfoCard = header.locator('div:has(svg):has-text("Admin"), div:has(svg):has-text("Staff")').first()
+  // Trova User Info - cerca un div che contiene Admin/Staff MA NON contiene "Settimana", "Oggi", "Mese", "Rifiutate"
+  let userInfoCard = headerStatsContainer.locator('div').filter({ 
+    hasText: /Admin|Staff/,
+    hasNotText: /Settimana|Oggi|Mese|Rifiutate/
+  }).first()
   
-  // Verifica che non sia la stessa card di Rifiutate controllando che contenga "Admin" o "Staff"
-  const userInfoText = await userInfoCard.textContent()
-  console.log(`User Info trovata con testo: ${userInfoText?.substring(0, 50)}`)
+  // Verifica contenuto
+  let userInfoText = await userInfoCard.textContent()
+  console.log(`User Info trovata con testo: ${userInfoText?.substring(0, 80)}`)
+  
+  // Se non trovata correttamente (contiene ancora "Settimana"), prova un approccio diverso - cerca il div che contiene l'email utente
+  if (!userInfoText || userInfoText.includes('Settimana')) {
+    const userInfoByEmail = headerStatsContainer.locator('div').filter({ 
+      hasText: /@/ // Contiene una email
+    }).first()
+    const emailText = await userInfoByEmail.textContent()
+    console.log(`User Info trovata tramite email: ${emailText?.substring(0, 50)}`)
+    if (emailText && !emailText.includes('Settimana')) {
+      // Usa questo invece
+      userInfoCard = userInfoByEmail
+      userInfoText = emailText
+    }
+  }
   
   const rifiutateCount = await rifiutateCard.count()
   const userInfoCount = await userInfoCard.count()

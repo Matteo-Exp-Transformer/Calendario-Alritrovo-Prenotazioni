@@ -23,9 +23,10 @@ const STATUS_LABELS: Record<string, { label: string; bgColor: string; textColor:
 
 interface ArchiveBookingCardProps {
   booking: any
+  onViewInCalendar?: (date: string) => void
 }
 
-const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking }) => {
+const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onViewInCalendar }) => {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const formatDate = (dateStr: string) => {
@@ -189,13 +190,41 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking }) => {
               </div>
             </div>
           )}
+
+          {/* Pulsante Visualizza nel Calendario - Solo per prenotazioni accettate */}
+          {booking.status === 'accepted' && booking.confirmed_start && onViewInCalendar && (() => {
+            // Estrai data da confirmed_start senza conversioni timezone
+            const dateMatch = booking.confirmed_start.match(/(\d{4})-(\d{2})-(\d{2})/)
+            const dateStr = dateMatch ? `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}` : null
+            
+            if (!dateStr) return null
+            
+            return (
+              <div className="mt-4 pt-4 border-t-2 border-indigo-200">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation() // Previene chiusura card
+                    onViewInCalendar(dateStr)
+                  }}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                >
+                  <Calendar className="w-5 h-5" />
+                  <span>📅 Visualizza nel Calendario</span>
+                </button>
+              </div>
+            )
+          })()}
         </div>
       )}
     </div>
   )
 }
 
-export const ArchiveTab: React.FC = () => {
+interface ArchiveTabProps {
+  onViewInCalendar?: (date: string) => void
+}
+
+export const ArchiveTab: React.FC<ArchiveTabProps> = ({ onViewInCalendar }) => {
   const { data: allBookings, isLoading, error } = useAllBookings()
   const [filter, setFilter] = useState<ArchiveFilter>('all')
 
@@ -295,7 +324,7 @@ export const ArchiveTab: React.FC = () => {
         ) : (
           <div className="grid gap-4">
             {filteredBookings.map((booking) => {
-              return <ArchiveBookingCard key={booking.id} booking={booking} />
+              return <ArchiveBookingCard key={booking.id} booking={booking} onViewInCalendar={onViewInCalendar} />
             })}
           </div>
         )}

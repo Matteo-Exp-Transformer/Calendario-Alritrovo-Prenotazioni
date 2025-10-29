@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -21,14 +21,16 @@ const extractTimeFromISO = (isoString: string): string => {
 
 interface BookingCalendarProps {
   bookings: BookingRequest[]
+  initialDate?: string | null
 }
 
-export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) => {
+export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, initialDate }) => {
+  const calendarRef = useRef<FullCalendar>(null)
   const [selectedBooking, setSelectedBooking] = useState<BookingRequest | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedDate, setSelectedDate] = useState<string>(() => {
-    // Set today's date as default
-    return new Date().toISOString().split('T')[0]
+    // Set today's date as default, or initialDate if provided
+    return initialDate || new Date().toISOString().split('T')[0]
   })
   const [calendarKey, setCalendarKey] = useState(0) // Force re-render key
 
@@ -46,6 +48,23 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
   useEffect(() => {
     setCalendarKey(prev => prev + 1)
   }, [selectedDate])
+
+  // Navigate to initialDate when it changes (from Archive)
+  useEffect(() => {
+    if (initialDate && calendarRef.current) {
+      try {
+        const calendarApi = calendarRef.current.getApi()
+        // Parse date in local timezone to avoid timezone issues
+        const [year, month, day] = initialDate.split('-').map(Number)
+        const targetDate = new Date(year, month - 1, day)
+        calendarApi.gotoDate(targetDate)
+        setSelectedDate(initialDate)
+        console.log('✅ [BookingCalendar] Navigated to date:', initialDate)
+      } catch (error) {
+        console.error('❌ [BookingCalendar] Error navigating to date:', error)
+      }
+    }
+  }, [initialDate])
 
   const events = transformBookingsToCalendarEvents(bookings)
 
@@ -256,7 +275,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings }) =>
             </span>
           </div>
 
-          <FullCalendar key={calendarKey} {...config} events={events} />
+          <FullCalendar ref={calendarRef} key={calendarKey} {...config} events={events} />
         </div>
 
         {/* Sezione Disponibilità */}

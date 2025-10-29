@@ -2,7 +2,11 @@ import React from 'react'
 import { useAcceptedBookings } from '../hooks/useBookingQueries'
 import { BookingCalendar } from './BookingCalendar'
 
-export const BookingCalendarTab: React.FC = () => {
+interface BookingCalendarTabProps {
+  initialDate?: string | null
+}
+
+export const BookingCalendarTab: React.FC<BookingCalendarTabProps> = ({ initialDate }) => {
   const { data: acceptedBookings, isLoading, error } = useAcceptedBookings()
 
   if (isLoading) {
@@ -39,6 +43,6 @@ export const BookingCalendarTab: React.FC = () => {
     )
   }
 
-  return <BookingCalendar bookings={acceptedBookings} />
+  return <BookingCalendar bookings={acceptedBookings} initialDate={initialDate} />
 }
 

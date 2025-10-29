@@ -8,9 +8,9 @@ export const AdminHeader: React.FC = () => {
   const { data: stats, isLoading: isLoadingStats } = useBookingStats()
 
   return (
-    <div className="flex items-center gap-2 lg:gap-3 w-full">
+    <div className="flex items-center gap-2 lg:gap-3">
       {/* Stats Cards - STILE UNIFORME MODERNO - Ridotte 3/4 */}
-      <div className="flex items-center gap-2 lg:gap-3 flex-shrink-0">
+      <div className="flex items-center gap-2 lg:gap-3">
         {/* Settimana */}
         <div className="bg-white rounded-modern border-2 border-gray-400 shadow-md hover:shadow-lg hover:border-violet-500 transition-all p-2 lg:p-3 flex flex-col items-center justify-center min-h-[60px] min-w-[70px] lg:min-h-[70px] lg:min-w-[85px]">
           <p className="text-[8px] lg:text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-0.5 lg:mb-1 text-center">Settimana</p>

@@ -59,6 +59,7 @@ export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('calendar')
   const [showPendingPanel, setShowPendingPanel] = useState(false)
   const [showNewBookingPanel, setShowNewBookingPanel] = useState(false)
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null)
   const { data: stats, isLoading: isLoadingStats } = useBookingStats()
   const { logout } = useAdminAuth()
 
@@ -67,7 +68,19 @@ export const AdminDashboard: React.FC = () => {
     setActiveTab(tab)
     if (tab !== 'calendar') {
       setShowPendingPanel(false)
+      // Reset selectedCalendarDate quando si cambia tab (tranne quando si va al calendario da Archivio)
+      // Verrà resettato dopo che il calendario lo ha processato
     }
+  }
+
+  // Callback per navigare al calendario da Archivio
+  const handleViewInCalendar = (date: string) => {
+    setSelectedCalendarDate(date)
+    setActiveTab('calendar')
+    // Reset selectedCalendarDate dopo un breve delay per permettere al calendario di processarlo
+    setTimeout(() => {
+      setSelectedCalendarDate(null)
+    }, 100)
   }
 
   return (
@@ -172,9 +185,9 @@ export const AdminDashboard: React.FC = () => {
 
         {/* Tab Content */}
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 min-h-[600px] border-2 border-purple-100 relative">
-          {activeTab === 'calendar' && <BookingCalendarTab />}
+          {activeTab === 'calendar' && <BookingCalendarTab initialDate={selectedCalendarDate} />}
           {activeTab === 'pending' && <PendingRequestsTab />}
-          {activeTab === 'archive' && <ArchiveTab />}
+          {activeTab === 'archive' && <ArchiveTab onViewInCalendar={handleViewInCalendar} />}
           {activeTab === 'settings' && <SettingsTab />}
         </div>
       </main>
