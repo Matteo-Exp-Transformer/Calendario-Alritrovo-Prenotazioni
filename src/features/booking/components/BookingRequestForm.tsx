@@ -74,12 +74,15 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       isValid = false
     }
 
-    // Email validation
-    if (!formData.client_email.trim()) {
-      newErrors.client_email = 'Email obbligatoria'
-      isValid = false
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.client_email)) {
+    // Email validation - optional but must be valid if provided
+    if (formData.client_email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.client_email)) {
       newErrors.client_email = 'Email non valida'
+      isValid = false
+    }
+
+    // Phone validation - required
+    if (!formData.client_phone || !formData.client_phone.trim()) {
+      newErrors.client_phone = 'Numero di telefono obbligatorio'
       isValid = false
     }
 

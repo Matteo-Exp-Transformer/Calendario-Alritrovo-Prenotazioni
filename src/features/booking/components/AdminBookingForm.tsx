@@ -55,11 +55,15 @@ export const AdminBookingForm: React.FC = () => {
       isValid = false
     }
 
-    if (!formData.client_email.trim()) {
-      newErrors.client_email = 'Email obbligatoria'
-      isValid = false
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.client_email)) {
+    // Email validation - optional but must be valid if provided
+    if (formData.client_email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.client_email)) {
       newErrors.client_email = 'Email non valida'
+      isValid = false
+    }
+
+    // Phone validation - required
+    if (!formData.client_phone || !formData.client_phone.trim()) {
+      newErrors.client_phone = 'Numero di telefono obbligatorio'
       isValid = false
     }
 
@@ -173,8 +177,7 @@ export const AdminBookingForm: React.FC = () => {
                 setFormData({ ...formData, client_email: e.target.value })
                 setErrors({ ...errors, client_email: '' })
               }}
-              placeholder="Email *"
-              required
+              placeholder="Email (Opzionale)"
               className={errors.client_email ? '!border-red-500' : ''}
             />
             {errors.client_email && (
@@ -188,9 +191,17 @@ export const AdminBookingForm: React.FC = () => {
               id="client_phone"
               type="tel"
               value={formData.client_phone}
-              onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
-              placeholder="Telefono (Opzionale)"
+              onChange={(e) => {
+                setFormData({ ...formData, client_phone: e.target.value })
+                setErrors({ ...errors, client_phone: '' })
+              }}
+              required
+              placeholder="Telefono *"
+              className={errors.client_phone ? '!border-red-500' : ''}
             />
+            {errors.client_phone && (
+              <p className="text-sm text-red-500">{errors.client_phone}</p>
+            )}
           </div>
         </div>
 
