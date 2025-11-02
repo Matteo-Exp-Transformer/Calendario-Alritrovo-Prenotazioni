@@ -1,5 +1,10 @@
 import React, { ReactNode, useId, useMemo, useState } from 'react'
 
+export interface CollapsibleCardCounterData {
+  available: number
+  capacity: number
+}
+
 export interface CollapsibleCardProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string
   subtitle?: string | ReactNode
@@ -10,7 +15,7 @@ export interface CollapsibleCardProps extends React.HTMLAttributes<HTMLDivElemen
   defaultOpen?: boolean
   expanded?: boolean
   onExpandedChange?: (expanded: boolean) => void
-  counter?: number
+  counter?: number | CollapsibleCardCounterData
   actions?: ReactNode
   className?: string
   headerClassName?: string
@@ -226,7 +231,7 @@ export const CollapsibleCard = ({
 
   return (
     <div
-      className={`rounded-modern border-2 border-gray-400 bg-white shadow-lg hover:shadow-xl transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 ${className}`}
+      className={`bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden ${className}`}
       style={style}
       data-expanded={isExpanded}
       role="region"
@@ -235,7 +240,10 @@ export const CollapsibleCard = ({
     >
       {/* Header */}
       <div
-        className={`flex cursor-pointer items-start justify-between gap-4 px-4 py-4 transition-colors sm:px-6 relative ${headerClassName}`}
+        className={`flex cursor-pointer items-center px-6 py-4 ${
+          headerClassName ||
+          'bg-gray-50 hover:bg-gray-100 border-b border-gray-200'
+        } transition-colors duration-200 active:scale-[0.99] min-h-[44px]`}
         onClick={toggleExpanded}
         role="button"
         tabIndex={0}
@@ -245,34 +253,108 @@ export const CollapsibleCard = ({
         id={headerId}
         data-collapsible-disabled={collapseDisabled}
       >
-        <div className="flex flex-1 items-start gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           {Icon && (
-            <Icon className="mt-1 h-5 w-5 text-gray-500" aria-hidden="true" />
-          )}
-          <div className="flex flex-col space-y-1">
-            <div className="flex items-center space-x-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-              </div>
-              {counter !== undefined && (
-                <span
-                  className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                  aria-label={`${counter} items`}
-                >
-                  {counter}
-                </span>
-              )}
+            <div className="flex-shrink-0 bg-white/80 rounded-lg p-2">
+              <Icon className="h-5 w-5 text-gray-600" aria-hidden="true" />
             </div>
-            {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+          )}
+          <div className="flex flex-col justify-center gap-1 min-w-0">
+            <div className="flex items-center gap-3 flex-wrap">
+              <h3 className="text-lg font-semibold text-gray-900 break-words">
+                {title}
+              </h3>
+            </div>
+            {subtitle && (
+              <p className="text-sm text-gray-500 break-words">{subtitle}</p>
+            )}
             {description && (
-              <p className="text-xs text-gray-400 sm:text-sm">{description}</p>
+              <p className="text-xs text-gray-400 sm:text-sm break-words">
+                {description}
+              </p>
             )}
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
-          {actions && (
-            <div className="flex items-center space-x-2">{actions}</div>
+        <div className="flex-1" />
+
+        {counter !== undefined && (
+          <div className="flex items-center justify-center flex-shrink-0">
+            {(() => {
+              // Check if counter is a capacity object or just a number
+              const isCapacityObject = typeof counter === 'object' && 'available' in counter && 'capacity' in counter
+
+              if (isCapacityObject) {
+                const { available, capacity } = counter
+                const percentage = capacity > 0 ? (available / capacity) * 100 : 0
+
+                // Determine color based on availability percentage
+                const colorClasses =
+                  percentage > 70
+                    ? 'bg-green-100 border-green-400 text-green-800' // High availability - Green (more vivid)
+                    : percentage >= 30
+                      ? 'bg-yellow-100 border-yellow-400 text-yellow-800' // Medium availability - Yellow (more vivid)
+                      : 'bg-red-100 border-red-400 text-red-800' // Low availability - Red (more vivid)
+
+                const labelColorClasses =
+                  percentage > 70
+                    ? 'text-green-700'
+                    : percentage >= 30
+                      ? 'text-yellow-700'
+                      : 'text-red-700'
+
+                return (
+                  <div
+                    className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg border-2 shadow-sm transition-all duration-200 ${colorClasses} flex-shrink-0`}
+                    aria-label={`${available} posti disponibili su ${capacity} totali`}
+                  >
+                    <span className="text-sm font-semibold">
+                      {available}/{capacity}
+                    </span>
+                    <span className={`text-xs font-medium ${labelColorClasses}`}>
+                      disponibili
+                    </span>
+                  </div>
+                )
+              } else {
+                // Legacy number counter - keep for backwards compatibility
+                return (
+                  <span
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-al-ritrovo-primary text-white flex-shrink-0"
+                    aria-label={`${counter} items`}
+                  >
+                    {counter}
+                  </span>
+                )
+              }
+            })()}
+          </div>
+        )}
+
+        <div className="flex-1" />
+
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {actions && <div className="flex items-center gap-2">{actions}</div>}
+          {!collapseDisabled && (
+            <div
+              className="transition-transform duration-200"
+              style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              aria-hidden="true"
+            >
+              <svg
+                className="w-5 h-5 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
           )}
         </div>
       </div>
@@ -281,7 +363,7 @@ export const CollapsibleCard = ({
       {isExpanded && (
         <div
           id={contentId}
-          className="border-t border-gray-200" // maintain border separation
+          className="border-t border-gray-200 transition-all duration-300 ease-in-out"
           role="region"
           aria-labelledby={headerId}
           data-state={

@@ -49,12 +49,16 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
   React.useEffect(() => {
     if (booking) {
       const date = booking.desired_date
-      const startTime = booking.desired_time || '20:00'
+      const startTimeRaw = booking.desired_time || '20:00'
       
-      // Calculate end time (default +3 hours)
-      const [hours, minutes] = startTime.split(':').map(Number)
-      const endHours = (hours + 3) % 24
-      const endTime = `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+      // Normalize minutes to 00 or 30
+      const [startHours, startMinutes] = startTimeRaw.split(':').map(Number)
+      const normalizedStartMinutes = startMinutes === 0 || startMinutes === 30 ? startMinutes : 0
+      const startTime = `${startHours.toString().padStart(2, '0')}:${normalizedStartMinutes.toString().padStart(2, '0')}`
+      
+      // Calculate end time (default +3 hours) with normalized minutes
+      const endHours = (startHours + 3) % 24
+      const endTime = `${endHours.toString().padStart(2, '0')}:${normalizedStartMinutes.toString().padStart(2, '0')}`
 
       setFormData({
         date: date,

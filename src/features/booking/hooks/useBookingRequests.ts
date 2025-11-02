@@ -12,16 +12,41 @@ export const useCreateBookingRequest = () => {
       console.log('🔵 [useCreateBookingRequest] Starting mutation...')
       console.log('🔵 [useCreateBookingRequest] Input data:', data)
       
-      const insertData = {
+      const insertData: any = {
         client_name: data.client_name,
         client_email: data.client_email,
         client_phone: data.client_phone || null,
-        event_type: data.event_type,
         desired_date: data.desired_date,
         desired_time: data.desired_time || null,
         num_guests: data.num_guests,
         special_requests: data.special_requests || null,
         status: 'pending' as const
+      }
+
+      // Nuovi campi per sistema menu
+      if (data.booking_type) {
+        insertData.booking_type = data.booking_type
+      }
+
+      // Retrocompatibilità: se event_type esiste, lo manteniamo
+      if (data.event_type) {
+        insertData.event_type = data.event_type
+      }
+
+      // Menu selection (solo per rinfresco_laurea)
+      if (data.booking_type === 'rinfresco_laurea' && data.menu_selection) {
+        insertData.menu_selection = data.menu_selection
+        insertData.menu_total_per_person = data.menu_total_per_person || 0
+        insertData.menu_total_booking = data.menu_total_booking || 0
+      }
+
+      // Dietary restrictions
+      // IMPORTANTE: I guest_count nelle intolleranze sono separati da num_guests.
+      // num_guests è il totale ospiti della prenotazione (calcolo capacità, ecc.)
+      // I guest_count nelle intolleranze servono solo per associare quante persone hanno quella specifica intolleranza.
+      // NON vengono sommati al totale.
+      if (data.dietary_restrictions && data.dietary_restrictions.length > 0) {
+        insertData.dietary_restrictions = data.dietary_restrictions
       }
 
       console.log('🔵 [useCreateBookingRequest] Insert data:', insertData)

@@ -51,3 +51,4 @@ test('Verifica posizionamento User Info e Logout accanto a Rifiutate', async ({ 
   expect(rifiutateCount + userInfoCount + logoutCount).toBeGreaterThan(0)
 })
 
+

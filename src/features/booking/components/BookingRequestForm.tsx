@@ -1,19 +1,14 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Input, Textarea } from '@/components/ui'
-import type { BookingRequestInput, EventType } from '@/types/booking'
+import type { BookingRequestInput } from '@/types/booking'
 import { useCreateBookingRequest } from '../hooks/useBookingRequests'
 import { useRateLimit } from '@/hooks/useRateLimit'
 import { toast } from 'react-toastify'
 import { Check, Send, Loader2, CheckCircle } from 'lucide-react'
-
-const EVENT_TYPES: { value: EventType; label: string }[] = [
-  { value: 'drink_caraffe', label: 'Drink/Caraffe' },
-  { value: 'drink_rinfresco_leggero', label: 'Drink/Caraffe + rinfresco leggero' },
-  { value: 'drink_rinfresco_completo', label: 'Drink/Caraffe + rinfresco completo' },
-  { value: 'drink_rinfresco_completo_primo', label: 'Drink/Caraffe + rinfresco completo + primo piatto' },
-  { value: 'menu_pranzo_cena', label: 'Menu Pranzo / Menù Cena' }
-]
+import { MenuSelection } from './MenuSelection'
+import { DietaryRestrictionsSection } from './DietaryRestrictionsSection'
+import { useMenuItems } from '../hooks/useMenuItems'
 
 interface BookingRequestFormProps {
   onSubmit?: () => void
@@ -24,11 +19,15 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     client_name: '',
     client_email: '',
     client_phone: '',
-    event_type: 'drink_caraffe',
+    booking_type: 'tavolo',
     desired_date: '',
     desired_time: '',
     num_guests: 0,
-    special_requests: ''
+    special_requests: '',
+    menu_selection: {
+      items: []
+    },
+    dietary_restrictions: []
   })
 
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
@@ -38,20 +37,30 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
   // Reset num_guests to 0 when cleared - only allow numeric input
   const handleNumGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value
-    
+
     // Only allow numeric characters
     if (inputValue === '') {
-      setFormData({ ...formData, num_guests: 0 })
+      const newFormData = { ...formData, num_guests: 0 }
+      // Aggiorna menu_total_booking se c'è un menu
+      if (newFormData.menu_total_per_person) {
+        newFormData.menu_total_booking = 0
+      }
+      setFormData(newFormData)
       setErrors({ ...errors, num_guests: '' })
     } else if (/^\d+$/.test(inputValue)) {
       const value = parseInt(inputValue, 10)
       if (value >= 1 && value <= 110) {
-        setFormData({ ...formData, num_guests: value })
+        const newFormData = { ...formData, num_guests: value }
+        // Aggiorna menu_total_booking se c'è un menu
+        if (newFormData.menu_total_per_person) {
+          newFormData.menu_total_booking = newFormData.menu_total_per_person * value
+        }
+        setFormData(newFormData)
         setErrors({ ...errors, num_guests: '' })
       }
     }
   }
-  
+
   const handleNumGuestsKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     // Only allow numbers
     if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab' && e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') {
@@ -59,10 +68,11 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     }
   }
   const { mutate, isPending } = useCreateBookingRequest()
-  const { checkRateLimit, isBlocked } = useRateLimit({ 
-    maxAttempts: 3, 
+  const { checkRateLimit, isBlocked } = useRateLimit({
+    maxAttempts: 3,
     timeWindow: 60000 // 1 minuto
   })
+  const { data: menuItems = [] } = useMenuItems()
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {}
@@ -94,7 +104,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       const selectedDate = new Date(formData.desired_date)
       const today = new Date()
       today.setHours(0, 0, 0, 0)
-      
+
       if (selectedDate < today) {
         newErrors.desired_date = 'La data non può essere nel passato'
         isValid = false
@@ -114,6 +124,24 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     } else if (formData.num_guests > 110) {
       newErrors.num_guests = 'Massimo 110 ospiti'
       isValid = false
+    }
+
+    // Booking type validation
+    if (!formData.booking_type) {
+      newErrors.booking_type = 'Tipologia di prenotazione obbligatoria'
+      isValid = false
+    }
+
+    // Menu validation for Rinfresco di Laurea
+    if (formData.booking_type === 'rinfresco_laurea') {
+      if (!formData.menu_selection || !formData.menu_selection.items || formData.menu_selection.items.length === 0) {
+        newErrors.menu = 'Seleziona almeno un prodotto dal menù'
+        isValid = false
+      }
+      if (!formData.menu_total_per_person || formData.menu_total_per_person <= 0) {
+        newErrors.menu = 'Il totale a persona deve essere maggiore di 0'
+        isValid = false
+      }
     }
 
     // Privacy consent validation
@@ -154,11 +182,15 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           client_name: '',
           client_email: '',
           client_phone: '',
-          event_type: 'drink_caraffe',
+          booking_type: 'tavolo',
           desired_date: '',
           desired_time: '',
           num_guests: 0,
-          special_requests: ''
+          special_requests: '',
+          menu_selection: {
+            items: []
+          },
+          dietary_restrictions: []
         })
         setPrivacyAccepted(false)
         // Mostra la modal di conferma invece del toast
@@ -179,152 +211,235 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       <div className="grid md:grid-cols-2 gap-6 md:gap-8">
         {/* COLONNA SINISTRA: Dati Personali */}
         <div className="space-y-6">
-          <h2 className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige">
+          <h2
+            className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.5)',
+              backdropFilter: 'blur(6px)',
+              padding: '12px 20px',
+              borderRadius: '12px'
+            }}
+          >
             Dati Personali
           </h2>
 
-      {/* Nome */}
-      <div className="space-y-3">
-        <Input
-          id="client_name"
-          value={formData.client_name}
-          onChange={(e) => {
-            setFormData({ ...formData, client_name: e.target.value })
-            setErrors({ ...errors, client_name: '' })
-          }}
-          placeholder="Nome Completo * (es: Mario Rossi)"
-          required
-          className={errors.client_name ? '!border-red-500' : ''}
-        />
-        {errors.client_name && (
-          <p className="text-sm text-red-500">{errors.client_name}</p>
-        )}
-      </div>
+          {/* Nome */}
+          <div className="space-y-3">
+            <Input
+              id="client_name"
+              value={formData.client_name}
+              onChange={(e) => {
+                setFormData({ ...formData, client_name: e.target.value })
+                setErrors({ ...errors, client_name: '' })
+              }}
+              placeholder="Nome Completo *"
+              required
+              className={errors.client_name ? '!border-red-500' : ''}
+            />
+            {errors.client_name && (
+              <p className="text-sm text-red-500">{errors.client_name}</p>
+            )}
+          </div>
 
-      {/* Email */}
-      <div className="space-y-3">
-        <Input
-          id="client_email"
-          type="email"
-          value={formData.client_email}
-          onChange={(e) => {
-            setFormData({ ...formData, client_email: e.target.value })
-            setErrors({ ...errors, client_email: '' })
-          }}
-          placeholder="Email * (es: nome@email.com)"
-          required
-          className={errors.client_email ? '!border-red-500' : ''}
-        />
-        {errors.client_email && (
-          <p className="text-sm text-red-500">{errors.client_email}</p>
-        )}
-      </div>
+          {/* Email */}
+          <div className="space-y-3">
+            <Input
+              id="client_email"
+              type="email"
+              value={formData.client_email}
+              onChange={(e) => {
+                setFormData({ ...formData, client_email: e.target.value })
+                setErrors({ ...errors, client_email: '' })
+              }}
+              placeholder="Email (Opzionale)"
+              className={errors.client_email ? '!border-red-500' : ''}
+            />
+            {errors.client_email && (
+              <p className="text-sm text-red-500">{errors.client_email}</p>
+            )}
+          </div>
 
-      {/* Telefono */}
-      <div className="space-y-3">
-        <Input
-          id="client_phone"
-          type="tel"
-          value={formData.client_phone}
-          onChange={(e) => setFormData({ ...formData, client_phone: e.target.value })}
-          placeholder="Telefono (Opzionale) - es: 351 123 4567"
-        />
-      </div>
+          {/* Telefono */}
+          <div className="space-y-3">
+            <Input
+              id="client_phone"
+              type="tel"
+              value={formData.client_phone}
+              onChange={(e) => {
+                setFormData({ ...formData, client_phone: e.target.value })
+                setErrors({ ...errors, client_phone: '' })
+              }}
+              placeholder="Telefono *"
+              required
+              className={errors.client_phone ? '!border-red-500' : ''}
+            />
+            {errors.client_phone && (
+              <p className="text-sm text-red-500">{errors.client_phone}</p>
+            )}
+          </div>
         </div>
 
         {/* COLONNA DESTRA: Dettagli Prenotazione */}
         <div className="space-y-6">
-          <h2 className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige">
+          <h2
+            className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.5)',
+              backdropFilter: 'blur(6px)',
+              padding: '12px 20px',
+              borderRadius: '12px'
+            }}
+          >
             Dettagli Prenotazione
           </h2>
 
-      {/* Tipo Evento */}
-      <div className="space-y-3">
-        <select
-          id="event_type"
-          value={formData.event_type}
-          onChange={(e) => setFormData({ ...formData, event_type: e.target.value as EventType })}
-          required
-          className="flex rounded-full border bg-white/50 backdrop-blur-[6px] shadow-sm transition-all text-gray-600"
-          style={{ 
-            borderColor: 'rgba(0,0,0,0.2)', 
-            maxWidth: '600px', 
-            height: '56px',
-            padding: '16px',
-            fontSize: '16px',
-            backgroundColor: 'rgba(255, 255, 255, 0.5)',
-            backdropFilter: 'blur(6px)'
-          }}
-          onFocus={(e) => e.target.style.borderColor = '#8B6914'}
-          onBlur={(e) => e.target.style.borderColor = 'rgba(0,0,0,0.2)'}
-        >
-          {!formData.event_type && <option value="">Tipo Evento * - Seleziona un'opzione</option>}
-          {EVENT_TYPES.map((type) => (
-            <option key={type.value} value={type.value}>
-              {type.label}
-            </option>
-          ))}
-        </select>
-      </div>
+          {/* Tipologia di Prenotazione - DROPDOWN (Issue 1 Fixed) */}
+          <div className="space-y-3">
+            <label
+              className="block text-sm font-medium text-warm-wood mb-2"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(6px)',
+                padding: '8px 16px',
+                borderRadius: '12px',
+                display: 'inline-block'
+              }}
+            >
+              Tipologia di Prenotazione *
+            </label>
+            <select
+              id="booking_type"
+              value={formData.booking_type}
+              onChange={(e) => {
+                setFormData({ ...formData, booking_type: e.target.value as 'tavolo' | 'rinfresco_laurea' })
+                setErrors({ ...errors, booking_type: '' })
+              }}
+              className="block rounded-full border bg-white/50 backdrop-blur-[6px] shadow-sm transition-all"
+              style={{
+                borderColor: 'rgba(0,0,0,0.2)',
+                height: '56px',
+                padding: '16px',
+                fontSize: '16px',
+                fontWeight: '500',
+                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(6px)',
+                color: 'black',
+                width: 'auto',
+                minWidth: '280px'
+              }}
+              onFocus={(e) => (e.target as HTMLSelectElement).style.borderColor = '#8B6914'}
+              onBlur={(e) => (e.target as HTMLSelectElement).style.borderColor = 'rgba(0,0,0,0.2)'}
+            >
+              <option value="tavolo">Prenota un Tavolo</option>
+              <option value="rinfresco_laurea">Rinfresco di Laurea</option>
+            </select>
+            {errors.booking_type && (
+              <p className="text-sm text-red-500">{errors.booking_type}</p>
+            )}
+          </div>
 
-      {/* Data */}
-      <div className="space-y-3">
-        <Input
-          id="desired_date"
-          type="date"
-          value={formData.desired_date}
-          onChange={(e) => {
-            setFormData({ ...formData, desired_date: e.target.value })
-            setErrors({ ...errors, desired_date: '' })
-          }}
-          required
-          className={errors.desired_date ? '!border-red-500' : ''}
-        />
-        {errors.desired_date && (
-          <p className="text-sm text-red-500">{errors.desired_date}</p>
-        )}
-      </div>
+          {/* Data */}
+          <div className="space-y-3">
+            <Input
+              id="desired_date"
+              type="date"
+              value={formData.desired_date}
+              onChange={(e) => {
+                setFormData({ ...formData, desired_date: e.target.value })
+                setErrors({ ...errors, desired_date: '' })
+              }}
+              required
+              className={errors.desired_date ? '!border-red-500' : ''}
+            />
+            {errors.desired_date && (
+              <p className="text-sm text-red-500">{errors.desired_date}</p>
+            )}
+          </div>
 
-      {/* Ora */}
-      <div className="space-y-3">
-        <Input
-          id="desired_time"
-          type="time"
-          value={formData.desired_time}
-          onChange={(e) => {
-            setFormData({ ...formData, desired_time: e.target.value })
-            setErrors({ ...errors, desired_time: '' })
-          }}
-          required
-          className={errors.desired_time ? '!border-red-500' : ''}
-        />
-        {errors.desired_time && (
-          <p className="text-sm text-red-500">{errors.desired_time}</p>
-        )}
-      </div>
+          {/* Ora */}
+          <div className="space-y-3">
+            <Input
+              id="desired_time"
+              type="time"
+              value={formData.desired_time || ''}
+              onChange={(e) => {
+                setFormData({ ...formData, desired_time: e.target.value })
+                setErrors({ ...errors, desired_time: '' })
+              }}
+              required
+              className={errors.desired_time ? '!border-red-500' : ''}
+            />
+            {errors.desired_time && (
+              <p className="text-sm text-red-500">{errors.desired_time}</p>
+            )}
+          </div>
 
-      {/* Numero Ospiti */}
-      <div className="space-y-3">
-        <Input
-          id="num_guests"
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          min="1"
-          max="110"
-          value={formData.num_guests || ''}
-          onChange={handleNumGuestsChange}
-          onKeyPress={handleNumGuestsKeyPress}
-          required
-          placeholder="Numero Ospiti * (es: 15)"
-          className={errors.num_guests ? '!border-red-500' : ''}
-        />
-        {errors.num_guests && (
-          <p className="text-sm text-red-500">{errors.num_guests}</p>
-        )}
-      </div>
+          {/* Numero Ospiti */}
+          <div className="space-y-3">
+            <Input
+              id="num_guests"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              min="1"
+              max="110"
+              value={formData.num_guests || ''}
+              onChange={handleNumGuestsChange}
+              onKeyPress={handleNumGuestsKeyPress}
+              required
+              placeholder="Numero Ospiti * (es: 15)"
+              className={errors.num_guests ? '!border-red-500' : ''}
+            />
+            {errors.num_guests && (
+              <p className="text-sm text-red-500">{errors.num_guests}</p>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Menu Selection - Solo per Rinfresco di Laurea */}
+      {formData.booking_type === 'rinfresco_laurea' && (
+        <div className="space-y-6">
+          <MenuSelection
+            selectedItems={formData.menu_selection?.items || []}
+            onMenuChange={(items, totalPerPerson) => {
+              const numGuests = formData.num_guests || 0
+              setFormData({
+                ...formData,
+                menu_selection: {
+                  items
+                },
+                menu_total_per_person: totalPerPerson,
+                menu_total_booking: totalPerPerson * numGuests
+              })
+              setErrors({ ...errors, menu: '' })
+            }}
+          />
+          {errors.menu && (
+            <p className="text-sm text-red-500">{errors.menu}</p>
+          )}
+        </div>
+      )}
+
+      {/* Intolleranze Alimentari - Solo per Rinfresco di Laurea */}
+      {/* NOTA: I guest_count nelle intolleranze sono separati da num_guests.
+          Il num_guests è il totale ospiti della prenotazione.
+          I guest_count nelle intolleranze indicano solo quante persone hanno quella specifica intolleranza.
+          NON vengono sommati al totale. */}
+      {formData.booking_type === 'rinfresco_laurea' && (
+        <div className="space-y-6">
+          <DietaryRestrictionsSection
+            restrictions={formData.dietary_restrictions || []}
+            onRestrictionsChange={(restrictions) => {
+              setFormData({
+                ...formData,
+                dietary_restrictions: restrictions
+                // NOTA: num_guests non viene modificato quando si aggiungono intolleranze
+              })
+            }}
+          />
+        </div>
+      )}
 
       {/* Note Speciali - Full Width sotto le 2 colonne */}
       <div className="space-y-3">
@@ -332,13 +447,13 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           id="special_requests"
           value={formData.special_requests}
           onChange={(e) => setFormData({ ...formData, special_requests: e.target.value })}
-          placeholder="Note o Richieste Speciali (es: Menu vegetariano, intolleranze alimentari, tavolo specifico...)"
+          placeholder="Note o Richieste Speciali (es: Tavolo specifico, richieste particolari...)"
           rows={4}
         />
       </div>
 
       {/* Privacy Policy - Checkbox Piccolo e Stondato */}
-      <div className="rounded-xl p-4 bg-gradient-to-br from-warm-cream/60 via-warm-cream/40 to-transparent border-2 border-warm-beige shadow-sm">
+      <div className="rounded-xl p-4 bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent border-2 border-warm-beige shadow-sm">
         <div className="flex items-center gap-3">
           {/* Custom Checkbox - Più piccolo */}
           <div className="relative flex-shrink-0">
@@ -365,8 +480,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           </div>
 
           {/* Label */}
-          <label 
-            htmlFor="privacy-consent" 
+          <label
+            htmlFor="privacy-consent"
             className="cursor-pointer text-sm text-warm-wood-dark font-medium leading-relaxed"
             style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: '8px 16px', borderRadius: '8px', backdropFilter: 'blur(4px)', maxWidth: '600px' }}
           >
@@ -385,44 +500,45 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         </div>
       </div>
 
-      {/* Submit Button - Ovale GRANDE e allungato orizzontalmente */}
-      <div className="flex justify-center">
-        <button
-          type="submit"
-          disabled={isPending || isBlocked}
-          style={{ backgroundColor: '#22c55e', paddingLeft: '256px', paddingRight: '256px', paddingTop: '25px', paddingBottom: '25px', borderRadius: '50px' }}
-          className="group relative overflow-hidden bg-green-600 px-[256px] py-6 text-2xl font-bold uppercase tracking-wide text-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(34,197,94,0.4)] hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl md:w-auto"
-        >
-          {/* Glow effect on hover */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+      {/* Nota campi obbligatori e Submit Button */}
+      <div className="flex items-center justify-between gap-4 mt-4">
+        <p className="text-xs text-gray-600">
+          * I campi contrassegnati sono obbligatori.
+        </p>
+        <div className="flex justify-center flex-1">
+          <button
+            type="submit"
+            disabled={isPending || isBlocked}
+            style={{ backgroundColor: '#22c55e', paddingLeft: '256px', paddingRight: '256px', paddingTop: '25px', paddingBottom: '25px', borderRadius: '50px' }}
+            className="group relative overflow-hidden bg-green-600 px-[256px] py-6 text-2xl font-bold uppercase tracking-wide text-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(34,197,94,0.4)] hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl md:w-auto"
+          >
+            {/* Glow effect on hover */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
 
-          {/* Content */}
-          <div className="relative flex items-center justify-center gap-3 whitespace-nowrap">
-            {isPending ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                <span className="text-sm md:text-base">Invio in corso...</span>
-              </>
-            ) : isBlocked ? (
-              <span className="text-sm md:text-base">Limite richieste raggiunto</span>
-            ) : (
-              <>
-                <span className="text-2xl">Invia Prenotazione</span>
-                <Send className="h-6 w-6 transition-transform duration-300 group-hover:translate-x-1" />
-              </>
-            )}
-          </div>
+            {/* Content */}
+            <div className="relative flex items-center justify-center gap-3 whitespace-nowrap">
+              {isPending ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span className="text-sm md:text-base">Invio in corso...</span>
+                </>
+              ) : isBlocked ? (
+                <span className="text-sm md:text-base">Limite richieste raggiunto</span>
+              ) : (
+                <>
+                  <span className="text-2xl">Invia Prenotazione</span>
+                  <Send className="h-6 w-6 transition-transform duration-300 group-hover:translate-x-1" />
+                </>
+              )}
+            </div>
 
-          {/* Animated border glow */}
-          <div className="absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-            <div className="absolute inset-[-2px] rounded-full bg-gradient-to-r from-warm-wood via-warm-orange to-terracotta blur-sm"></div>
-          </div>
-        </button>
+            {/* Animated border glow */}
+            <div className="absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              <div className="absolute inset-[-2px] rounded-full bg-gradient-to-r from-warm-wood via-warm-orange to-terracotta blur-sm"></div>
+            </div>
+          </button>
+        </div>
       </div>
-
-      <p className="text-xs text-center text-gray-600">
-        * I campi contrassegnati sono obbligatori.
-      </p>
     </form>
 
     {/* Modal di Conferma Successo */}
@@ -448,13 +564,13 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
                 window.location.href = 'https://alritrovobologna.wixsite.com/alritrovobologna'
               }, 300)
             }}
-            style={{ 
-              padding: '12px 32px', 
-              fontSize: '18px', 
-              fontWeight: 'bold', 
-              color: 'white', 
-              backgroundColor: '#22c55e', 
-              border: 'none', 
+            style={{
+              padding: '12px 32px',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              color: 'white',
+              backgroundColor: '#22c55e',
+              border: 'none',
               borderRadius: '999px',
               cursor: 'pointer'
             }}
@@ -467,4 +583,3 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     </>
   )
 }
-

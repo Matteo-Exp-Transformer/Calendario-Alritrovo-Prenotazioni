@@ -15,12 +15,25 @@ export interface BookingRequest {
   client_phone?: string
 
   // Booking details
-  event_type: EventType
+  event_type?: EventType // Deprecated, mantenuto per retrocompatibilità
+  booking_type?: 'tavolo' | 'rinfresco_laurea'
   desired_date: string
   desired_time?: string
   num_guests: number
   special_requests?: string
-  menu?: string
+  menu?: string // Deprecated, usare menu_selection
+  
+  // Menu selection (nuovo sistema)
+  menu_selection?: {
+    items: Array<{ id: string; name: string; price: number; category: string }>
+  }
+  menu_total_per_person?: number
+  menu_total_booking?: number
+  dietary_restrictions?: Array<{
+    restriction: string
+    guest_count: number
+    notes?: string
+  }>
 
   // Status management
   status: BookingStatus
@@ -38,11 +51,22 @@ export interface BookingRequestInput {
   client_name: string
   client_email: string
   client_phone?: string
-  event_type: EventType
+  event_type?: EventType // Deprecated, mantenuto per retrocompatibilità
+  booking_type: 'tavolo' | 'rinfresco_laurea'
   desired_date: string
   desired_time?: string
   num_guests: number
   special_requests?: string
+  menu_selection?: {
+    items: Array<{ id: string; name: string; price: number; category: string }>
+  }
+  menu_total_per_person?: number
+  menu_total_booking?: number
+  dietary_restrictions?: Array<{
+    restriction: string
+    guest_count: number
+    notes?: string // per "Altro"
+  }>
 }
 
 export interface AdminUser {

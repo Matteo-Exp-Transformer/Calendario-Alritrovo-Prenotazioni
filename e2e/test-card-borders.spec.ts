@@ -42,3 +42,4 @@ test('Verifica bordo delle card corretto', async ({ page }) => {
   expect(count1 + count2).toBeGreaterThan(0)
 })
 
+

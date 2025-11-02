@@ -279,9 +279,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
         </div>
 
         {/* Sezione Disponibilità */}
-        <div className="space-y-6">
+        <div>
           {/* Header con data */}
-          <div className="text-center">
+          <div className="text-center mb-8">
             <h3 className="text-2xl font-serif font-bold text-warm-wood mb-2">
               Disponibilità
             </h3>
@@ -291,45 +291,52 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
           </div>
 
           {/* Mattina CollapsibleCard */}
-          <div style={{ border: '5px solid #10B981', borderRadius: '12px', boxShadow: '0 8px 16px -2px rgba(16, 185, 129, 0.4), 0 4px 8px -2px rgba(16, 185, 129, 0.3)', backgroundColor: '#86EFAC' }} className="overflow-hidden transition-all duration-200 hover:shadow-2xl">
+          <div 
+            className="rounded-lg overflow-hidden shadow-lg"
+            style={{
+              border: '4px solid rgb(34, 197, 94)',
+              backgroundColor: 'rgba(240, 253, 244, 0.6)',
+              marginBottom: '32px',
+            }}
+          >
             <CollapsibleCard
               title="Mattina"
               subtitle="10:00 - 14:30"
               icon={Sunrise}
               defaultExpanded={true}
               collapseDisabled={false}
-              className="!border-0 !rounded-none !shadow-none !bg-transparent"
-              headerClassName="!bg-green-100 hover:!bg-green-200 transition-colors"
-              actions={
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex">
-                  <div className="rounded-full bg-transparent" style={{ padding: '12px', boxShadow: '0 0 0 3px #dc2626' }}>
-                    <div className="flex flex-col items-center justify-center bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-2xl w-48 h-48">
-                      <div className="text-6xl font-extrabold text-white leading-none mb-2">
-                        {selectedDateData.capacity.morning.available}
-                      </div>
-                      <div className="text-sm font-semibold text-green-100 uppercase tracking-wide">
-                        Posti liberi
-                      </div>
-                      <div className="text-2xl font-bold text-white mt-3 opacity-75">
-                        {selectedDateData.capacity.morning.capacity} totali
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              }
-          >
-              <div className="px-4 sm:px-6 py-4 space-y-10 bg-gradient-to-b from-white/40 via-white/20 to-transparent">
+              counter={{
+                available: selectedDateData.capacity.morning.available,
+                capacity: selectedDateData.capacity.morning.capacity
+              }}
+              headerClassName="bg-green-100 hover:bg-green-200 border-b-2 border-green-300"
+              className="!bg-transparent !border-transparent !shadow-none"
+            >
+              <div className="px-4 sm:px-6 py-4" style={{ backgroundColor: 'rgba(240, 253, 244, 0.4)' }}>
                 {selectedDateData.morningBookings.length > 0 ? (
-                  selectedDateData.morningBookings.map((booking) => (
-                    <div
-                      key={booking.id}
-                      className="bg-white/98 backdrop-blur-sm p-5 rounded-modern relative"
-                      style={{
-                        border: '3px solid rgba(255, 255, 255, 0.9)',
-                        boxShadow: '0 0 0 1px rgba(255, 255, 255, 1), 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 3px rgba(255, 255, 255, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.08)',
-                        transform: 'translateY(-2px)',
-                      }}
-                    >
+                  selectedDateData.morningBookings.map((booking, index) => (
+                    <React.Fragment key={booking.id}>
+                      {index > 0 && (
+                        <div className="my-8 flex items-center">
+                          <div 
+                            className="w-full"
+                            style={{
+                              height: '3px',
+                              background: 'linear-gradient(to right, transparent, rgba(34, 197, 94, 0.4) 5%, rgba(34, 197, 94, 0.8) 20%, rgba(34, 197, 94, 1) 50%, rgba(34, 197, 94, 0.8) 80%, rgba(34, 197, 94, 0.4) 95%, transparent)',
+                              borderRadius: '2px',
+                              boxShadow: '0 2px 4px rgba(34, 197, 94, 0.2)',
+                            }}
+                          ></div>
+                        </div>
+                      )}
+                      <div
+                        className="bg-white/98 backdrop-blur-sm p-5 rounded-modern relative"
+                        style={{
+                          border: '3px solid rgba(255, 255, 255, 0.9)',
+                          boxShadow: '0 0 0 1px rgba(255, 255, 255, 1), 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 3px rgba(255, 255, 255, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.08)',
+                          transform: 'translateY(-2px)',
+                        }}
+                      >
                       {/* Nome cliente */}
                       <div className="mb-4">
                         <h4 className="font-bold text-xl text-gray-900">
@@ -413,7 +420,8 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                           <p className="text-sm text-gray-700 italic line-clamp-2">{booking.special_requests}</p>
                         </div>
                       )}
-                    </div>
+                      </div>
+                    </React.Fragment>
                   ))
                 ) : (
                   <div className="text-center py-8">
@@ -428,45 +436,53 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
           </div>
 
           {/* Pomeriggio CollapsibleCard */}
-          <div style={{ border: '5px solid #FDE047', borderRadius: '12px', boxShadow: '0 8px 16px -2px rgba(253, 224, 71, 0.4), 0 4px 8px -2px rgba(253, 224, 71, 0.3)', backgroundColor: '#FEF08A' }} className="overflow-hidden transition-all duration-200 hover:shadow-2xl">
-            <CollapsibleCard
-            title="Pomeriggio"
-            subtitle="14:31 - 18:30"
-            icon={Sun}
-            defaultExpanded={true}
-            collapseDisabled={true}
-            className="!border-0 !rounded-none !shadow-none !bg-transparent"
-            headerClassName="!bg-yellow-100 hover:!bg-yellow-200 transition-colors"
-            actions={
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex">
-                <div className="rounded-full bg-transparent" style={{ padding: '12px', boxShadow: '0 0 0 3px #dc2626' }}>
-                  <div className="flex flex-col items-center justify-center bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full shadow-2xl w-48 h-48">
-                    <div className="text-6xl font-extrabold text-gray-900 leading-none mb-2">
-                      {selectedDateData.capacity.afternoon.available}
-                    </div>
-                    <div className="text-sm font-semibold text-yellow-900 uppercase tracking-wide opacity-90">
-                      Posti liberi
-                    </div>
-                    <div className="text-2xl font-bold text-gray-900 mt-3 opacity-75">
-                      {selectedDateData.capacity.afternoon.capacity} totali
-                    </div>
-                  </div>
-                </div>
-              </div>
-            }
+          <div 
+            className="rounded-lg overflow-hidden shadow-lg"
+            style={{
+              border: '4px solid rgb(234, 179, 8)',
+              backgroundColor: 'rgba(254, 249, 195, 0.6)',
+              marginTop: '32px',
+              marginBottom: '32px',
+            }}
           >
-              <div className="px-4 sm:px-6 py-4 space-y-10 bg-gradient-to-b from-white/40 via-white/20 to-transparent">
+            <CollapsibleCard
+              title="Pomeriggio"
+              subtitle="14:31 - 18:30"
+              icon={Sun}
+              defaultExpanded={true}
+              collapseDisabled={false}
+              counter={{
+                available: selectedDateData.capacity.afternoon.available,
+                capacity: selectedDateData.capacity.afternoon.capacity
+              }}
+              headerClassName="bg-yellow-100 hover:bg-yellow-200 border-b-2 border-yellow-300"
+              className="!bg-transparent !border-transparent !shadow-none"
+            >
+              <div className="px-4 sm:px-6 py-4" style={{ backgroundColor: 'rgba(254, 249, 195, 0.4)' }}>
                 {selectedDateData.afternoonBookings.length > 0 ? (
-                  selectedDateData.afternoonBookings.map((booking) => (
-                    <div
-                      key={booking.id}
-                      className="bg-white/98 backdrop-blur-sm p-5 rounded-modern relative"
-                      style={{
-                        border: '3px solid rgba(255, 255, 255, 0.9)',
-                        boxShadow: '0 0 0 1px rgba(255, 255, 255, 1), 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 3px rgba(255, 255, 255, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.08)',
-                        transform: 'translateY(-2px)',
-                      }}
-                    >
+                  selectedDateData.afternoonBookings.map((booking, index) => (
+                    <React.Fragment key={booking.id}>
+                      {index > 0 && (
+                        <div className="my-8 flex items-center">
+                          <div 
+                            className="w-full"
+                            style={{
+                              height: '3px',
+                              background: 'linear-gradient(to right, transparent, rgba(234, 179, 8, 0.4) 5%, rgba(234, 179, 8, 0.8) 20%, rgba(234, 179, 8, 1) 50%, rgba(234, 179, 8, 0.8) 80%, rgba(234, 179, 8, 0.4) 95%, transparent)',
+                              borderRadius: '2px',
+                              boxShadow: '0 2px 4px rgba(234, 179, 8, 0.2)',
+                            }}
+                          ></div>
+                        </div>
+                      )}
+                      <div
+                        className="bg-white/98 backdrop-blur-sm p-5 rounded-modern relative"
+                        style={{
+                          border: '3px solid rgba(255, 255, 255, 0.9)',
+                          boxShadow: '0 0 0 1px rgba(255, 255, 255, 1), 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 3px rgba(255, 255, 255, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.08)',
+                          transform: 'translateY(-2px)',
+                        }}
+                      >
                       {/* Nome cliente */}
                       <div className="mb-4">
                         <h4 className="font-bold text-xl text-gray-900">
@@ -475,7 +491,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                       </div>
 
                       {/* Two-column layout */}
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-2 gap-6">
                         {/* Left Column */}
                         <div className="space-y-4">
 
@@ -549,7 +565,8 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                           <p className="text-sm text-gray-700 italic line-clamp-2">{booking.special_requests}</p>
                         </div>
                       )}
-                    </div>
+                      </div>
+                    </React.Fragment>
                   ))
                 ) : (
                   <div className="text-center py-8">
@@ -564,45 +581,52 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
           </div>
 
           {/* Sera CollapsibleCard */}
-          <div style={{ border: '5px solid #93C5FD', borderRadius: '12px', boxShadow: '0 8px 16px -2px rgba(147, 197, 253, 0.4), 0 4px 8px -2px rgba(147, 197, 253, 0.3)', backgroundColor: '#A5B4FC' }} className="overflow-hidden transition-all duration-200 hover:shadow-2xl">
-            <CollapsibleCard
-            title="Sera"
-            subtitle="18:31 - 23:30"
-            icon={Moon}
-            defaultExpanded={true}
-            collapseDisabled={true}
-            className="!border-0 !rounded-none !shadow-none !bg-transparent"
-            headerClassName="!bg-blue-100 hover:!bg-blue-200 transition-colors"
-            actions={
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex">
-                <div className="rounded-full bg-transparent" style={{ padding: '12px', boxShadow: '0 0 0 3px #dc2626' }}>
-                  <div className="flex flex-col items-center justify-center bg-gradient-to-br from-blue-400 to-blue-500 rounded-full shadow-2xl w-48 h-48">
-                    <div className="text-6xl font-extrabold text-white leading-none mb-2">
-                      {selectedDateData.capacity.evening.available}
-                    </div>
-                    <div className="text-sm font-semibold text-blue-100 uppercase tracking-wide">
-                      Posti liberi
-                    </div>
-                    <div className="text-2xl font-bold text-white mt-3 opacity-75">
-                      {selectedDateData.capacity.evening.capacity} totali
-                    </div>
-                  </div>
-                </div>
-              </div>
-            }
+          <div 
+            className="rounded-lg overflow-hidden shadow-lg"
+            style={{
+              border: '4px solid rgb(59, 130, 246)',
+              backgroundColor: 'rgba(239, 246, 255, 0.6)',
+              marginTop: '32px',
+            }}
           >
-              <div className="px-4 sm:px-6 py-4 space-y-10 bg-gradient-to-b from-white/40 via-white/20 to-transparent">
+            <CollapsibleCard
+              title="Sera"
+              subtitle="18:31 - 23:30"
+              icon={Moon}
+              defaultExpanded={true}
+              collapseDisabled={false}
+              counter={{
+                available: selectedDateData.capacity.evening.available,
+                capacity: selectedDateData.capacity.evening.capacity
+              }}
+              headerClassName="bg-blue-100 hover:bg-blue-200 border-b-2 border-blue-300"
+              className="!bg-transparent !border-transparent !shadow-none"
+            >
+              <div className="px-4 sm:px-6 py-4" style={{ backgroundColor: 'rgba(239, 246, 255, 0.4)' }}>
                 {selectedDateData.eveningBookings.length > 0 ? (
-                  selectedDateData.eveningBookings.map((booking) => (
-                    <div
-                      key={booking.id}
-                      className="bg-white/98 backdrop-blur-sm p-5 rounded-modern relative"
-                      style={{
-                        border: '3px solid rgba(255, 255, 255, 0.9)',
-                        boxShadow: '0 0 0 1px rgba(255, 255, 255, 1), 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 3px rgba(255, 255, 255, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.08)',
-                        transform: 'translateY(-2px)',
-                      }}
-                    >
+                  selectedDateData.eveningBookings.map((booking, index) => (
+                    <React.Fragment key={booking.id}>
+                      {index > 0 && (
+                        <div className="my-8 flex items-center">
+                          <div 
+                            className="w-full"
+                            style={{
+                              height: '3px',
+                              background: 'linear-gradient(to right, transparent, rgba(59, 130, 246, 0.4) 5%, rgba(59, 130, 246, 0.8) 20%, rgba(59, 130, 246, 1) 50%, rgba(59, 130, 246, 0.8) 80%, rgba(59, 130, 246, 0.4) 95%, transparent)',
+                              borderRadius: '2px',
+                              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)',
+                            }}
+                          ></div>
+                        </div>
+                      )}
+                      <div
+                        className="bg-white/98 backdrop-blur-sm p-5 rounded-modern relative"
+                        style={{
+                          border: '3px solid rgba(255, 255, 255, 0.9)',
+                          boxShadow: '0 0 0 1px rgba(255, 255, 255, 1), 0 0 0 2px rgba(255, 255, 255, 0.7), 0 0 0 3px rgba(255, 255, 255, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.08)',
+                          transform: 'translateY(-2px)',
+                        }}
+                      >
                       {/* Nome cliente */}
                       <div className="mb-4">
                         <h4 className="font-bold text-xl text-gray-900">
@@ -685,7 +709,8 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                           <p className="text-sm text-gray-700 italic line-clamp-2">{booking.special_requests}</p>
                         </div>
                       )}
-                    </div>
+                      </div>
+                    </React.Fragment>
                   ))
                 ) : (
                   <div className="text-center py-8">

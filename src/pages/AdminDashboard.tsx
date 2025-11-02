@@ -20,37 +20,33 @@ interface NavItemProps {
 }
 
 const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, badge, onClick }) => (
-  <div 
+  <button
     onClick={onClick}
-    style={{ backgroundColor: 'rgba(40, 55, 70, 0.85)', color: '#FFFFFF' }}
     className={`
-      relative flex items-center gap-3 px-6 md:px-8 py-3.5 md:py-4 rounded-3xl transition-all duration-200 font-black tracking-wide border-2 cursor-pointer
+      relative flex items-center gap-3 px-4 md:px-6 py-3 rounded-lg transition-all duration-200 border-2 cursor-pointer min-h-[44px]
       ${active
-        ? 'bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 border-gray-800'
-        : 'border-gray-800 hover:bg-[#2D3A4D] hover:border-gray-900 active:scale-95'
+        ? 'bg-white border-al-ritrovo-primary text-al-ritrovo-primary font-semibold shadow-sm'
+        : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 active:scale-[0.98]'
       }
     `}>
     <div className={`
-      w-11 h-11 rounded-2xl flex items-center justify-center transition-all
+      flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors
       ${active
-        ? 'bg-white/30'
-        : 'bg-white/10 group-hover:bg-white/20'
+        ? 'bg-al-ritrovo-primary/10'
+        : 'bg-gray-100'
       }
     `}>
-      <Icon className="w-6 h-6 md:w-7 md:h-7 text-white" />
+      <Icon className={`w-5 h-5 ${active ? 'text-al-ritrovo-primary' : 'text-gray-600'}`} />
     </div>
 
-    <span className="text-white text-sm md:text-base uppercase tracking-widest">{label}</span>
+    <span className="text-sm md:text-base font-medium">{label}</span>
 
     {badge && badge > 0 && (
-      <div className="relative">
-        <div className="absolute inset-0 bg-red-400 rounded-full blur-md opacity-75"></div>
-        <span className="relative inline-flex items-center justify-center min-w-[28px] h-7 bg-gradient-to-br from-red-500 to-rose-600 text-white text-xs font-black px-2.5 rounded-full shadow-[0_4px_16px_rgba(239,68,68,0.6)] border-2 border-white/50">
-          {badge}
-        </span>
-      </div>
+      <span className="ml-auto inline-flex items-center justify-center min-w-[24px] h-6 bg-al-ritrovo-primary text-white text-xs font-semibold px-2 rounded-full">
+        {badge}
+      </span>
     )}
-  </div>
+  </button>
 )
 
 
@@ -58,7 +54,6 @@ export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('calendar')
   const [showPendingPanel, setShowPendingPanel] = useState(false)
   const [showNewBookingPanel, setShowNewBookingPanel] = useState(false)
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null)
   const { data: stats, isLoading: isLoadingStats } = useBookingStats()
 
   // Chiudi il pannello pendenti quando cambi tab
@@ -66,37 +61,25 @@ export const AdminDashboard: React.FC = () => {
     setActiveTab(tab)
     if (tab !== 'calendar') {
       setShowPendingPanel(false)
-      // Reset selectedCalendarDate quando si cambia tab (tranne quando si va al calendario da Archivio)
-      // Verrà resettato dopo che il calendario lo ha processato
     }
   }
 
-  // Callback per navigare al calendario da Archivio
-  const handleViewInCalendar = (date: string) => {
-    setSelectedCalendarDate(date)
-    setActiveTab('calendar')
-    // Reset selectedCalendarDate dopo un delay per permettere al calendario di processarlo
-    setTimeout(() => {
-      setSelectedCalendarDate(null)
-    }, 1000)
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      {/* Header con Navbar Orizzontale - Tema Colorato Professionale */}
-      <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-2xl border-b-4 border-yellow-400/50">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-2 md:py-3">
-          {/* Top Bar: Logo + Stats + User Info - Allineati a sinistra */}
-          <div className="flex items-center gap-6 mb-1">
+    <div className="min-h-screen bg-gray-50">
+      {/* Header - Minimalist Professional */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6">
+          {/* Top Bar: Logo + User Info */}
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl md:text-3xl font-serif font-bold text-white drop-shadow-lg">Al Ritrovo</h1>
-              <p className="text-yellow-200 text-xs md:text-sm mt-0 font-medium leading-tight">Dashboard Amministratore</p>
+              <h1 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">Al Ritrovo</h1>
+              <p className="text-gray-600 text-sm mt-1">Dashboard Amministratore</p>
             </div>
             <AdminHeader />
           </div>
 
-          {/* Navigation Tabs Orizzontale */}
-          <nav className="flex flex-wrap items-center gap-5 md:gap-6 pb-2 mt-4">
+          {/* Navigation Tabs */}
+          <nav className="flex flex-wrap items-center gap-3 md:gap-4">
             <NavItem
               icon={Calendar}
               label="Calendario"
@@ -142,9 +125,7 @@ export const AdminDashboard: React.FC = () => {
               defaultExpanded={false}
               expanded={showNewBookingPanel}
               onExpandedChange={setShowNewBookingPanel}
-              className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 shadow-xl"
-              style={{ borderColor: 'rgba(40, 55, 70, 0.85)' }}
-              headerClassName="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+              headerClassName="bg-al-ritrovo-primary/5 hover:bg-al-ritrovo-primary/10 border-b border-al-ritrovo-primary/20"
             >
               <div className="bg-white rounded-lg">
                 <AdminBookingForm />
@@ -160,9 +141,7 @@ export const AdminDashboard: React.FC = () => {
               expanded={showPendingPanel}
               onExpandedChange={setShowPendingPanel}
               counter={stats?.pending}
-              className="bg-gradient-to-br from-amber-50 to-orange-50 shadow-xl"
-              style={{ borderColor: 'rgba(40, 55, 70, 0.85)' }}
-              headerClassName="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+              headerClassName="bg-yellow-50 hover:bg-yellow-100 border-b border-yellow-200"
             >
               <div className="p-4 max-h-[600px] overflow-y-auto">
                 <PendingRequestsTab />
@@ -172,10 +151,10 @@ export const AdminDashboard: React.FC = () => {
         )}
 
         {/* Tab Content */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-8 min-h-[600px] border-2 border-purple-100 relative">
-          {activeTab === 'calendar' && <BookingCalendarTab initialDate={selectedCalendarDate} />}
+        <div className="bg-white rounded-lg shadow-sm p-6 md:p-8 min-h-[600px] border border-gray-200">
+          {activeTab === 'calendar' && <BookingCalendarTab />}
           {activeTab === 'pending' && <PendingRequestsTab />}
-          {activeTab === 'archive' && <ArchiveTab onViewInCalendar={handleViewInCalendar} />}
+          {activeTab === 'archive' && <ArchiveTab />}
           {activeTab === 'settings' && <SettingsTab />}
         </div>
       </main>

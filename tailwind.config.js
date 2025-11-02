@@ -8,14 +8,14 @@ export default {
     extend: {
       colors: {
         // Palette "Caldo & Legno" - Ristorante Tradizionale
-        'warm-wood': '#8B4513',        // Marrone legno scuro
-        'warm-wood-dark': '#6B3410',   // Marrone legno ancora più scuro
-        'warm-beige': '#F5DEB3',       // Beige chiaro
-        'warm-orange': '#D2691E',      // Arancio cioccolato
-        'warm-cream': '#FFF8DC',       // Crema
-        'olive-green': '#6B8E23',      // Verde oliva
-        'terracotta': '#E07041',       // Terracotta
-        'gold-warm': '#DAA520',        // Oro caldo
+        'warm-wood': 'rgb(139 69 19 / var(--tw-alpha-value, 1))',        // Marrone legno scuro
+        'warm-wood-dark': 'rgb(107 52 16 / var(--tw-alpha-value, 1))',   // Marrone legno ancora più scuro
+        'warm-beige': 'rgb(245 222 179 / var(--tw-alpha-value, 1))',       // Beige chiaro
+        'warm-orange': 'rgb(210 105 30 / var(--tw-alpha-value, 1))',      // Arancio cioccolato
+        'warm-cream': 'rgb(255 248 220 / var(--tw-alpha-value, 1))',       // Crema
+        'olive-green': 'rgb(107 142 35 / var(--tw-alpha-value, 1))',      // Verde oliva
+        'terracotta': 'rgb(224 112 65 / var(--tw-alpha-value, 1))',       // Terracotta
+        'gold-warm': 'rgb(218 165 32 / var(--tw-alpha-value, 1))',        // Oro caldo
 
         // Retrocompatibilità (mantiene riferimenti vecchi)
         'al-ritrovo': {

@@ -14,15 +14,29 @@ test('Verifica posizionamento Logout sotto Dashboard Amministratore', async ({ p
   // Prendi uno screenshot
   await page.screenshot({ path: 'screenshots/logout-position-test.png', fullPage: true })
   
-  // Trova il testo "Dashboard Amministratore"
-  const dashboardText = page.locator('text=Dashboard Amministratore')
+  // Attendi che la pagina sia completamente caricata
+  await page.waitForLoadState('networkidle')
+  
+  // Trova il testo "Dashboard Amministratore" nell'header
+  const dashboardText = page.locator('text=Dashboard Amministratore').first()
   const dashboardCount = await dashboardText.count()
   console.log(`Testo "Dashboard Amministratore" trovato: ${dashboardCount} volte`)
   
-  // Trova il pulsante Logout
-  const logoutButton = page.locator('button:has-text("Logout")')
+  // Trova il pulsante Logout nell'header
+  const logoutButton = page.locator('button:has-text("Logout")').first()
   const logoutCount = await logoutButton.count()
   console.log(`Pulsante Logout trovato: ${logoutCount} volte`)
+  
+  // Se non trovato, prova altri selettori
+  if (dashboardCount === 0) {
+    console.log('⚠️ Testo "Dashboard Amministratore" non trovato con il primo selettore, provo alternativi...')
+    const altDashboard = page.locator('p:has-text("Dashboard")')
+    const altCount = await altDashboard.count()
+    console.log(`Trovato con selettore alternativo: ${altCount}`)
+  }
+  
+  expect(dashboardCount).toBeGreaterThan(0)
+  expect(logoutCount).toBeGreaterThan(0)
   
   if (dashboardCount > 0 && logoutCount > 0) {
     // Verifica posizione relativa
@@ -39,13 +53,15 @@ test('Verifica posizionamento Logout sotto Dashboard Amministratore', async ({ p
       console.log(`Differenza orizzontale: ${xDifference}px`)
       
       // Logout dovrebbe essere sotto (distanza positiva)
+      // Verifica che sia ragionevolmente vicino al testo (max 20px)
       expect(yDifference).toBeGreaterThan(0)
-      
-      // Verifica che la distanza sia ragionevole (non troppo lontano)
-      expect(yDifference).toBeLessThan(100)
+      expect(yDifference).toBeLessThan(20) // Accetta fino a 20px di distanza
       
       // Verifica che siano allineati (x simili con tolleranza)
       expect(xDifference).toBeLessThan(50)
+      
+      // Verifica che la distanza dai bottoni nav sia sufficiente
+      // (questo viene verificato indirettamente dal layout con mb-6)
       
       console.log('✅ Logout posizionato correttamente sotto "Dashboard Amministratore"')
     }

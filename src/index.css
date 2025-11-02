@@ -5,6 +5,24 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .bg-warm-cream-60 {
+    background-color: rgba(255, 248, 220, 0.6);
+  }
+  .bg-warm-cream-40 {
+    background-color: rgba(255, 248, 220, 0.4);
+  }
+  .from-warm-cream-60 {
+    --tw-gradient-from: rgba(255, 248, 220, 0.6);
+    --tw-gradient-to: rgba(255, 248, 220, 0);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+  .via-warm-cream-40 {
+    --tw-gradient-to: rgba(255, 248, 220, 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), rgba(255, 248, 220, 0.4) var(--tw-gradient-via-position), var(--tw-gradient-to);
+  }
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

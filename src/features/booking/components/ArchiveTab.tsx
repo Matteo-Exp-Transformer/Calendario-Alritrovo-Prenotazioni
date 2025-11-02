@@ -150,59 +150,59 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
 
       {/* Contenuto Espandibile */}
       {isExpanded && (
-        <div className="p-6 bg-white border-t-2 border-warm-orange/10 animate-slideDown">
-          {/* Dati Organizzati - Griglia a 2 colonne */}
-          <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+        <div className="p-4 md:p-6 bg-white border-t-2 border-warm-orange/10 animate-slideDown">
+          {/* Dati Organizzati - Responsive: 1 colonna su mobile, 2 su desktop */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 md:gap-y-3">
             {/* Nome */}
-            <div className="flex items-start gap-3 py-3">
-              <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Nome:</span>
-              <span className="text-base font-semibold text-warm-wood-dark">{booking.client_name}</span>
+            <div className="flex flex-row items-start gap-3 py-1.5 md:py-2">
+              <span className="text-xs text-gray-500 w-24 md:w-28 font-medium uppercase tracking-wide flex-shrink-0">Nome:</span>
+              <span className="text-sm md:text-base font-semibold text-warm-wood-dark break-words">{booking.client_name}</span>
             </div>
 
             {/* Email */}
-            <div className="flex items-start gap-3 py-3">
-              <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Email:</span>
-              <span className="text-base font-semibold text-warm-wood-dark">{booking.client_email}</span>
+            <div className="flex flex-row items-start gap-3 py-1.5 md:py-2">
+              <span className="text-xs text-gray-500 w-24 md:w-28 font-medium uppercase tracking-wide flex-shrink-0">Email:</span>
+              <span className="text-sm md:text-base font-semibold text-warm-wood-dark break-all">{booking.client_email}</span>
             </div>
 
             {/* Telefono */}
             {booking.client_phone && (
-              <div className="flex items-start gap-3 py-3">
-                <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Telefono:</span>
-                <span className="text-base font-semibold text-warm-wood-dark">{booking.client_phone}</span>
+              <div className="flex flex-row items-start gap-3 py-1.5 md:py-2">
+                <span className="text-xs text-gray-500 w-24 md:w-28 font-medium uppercase tracking-wide flex-shrink-0">Telefono:</span>
+                <span className="text-sm md:text-base font-semibold text-warm-wood-dark">{booking.client_phone}</span>
               </div>
             )}
 
             {/* Data */}
-            <div className="flex items-start gap-3 py-3">
-              <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Data:</span>
-              <span className="text-base font-semibold text-warm-wood-dark">{formatDate(displayDate)}</span>
+            <div className="flex flex-row items-start gap-3 py-1.5 md:py-2">
+              <span className="text-xs text-gray-500 w-24 md:w-28 font-medium uppercase tracking-wide flex-shrink-0">Data:</span>
+              <span className="text-sm md:text-base font-semibold text-warm-wood-dark">{formatDate(displayDate)}</span>
             </div>
 
             {/* Orario */}
-            <div className="flex items-start gap-3 py-3">
-              <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Orario:</span>
-              <span className="text-base font-semibold text-warm-wood-dark">{formatTime(displayTime)}</span>
+            <div className="flex flex-row items-start gap-3 py-1.5 md:py-2">
+              <span className="text-xs text-gray-500 w-24 md:w-28 font-medium uppercase tracking-wide flex-shrink-0">Orario:</span>
+              <span className="text-sm md:text-base font-semibold text-warm-wood-dark">{formatTime(displayTime)}</span>
             </div>
 
             {/* Pax */}
-            <div className="flex items-start gap-3 py-3">
-              <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Pax:</span>
-              <span className="text-base font-semibold text-warm-wood-dark">{booking.num_guests}</span>
+            <div className="flex flex-row items-start gap-3 py-1.5 md:py-2">
+              <span className="text-xs text-gray-500 w-24 md:w-28 font-medium uppercase tracking-wide flex-shrink-0">Pax:</span>
+              <span className="text-sm md:text-base font-semibold text-warm-wood-dark">{booking.num_guests}</span>
             </div>
 
             {/* Tipo */}
-            <div className="flex items-start gap-3 py-3">
-              <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Tipo:</span>
-              <span className="text-base font-semibold text-warm-wood-dark">{eventConfig.label}</span>
+            <div className="flex flex-row items-start gap-3 py-1.5 md:py-2">
+              <span className="text-xs text-gray-500 w-24 md:w-28 font-medium uppercase tracking-wide flex-shrink-0">Tipo:</span>
+              <span className="text-sm md:text-base font-semibold text-warm-wood-dark">{eventConfig.label}</span>
             </div>
           </div>
 
           {/* Note Richieste Speciali - Fuori dalla griglia */}
           {booking.special_requests && (
-            <div className="pt-6 mt-6 border-t border-warm-orange/20">
-              <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-3">Richieste Speciali</p>
-              <p className="text-sm text-gray-700 leading-relaxed">
+            <div className="pt-4 md:pt-6 mt-4 md:mt-6 border-t border-warm-orange/20">
+              <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-2 md:mb-3">Richieste Speciali</p>
+              <p className="text-sm md:text-base text-gray-700 leading-relaxed break-words">
                 {booking.special_requests}
               </p>
             </div>
@@ -210,9 +210,9 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
 
           {/* Motivo rifiuto se presente */}
           {booking.rejection_reason && (
-            <div className="pt-6 mt-6 border-t border-red-300/30">
-              <p className="text-xs text-red-600 uppercase tracking-wide font-semibold mb-3">Motivo Rifiuto</p>
-              <p className="text-sm text-red-700 leading-relaxed">
+            <div className="pt-4 md:pt-6 mt-4 md:mt-6 border-t border-red-300/30">
+              <p className="text-xs text-red-600 uppercase tracking-wide font-semibold mb-2 md:mb-3">Motivo Rifiuto</p>
+              <p className="text-sm md:text-base text-red-700 leading-relaxed break-words">
                 {booking.rejection_reason}
               </p>
             </div>
@@ -227,17 +227,18 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
             if (!dateStr) return null
 
             return (
-              <div className="flex gap-4 pt-4 border-t border-warm-orange/20 mt-6">
+              <div className="flex gap-2 md:gap-4 pt-3 md:pt-4 border-t border-warm-orange/20 mt-4 md:mt-6">
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
                     onViewInCalendar(dateStr)
                   }}
                   style={{ backgroundColor: '#059669', color: 'white' }}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 hover:bg-green-700 font-bold text-lg shadow-xl rounded-xl transition-all"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 md:px-6 py-3 md:py-4 hover:bg-green-700 font-bold text-sm md:text-lg shadow-xl rounded-xl transition-all"
                 >
-                  <Calendar className="w-5 h-5" />
-                  Visualizza nel Calendario
+                  <Calendar className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="hidden sm:inline">Visualizza nel Calendario</span>
+                  <span className="sm:hidden">Calendario</span>
                 </button>
               </div>
             )

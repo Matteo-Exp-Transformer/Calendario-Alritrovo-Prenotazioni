@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui'
-import { Settings, Mail, Bell, Database, Shield } from 'lucide-react'
+import { Settings, Mail, Bell, Database, Shield, UtensilsCrossed, X } from 'lucide-react'
 import { EmailLogsModal } from './EmailLogsModal'
 import { TestEmailModal } from './TestEmailModal'
+import { MenuPricesTab } from './MenuPricesTab'
 
 export const SettingsTab: React.FC = () => {
   const [showEmailLogs, setShowEmailLogs] = useState(false)
   const [showTestEmail, setShowTestEmail] = useState(false)
+  const [showMenuPrices, setShowMenuPrices] = useState(false)
 
   const emailNotificationsEnabled = !!(
     import.meta.env.RESEND_API_KEY || import.meta.env.VITE_RESEND_API_KEY
@@ -162,6 +164,15 @@ export const SettingsTab: React.FC = () => {
           >
             💾 Export Settings
           </Button>
+          <Button
+            variant="solid"
+            size="lg"
+            onClick={() => setShowMenuPrices(true)}
+            className="bg-gradient-to-r from-warm-wood to-warm-wood-dark text-white shadow-lg hover:scale-105 transition-all"
+          >
+            <UtensilsCrossed className="h-5 w-5 mr-2" />
+            🍽️ Prezzi Menu
+          </Button>
         </div>
       </div>
 
@@ -170,6 +181,25 @@ export const SettingsTab: React.FC = () => {
 
       {/* Test Email Modal */}
       <TestEmailModal isOpen={showTestEmail} onClose={() => setShowTestEmail(false)} />
+
+      {/* Menu Prices Tab Modal */}
+      {showMenuPrices && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setShowMenuPrices(false)} />
+          <div className="relative bg-white rounded-lg shadow-2xl max-w-6xl mx-auto my-8 p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Prezzi Menu</h2>
+              <button
+                onClick={() => setShowMenuPrices(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="h-6 w-6 text-gray-600" />
+              </button>
+            </div>
+            <MenuPricesTab />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -20,6 +20,7 @@ export const AdminBookingForm: React.FC = () => {
     client_email: '',
     client_phone: '',
     event_type: 'drink_caraffe',
+    booking_type: 'tavolo',
     desired_date: '',
     desired_time: '',
     num_guests: 0,
@@ -114,6 +115,7 @@ export const AdminBookingForm: React.FC = () => {
           client_email: '',
           client_phone: '',
           event_type: 'drink_caraffe',
+          booking_type: 'tavolo',
           desired_date: '',
           desired_time: '',
           num_guests: 0,
@@ -282,7 +284,7 @@ export const AdminBookingForm: React.FC = () => {
             <Input
               id="desired_time"
               type="time"
-              value={formData.desired_time}
+              value={formData.desired_time || ''}
               onChange={(e) => {
                 setFormData({ ...formData, desired_time: e.target.value })
                 setErrors({ ...errors, desired_time: '' })

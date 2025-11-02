@@ -52,12 +52,17 @@ export interface Database {
           client_name: string
           client_email: string
           client_phone: string | null
-          event_type: string
+          event_type: string | null
+          booking_type: string | null
           desired_date: string
           desired_time: string | null
           num_guests: number | null
           special_requests: string | null
           menu: string | null
+          menu_selection: Json | null
+          menu_total_per_person: number | null
+          menu_total_booking: number | null
+          dietary_restrictions: Json | null
           status: string
           confirmed_start: string | null
           confirmed_end: string | null
@@ -73,12 +78,17 @@ export interface Database {
           client_name: string
           client_email: string
           client_phone?: string | null
-          event_type: string
+          event_type?: string | null
+          booking_type?: string | null
           desired_date: string
           desired_time?: string | null
           num_guests?: number | null
           special_requests?: string | null
           menu?: string | null
+          menu_selection?: Json | null
+          menu_total_per_person?: number | null
+          menu_total_booking?: number | null
+          dietary_restrictions?: Json | null
           status?: string
           confirmed_start?: string | null
           confirmed_end?: string | null
@@ -94,12 +104,17 @@ export interface Database {
           client_name?: string
           client_email?: string
           client_phone?: string | null
-          event_type?: string
+          event_type?: string | null
+          booking_type?: string | null
           desired_date?: string
           desired_time?: string | null
           num_guests?: number | null
           special_requests?: string | null
           menu?: string | null
+          menu_selection?: Json | null
+          menu_total_per_person?: number | null
+          menu_total_booking?: number | null
+          dietary_restrictions?: Json | null
           status?: string
           confirmed_start?: string | null
           confirmed_end?: string | null
@@ -107,6 +122,38 @@ export interface Database {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+        }
+      }
+      menu_items: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          name: string
+          category: string
+          price: number
+          description: string | null
+          sort_order: number
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          name: string
+          category: string
+          price: number
+          description?: string | null
+          sort_order?: number
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          updated_at?: string
+          name?: string
+          category?: string
+          price?: number
+          description?: string | null
+          sort_order?: number
         }
       }
       admin_users: {
