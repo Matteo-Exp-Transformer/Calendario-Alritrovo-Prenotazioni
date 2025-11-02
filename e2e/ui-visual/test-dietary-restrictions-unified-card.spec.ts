@@ -19,8 +19,12 @@ test.describe('DietaryRestrictionsSection - Card Unificata', () => {
     await page.goto('/prenota')
     await page.waitForLoadState('networkidle')
 
+    // Seleziona "Rinfresco di Laurea" per far apparire la sezione intolleranze
+    await page.selectOption('select#booking_type', 'rinfresco_laurea')
+    await page.waitForTimeout(500)
+
     // Scrolla fino alla sezione intolleranze (usa heading)
-    const intolleranzeHeading = page.locator('h2:has-text("Intolleranze Alimentari")')
+    const intolleranzeHeading = page.locator('h2:has-text("Intolleranze")')
     await intolleranzeHeading.scrollIntoViewIfNeeded({ timeout: 10000 })
     await page.waitForTimeout(500)
 
@@ -74,6 +78,10 @@ test.describe('DietaryRestrictionsSection - Card Unificata', () => {
     await page.goto('/prenota')
     await page.waitForLoadState('networkidle')
 
+    // Seleziona "Rinfresco di Laurea" per far apparire la sezione intolleranze
+    await page.selectOption('select#booking_type', 'rinfresco_laurea')
+    await page.waitForTimeout(500)
+
     const unifiedCard = page.locator('.bg-white\\/95.backdrop-blur-md.border-2.border-gray-200.rounded-xl.shadow-lg').filter({
       has: page.locator('text=Intolleranze')
     })
@@ -81,7 +89,7 @@ test.describe('DietaryRestrictionsSection - Card Unificata', () => {
     await expect(unifiedCard).toBeVisible()
 
     // Screenshot desktop
-    const intolleranzeHeading = page.locator('h2:has-text("Intolleranze Alimentari")')
+    const intolleranzeHeading = page.locator('h2:has-text("Intolleranze")')
     await intolleranzeHeading.scrollIntoViewIfNeeded({ timeout: 10000 })
     await page.screenshot({
       path: 'e2e/screenshots/dietary-card-desktop.png',
@@ -92,6 +100,10 @@ test.describe('DietaryRestrictionsSection - Card Unificata', () => {
     await page.setViewportSize({ width: 375, height: 667 })
     await page.goto('/prenota')
     await page.waitForLoadState('networkidle')
+
+    // Seleziona "Rinfresco di Laurea" per far apparire la sezione intolleranze
+    await page.selectOption('select#booking_type', 'rinfresco_laurea')
+    await page.waitForTimeout(500)
 
     await expect(unifiedCard).toBeVisible()
 

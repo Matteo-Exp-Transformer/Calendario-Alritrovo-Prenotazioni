@@ -42,7 +42,7 @@ test.describe('Booking Form - Semi-transparent Opaque Cards', () => {
     await expect(dettagliPrenotazioneCard).toBeVisible()
 
     // Verify Menu Selection section has semi-transparent card
-    const menuCard = page.locator('div.bg-white\\/95.backdrop-blur-md.border-2.border-gray-200.rounded-xl.shadow-lg').filter({ has: page.locator('text=Menù Rinfresco') }).first()
+    const menuCard = page.locator('div.bg-white\\/95.backdrop-blur-md.border-2.border-gray-200.rounded-xl.shadow-lg').filter({ has: page.locator('text=Menù') }).first()
     await expect(menuCard).toBeVisible()
 
     // Verify Dietary Restrictions section has semi-transparent card

@@ -137,3 +137,4 @@ Applicare `font-bold` direttamente agli Input nel form.
 **Report generato seguendo:** Skill `verification-before-completion`  
 **Metodo:** Analisi codice + Identificazione conflitti CSS + Verifica TypeScript
 
+

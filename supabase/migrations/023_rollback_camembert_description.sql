@@ -9,3 +9,4 @@ SET description = '2 pz a persona',
     updated_at = NOW()
 WHERE name = 'Camembert' AND category = 'fritti';
 
+

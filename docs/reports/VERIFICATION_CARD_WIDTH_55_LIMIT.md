@@ -200,3 +200,4 @@ npx playwright test e2e/verify-card-width-limit.spec.ts
 **Report generato con:** Skills di testing (verification-before-completion, testing-skills-with-subagents)  
 **Metodo:** Analisi codice + Test automatici + Verifica visiva
 
+

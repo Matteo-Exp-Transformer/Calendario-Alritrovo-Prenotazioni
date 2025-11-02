@@ -161,3 +161,4 @@ if (category === 'bevande') {
 - Le funzioni helper sono case-insensitive e gestiscono variazioni di formattazione
 - Il test debug (`test-caraffe-debug-names.spec.ts`) è stato utilizzato per identificare i nomi esatti nel frontend
 
+

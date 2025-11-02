@@ -135,3 +135,4 @@ La logica è ora identica a quella dei primi piatti: mutual exclusion totale tra
 **Report generato seguendo:** Skill `verification-before-completion`  
 **Principio:** Evidence before claims, always
 
+

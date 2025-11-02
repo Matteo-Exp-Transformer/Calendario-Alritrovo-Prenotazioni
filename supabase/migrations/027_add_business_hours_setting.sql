@@ -21,3 +21,4 @@ DO UPDATE SET
   setting_value = EXCLUDED.setting_value,
   updated_at = NOW();
 
+

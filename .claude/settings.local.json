@@ -57,7 +57,9 @@
       "Bash(findstr:*)",
       "Bash(timeout 60 bash:*)",
       "Bash(timeout:*)",
-      "SlashCommand(/testing-skills-with-subagents)"
+      "SlashCommand(/testing-skills-with-subagents)",
+      "Bash(tasklist:*)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []

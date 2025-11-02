@@ -282,7 +282,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     <>
     <form onSubmit={handleSubmit} className="w-full max-w-[55vw] mx-auto px-4 md:px-6 space-y-8 font-bold">
       {/* Sezione: Dati Personali */}
-      <div className="bg-white/95 backdrop-blur-md border-2 border-gray-200 rounded-xl shadow-lg p-6 md:p-8 space-y-6">
+      <div className="space-y-6">
         <h2
           className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
           style={{
@@ -349,10 +349,9 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             <p className="text-sm text-red-500">{errors.client_phone}</p>
           )}
         </div>
-      </div>
 
       {/* Sezione: Dettagli Prenotazione */}
-      <div className="bg-white/95 backdrop-blur-md border-2 border-gray-200 rounded-xl shadow-lg p-6 md:p-8 space-y-6">
+      <div className="space-y-6">
         <h2
           className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
           style={{
@@ -521,7 +520,9 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             <p className="text-sm text-red-500">{errors.num_guests}</p>
           )}
         </div>
+        </div>
       </div>
+
       {/* Menu Selection - Solo per Rinfresco di Laurea */}
       {formData.booking_type === 'rinfresco_laurea' && (
         <div className="space-y-6">

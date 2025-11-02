@@ -161,3 +161,4 @@ grep "ml-6\|pr-2" src/features/booking/components/MenuSelection.tsx
 **Principio:** Evidence before claims, always  
 **Verifica eseguita:** Prima di dichiarare completato
 
+

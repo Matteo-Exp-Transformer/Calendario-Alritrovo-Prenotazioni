@@ -208,3 +208,4 @@ Gestione automatica di destinatari multipli nel log database.
 - [Resend API Keys](https://resend.com/docs/api-reference/api-keys)
 - [Resend Email Sending](https://resend.com/docs/api-reference/emails/send-email)
 
+

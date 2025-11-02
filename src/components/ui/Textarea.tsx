@@ -13,12 +13,12 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       <>
         <textarea
           className={cn(
-            'flex rounded-modern border bg-white shadow-sm transition-all',
+            'flex rounded-modern border bg-white shadow-sm transition-all box-border',
             className
           )}
-          style={{ 
-            borderColor: 'rgba(0,0,0,0.2)', 
-            width: '100%', 
+          style={{
+            borderColor: 'rgba(0,0,0,0.2)',
+            width: '100%',
             minHeight: '140px',
             padding: '16px',
             fontSize: '16px',

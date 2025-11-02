@@ -117,3 +117,4 @@ Il padding adeguato è ora applicato sia al container esterno che al contenuto i
 **Report generato seguendo:** Skill `verification-before-completion`  
 **Principio:** Evidence before claims, always
 
+

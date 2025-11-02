@@ -185,7 +185,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="bg-white/95 backdrop-blur-md border-2 border-gray-200 rounded-xl shadow-lg p-6 md:p-8 space-y-6">
       {/* Titolo Sezione */}
       <h2
         className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
