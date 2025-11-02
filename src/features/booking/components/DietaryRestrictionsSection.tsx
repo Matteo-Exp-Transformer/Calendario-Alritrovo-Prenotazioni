@@ -201,24 +201,36 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
       {/* Lista Recap */}
       {restrictions.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-lg font-bold text-gray-800">Intolleranze inserite:</h3>
+          <h3
+            className="text-lg font-bold text-gray-800"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.5)',
+              backdropFilter: 'blur(6px)',
+              padding: '12px 20px',
+              borderRadius: '12px',
+              display: 'inline-block'
+            }}
+          >
+            Intolleranze inserite:
+          </h3>
           {restrictions.map((restriction, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-4 bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent rounded-lg border-2 border-warm-beige hover:shadow-md transition-all"
+              className="flex items-center gap-6 p-5 bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent rounded-lg border-2 border-warm-beige hover:shadow-md transition-all"
+              style={{
+                minHeight: '64px'
+              }}
             >
-              <div className="flex-1">
-                <div className="flex items-center gap-3">
-                  <span className="font-semibold text-gray-900">{restriction.restriction}</span>
-                  {restriction.restriction === 'Altro' && restriction.notes && (
-                    <span className="text-sm text-gray-600 italic">({restriction.notes})</span>
-                  )}
-                  <span className="text-warm-wood font-bold">
-                    {restriction.guest_count} {restriction.guest_count === 1 ? 'ospite' : 'ospiti'}
-                  </span>
-                </div>
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <span className="font-semibold text-gray-900">{restriction.restriction}</span>
+                {restriction.restriction === 'Altro' && restriction.notes && (
+                  <span className="text-sm text-gray-600 italic">({restriction.notes})</span>
+                )}
+                <span className="text-warm-wood font-bold">
+                  {restriction.guest_count} {restriction.guest_count === 1 ? 'ospite' : 'ospiti'}
+                </span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-3 ml-auto flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => handleEdit(index)}

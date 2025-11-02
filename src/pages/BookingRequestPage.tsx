@@ -56,13 +56,28 @@ export const BookingRequestPage: React.FC = () => {
           </div>
 
           {/* Info Box Ridisegnata */}
-          <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-6 md:p-8 animate-fade-in">
+          <div
+            className="rounded-2xl shadow-xl p-6 md:p-8 animate-fade-in"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.5)',
+              backdropFilter: 'blur(6px)',
+            }}
+          >
             <div className="flex items-start gap-4 md:gap-6">
               <div className="flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-terracotta to-warm-orange shadow-lg">
                 <Clock className="w-7 h-7 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl md:text-2xl font-serif font-semibold mb-4 text-warm-wood">
+                <h3
+                  className="text-xl md:text-2xl font-serif font-semibold mb-4 text-warm-wood"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                    backdropFilter: 'blur(6px)',
+                    padding: '12px 20px',
+                    borderRadius: '12px',
+                    display: 'inline-block'
+                  }}
+                >
                   Orari e Contatti
                 </h3>
                 <p className="text-base md:text-lg mb-6 text-gray-700">
@@ -71,15 +86,23 @@ export const BookingRequestPage: React.FC = () => {
                 <div className="space-y-3 text-base md:text-lg text-warm-wood-dark">
                   <div className="flex items-center gap-3">
                     <Mail className="w-5 h-5 text-warm-orange" />
-                    <span className="font-medium">info@alritrovo.it</span>
+                    <span className="font-medium">Alritrovobologna@gmail.com</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Phone className="w-5 h-5 text-warm-orange" />
-                    <span className="font-medium">+39 051 123 4567</span>
+                    <span className="font-medium">3505362538</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-5 h-5 text-warm-orange" />
-                    <span className="font-medium">Martedì - Domenica, 19:00 - 24:00</span>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-5 h-5 text-warm-orange" />
+                      <span className="font-medium">Orario:</span>
+                    </div>
+                    <div className="ml-8 space-y-1">
+                      <div className="font-medium">Lunedì - Giovedì: 11:00 - 00:00</div>
+                      <div className="font-medium">Venerdì: 11:00 - 01:00</div>
+                      <div className="font-medium">Sabato: 17:00 - 01:00</div>
+                      <div className="font-medium">Domenica: Chiuso</div>
+                    </div>
                   </div>
                 </div>
               </div>

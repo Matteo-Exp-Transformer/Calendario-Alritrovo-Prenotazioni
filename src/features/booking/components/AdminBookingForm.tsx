@@ -554,7 +554,16 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
 
       {/* Nota campi obbligatori e Submit Button */}
       <div className="flex items-center justify-between gap-4 mt-4">
-        <p className="text-xs text-gray-600">
+        <p
+          className="text-xs text-gray-600"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+            backdropFilter: 'blur(6px)',
+            padding: '8px 16px',
+            borderRadius: '12px',
+            display: 'inline-block'
+          }}
+        >
           * I campi contrassegnati sono obbligatori.
         </p>
         <div className="flex justify-center flex-1">
