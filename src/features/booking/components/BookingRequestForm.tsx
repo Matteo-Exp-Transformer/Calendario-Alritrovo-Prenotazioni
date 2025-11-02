@@ -280,7 +280,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
   return (
     <>
-    <form onSubmit={handleSubmit} className="w-full md:max-w-2xl mx-auto px-4 md:px-6 space-y-8">
+    <form onSubmit={handleSubmit} className="w-full max-w-[55vw] mx-auto px-4 md:px-6 space-y-8 font-bold">
       {/* Sezione: Dati Personali */}
       <div className="space-y-6">
         <h2
@@ -349,7 +349,6 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             <p className="text-sm text-red-500">{errors.client_phone}</p>
           )}
         </div>
-      </div>
 
       {/* Sezione: Dettagli Prenotazione */}
       <div className="space-y-6">
@@ -392,7 +391,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               height: '56px',
               padding: '16px',
               fontSize: '16px',
-              fontWeight: '500',
+              fontWeight: '700',
               backgroundColor: 'rgba(255, 255, 255, 0.5)',
               backdropFilter: 'blur(6px)',
               color: 'black',
@@ -521,6 +520,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             <p className="text-sm text-red-500">{errors.num_guests}</p>
           )}
         </div>
+        </div>
       </div>
 
       {/* Menu Selection - Solo per Rinfresco di Laurea */}
@@ -626,8 +626,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         </div>
       </div>
 
-      {/* Nota campi obbligatori e Submit Button */}
-      <div className="flex items-center justify-between gap-4 mt-4">
+      {/* Nota campi obbligatori */}
+      <div className="mt-4">
         <p
           className="text-xs text-gray-600"
           style={{
@@ -640,8 +640,11 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         >
           * I campi contrassegnati sono obbligatori.
         </p>
-        <div className="flex justify-center flex-1">
-          <button
+      </div>
+
+      {/* Submit Button */}
+      <div className="flex justify-center mt-4">
+        <button
             type="submit"
             disabled={isPending || isBlocked}
             style={{ backgroundColor: '#22c55e', paddingLeft: '256px', paddingRight: '256px', paddingTop: '25px', paddingBottom: '25px', borderRadius: '50px' }}
@@ -673,7 +676,6 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             </div>
           </button>
         </div>
-      </div>
     </form>
 
     {/* Modal di Conferma Successo */}

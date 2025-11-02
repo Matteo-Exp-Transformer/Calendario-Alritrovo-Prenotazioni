@@ -5,7 +5,7 @@ import { useAcceptedBookings } from '../hooks/useBookingQueries'
 import type { BookingRequest } from '@/types/booking'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { createBookingDateTime } from '../utils/dateUtils'
+import { createBookingDateTime, extractDateFromISO, extractTimeFromISO } from '../utils/dateUtils'
 import { getSlotsOccupiedByBooking } from '../utils/capacityCalculator'
 import { CAPACITY_CONFIG } from '../constants/capacity'
 import { toast } from 'react-toastify'
@@ -71,9 +71,9 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
   const [formData, setFormData] = useState(() => {
     return {
-      date: booking.confirmed_start ? format(new Date(booking.confirmed_start), 'yyyy-MM-dd') : '',
-      startTime: booking.confirmed_start ? format(new Date(booking.confirmed_start), 'HH:mm') : '',
-      endTime: booking.confirmed_end ? format(new Date(booking.confirmed_end), 'HH:mm') : '',
+      date: extractDateFromISO(booking.confirmed_start),
+      startTime: extractTimeFromISO(booking.confirmed_start),
+      endTime: extractTimeFromISO(booking.confirmed_end),
       numGuests: booking.num_guests,
       specialRequests: booking.special_requests || '',
       menu: booking.menu || '',
@@ -82,23 +82,11 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
   // Aggiorna formData quando cambia il booking
   useEffect(() => {
-    // Extract date and time directly from ISO strings to avoid timezone issues
-    const extractDate = (isoString: string | null | undefined) => {
-      if (!isoString) return ''
-      const match = isoString.match(/(\d{4})-(\d{2})-(\d{2})/)
-      return match ? `${match[1]}-${match[2]}-${match[3]}` : ''
-    }
-    
-    const extractTime = (isoString: string | null | undefined) => {
-      if (!isoString) return ''
-      const match = isoString.match(/T(\d{2}):(\d{2})/)
-      return match ? `${match[1]}:${match[2]}` : ''
-    }
-    
+    // Use utility functions to extract date and time directly from ISO strings to avoid timezone issues
     setFormData({
-      date: extractDate(booking.confirmed_start),
-      startTime: extractTime(booking.confirmed_start),
-      endTime: extractTime(booking.confirmed_end),
+      date: extractDateFromISO(booking.confirmed_start),
+      startTime: extractTimeFromISO(booking.confirmed_start),
+      endTime: extractTimeFromISO(booking.confirmed_end),
       numGuests: booking.num_guests,
       specialRequests: booking.special_requests || '',
       menu: booking.menu || '',
@@ -111,7 +99,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     const dayBookings = acceptedBookings.filter((b) => {
       if (b.id === booking.id) return false // Escludi la prenotazione corrente
       if (!b.confirmed_start) return false
-      const bookingDate = new Date(b.confirmed_start).toISOString().split('T')[0]
+      const bookingDate = extractDateFromISO(b.confirmed_start)
       return bookingDate === date
     })
 
@@ -307,9 +295,10 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 bg-amber-100">
           {!showCancelConfirm && (
-            <div className="grid grid-cols-2 gap-6">
+            <div className="bg-white/95 backdrop-blur-md border-2 border-gray-200 rounded-xl shadow-lg p-6 md:p-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Colonna Sinistra - Informazioni Cliente */}
-              <div className="space-y-4 pr-6 border-r-2 border-gray-300">
+              <div className="space-y-4 sm:pr-6 sm:border-r-2 border-gray-300">
                 {/* Sezione Header */}
                 <div className="border-b-2 border-gray-100 pb-4">
                   <h3 className="font-serif font-bold text-lg text-gray-900 flex items-center">
@@ -347,7 +336,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
               </div>
 
               {/* Colonna Destra - Dettagli Evento */}
-              <div className="space-y-4 pl-6">
+              <div className="space-y-4 sm:pl-6">
                 {/* Sezione Header Event Details */}
                 <div className="border-b-2 border-gray-100 pb-4">
                   <h3 className="font-serif font-bold text-lg text-gray-900 flex items-center">
@@ -479,6 +468,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                 </div>
               )}
               </div>
+            </div>
             </div>
           )}
         </div>

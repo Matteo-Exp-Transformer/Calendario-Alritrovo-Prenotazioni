@@ -1,203 +1,242 @@
-# 🧪 E2E Testing Suite - Al Ritrovo Booking System
+# 🧪 E2E Test Suite - Al Ritrovo Booking System
 
-## 📋 Test Coverage
+Suite completa di test end-to-end organizzata per categorie funzionali.
 
-Questa suite contiene 6 test end-to-end che coprono l'intero flusso dell'applicazione:
+## 📁 Struttura Test
 
-### Test 1: Flusso Prenotazione Utente ✅
-- **File**: `01-booking-flow.spec.ts`
-- **Descrizione**: Crea una prenotazione dal form pubblico
-- **Email Test**: matteo.cavallaro.work@gmail.com
-- **Verifica**: Form submission, validation, success message
+I test sono organizzati in cartelle per categoria:
 
-### Test 2: Conferma Prenotazione + Email ✅
-- **File**: `02-accept-booking.spec.ts`
-- **Descrizione**: Admin accetta prenotazione da pendenti
-- **Verifica**: Prenotazione va in calendario, email inviata
-
-### Test 3: Rifiuto Prenotazione ❌
-- **File**: `03-reject-booking.spec.ts`
-- **Descrizione**: Admin rifiuta prenotazione
-- **Verifica**: Prenotazione va in archivio come "Rifiutata"
-
-### Test 4: Modifica Prenotazione dal Calendario ✏️
-- **File**: `04-edit-booking-calendar.spec.ts`
-- **Descrizione**: Click su evento calendario, modifica dettagli
-- **Verifica**: Modifiche salvate correttamente
-
-### Test 5: Cancellazione Prenotazione dal Calendario 🗑️
-- **File**: `05-delete-booking-calendar.spec.ts`
-- **Descrizione**: Click su evento, cancella prenotazione
-- **Verifica**: Evento rimosso dal calendario
-
-### Test 6: Archivio con Filtri 📚
-- **File**: `06-archive-filters.spec.ts`
-- **Descrizione**: Testa filtri Tutte/Accettate/Rifiutate
-- **Verifica**: Cards collapsibili, counter, filtri funzionanti
-
----
-
-## 🚀 Setup
-
-### Prerequisiti
-```bash
-# Installare Playwright (già fatto)
-npm install -D @playwright/test
-
-# Installare browser Chromium
-npx playwright install chromium
+```
+e2e/
+├── 📁 booking-flow/          # Flusso prenotazione utente pubblico
+├── 📁 admin-crud/            # Operazioni CRUD admin (accept, reject, edit, delete)
+├── 📁 calendar/              # Funzionalità calendario
+├── 📁 menu/                  # Selezione e validazione menu
+├── 📁 validation/            # Validazione form e input
+├── 📁 ui-visual/             # Test visual e layout
+├── 📁 archive/                # Test archivio prenotazioni
+├── 📁 time-slots/             # Test time slots e disponibilità
+├── 📁 mobile/                 # Test responsive mobile
+├── 📁 helpers/                # Helper functions per test
+├── 📁 screenshots/            # Screenshot generati dai test
+└── 📄 README.md               # Questa guida
 ```
 
-### Configurazione
-1. **Server Dev**: Deve essere in esecuzione su `http://localhost:5175`
-2. **Database**: Supabase deve essere configurato
-3. **Admin Credentials**:
-   - Email: `admin@alritrovo.com`
-   - Password: `admin123`
-   - ⚠️ **IMPORTANTE**: Aggiorna le credenziali nei test se diverse!
+## 📂 Categorie Test
+
+### 🎫 booking-flow/
+**Scopo**: Test del flusso completo prenotazione utente pubblico
+
+- `01-booking-flow.spec.ts` - Crea prenotazione dal form pubblico
+
+**Cosa testa:**
+- Compilazione form pubblico `/prenota`
+- Validazione campi
+- Invio prenotazione
+- Messaggio di successo
 
 ---
 
-## 🎯 Esecuzione Test
+### 👨‍💼 admin-crud/
+**Scopo**: Test operazioni CRUD dell'admin dashboard
 
-### Eseguire TUTTI i test in sequenza
+- `02-accept-booking.spec.ts` - Accetta prenotazione da pendenti
+- `03-reject-booking.spec.ts` - Rifiuta prenotazione
+- `04-edit-booking-calendar.spec.ts` - Modifica prenotazione dal calendario
+- `05-delete-booking-calendar.spec.ts` - Cancella prenotazione
+- `11-admin-booking-insertion.spec.ts` - Crea prenotazione da admin
+- `comprehensive-admin-flow-test.spec.ts` - Flusso completo CRUD
+
+**Cosa testa:**
+- Login admin
+- Accettazione/rifiuto prenotazioni
+- Modifica prenotazioni esistenti
+- Cancellazione prenotazioni
+- Creazione prenotazioni da admin
+
+---
+
+### 📅 calendar/
+**Scopo**: Test funzionalità calendario
+
+- `05-test-morning-booking.spec.ts` - Visualizzazione prenotazioni mattina
+- `13-test-calendar-and-collapse-cards.spec.ts` - Interazione calendario e cards
+- `15-test-view-in-calendar-from-archive.spec.ts` - Navigazione archivio → calendario
+
+**Cosa testa:**
+- Rendering FullCalendar
+- Visualizzazione eventi per fascia oraria
+- Integrazione con collapse cards
+- Navigazione tra viste
+
+---
+
+### 🍽️ menu/
+**Scopo**: Test selezione e validazione menu
+
+- `07-menu-field.spec.ts` - Campo menu in form
+- `test-menu-selection-limits.spec.ts` - Limiti selezione per categoria
+- `test-menu-auto-deselection.spec.ts` - Deselezione automatica
+- `test-menu-no-bis-primi.spec.ts` - Restrizione "bis primi"
+- `verify-menu-limits-implementation.spec.ts` - Verifica implementazione limiti
+- `final-menu-verification.spec.ts` - Verifica finale sistema menu
+- `verify-menu-fresh.spec.ts` - Verifica menu aggiornato
+- `final-duplicate-verification.spec.ts` - Verifica assenza duplicati
+
+**Cosa testa:**
+- Selezione voci menu
+- Limit per categoria (max 3 antipasti, max 1 primo, etc.)
+- Mutual exclusion (bevande, pizza/focaccia)
+- Validazione regole business
+- Integrità dati menu
+
+---
+
+### ✅ validation/
+**Scopo**: Test validazione form
+
+- `16-test-email-phone-validation.spec.ts` - Validazione email e telefono
+
+**Cosa testa:**
+- Email opzionale vs obbligatorio
+- Telefono obbligatorio
+- Validazione form pubblico e admin
+
+---
+
+### 🎨 ui-visual/
+**Scopo**: Test visual e layout UI
+
+- `final-visual-verification-simple.spec.ts` - Verifica visual completa dashboard
+- `10-test-modal-two-columns.spec.ts` - Layout modale a due colonne
+- `visual-check.spec.ts` - Check visual generale
+- `visual-admin-check.spec.ts` - Check visual admin
+- `visual-form-layout-test.spec.ts` - Layout form prenotazione
+- `final-snapshot.spec.ts` - Snapshot finale
+- `test-admin-ui-modernization.spec.ts` - Modernizzazione UI admin
+- `test-header-layout.spec.ts` - Layout header
+- `test-header-spacing-and-fonts.spec.ts` - Spaziatura e font header
+- `test-admin-header-modifications.spec.ts` - Modifiche header admin
+- `test-card-borders.spec.ts` - Bordi cards
+- `test-dashboard-buttons.spec.ts` - Bottoni dashboard
+- `test-logout-button.spec.ts` - Bottone logout
+- `test-logout-position.spec.ts` - Posizione logout
+- `test-user-info-position.spec.ts` - Posizione info utente
+
+**Cosa testa:**
+- Layout responsive
+- Styling componenti
+- Posizionamento elementi
+- Screenshot comparison
+
+---
+
+### 📚 archive/
+**Scopo**: Test archivio prenotazioni
+
+- `06-archive-filters.spec.ts` - Filtri archivio (Tutte/Accettate/Rifiutate)
+- `test-archive-cards.spec.ts` - Cards archivio collapsibili
+
+**Cosa testa:**
+- Filtri archivio
+- Visualizzazione prenotazioni accettate/rifiutate
+- Cards collapsibili
+- Counter prenotazioni
+
+---
+
+### ⏰ time-slots/
+**Scopo**: Test time slots e disponibilità
+
+- `08-test-afternoon-booking.spec.ts` - Assegnazione slot pomeriggio
+- `14-test-time-slot-assignment.spec.ts` - Edge cases assegnazione slot
+- `bugfix-time-slot-collapse-cards.spec.ts` - Fix collapse cards time slots
+- `test-collapse-cards.spec.ts` - Cards time slots
+
+**Cosa testa:**
+- Classificazione slot (Mattina/Pomeriggio/Sera)
+- Assegnazione automatica slot
+- Edge cases (crossover mezzanotte, etc.)
+- Interazione collapse cards
+
+---
+
+### 📱 mobile/
+**Scopo**: Test responsive mobile
+
+- `09-test-modal-mobile-size.spec.ts` - Dimensioni modale mobile
+- `test-archive-mobile.spec.ts` - Archivio mobile
+- `mobile-test.spec.ts` - Test mobile generale
+- `quick-mobile-test.spec.ts` - Test mobile veloce
+- `test-time-input-00-30-mobile.spec.ts` - Input time mobile
+
+**Cosa testa:**
+- Layout responsive
+- Dimensioni modale su mobile
+- Touch interactions
+- Viewport piccoli (320px, 768px)
+
+---
+
+## 🚀 Esecuzione Test
+
+### Eseguire tutti i test
 ```bash
 npm run test:e2e
 ```
 
-### Eseguire un singolo test
+### Eseguire test per categoria
 ```bash
-npx playwright test e2e/01-booking-flow.spec.ts
+# Solo booking flow
+npx playwright test e2e/booking-flow/
+
+# Solo admin CRUD
+npx playwright test e2e/admin-crud/
+
+# Solo menu
+npx playwright test e2e/menu/
+```
+
+### Eseguire singolo test
+```bash
+npx playwright test e2e/booking-flow/01-booking-flow.spec.ts
 ```
 
 ### Eseguire con UI interattiva
 ```bash
+npm run test:e2e:ui
+# Oppure
 npx playwright test --ui
 ```
 
-### Eseguire in debug mode
+### Debug mode
 ```bash
+npm run test:e2e:debug
+# Oppure
 npx playwright test --debug
 ```
 
-### Vedere report HTML
+### Vedere report
 ```bash
+npm run test:report
+# Oppure
 npx playwright show-report
 ```
 
----
-
 ## 📸 Screenshots
 
-I test salvano screenshot automaticamente in `e2e/screenshots/`:
+I test salvano screenshot automaticamente in `e2e/screenshots/` organizzati per categoria.
 
-```
-e2e/screenshots/
-├── 01-form-filled.png
-├── 01-after-submit.png
-├── 02-admin-dashboard.png
-├── 02-pending-requests.png
-├── 02-booking-card-expanded.png
-├── 02-after-accept.png
-├── 02-calendar-with-booking.png
-├── 03-pending-before-reject.png
-├── 03-booking-card-expanded.png
-├── 03-after-reject.png
-├── 03-archive-rejected.png
-├── 04-calendar-view.png
-├── 04-modal-opened.png
-├── 04-after-edits.png
-├── 04-after-save.png
-├── 05-calendar-before-delete.png
-├── 05-modal-opened.png
-├── 05-after-delete.png
-├── 06-archive-initial.png
-├── 06-filter-tutte.png
-├── 06-filter-accettate.png
-├── 06-filter-rifiutate.png
-├── 06-card-collapsed.png
-├── 06-card-expanded.png
-└── 06-archive-final.png
-```
-
----
-
-## 🐛 Debugging
-
-### Se un test fallisce:
-
-1. **Controllare screenshots**: `e2e/screenshots/`
-2. **Video**: Salvati in `test-results/` (solo on failure)
-3. **Trace**: `npx playwright show-trace test-results/[test-name]/trace.zip`
-4. **Console logs**: Ogni test stampa log dettagliati
-
-### Problemi Comuni:
-
-#### Test 1 fallisce
-- ✅ Verifica che `/prenota` sia accessibile
-- ✅ Controlla validation del form
-- ✅ Verifica che Supabase accetti INSERT
-
-#### Test 2 fallisce
-- ✅ Controlla credenziali admin
-- ✅ Verifica che Test 1 sia stato eseguito prima
-- ✅ Controlla che il tab "Pendenti" esista
-
-#### Test 4/5 falliscono
-- ✅ Verifica che FullCalendar sia renderizzato
-- ✅ Controlla che ci siano eventi nel calendario
-- ✅ Verifica che il modal si apra al click
-
-#### Test 6 fallisce
-- ✅ Controlla che ci siano prenotazioni in archivio
-- ✅ Verifica che i filtri siano visibili
-- ✅ Controlla collapse/expand cards
-
----
-
-## 📝 Note Importanti
-
-### Email Testing
-- **Test 2** verifica che email venga inviata dopo accettazione
-- ⚠️ Richiede `RESEND_API_KEY` configurato in Supabase
-- Se non configurato, test passa ma email non viene inviata
-- Controlla `email_logs` table in database per verificare
-
-### Credenziali Admin
-**IMPORTANTE**: I test usano queste credenziali:
-```typescript
-email: 'admin@alritrovo.com'
-password: 'admin123'
-```
-
-Se le tue credenziali sono diverse:
-1. Crea un admin user con queste credenziali, OPPURE
-2. Aggiorna le credenziali in ogni test file
-
-### Test Sequence
-I test sono progettati per essere eseguiti in sequenza:
-```
-Test 1 → Crea prenotazione
-Test 2 → Accetta quella prenotazione
-Test 3 → Crea e rifiuta altra prenotazione
-Test 4 → Modifica prenotazione accettata
-Test 5 → Cancella prenotazione
-Test 6 → Verifica archivio
-```
-
-Puoi anche eseguirli singolarmente, ma alcuni test (2,4,5,6) richiedono dati creati da test precedenti.
-
----
-
-## 🔧 Configurazione Playwright
+## 🔧 Configurazione
 
 File: `playwright.config.ts`
 
 ```typescript
 {
+  testDir: './e2e',
+  testMatch: /.*\.spec\.ts$/,  // Cerca in tutte le sottocartelle
   baseURL: 'http://localhost:5175',
   workers: 1, // Sequenziale (non parallelo)
-  retries: 0,  // No retries (per debugging)
   reporter: 'html',
   webServer: {
     command: 'npm run dev',
@@ -207,83 +246,62 @@ File: `playwright.config.ts`
 }
 ```
 
----
+## 🔐 Credenziali Test
 
-## 🎓 Best Practices
+I test usano queste credenziali admin:
+- **Email**: `0cavuz0@gmail.com`
+- **Password**: `Cavallaro`
 
-### Quando aggiungere nuovi test:
+⚠️ **IMPORTANTE**: L'utente admin deve esistere in Supabase prima di eseguire i test.
 
-1. **Naming**: `NN-feature-name.spec.ts`
-2. **Structure**: Segui il pattern dei test esistenti
+## 📝 Note Importanti
+
+### Sequenza Test
+Alcuni test richiedono che altri siano eseguiti prima:
+- `02-accept-booking.spec.ts` richiede che `01-booking-flow.spec.ts` sia eseguito prima
+- `04-edit-booking-calendar.spec.ts` richiede una prenotazione accettata
+- `05-delete-booking-calendar.spec.ts` richiede una prenotazione accettata
+
+### Test con Skip
+Alcuni test potrebbero avere `test.skip()` per saltare automaticamente:
+- Test che richiedono setup manuale
+- Test che testano feature non ancora implementate
+- Test temporaneamente disabilitati per debugging
+
+### Helpers
+Funzioni helper condivise in `e2e/helpers/`:
+- `auth.ts` - Funzioni per login admin
+
+## 🐛 Troubleshooting
+
+### Test fallisce con errore login
+- Verifica credenziali admin in Supabase
+- Controlla che l'utente esista e sia autenticabile
+
+### Test fallisce per selector non trovato
+- Verifica che l'app sia in esecuzione su `http://localhost:5175`
+- Controlla screenshots in `e2e/screenshots/` per vedere lo stato della pagina
+
+### Test fallisce per timeout
+- Aumenta timeout nel test
+- Verifica che il server dev sia in esecuzione
+- Controlla che non ci siano errori in console
+
+## 📊 Statistiche
+
+- **Totale test**: ~57 test organizzati
+- **Categorie**: 9 categorie funzionali
+- **Copertura**: Booking flow, Admin CRUD, Calendar, Menu, Validation, UI, Archive, Time slots, Mobile
+
+## 🎯 Best Practices
+
+1. **Naming**: Usa nomi descrittivi `test-feature-name.spec.ts`
+2. **Organization**: Metti test nella categoria corretta
 3. **Screenshots**: Salva screenshot nei punti chiave
 4. **Logs**: Usa `console.log()` per debugging
-5. **Selectors**: Usa text matching dove possibile, fallback a CSS
-
-### Selector Strategy:
-```typescript
-// ✅ GOOD: Text-based (resistant to refactoring)
-page.locator('button:has-text("Accetta")')
-
-// ⚠️ OK: Class-based (fragile)
-page.locator('.btn-accept')
-
-// ❌ BAD: Index-based (very fragile)
-page.locator('button').nth(3)
-```
+5. **Selectors**: Preferisci text matching, evita selettori fragili
 
 ---
 
-## 📊 Report HTML
-
-Dopo l'esecuzione, visualizza il report:
-
-```bash
-npx playwright show-report
-```
-
-Il report mostra:
-- ✅ Test passati/falliti
-- ⏱️ Tempo di esecuzione
-- 📸 Screenshots
-- 🎥 Video (se falliti)
-- 📋 Trace viewer
-
----
-
-## 🚀 CI/CD Integration
-
-Per eseguire in CI (GitHub Actions, GitLab CI, etc.):
-
-```yaml
-# .github/workflows/e2e-tests.yml
-name: E2E Tests
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-      - run: npm ci
-      - run: npx playwright install --with-deps
-      - run: npm run test:e2e
-      - uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: playwright-report
-          path: playwright-report/
-```
-
----
-
-## 📞 Support
-
-**Problemi con i test?**
-1. Controlla screenshots in `e2e/screenshots/`
-2. Leggi i log della console (molto dettagliati)
-3. Esegui con `--debug` per step-by-step
-4. Controlla questo README per troubleshooting
-
-**Test Status**: ✅ Ready to Run
-**Ultima Modifica**: 27 Gennaio 2025
+**Ultimo aggiornamento**: Gennaio 2025
+**Status**: ✅ Test organizzati e funzionanti

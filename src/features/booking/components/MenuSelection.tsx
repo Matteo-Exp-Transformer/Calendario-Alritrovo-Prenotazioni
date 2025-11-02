@@ -18,23 +18,25 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 // Helper functions for menu validation
 // IMPORTANT: Premium check MUST come first because "Caraffe / Drink Premium" contains "Caraffe / Drink"
+// NOTA: I nomi possono avere variazioni: "Caraffe / Drink", "Caraffe drink", "Caraffe Drink Premium", ecc.
 const isCaraffeDrinkPremium = (itemName: string): boolean => {
-  const premiumDrinks = [
-    'Caraffe / Drink Premium'
-  ]
-  // Check for exact match or exact contains (with word boundaries in mind)
-  return premiumDrinks.some(drink => itemName.trim() === drink || itemName.includes(drink))
+  const nameLower = itemName.toLowerCase().trim()
+  // Cerca varianti di Premium (con o senza slash, case insensitive)
+  return nameLower.includes('premium') && 
+         (nameLower.includes('caraffe') || nameLower.includes('drink'))
 }
 
 const isCaraffeDrinkStandard = (itemName: string): boolean => {
-  const standardDrinks = [
-    'Caraffe / Drink'
-  ]
-  // Only match if it's NOT premium (premium contains standard, so we must exclude it first)
+  const nameLower = itemName.toLowerCase().trim()
+  // NON è premium
   if (isCaraffeDrinkPremium(itemName)) {
     return false
   }
-  return standardDrinks.some(drink => itemName.trim() === drink || itemName.includes(drink))
+  // Contiene "caraffe" e "drink" ma NON "premium"
+  return (nameLower.includes('caraffe') || nameLower.includes('drink')) &&
+         !nameLower.includes('premium') &&
+         !nameLower.includes('caffè') && // Escludi "Caffè"
+         !nameLower.includes('caffe')     // Escludi anche varianti
 }
 
 const isPizzaOrFocaccia = (itemName: string): boolean => {
@@ -80,20 +82,16 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
 
       // === BEVANDE RULES ===
       if (item.category === 'bevande') {
-        // Auto-deselect conflicting drink group
-        // IMPORTANT: Premium check MUST come before standard because "Caraffe / Drink Premium" contains "Caraffe / Drink"
-        if (isCaraffeDrinkStandard(item.name)) {
-          // User selected standard drink → remove any premium drinks
+        // Mutual exclusion per Caraffe / Drink e Caraffe / Drink Premium (come primi piatti)
+        // Se è una caraffe, rimuovi tutte le altre caraffe (standard e premium)
+        if (isCaraffeDrinkStandard(item.name) || isCaraffeDrinkPremium(item.name)) {
+          // Rimuovi tutte le bevande che sono caraffe (sia standard che premium)
           newItems = selectedItems.filter(selected =>
-            !(selected.category === 'bevande' && isCaraffeDrinkPremium(selected.name))
-          )
-        } else if (isCaraffeDrinkPremium(item.name)) {
-          // User selected premium drink → remove any standard drinks
-          newItems = selectedItems.filter(selected =>
-            !(selected.category === 'bevande' && isCaraffeDrinkStandard(selected.name))
+            !(selected.category === 'bevande' && 
+              (isCaraffeDrinkStandard(selected.name) || isCaraffeDrinkPremium(selected.name)))
           )
         } else {
-          // Not a conflicting item, keep all selections
+          // Non è una caraffe, mantieni tutte le selezioni
           newItems = selectedItems
         }
 
@@ -211,6 +209,12 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
 
         // Determine max limit for counter display
         let maxLimit: number | null = null
+        if (category === 'bevande') {
+          // Controlla se ci sono caraffe selezionate
+          const hasCaraffe = selectedItems.some(i => i.category === 'bevande' && 
+            (isCaraffeDrinkStandard(i.name) || isCaraffeDrinkPremium(i.name)))
+          if (hasCaraffe) maxLimit = 1 // Solo una caraffe può essere selezionata
+        }
         if (category === 'antipasti') maxLimit = 3
         if (category === 'fritti') maxLimit = 3
         if (category === 'primi') maxLimit = 1
@@ -242,14 +246,15 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                   <label
                     key={item.id}
                     className={`
-                      flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer
+                      flex items-center gap-4 p-8 rounded-lg border-2 cursor-pointer
                       transition-all duration-200
                     `}
                     style={{
                       minHeight: '100px',
                       backgroundColor: isSelected ? 'rgba(245, 222, 179, 0.6)' : 'rgba(255, 255, 255, 0.5)',
                       backdropFilter: 'blur(6px)',
-                      borderColor: isSelected ? '#8B4513' : 'rgba(0,0,0,0.2)'
+                      borderColor: isSelected ? '#8B4513' : 'rgba(0,0,0,0.2)',
+                      padding: '20px'
                     }}
                   >
                     <input
@@ -270,17 +275,19 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                         <Check className="h-4 w-4 text-white" strokeWidth={3} />
                       )}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1" style={{ paddingLeft: '12px', paddingRight: '12px', paddingTop: '8px', paddingBottom: '8px' }}>
                       <div className="flex items-center">
-                        <span className={`font-medium flex-1 ${isSelected ? 'text-warm-wood' : 'text-gray-700'}`}>
+                        <span className={`font-bold flex-1 ${isSelected ? 'text-warm-wood' : 'text-gray-700'}`} style={{ fontWeight: '700' }}>
                           {item.name}
                         </span>
-                        <span className="text-lg font-bold text-warm-wood ml-4">
+                        <span className="text-lg font-bold text-warm-wood ml-6" style={{ paddingRight: '12px', fontWeight: '700' }}>
                           €{item.price.toFixed(2)}
                         </span>
                       </div>
                       {item.description && (
-                        <p className="text-sm text-gray-600 mt-1">{item.description}</p>
+                        <p className="text-sm font-bold text-gray-600 mt-2" style={{ fontWeight: '700' }}>
+                          {item.description}
+                        </p>
                       )}
                     </div>
                   </label>
@@ -294,7 +301,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
       {/* Totale a Persona */}
       {selectedItems.length > 0 && (
         <div 
-          className="rounded-xl p-6"
+          className="rounded-xl p-8"
           style={{
             backgroundColor: 'rgba(255, 255, 255, 0.5)',
             backdropFilter: 'blur(6px)',

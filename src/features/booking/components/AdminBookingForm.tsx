@@ -172,8 +172,8 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
     if (!formData.num_guests || formData.num_guests < 1) {
       newErrors.num_guests = 'Numero ospiti obbligatorio (min 1)'
       isValid = false
-    } else if (formData.num_guests > 110) {
-      newErrors.num_guests = 'Massimo 110 ospiti'
+    } else if (formData.num_guests > 80) {
+      newErrors.num_guests = 'Massimo 80 ospiti'
       isValid = false
     }
 
@@ -466,7 +466,7 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
               inputMode="numeric"
               pattern="[0-9]*"
               min="1"
-              max="110"
+              max="80"
               value={formData.num_guests || ''}
               onChange={handleNumGuestsChange}
               onKeyPress={handleNumGuestsKeyPress}

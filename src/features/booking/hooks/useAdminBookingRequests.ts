@@ -11,8 +11,13 @@ export const useCreateAdminBooking = () => {
       console.log('🔵 [useCreateAdminBooking] Starting mutation...')
       console.log('🔵 [useCreateAdminBooking] Input data:', data)
       
-      // Extract time from desired_time string
-      const timeMatch = data.desired_time?.match(/^(\d{2}):(\d{2})/)
+      // Normalizza desired_time a formato HH:MM (rimuove secondi se presenti)
+      const normalizedTime = data.desired_time 
+        ? data.desired_time.split(':').slice(0, 2).join(':')
+        : null
+      
+      // Extract time from normalized desired_time string
+      const timeMatch = normalizedTime?.match(/^(\d{2}):(\d{2})/)
       const hours = timeMatch ? parseInt(timeMatch[1]) : 12
       const minutes = timeMatch ? parseInt(timeMatch[2]) : 0
       
@@ -30,7 +35,7 @@ export const useCreateAdminBooking = () => {
         booking_type: data.booking_type,
         event_type: data.event_type,
         desired_date: data.desired_date,
-        desired_time: data.desired_time || null,
+        desired_time: normalizedTime,
         num_guests: data.num_guests,
         special_requests: data.special_requests || null,
         menu_selection: data.menu_selection || null,

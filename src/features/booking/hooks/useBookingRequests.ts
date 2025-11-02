@@ -12,12 +12,17 @@ export const useCreateBookingRequest = () => {
       console.log('🔵 [useCreateBookingRequest] Starting mutation...')
       console.log('🔵 [useCreateBookingRequest] Input data:', data)
       
+      // Normalizza desired_time a formato HH:MM (rimuove secondi se presenti)
+      const normalizedTime = data.desired_time 
+        ? data.desired_time.split(':').slice(0, 2).join(':')
+        : null
+
       const insertData: any = {
         client_name: data.client_name,
         client_email: data.client_email,
         client_phone: data.client_phone || null,
         desired_date: data.desired_date,
-        desired_time: data.desired_time || null,
+        desired_time: normalizedTime,
         num_guests: data.num_guests,
         special_requests: data.special_requests || null,
         status: 'pending' as const

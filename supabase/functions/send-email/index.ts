@@ -25,6 +25,68 @@ Deno.serve(async (req) => {
     console.log('[Edge Function] Type:', emailType)
     console.log('[Edge Function] Booking ID:', bookingId)
 
+    // Validate recipients
+    let recipients: string | string[]
+    
+    if (Array.isArray(to)) {
+      // Validate array: max 50 recipients (Resend limit)
+      if (to.length > 50) {
+        return new Response(JSON.stringify({ 
+          error: 'Too many recipients. Maximum 50 recipients allowed.' 
+        }), {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        })
+      }
+      
+      // Validate each email format (basic check)
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      for (const email of to) {
+        if (typeof email !== 'string' || !emailRegex.test(email)) {
+          return new Response(JSON.stringify({ 
+            error: `Invalid email format: ${email}` 
+          }), {
+            status: 400,
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+            },
+          })
+        }
+      }
+      
+      recipients = to
+    } else if (typeof to === 'string') {
+      // Validate single email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(to)) {
+        return new Response(JSON.stringify({ 
+          error: `Invalid email format: ${to}` 
+        }), {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        })
+      }
+      
+      recipients = to
+    } else {
+      return new Response(JSON.stringify({ 
+        error: 'Invalid recipient format. Must be a string or array of strings.' 
+      }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      })
+    }
+
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -33,7 +95,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         from: `${SENDER_NAME} <${SENDER_EMAIL}>`,
-        to,
+        to: recipients, // Can be string or string[]
         subject,
         html,
       }),

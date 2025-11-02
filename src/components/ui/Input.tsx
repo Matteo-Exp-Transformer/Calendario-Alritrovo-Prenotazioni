@@ -19,11 +19,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         style={{ 
           borderColor: 'rgba(0,0,0,0.2)', 
-          maxWidth: '600px', 
+          maxWidth: '600px',
           height: '56px',
           padding: '16px',
           fontSize: '16px',
-          fontWeight: '500',
+          fontWeight: '700',
           backgroundColor: 'rgba(255, 255, 255, 0.5)',
           backdropFilter: 'blur(6px)',
           color: 'black'

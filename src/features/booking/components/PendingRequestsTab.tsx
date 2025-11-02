@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 import type { BookingRequest } from '@/types/booking'
 import { getSlotsOccupiedByBooking } from '../utils/capacityCalculator'
 import { CAPACITY_CONFIG } from '../constants/capacity'
-import { createBookingDateTime } from '../utils/dateUtils'
+import { createBookingDateTime, extractDateFromISO } from '../utils/dateUtils'
 
 export const PendingRequestsTab: React.FC = () => {
   const { data: pendingBookings, isLoading, error, refetch } = usePendingBookings()
@@ -27,7 +27,7 @@ export const PendingRequestsTab: React.FC = () => {
     // Get accepted bookings for this date
     const dayBookings = acceptedBookings.filter((b) => {
       if (!b.confirmed_start) return false
-      const bookingDate = new Date(b.confirmed_start).toISOString().split('T')[0]
+      const bookingDate = extractDateFromISO(b.confirmed_start)
       return bookingDate === date
     })
 
@@ -95,7 +95,7 @@ export const PendingRequestsTab: React.FC = () => {
     // Calcola i dati per l'accettazione usando la stessa logica del modale
     const date = booking.desired_date
     const startTime = booking.desired_time || '20:00'
-    
+    console.log(' [PORCA MADONNNNAAAAAAAAAAAAAAAAAAAAAAAA] startTime:', startTime)
     // Calculate end time (default +3 hours)
     const [hours, minutes] = startTime.split(':').map(Number)
     const endHours = (hours + 3) % 24
@@ -108,11 +108,12 @@ export const PendingRequestsTab: React.FC = () => {
     const endTimeFormatted = endTime.includes(':')
       ? endTime.split(':').slice(0, 2).join(':')
       : endTime
+    console.log(startTimeFormatted, endTimeFormatted);
     
     // Create ISO strings handling midnight crossover
     const confirmedStart = createBookingDateTime(date, startTimeFormatted, true)
     const confirmedEnd = createBookingDateTime(date, endTimeFormatted, false, startTimeFormatted)
-    
+    console.log(confirmedStart, confirmedEnd);
     // ✅ CHECK CAPACITY BEFORE ACCEPTING
     console.log('🔵 [PendingRequestsTab] Checking capacity before accepting...')
     const hasCapacity = checkCapacity(booking, startTimeFormatted, endTimeFormatted)

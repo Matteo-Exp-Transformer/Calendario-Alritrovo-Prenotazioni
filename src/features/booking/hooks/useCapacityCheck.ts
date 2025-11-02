@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { BookingRequest, TimeSlot, AvailabilityCheck } from '@/types/booking'
 import { CAPACITY_CONFIG } from '../constants/capacity'
+import { extractDateFromISO } from '../utils/dateUtils'
 
 interface UseCapacityCheckParams {
   date: string
@@ -58,7 +59,7 @@ export function useCapacityCheck(params: UseCapacityCheckParams): AvailabilityCh
     const dayBookings = acceptedBookings.filter((booking) => {
       if (booking.id === excludeBookingId) return false
       if (!booking.confirmed_start) return false
-      const bookingDate = new Date(booking.confirmed_start).toISOString().split('T')[0]
+      const bookingDate = extractDateFromISO(booking.confirmed_start)
       return bookingDate === date
     })
 

@@ -49,7 +49,15 @@
       "Bash(taskkill /F /PID 39156 2)",
       "Bash(nul)",
       "Skill(test-driven-development)",
-      "Bash(wait:*)"
+      "Bash(wait:*)",
+      "Bash(source .env.local)",
+      "Bash(VITE_SUPABASE_URL=\"https://dphuttzgdcerexunebct.supabase.co\" VITE_SUPABASE_ANON_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwaHV0dHpnZGNlcmV4dW5lYmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1MTI0NDMsImV4cCI6MjA3NzA4ODQ0M30.8OpmfjuZkT2vdSbOcr4fUeaKaKibuF4vdFLnNSk7h60\" node:*)",
+      "Bash(VITE_SUPABASE_URL=\"https://dphuttzgdcerexunebct.supabase.co\" VITE_SUPABASE_ANON_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwaHV0dHpnZGNlcmV4dW5lYmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1MTI0NDMsImV4cCI6MjA3NzA4ODQ0M30.8OpmfjuZkT2vdSbOcr4fUeaKaKibuF4vdFLnNSk7h60\" node check_constraint.mjs)",
+      "Bash(VITE_SUPABASE_URL=\"https://dphuttzgdcerexunebct.supabase.co\" VITE_SUPABASE_ANON_KEY=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwaHV0dHpnZGNlcmV4dW5lYmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1MTI0NDMsImV4cCI6MjA3NzA4ODQ0M30.8OpmfjuZkT2vdSbOcr4fUeaKaKibuF4vdFLnNSk7h60\" node test_constraint.mjs)",
+      "Bash(findstr:*)",
+      "Bash(timeout 60 bash:*)",
+      "Bash(timeout:*)",
+      "SlashCommand(/testing-skills-with-subagents)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,227 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\matte.MIO\\Documents\\GitHub\\Calendarbackup\\playwright.config.ts",
+    "rootDir": "C:/Users/matte.MIO/Documents/GitHub/Calendarbackup/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/Users/matte.MIO/Documents/GitHub/Calendarbackup/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Users/matte.MIO/Documents/GitHub/Calendarbackup/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "/.*\\.spec\\.ts$/"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:5175",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "skills-test-mobile-bg-final.spec.ts",
+      "file": "skills-test-mobile-bg-final.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Skills Testing Finale - Mobile Vintage Background",
+          "file": "skills-test-mobile-bg-final.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Ô£à Verifica implementazione completa delle modifiche",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6461,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "­ƒº¬ Skills Testing: Verifica implementazione sfondo vintage mobile\n\n"
+                        },
+                        {
+                          "text": "­ƒô▒ TEST 1: Desktop (1920x1080)\n"
+                        },
+                        {
+                          "text": "   Card classes: bg-white/30 md:bg-white/95 backdrop-blur-xl md:backdrop-blur-md shadow-2xl rounded-modern p-8 md:p-12 mb-8 animate-slide-in-up\n"
+                        },
+                        {
+                          "text": "   Ô£à Desktop: Card opaca, vintage nascosta\n\n"
+                        },
+                        {
+                          "text": "­ƒô▒ TEST 2: Mobile (375x667) - Card trasparente\n"
+                        },
+                        {
+                          "text": "   Card classes: bg-white/30 md:bg-white/95 backdrop-blur-xl md:backdrop-blur-md shadow-2xl rounded-modern p-8 md:p-12 mb-8 animate-slide-in-up\n"
+                        },
+                        {
+                          "text": "   Ô£à Mobile: Card trasparente (30%) con blur forte\n\n"
+                        },
+                        {
+                          "text": "­ƒô▒ TEST 3: Info box trasparente su mobile\n"
+                        },
+                        {
+                          "text": "   Info box style: background-color: rgba(255, 255, 255, 0.3); backdrop-filter: blur(16px);\n"
+                        },
+                        {
+                          "text": "   Ô£à Info box: 30% opacit├á, blur 16px\n\n"
+                        },
+                        {
+                          "text": "­ƒô▒ TEST 4: Immagine vintage mobile\n"
+                        },
+                        {
+                          "text": "   Vintage style: background-image: url(\"/src/assets/mobile-vintage-bg.png\"); background-size: cover; background-position: center center; background-repeat: no-repeat; \n"
+                        },
+                        {
+                          "text": "   Vintage classes: fixed bottom-0 left-0 right-0 z-0 md:hidden\n"
+                        },
+                        {
+                          "text": "   Ô£à Immagine vintage presente e nascosta su desktop\n\n"
+                        },
+                        {
+                          "text": "­ƒô▒ TEST 5: Text-shadow sui titoli\n"
+                        },
+                        {
+                          "text": "   Ô£à Titolo ha text-shadow\n\n"
+                        },
+                        {
+                          "text": "­ƒô▒ TEST 6: Overlay pi├╣ scuro (40%)\n"
+                        },
+                        {
+                          "text": "   Ô£à Overlay 40% verificato\n\n"
+                        },
+                        {
+                          "text": "Ô£à Skills Testing completato!\n"
+                        },
+                        {
+                          "text": "\n­ƒô© Screenshots salvati in e2e/screenshots/\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-02T17:18:14.483Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "efbaa045ee3a573b0266-e55ad89af9aa8a3ebfae",
+              "file": "skills-test-mobile-bg-final.spec.ts",
+              "line": 10,
+              "column": 3
+            },
+            {
+              "title": "Ô£à Verifica visiva completa - Desktop vs Mobile",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5246,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "\n­ƒô▒ Testing scenario: desktop\n"
+                        },
+                        {
+                          "text": "   Ô£à desktop: Elementi verificati\n"
+                        },
+                        {
+                          "text": "\n­ƒô▒ Testing scenario: mobile\n"
+                        },
+                        {
+                          "text": "   Ô£à mobile: Elementi verificati\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-02T17:18:21.006Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "efbaa045ee3a573b0266-37bed58901bf81d07367",
+              "file": "skills-test-mobile-bg-final.spec.ts",
+              "line": 133,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-11-02T17:18:14.020Z",
+    "duration": 12306.1,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

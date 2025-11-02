@@ -36,7 +36,7 @@ INSERT INTO menu_items (name, category, price, description, sort_order) VALUES
   ('Camembert', 'fritti', 2.00, '2 pz a persona', 4),
   ('Nachos con cheddar', 'fritti', 2.00, '2 pz a persona', 5),
   ('Jalapeños con formaggio', 'fritti', 2.00, '2 pz a persona', 6),
-  ('Pulled Pork', 'fritti', 2.50, '2 pz a persona', 7),
+  ('Pulled Pork', 'fritti', 2.50, 'Bite panati di Pulled Pork 2 pz a persona', 7),
   ('Panelle (Farina di Ceci fritta, Specialità Siciliana)', 'fritti', 2.00, '2 pz a persona', 8),
   ('Falafel', 'fritti', 2.00, '2 pz a persona', 9),
   ('Polpette vegane di Lenticchie', 'fritti', 3.00, '2 pz a persona', 10),

@@ -102,8 +102,8 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
       </h2>
 
       {/* Form Aggiunta/Modifica */}
-      <div className="bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent border-2 border-warm-beige rounded-xl p-6 space-y-4">
-        <div className="grid md:grid-cols-2 gap-4">
+      <div className="bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent border-2 border-warm-beige rounded-xl p-8 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-full">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Intolleranza / Esigenza *
@@ -123,6 +123,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
                 height: '56px',
                 padding: '16px',
                 fontSize: '16px',
+                fontWeight: '700',
                 backgroundColor: 'rgba(255, 255, 255, 0.5)',
                 backdropFilter: 'blur(6px)'
               }}
@@ -216,15 +217,15 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
           {restrictions.map((restriction, index) => (
             <div
               key={index}
-              className="flex items-center gap-6 p-5 bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent rounded-lg border-2 border-warm-beige hover:shadow-md transition-all"
+              className="flex items-center gap-6 p-6 bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent rounded-lg border-2 border-warm-beige hover:shadow-md transition-all"
               style={{
                 minHeight: '64px'
               }}
             >
               <div className="flex items-center gap-3 flex-shrink-0">
-                <span className="font-semibold text-gray-900">{restriction.restriction}</span>
+                <span className="font-bold text-gray-900">{restriction.restriction}</span>
                 {restriction.restriction === 'Altro' && restriction.notes && (
-                  <span className="text-sm text-gray-600 italic">({restriction.notes})</span>
+                  <span className="text-sm font-bold text-gray-600 italic">({restriction.notes})</span>
                 )}
                 <span className="text-warm-wood font-bold">
                   {restriction.guest_count} {restriction.guest_count === 1 ? 'ospite' : 'ospiti'}

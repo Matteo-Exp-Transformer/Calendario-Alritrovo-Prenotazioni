@@ -57,3 +57,39 @@ export function crossesMidnight(startTime: string, endTime: string): boolean {
   return isCrossMidnight
 }
 
+/**
+ * Estrae la data (YYYY-MM-DD) da una stringa ISO timestamp senza conversioni timezone
+ * Questa funzione estrae direttamente dalla stringa per evitare problemi di conversione timezone
+ * quando si usa new Date() che interpreta il timestamp nel timezone locale del browser.
+ * 
+ * @param isoString - Stringa ISO timestamp (es: "2025-01-15T20:00:00+00:00" o "2025-01-15T20:00:00Z")
+ * @returns Data in formato YYYY-MM-DD o stringa vuota se isoString è null/undefined/invalido
+ * 
+ * @example
+ * extractDateFromISO("2025-01-15T20:00:00+00:00") // "2025-01-15"
+ * extractDateFromISO("2025-01-15T20:00:00Z") // "2025-01-15"
+ */
+export function extractDateFromISO(isoString: string | null | undefined): string {
+  if (!isoString) return ''
+  const match = isoString.match(/(\d{4})-(\d{2})-(\d{2})/)
+  return match ? `${match[1]}-${match[2]}-${match[3]}` : ''
+}
+
+/**
+ * Estrae l'orario (HH:MM) da una stringa ISO timestamp senza conversioni timezone
+ * Questa funzione estrae direttamente dalla stringa per evitare problemi di conversione timezone
+ * quando si usa new Date() che interpreta il timestamp nel timezone locale del browser.
+ * 
+ * @param isoString - Stringa ISO timestamp (es: "2025-01-15T20:00:00+00:00" o "2025-01-15T20:00:00Z")
+ * @returns Orario in formato HH:MM o stringa vuota se isoString è null/undefined/invalido
+ * 
+ * @example
+ * extractTimeFromISO("2025-01-15T20:00:00+00:00") // "20:00"
+ * extractTimeFromISO("2025-01-15T20:00:00Z") // "20:00"
+ */
+export function extractTimeFromISO(isoString: string | null | undefined): string {
+  if (!isoString) return ''
+  const match = isoString.match(/T(\d{2}):(\d{2})/)
+  return match ? `${match[1]}:${match[2]}` : ''
+}
+

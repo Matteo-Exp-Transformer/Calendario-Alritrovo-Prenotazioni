@@ -87,6 +87,8 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
 
     if (formData.numGuests < 1) {
       newErrors.numGuests = 'Numero ospiti minimo 1'
+    } else if (formData.numGuests > 80) {
+      newErrors.numGuests = 'Massimo 80 ospiti'
     }
 
     // Check if end time is before start time (convert to Date for proper comparison)
@@ -221,7 +223,7 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
           <input
             type="number"
             min="1"
-            max="110"
+            max="80"
             value={formData.numGuests || ''}
             onChange={(e) => {
               setFormData({ ...formData, numGuests: Number(e.target.value) })

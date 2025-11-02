@@ -39,6 +39,15 @@ yarn-error.log*
 # Generated files
 *.tsbuildinfo
 
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Test outputs (obsolete, use e2e/screenshots instead)
+tests/
+test-screenshots/
+
 # Calendar backup specific
 alritrovo_fullpage.png
 .playwright-mcp/

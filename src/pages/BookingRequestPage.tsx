@@ -72,7 +72,7 @@ export const BookingRequestPage: React.FC = () => {
   const groupedHours = getGroupedHours()
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden font-bold">
       {/* Overlay scuro per leggibilità */}
       <div
         className="fixed inset-0 z-0"

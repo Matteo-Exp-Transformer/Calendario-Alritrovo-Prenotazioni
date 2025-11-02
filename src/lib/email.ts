@@ -5,7 +5,7 @@
 // Environment variables are configured in Supabase Secrets, not used directly in this file
 
 interface SendEmailOptions {
-  to: string
+  to: string | string[] // Support both single email and array (max 50 recipients)
   subject: string
   html: string
   bookingId?: string
@@ -129,10 +129,13 @@ export const sendAndLogEmail = async (
   console.log('🔵 [sendAndLogEmail] Type:', emailType)
   console.log('🔵 [sendAndLogEmail] Booking ID:', options.bookingId)
 
+  // For logging, if to is an array, join with comma or use first email
+  const recipientEmail = Array.isArray(options.to) ? options.to.join(', ') : options.to
+  
   const log: EmailLog = {
     booking_id: options.bookingId,
     email_type: emailType,
-    recipient_email: options.to,
+    recipient_email: recipientEmail,
     status: 'pending',
   }
 

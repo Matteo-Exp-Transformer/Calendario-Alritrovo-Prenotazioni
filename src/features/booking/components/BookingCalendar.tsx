@@ -13,11 +13,7 @@ import { BookingDetailsModal } from './BookingDetailsModal'
 import { calculateDailyCapacity, getSlotsOccupiedByBooking } from '../utils/capacityCalculator'
 import { CollapsibleCard } from '@/components/ui/CollapsibleCard'
 
-// Helper to extract time from ISO string without timezone conversion
-const extractTimeFromISO = (isoString: string): string => {
-  const match = isoString.match(/T(\d{2}):(\d{2})/)
-  return match ? `${match[1]}:${match[2]}` : ''
-}
+import { extractDateFromISO, extractTimeFromISO } from '../utils/dateUtils'
 
 interface BookingCalendarProps {
   bookings: BookingRequest[]
@@ -101,7 +97,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
     
     const dayBookings = acceptedBookings.filter((booking) => {
       if (!booking.confirmed_start) return false
-      const bookingDate = new Date(booking.confirmed_start).toISOString().split('T')[0]
+      const bookingDate = extractDateFromISO(booking.confirmed_start)
       return bookingDate === selectedDate
     })
 

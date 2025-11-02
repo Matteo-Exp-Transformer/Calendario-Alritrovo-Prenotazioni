@@ -1,5 +1,6 @@
 import type { BookingRequest, TimeSlot, TimeSlotCapacity, DailyCapacity } from '@/types/booking'
 import { CAPACITY_CONFIG } from '../constants/capacity'
+import { extractDateFromISO } from './dateUtils'
 
 // Helper: parse time string to minutes
 function parseTime(time: string): number {
@@ -74,7 +75,7 @@ export function calculateDailyCapacity(date: string, bookings: BookingRequest[])
 
   const dayBookings = bookings.filter((booking) => {
     if (!booking.confirmed_start) return false
-    const bookingDate = new Date(booking.confirmed_start).toISOString().split('T')[0]
+    const bookingDate = extractDateFromISO(booking.confirmed_start)
     return bookingDate === date
   })
 
