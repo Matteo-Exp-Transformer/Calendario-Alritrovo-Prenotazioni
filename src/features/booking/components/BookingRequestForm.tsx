@@ -8,7 +8,6 @@ import { toast } from 'react-toastify'
 import { Check, Send, Loader2, CheckCircle } from 'lucide-react'
 import { MenuSelection } from './MenuSelection'
 import { DietaryRestrictionsSection } from './DietaryRestrictionsSection'
-import { useMenuItems } from '../hooks/useMenuItems'
 
 interface BookingRequestFormProps {
   onSubmit?: () => void
@@ -72,7 +71,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     maxAttempts: 3,
     timeWindow: 60000 // 1 minuto
   })
-  const { data: menuItems = [] } = useMenuItems()
+  // Menu items loaded via MenuSelection component
+  // const { data: menuItems = [] } = useMenuItems()
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {}

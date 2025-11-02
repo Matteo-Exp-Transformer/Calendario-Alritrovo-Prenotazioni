@@ -295,7 +295,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
             className="rounded-lg overflow-hidden shadow-lg"
             style={{
               border: '4px solid rgb(34, 197, 94)',
-              backgroundColor: 'rgba(240, 253, 244, 0.6)',
+              backgroundColor: 'rgba(209, 250, 229, 0.85)',
               marginBottom: '32px',
             }}
           >
@@ -312,7 +312,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
               headerClassName="bg-green-100 hover:bg-green-200 border-b-2 border-green-300"
               className="!bg-transparent !border-transparent !shadow-none"
             >
-              <div className="px-4 sm:px-6 py-4" style={{ backgroundColor: 'rgba(240, 253, 244, 0.4)' }}>
+              <div className="px-4 sm:px-6 py-4" style={{ backgroundColor: 'rgba(187, 247, 208, 0.8)' }}>
                 {selectedDateData.morningBookings.length > 0 ? (
                   selectedDateData.morningBookings.map((booking, index) => (
                     <React.Fragment key={booking.id}>
@@ -390,7 +390,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                             <UtensilsCrossed className="w-5 h-5 text-green-600 flex-shrink-0" />
                             <div className="flex-1 flex items-center gap-2">
                               <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Evento:</span>
-                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type.replace(/_/g, ' ')}</span>
+                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type?.replace(/_/g, ' ') || 'N/A'}</span>
                             </div>
                           </div>
 
@@ -440,7 +440,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
             className="rounded-lg overflow-hidden shadow-lg"
             style={{
               border: '4px solid rgb(234, 179, 8)',
-              backgroundColor: 'rgba(254, 249, 195, 0.6)',
+              backgroundColor: 'rgba(254, 243, 199, 0.8)',
               marginTop: '32px',
               marginBottom: '32px',
             }}
@@ -458,7 +458,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
               headerClassName="bg-yellow-100 hover:bg-yellow-200 border-b-2 border-yellow-300"
               className="!bg-transparent !border-transparent !shadow-none"
             >
-              <div className="px-4 sm:px-6 py-4" style={{ backgroundColor: 'rgba(254, 249, 195, 0.4)' }}>
+              <div className="px-4 sm:px-6 py-4" style={{ backgroundColor: 'rgba(253, 230, 138, 0.75)' }}>
                 {selectedDateData.afternoonBookings.length > 0 ? (
                   selectedDateData.afternoonBookings.map((booking, index) => (
                     <React.Fragment key={booking.id}>
@@ -536,7 +536,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                             <UtensilsCrossed className="w-5 h-5 text-yellow-600 flex-shrink-0" />
                             <div className="flex-1 flex items-center gap-2">
                               <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Evento:</span>
-                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type.replace(/_/g, ' ')}</span>
+                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type?.replace(/_/g, ' ') || 'N/A'}</span>
                             </div>
                           </div>
 
@@ -585,7 +585,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
             className="rounded-lg overflow-hidden shadow-lg"
             style={{
               border: '4px solid rgb(59, 130, 246)',
-              backgroundColor: 'rgba(239, 246, 255, 0.6)',
+              backgroundColor: 'rgba(191, 219, 254, 0.85)',
               marginTop: '32px',
             }}
           >
@@ -602,7 +602,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
               headerClassName="bg-blue-100 hover:bg-blue-200 border-b-2 border-blue-300"
               className="!bg-transparent !border-transparent !shadow-none"
             >
-              <div className="px-4 sm:px-6 py-4" style={{ backgroundColor: 'rgba(239, 246, 255, 0.4)' }}>
+              <div className="px-4 sm:px-6 py-4" style={{ backgroundColor: 'rgba(147, 197, 253, 0.8)' }}>
                 {selectedDateData.eveningBookings.length > 0 ? (
                   selectedDateData.eveningBookings.map((booking, index) => (
                     <React.Fragment key={booking.id}>
@@ -680,7 +680,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                             <UtensilsCrossed className="w-5 h-5 text-blue-600 flex-shrink-0" />
                             <div className="flex-1 flex items-center gap-2">
                               <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Evento:</span>
-                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type.replace(/_/g, ' ')}</span>
+                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type?.replace(/_/g, ' ') || 'N/A'}</span>
                             </div>
                           </div>
 

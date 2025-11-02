@@ -132,7 +132,7 @@ export const getBookingAcceptedEmail = (booking: BookingRequest) => {
           </div>
           <div class="info-row">
             <span class="info-label">🎉 Tipo Evento:</span>
-            <span class="info-value"><strong>${EVENT_TYPE_LABELS[booking.event_type]}</strong></span>
+            <span class="info-value"><strong>${EVENT_TYPE_LABELS[booking.event_type || 'drink_caraffe']}</strong></span>
           </div>
           <div class="info-row">
             <span class="info-label">👥 Numero Ospiti:</span>
@@ -236,7 +236,7 @@ export const getBookingRejectedEmail = (booking: BookingRequest) => {
         <div class="info-box">
           <p><strong>Richiesta per:</strong></p>
           <p>📅 ${formatDateOnly(booking.desired_date)}</p>
-          <p>🎉 ${EVENT_TYPE_LABELS[booking.event_type]}</p>
+          <p>🎉 ${EVENT_TYPE_LABELS[booking.event_type || 'drink_caraffe']}</p>
           <p>👥 ${booking.num_guests} ospiti</p>
         </div>
 
@@ -323,7 +323,7 @@ export const getBookingCancelledEmail = (booking: BookingRequest) => {
 
         <div class="info-box">
           <p><strong>📅 Prenotazione:</strong> ${eventDate}</p>
-          <p><strong>🎉 Evento:</strong> ${EVENT_TYPE_LABELS[booking.event_type]}</p>
+          <p><strong>🎉 Evento:</strong> ${EVENT_TYPE_LABELS[booking.event_type || 'drink_caraffe']}</p>
           <p><strong>👥 Ospiti:</strong> ${booking.num_guests}</p>
         </div>
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Input, Button } from '@/components/ui'
+import { Input } from '@/components/ui'
 import { Plus, Edit, Trash2, X } from 'lucide-react'
 import { DIETARY_RESTRICTIONS, type DietaryRestrictionType } from '@/types/menu'
 

@@ -244,7 +244,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     return null
   }
 
-  const eventConfig = EVENT_TYPE_COLORS[booking.event_type] || EVENT_TYPE_COLORS.drink_caraffe
+  const eventConfig = EVENT_TYPE_COLORS[booking.event_type || 'drink_caraffe'] || EVENT_TYPE_COLORS.drink_caraffe
 
   return (
     <div 
@@ -276,7 +276,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
               </div>
               <div>
                 <h2 className="text-lg font-bold text-gray-900">
-                  {EVENT_TYPE_LABELS[booking.event_type]}
+                  {EVENT_TYPE_LABELS[booking.event_type || 'drink_caraffe']}
                 </h2>
                 <p className="text-sm text-gray-600">
                   Prenotazione #{booking.id.slice(0, 8)}

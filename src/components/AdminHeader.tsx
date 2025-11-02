@@ -1,10 +1,10 @@
 import React from 'react'
 import { useAdminAuth } from '@/features/booking/hooks/useAdminAuth'
 import { useBookingStats } from '@/features/booking/hooks/useBookingQueries'
-import { User, Shield, LogOut } from 'lucide-react'
+import { User, Shield } from 'lucide-react'
 
 export const AdminHeader: React.FC = () => {
-  const { user, logout } = useAdminAuth()
+  const { user } = useAdminAuth()
   const { data: stats, isLoading: isLoadingStats } = useBookingStats()
 
   return (

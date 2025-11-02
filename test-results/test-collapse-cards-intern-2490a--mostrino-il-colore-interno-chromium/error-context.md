@@ -1,0 +1,376 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]:
+            - heading "Al Ritrovo" [level=1] [ref=e8]
+            - paragraph [ref=e9]: Dashboard Amministratore
+          - generic [ref=e11]:
+            - generic [ref=e12]:
+              - paragraph [ref=e13]: Settimana
+              - paragraph [ref=e14]: "6"
+            - generic [ref=e15]:
+              - paragraph [ref=e16]: Oggi
+              - paragraph [ref=e17]: "0"
+            - generic [ref=e18]:
+              - paragraph [ref=e19]: Mese
+              - paragraph [ref=e20]: "11"
+            - generic [ref=e21]:
+              - paragraph [ref=e22]: Rifiutate
+              - paragraph [ref=e23]: "32"
+            - generic [ref=e25]:
+              - img [ref=e27]
+              - generic [ref=e30]:
+                - paragraph [ref=e31]: 0cavuz0@gmail.com
+                - generic [ref=e32]:
+                  - img [ref=e34]
+                  - paragraph [ref=e36]: Admin
+        - navigation [ref=e37]:
+          - button "Calendario" [active] [ref=e38] [cursor=pointer]:
+            - img [ref=e40]
+            - generic [ref=e42]: Calendario
+          - button "Prenotazioni Pendenti 0" [ref=e43] [cursor=pointer]:
+            - img [ref=e45]
+            - generic [ref=e48]: Prenotazioni Pendenti
+            - text: "0"
+          - button "Archivio" [ref=e49] [cursor=pointer]:
+            - img [ref=e51]
+            - generic [ref=e54]: Archivio
+          - button "Impostazioni" [ref=e55] [cursor=pointer]:
+            - img [ref=e57]
+            - generic [ref=e60]: Impostazioni
+    - main [ref=e61]:
+      - generic [ref=e62]:
+        - region "Inserisci nuova prenotazione Crea una nuova prenotazione nel sistema" [ref=e63]:
+          - button "Inserisci nuova prenotazione Crea una nuova prenotazione nel sistema" [ref=e64] [cursor=pointer]:
+            - generic [ref=e65]:
+              - img [ref=e67]
+              - generic [ref=e68]:
+                - heading "Inserisci nuova prenotazione" [level=3] [ref=e70]
+                - paragraph [ref=e71]: Crea una nuova prenotazione nel sistema
+        - region "Prenotazioni Pendenti 0 in attesa 0 items" [ref=e73]:
+          - button "Prenotazioni Pendenti 0 in attesa 0 items" [ref=e74] [cursor=pointer]:
+            - generic [ref=e75]:
+              - img [ref=e77]
+              - generic [ref=e80]:
+                - heading "Prenotazioni Pendenti" [level=3] [ref=e82]
+                - paragraph [ref=e83]: 0 in attesa
+            - generic "0 items" [ref=e85]: "0"
+      - generic [ref=e88]:
+        - generic [ref=e89]:
+          - generic [ref=e90]:
+            - img [ref=e92]
+            - generic [ref=e94]:
+              - heading "Calendario Prenotazioni" [level=2] [ref=e95]
+              - paragraph [ref=e96]: Vista completa delle prenotazioni accettate
+            - generic [ref=e97]: 17 prenotazioni
+          - generic [ref=e98]:
+            - generic [ref=e99]:
+              - generic [ref=e100]:
+                - generic [ref=e101]:
+                  - button "Previous month" [ref=e102] [cursor=pointer]:
+                    - img [ref=e103]: 
+                  - button "Next month" [ref=e104] [cursor=pointer]:
+                    - img [ref=e105]: 
+                - button "today" [disabled] [ref=e106]
+              - heading "novembre 2025" [level=2] [ref=e108]
+              - generic [ref=e110]:
+                - button "month" [pressed] [ref=e111] [cursor=pointer]
+                - button "week" [ref=e112] [cursor=pointer]
+                - button "day" [ref=e113] [cursor=pointer]
+                - button "list" [ref=e114] [cursor=pointer]
+            - generic "novembre 2025" [ref=e115]:
+              - grid [ref=e117]:
+                - rowgroup [ref=e118]:
+                  - row "lunedì martedì mercoledì giovedì venerdì sabato domenica" [ref=e122]:
+                    - columnheader "lunedì" [ref=e123]:
+                      - generic "lunedì" [ref=e125]: lun
+                    - columnheader "martedì" [ref=e126]:
+                      - generic "martedì" [ref=e128]: mar
+                    - columnheader "mercoledì" [ref=e129]:
+                      - generic "mercoledì" [ref=e131]: mer
+                    - columnheader "giovedì" [ref=e132]:
+                      - generic "giovedì" [ref=e134]: gio
+                    - columnheader "venerdì" [ref=e135]:
+                      - generic "venerdì" [ref=e137]: ven
+                    - columnheader "sabato" [ref=e138]:
+                      - generic "sabato" [ref=e140]: sab
+                    - columnheader "domenica" [ref=e141]:
+                      - generic "domenica" [ref=e143]: dom
+                - rowgroup [ref=e144]:
+                  - generic [ref=e147]:
+                    - row "27 ottobre 2025 28 ottobre 2025 29 ottobre 2025 30 ottobre 2025 31 ottobre 2025 1 novembre 2025 2 novembre 2025" [ref=e149]:
+                      - gridcell "27 ottobre 2025" [ref=e150]:
+                        - generic "27 ottobre 2025" [ref=e153]: "27"
+                      - gridcell "28 ottobre 2025" [ref=e155]:
+                        - generic "28 ottobre 2025" [ref=e158]: "28"
+                      - gridcell "29 ottobre 2025" [ref=e160]:
+                        - generic "29 ottobre 2025" [ref=e163]: "29"
+                      - gridcell "30 ottobre 2025" [ref=e165]:
+                        - generic [ref=e166]:
+                          - generic "30 ottobre 2025" [ref=e168]: "30"
+                          - generic [ref=e169]:
+                            - generic [ref=e173] [cursor=pointer]:
+                              - generic [ref=e174]:
+                                - img [ref=e175]
+                                - generic [ref=e180]: silvia
+                              - generic [ref=e181]:
+                                - generic [ref=e182]: 14 ospiti
+                                - generic [ref=e183]: •
+                                - generic [ref=e184]: 11:00
+                            - generic [ref=e188] [cursor=pointer]:
+                              - generic [ref=e189]:
+                                - img [ref=e190]
+                                - generic [ref=e195]: Silvia
+                              - generic [ref=e196]:
+                                - generic [ref=e197]: 16 ospiti
+                                - generic [ref=e198]: •
+                                - generic [ref=e199]: 11:15
+                            - generic [ref=e203] [cursor=pointer]:
+                              - generic [ref=e204]:
+                                - img [ref=e205]
+                                - generic [ref=e210]: elisa
+                              - generic [ref=e211]:
+                                - generic [ref=e212]: 23 ospiti
+                                - generic [ref=e213]: •
+                                - generic [ref=e214]: 16:30
+                            - generic "Show 3 more events" [ref=e216] [cursor=pointer]: +3 more
+                      - gridcell "31 ottobre 2025" [ref=e217]:
+                        - generic "31 ottobre 2025" [ref=e220]: "31"
+                      - gridcell "1 novembre 2025" [ref=e222]:
+                        - generic "1 novembre 2025" [ref=e225]: "1"
+                      - gridcell "2 novembre 2025" [ref=e227]:
+                        - generic "2 novembre 2025" [ref=e230]: "2"
+                    - row "3 novembre 2025 4 novembre 2025 5 novembre 2025 6 novembre 2025 7 novembre 2025 8 novembre 2025 9 novembre 2025" [ref=e234]:
+                      - gridcell "3 novembre 2025" [ref=e235]:
+                        - generic "3 novembre 2025" [ref=e238]: "3"
+                      - gridcell "4 novembre 2025" [ref=e240]:
+                        - generic [ref=e241]:
+                          - generic "4 novembre 2025" [ref=e243]: "4"
+                          - generic [ref=e244]:
+                            - generic [ref=e248] [cursor=pointer]:
+                              - generic [ref=e249]:
+                                - img [ref=e250]
+                                - generic [ref=e255]: Lorenzo
+                              - generic [ref=e256]:
+                                - generic [ref=e257]: 8 ospiti
+                                - generic [ref=e258]: •
+                                - generic [ref=e259]: 11:30
+                            - generic [ref=e263] [cursor=pointer]:
+                              - generic [ref=e264]:
+                                - img [ref=e265]
+                                - generic [ref=e270]: APERITIVO STUDENTESCO
+                              - generic [ref=e271]:
+                                - generic [ref=e272]: 50 ospiti
+                                - generic [ref=e273]: •
+                                - generic [ref=e274]: 18:00
+                      - gridcell "5 novembre 2025" [ref=e275]:
+                        - generic [ref=e276]:
+                          - generic "5 novembre 2025" [ref=e278]: "5"
+                          - generic [ref=e279]:
+                            - generic [ref=e283] [cursor=pointer]:
+                              - generic [ref=e284]:
+                                - img [ref=e285]
+                                - generic [ref=e290]: CAMILLA
+                              - generic [ref=e291]:
+                                - generic [ref=e292]: 25 ospiti
+                                - generic [ref=e293]: •
+                                - generic [ref=e294]: 20:00
+                            - generic [ref=e298] [cursor=pointer]:
+                              - generic [ref=e299]:
+                                - img [ref=e300]
+                                - generic [ref=e305]: GABRIELE
+                              - generic [ref=e306]:
+                                - generic [ref=e307]: 30 ospiti
+                                - generic [ref=e308]: •
+                                - generic [ref=e309]: 20:00
+                      - gridcell "6 novembre 2025" [ref=e310]:
+                        - generic [ref=e311]:
+                          - generic "6 novembre 2025" [ref=e313]: "6"
+                          - generic [ref=e318] [cursor=pointer]:
+                            - generic [ref=e319]:
+                              - img [ref=e320]
+                              - generic [ref=e325]: GIRGIA
+                            - generic [ref=e326]:
+                              - generic [ref=e327]: 18 ospiti
+                              - generic [ref=e328]: •
+                              - generic [ref=e329]: 12:30
+                      - gridcell "7 novembre 2025" [ref=e330]:
+                        - generic [ref=e331]:
+                          - generic "7 novembre 2025" [ref=e333]: "7"
+                          - generic [ref=e334]:
+                            - generic [ref=e338] [cursor=pointer]:
+                              - generic [ref=e339]:
+                                - img [ref=e340]
+                                - generic [ref=e345]: GAIA
+                              - generic [ref=e346]:
+                                - generic [ref=e347]: 30 ospiti
+                                - generic [ref=e348]: •
+                                - generic [ref=e349]: 11:30
+                            - generic [ref=e353] [cursor=pointer]:
+                              - generic [ref=e354]:
+                                - img [ref=e355]
+                                - generic [ref=e360]: CARLOTTA
+                              - generic [ref=e361]:
+                                - generic [ref=e362]: 9 ospiti
+                                - generic [ref=e363]: •
+                                - generic [ref=e364]: 13:30
+                            - generic [ref=e368] [cursor=pointer]:
+                              - generic [ref=e369]:
+                                - img [ref=e370]
+                                - generic [ref=e375]: PAOLA
+                              - generic [ref=e376]:
+                                - generic [ref=e377]: 25 ospiti
+                                - generic [ref=e378]: •
+                                - generic [ref=e379]: 20:00
+                            - generic "Show 1 more event" [ref=e381] [cursor=pointer]: +1 more
+                      - gridcell "8 novembre 2025" [ref=e382]:
+                        - generic [ref=e383]:
+                          - generic "8 novembre 2025" [ref=e385]: "8"
+                          - generic [ref=e386]:
+                            - generic [ref=e390] [cursor=pointer]:
+                              - generic [ref=e391]:
+                                - img [ref=e392]
+                                - generic [ref=e397]: MIRIAM + FRA + LO
+                              - generic [ref=e398]:
+                                - generic [ref=e399]: 43 ospiti
+                                - generic [ref=e400]: •
+                                - generic [ref=e401]: 21:00
+                            - generic [ref=e405] [cursor=pointer]:
+                              - generic [ref=e406]:
+                                - img [ref=e407]
+                                - generic [ref=e412]: ROSSELLA
+                              - generic [ref=e413]:
+                                - generic [ref=e414]: 25 ospiti
+                                - generic [ref=e415]: •
+                                - generic [ref=e416]: 21:30
+                      - gridcell "9 novembre 2025" [ref=e417]:
+                        - generic "9 novembre 2025" [ref=e420]: "9"
+                    - row "10 novembre 2025 11 novembre 2025 12 novembre 2025 13 novembre 2025 14 novembre 2025 15 novembre 2025 16 novembre 2025" [ref=e424]:
+                      - gridcell "10 novembre 2025" [ref=e425]:
+                        - generic "10 novembre 2025" [ref=e428]: "10"
+                      - gridcell "11 novembre 2025" [ref=e430]:
+                        - generic "11 novembre 2025" [ref=e433]: "11"
+                      - gridcell "12 novembre 2025" [ref=e435]:
+                        - generic "12 novembre 2025" [ref=e438]: "12"
+                      - gridcell "13 novembre 2025" [ref=e440]:
+                        - generic "13 novembre 2025" [ref=e443]: "13"
+                      - gridcell "14 novembre 2025" [ref=e445]:
+                        - generic "14 novembre 2025" [ref=e448]: "14"
+                      - gridcell "15 novembre 2025" [ref=e450]:
+                        - generic "15 novembre 2025" [ref=e453]: "15"
+                      - gridcell "16 novembre 2025" [ref=e455]:
+                        - generic "16 novembre 2025" [ref=e458]: "16"
+                    - row "17 novembre 2025 18 novembre 2025 19 novembre 2025 20 novembre 2025 21 novembre 2025 22 novembre 2025 23 novembre 2025" [ref=e462]:
+                      - gridcell "17 novembre 2025" [ref=e463]:
+                        - generic "17 novembre 2025" [ref=e466]: "17"
+                      - gridcell "18 novembre 2025" [ref=e468]:
+                        - generic "18 novembre 2025" [ref=e471]: "18"
+                      - gridcell "19 novembre 2025" [ref=e473]:
+                        - generic "19 novembre 2025" [ref=e476]: "19"
+                      - gridcell "20 novembre 2025" [ref=e478]:
+                        - generic "20 novembre 2025" [ref=e481]: "20"
+                      - gridcell "21 novembre 2025" [ref=e483]:
+                        - generic "21 novembre 2025" [ref=e486]: "21"
+                      - gridcell "22 novembre 2025" [ref=e488]:
+                        - generic "22 novembre 2025" [ref=e491]: "22"
+                      - gridcell "23 novembre 2025" [ref=e493]:
+                        - generic "23 novembre 2025" [ref=e496]: "23"
+                    - row "24 novembre 2025 25 novembre 2025 26 novembre 2025 27 novembre 2025 28 novembre 2025 29 novembre 2025 30 novembre 2025" [ref=e500]:
+                      - gridcell "24 novembre 2025" [ref=e501]:
+                        - generic "24 novembre 2025" [ref=e504]: "24"
+                      - gridcell "25 novembre 2025" [ref=e506]:
+                        - generic "25 novembre 2025" [ref=e509]: "25"
+                      - gridcell "26 novembre 2025" [ref=e511]:
+                        - generic "26 novembre 2025" [ref=e514]: "26"
+                      - gridcell "27 novembre 2025" [ref=e516]:
+                        - generic "27 novembre 2025" [ref=e519]: "27"
+                      - gridcell "28 novembre 2025" [ref=e521]:
+                        - generic "28 novembre 2025" [ref=e524]: "28"
+                      - gridcell "29 novembre 2025" [ref=e526]:
+                        - generic "29 novembre 2025" [ref=e529]: "29"
+                      - gridcell "30 novembre 2025" [ref=e531]:
+                        - generic "30 novembre 2025" [ref=e534]: "30"
+                    - row "1 dicembre 2025 2 dicembre 2025 3 dicembre 2025 4 dicembre 2025 5 dicembre 2025 6 dicembre 2025 7 dicembre 2025" [ref=e538]:
+                      - gridcell "1 dicembre 2025" [ref=e539]:
+                        - generic "1 dicembre 2025" [ref=e542]: "1"
+                      - gridcell "2 dicembre 2025" [ref=e544]:
+                        - generic "2 dicembre 2025" [ref=e547]: "2"
+                      - gridcell "3 dicembre 2025" [ref=e549]:
+                        - generic "3 dicembre 2025" [ref=e552]: "3"
+                      - gridcell "4 dicembre 2025" [ref=e554]:
+                        - generic "4 dicembre 2025" [ref=e557]: "4"
+                      - gridcell "5 dicembre 2025" [ref=e559]:
+                        - generic "5 dicembre 2025" [ref=e562]: "5"
+                      - gridcell "6 dicembre 2025" [ref=e564]:
+                        - generic "6 dicembre 2025" [ref=e567]: "6"
+                      - gridcell "7 dicembre 2025" [ref=e569]:
+                        - generic "7 dicembre 2025" [ref=e572]: "7"
+        - generic [ref=e576]:
+          - generic [ref=e577]:
+            - heading "Disponibilità" [level=3] [ref=e578]
+            - paragraph [ref=e579]: domenica, 02 novembre 2025
+          - region "Mattina 10:00 - 14:30 100 posti disponibili su 100 totali" [ref=e581]:
+            - button "Mattina 10:00 - 14:30 100 posti disponibili su 100 totali" [expanded] [ref=e582] [cursor=pointer]:
+              - generic [ref=e583]:
+                - img [ref=e585]
+                - generic [ref=e590]:
+                  - heading "Mattina" [level=3] [ref=e592]
+                  - paragraph [ref=e593]: 10:00 - 14:30
+              - generic "100 posti disponibili su 100 totali" [ref=e595]:
+                - generic [ref=e596]: 100/100
+                - generic [ref=e597]: disponibili
+            - region "Mattina 10:00 - 14:30 100 posti disponibili su 100 totali" [ref=e599]:
+              - generic [ref=e601]:
+                - img [ref=e603]
+                - paragraph [ref=e608]: Nessuna prenotazione per questa fascia oraria
+          - region "Pomeriggio 14:31 - 18:30 100 posti disponibili su 100 totali" [ref=e610]:
+            - button "Pomeriggio 14:31 - 18:30 100 posti disponibili su 100 totali" [expanded] [ref=e611] [cursor=pointer]:
+              - generic [ref=e612]:
+                - img [ref=e614]
+                - generic [ref=e620]:
+                  - heading "Pomeriggio" [level=3] [ref=e622]
+                  - paragraph [ref=e623]: 14:31 - 18:30
+              - generic "100 posti disponibili su 100 totali" [ref=e625]:
+                - generic [ref=e626]: 100/100
+                - generic [ref=e627]: disponibili
+            - region "Pomeriggio 14:31 - 18:30 100 posti disponibili su 100 totali" [ref=e629]:
+              - generic [ref=e631]:
+                - img [ref=e633]
+                - paragraph [ref=e639]: Nessuna prenotazione per questa fascia oraria
+          - region "Sera 18:31 - 23:30 100 posti disponibili su 100 totali" [ref=e641]:
+            - button "Sera 18:31 - 23:30 100 posti disponibili su 100 totali" [expanded] [ref=e642] [cursor=pointer]:
+              - generic [ref=e643]:
+                - img [ref=e645]
+                - generic [ref=e647]:
+                  - heading "Sera" [level=3] [ref=e649]
+                  - paragraph [ref=e650]: 18:31 - 23:30
+              - generic "100 posti disponibili su 100 totali" [ref=e652]:
+                - generic [ref=e653]: 100/100
+                - generic [ref=e654]: disponibili
+            - region "Sera 18:31 - 23:30 100 posti disponibili su 100 totali" [ref=e656]:
+              - generic [ref=e658]:
+                - img [ref=e660]
+                - paragraph [ref=e662]: Nessuna prenotazione per questa fascia oraria
+    - contentinfo [ref=e663]:
+      - paragraph [ref=e665]: Al Ritrovo Booking System v2.0 - Dashboard Amministratore
+  - generic [ref=e668]:
+    - img [ref=e670]
+    - generic [ref=e672]:
+      - heading "Utilizziamo i Cookie" [level=3] [ref=e673]
+      - paragraph [ref=e674]:
+        - text: Questo sito utilizza cookie tecnici necessari al funzionamento del sito e alla fornitura del servizio richiesto, come descritto nella nostra
+        - link "Privacy Policy" [ref=e675] [cursor=pointer]:
+          - /url: /privacy
+        - text: .
+      - generic [ref=e676]:
+        - button "Accetto" [ref=e677]
+        - button "Rifiuta" [ref=e678]
+        - link "Leggi di più" [ref=e679] [cursor=pointer]:
+          - /url: /privacy
+  - region "Notifications Alt+T"
+```

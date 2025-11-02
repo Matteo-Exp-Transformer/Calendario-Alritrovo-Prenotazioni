@@ -92,7 +92,7 @@ test.describe('Collapse Cards - Colori Interni FIXED (TDD GREEN)', () => {
     expect(mattinaContentBg).not.toBeNull()
     expect(mattinaContentBg?.computed).not.toBe('rgba(0, 0, 0, 0)')
     expect(mattinaContentBg?.computed).not.toBe('transparent')
-    expect(mattinaContentBg?.computed).toContain('240') // verde
+    expect(mattinaContentBg?.computed).toContain('187') // verde intenso
     expect(mattinaContentBg?.hasBgInInline).toBe(true)
 
     // 2. POMERIGGIO - dovrebbe funzionare (già funzionava)
@@ -110,7 +110,7 @@ test.describe('Collapse Cards - Colori Interni FIXED (TDD GREEN)', () => {
     expect(seraContentBg).not.toBeNull()
     expect(seraContentBg?.computed).not.toBe('rgba(0, 0, 0, 0)')
     expect(seraContentBg?.computed).not.toBe('transparent')
-    expect(seraContentBg?.computed).toContain('239') // blu
+    expect(seraContentBg?.computed).toContain('147') // blu intenso
     expect(seraContentBg?.hasBgInInline).toBe(true)
 
     // Screenshot per verifica visiva
