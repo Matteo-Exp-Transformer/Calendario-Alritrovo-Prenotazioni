@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Input, Textarea } from '@/components/ui'
 import type { BookingRequestInput } from '@/types/booking'
@@ -8,6 +8,8 @@ import { toast } from 'react-toastify'
 import { Check, Send, Loader2, CheckCircle } from 'lucide-react'
 import { MenuSelection } from './MenuSelection'
 import { DietaryRestrictionsSection } from './DietaryRestrictionsSection'
+import { useBusinessHours } from '@/hooks/useBusinessHours'
+import { isValidBookingDateTime, getDayOfWeek, formatHours } from '@/lib/businessHours'
 
 interface BookingRequestFormProps {
   onSubmit?: () => void
@@ -32,6 +34,9 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  
+  // Ref per prevenire doppi submit (anche con React StrictMode)
+  const isSubmittingRef = useRef(false)
 
   // Reset num_guests to 0 when cleared - only allow numeric input
   const handleNumGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,6 +78,30 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
   })
   // Menu items loaded via MenuSelection component
   // const { data: menuItems = [] } = useMenuItems()
+
+  // Fetch business hours (non-blocking - form works even if loading/fails)
+  const { data: businessHours, isLoading: isLoadingHours, error: hoursError } = useBusinessHours()
+
+  // Validate business hours in real-time (for immediate feedback)
+  const validateBusinessHours = (date: string, time: string) => {
+    if (!date || !time || !businessHours || isLoadingHours || hoursError) {
+      return null // No validation if data not available
+    }
+
+    if (!isValidBookingDateTime(date, time, businessHours)) {
+      const dayName = getDayOfWeek(date)
+      const dayHours = businessHours[dayName]
+
+      if (!dayHours || dayHours.length === 0) {
+        return 'Il ristorante è chiuso in questo giorno'
+      } else {
+        const availableHours = formatHours(dayHours)
+        return `Orario non valido. Orari disponibili: ${availableHours}`
+      }
+    }
+
+    return null // Valid
+  }
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {}
@@ -117,12 +146,35 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       isValid = false
     }
 
+    // Business hours validation (non-blocking: only validate if hours are loaded)
+    if (
+      formData.desired_date &&
+      formData.desired_time &&
+      businessHours &&
+      !isLoadingHours &&
+      !hoursError
+    ) {
+      if (!isValidBookingDateTime(formData.desired_date, formData.desired_time, businessHours)) {
+        const dayName = getDayOfWeek(formData.desired_date)
+        const dayHours = businessHours[dayName]
+
+        if (!dayHours || dayHours.length === 0) {
+          newErrors.desired_date = 'Il ristorante è chiuso in questo giorno'
+          isValid = false
+        } else {
+          const availableHours = formatHours(dayHours)
+          newErrors.desired_time = `Orario non valido. Orari disponibili: ${availableHours}`
+          isValid = false
+        }
+      }
+    }
+
     // Num guests validation
     if (!formData.num_guests || formData.num_guests < 1) {
       newErrors.num_guests = 'Numero ospiti obbligatorio (min 1)'
       isValid = false
-    } else if (formData.num_guests > 110) {
-      newErrors.num_guests = 'Massimo 110 ospiti'
+    } else if (formData.num_guests > 80) {
+      newErrors.num_guests = 'Massimo 80 ospiti'
       isValid = false
     }
 
@@ -159,6 +211,18 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     console.log('🔵 [BookingForm] Submit click')
     console.log('🔵 [BookingForm] Form data:', formData)
     console.log('🔵 [BookingForm] Privacy accepted:', privacyAccepted)
+    
+    // ✅ PROTEZIONE CONTRO DOPPI SUBMIT
+    // Previene doppi submit anche se React StrictMode causa doppi render
+    if (isSubmittingRef.current) {
+      console.warn('⚠️ [BookingForm] Submit già in corso, ignorando chiamata duplicata')
+      return
+    }
+    
+    if (isPending) {
+      console.warn('⚠️ [BookingForm] Mutation già in corso, ignorando submit')
+      return
+    }
 
     // Check rate limit first
     if (!checkRateLimit()) {
@@ -172,11 +236,15 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       return
     }
 
+    // Imposta il flag per prevenire doppi submit
+    isSubmittingRef.current = true
     console.log('✅ [BookingForm] Validation passed, calling mutate...')
+    
     mutate(formData, {
       onSuccess: () => {
         console.log('✅ [BookingForm] Mutation successful!')
         console.log('🔵 [BookingForm] Setting showSuccessModal to true')
+        
         // Reset form
         setFormData({
           client_name: '',
@@ -193,6 +261,10 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           dietary_restrictions: []
         })
         setPrivacyAccepted(false)
+        
+        // Reset flag di submit
+        isSubmittingRef.current = false
+        
         // Mostra la modal di conferma invece del toast
         setShowSuccessModal(true)
         console.log('✅ [BookingForm] showSuccessModal set to true')
@@ -200,200 +272,254 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       },
       onError: (error) => {
         console.error('❌ [BookingForm] Mutation error:', error)
+        // Reset flag in caso di errore per permettere nuovo tentativo
+        isSubmittingRef.current = false
       }
     })
   }
 
   return (
     <>
-    <form onSubmit={handleSubmit} className="space-y-8">
-      {/* Layout a 2 Colonne su schermi grandi */}
-      <div className="grid md:grid-cols-2 gap-6 md:gap-8">
-        {/* COLONNA SINISTRA: Dati Personali */}
-        <div className="space-y-6">
-          <h2
-            className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.5)',
-              backdropFilter: 'blur(6px)',
-              padding: '12px 20px',
-              borderRadius: '12px'
+    <form onSubmit={handleSubmit} className="w-full md:max-w-2xl mx-auto px-4 md:px-6 space-y-8">
+      {/* Sezione: Dati Personali */}
+      <div className="space-y-6">
+        <h2
+          className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+            backdropFilter: 'blur(6px)',
+            padding: '12px 20px',
+            borderRadius: '12px'
+          }}
+        >
+          Dati Personali
+        </h2>
+
+        {/* Nome */}
+        <div className="space-y-3">
+          <Input
+            id="client_name"
+            value={formData.client_name}
+            onChange={(e) => {
+              setFormData({ ...formData, client_name: e.target.value })
+              setErrors({ ...errors, client_name: '' })
             }}
-          >
-            Dati Personali
-          </h2>
-
-          {/* Nome */}
-          <div className="space-y-3">
-            <Input
-              id="client_name"
-              value={formData.client_name}
-              onChange={(e) => {
-                setFormData({ ...formData, client_name: e.target.value })
-                setErrors({ ...errors, client_name: '' })
-              }}
-              placeholder="Nome Completo *"
-              required
-              className={errors.client_name ? '!border-red-500' : ''}
-            />
-            {errors.client_name && (
-              <p className="text-sm text-red-500">{errors.client_name}</p>
-            )}
-          </div>
-
-          {/* Email */}
-          <div className="space-y-3">
-            <Input
-              id="client_email"
-              type="email"
-              value={formData.client_email}
-              onChange={(e) => {
-                setFormData({ ...formData, client_email: e.target.value })
-                setErrors({ ...errors, client_email: '' })
-              }}
-              placeholder="Email (Opzionale)"
-              className={errors.client_email ? '!border-red-500' : ''}
-            />
-            {errors.client_email && (
-              <p className="text-sm text-red-500">{errors.client_email}</p>
-            )}
-          </div>
-
-          {/* Telefono */}
-          <div className="space-y-3">
-            <Input
-              id="client_phone"
-              type="tel"
-              value={formData.client_phone}
-              onChange={(e) => {
-                setFormData({ ...formData, client_phone: e.target.value })
-                setErrors({ ...errors, client_phone: '' })
-              }}
-              placeholder="Telefono *"
-              required
-              className={errors.client_phone ? '!border-red-500' : ''}
-            />
-            {errors.client_phone && (
-              <p className="text-sm text-red-500">{errors.client_phone}</p>
-            )}
-          </div>
+            placeholder="Nome Completo *"
+            required
+            className={errors.client_name ? '!border-red-500' : ''}
+          />
+          {errors.client_name && (
+            <p className="text-sm text-red-500">{errors.client_name}</p>
+          )}
         </div>
 
-        {/* COLONNA DESTRA: Dettagli Prenotazione */}
-        <div className="space-y-6">
-          <h2
-            className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
+        {/* Email */}
+        <div className="space-y-3">
+          <Input
+            id="client_email"
+            type="email"
+            value={formData.client_email}
+            onChange={(e) => {
+              setFormData({ ...formData, client_email: e.target.value })
+              setErrors({ ...errors, client_email: '' })
+            }}
+            placeholder="Email (Opzionale)"
+            className={errors.client_email ? '!border-red-500' : ''}
+          />
+          {errors.client_email && (
+            <p className="text-sm text-red-500">{errors.client_email}</p>
+          )}
+        </div>
+
+        {/* Telefono */}
+        <div className="space-y-3">
+          <Input
+            id="client_phone"
+            type="tel"
+            value={formData.client_phone}
+            onChange={(e) => {
+              setFormData({ ...formData, client_phone: e.target.value })
+              setErrors({ ...errors, client_phone: '' })
+            }}
+            placeholder="Telefono *"
+            required
+            className={errors.client_phone ? '!border-red-500' : ''}
+          />
+          {errors.client_phone && (
+            <p className="text-sm text-red-500">{errors.client_phone}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Sezione: Dettagli Prenotazione */}
+      <div className="space-y-6">
+        <h2
+          className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+            backdropFilter: 'blur(6px)',
+            padding: '12px 20px',
+            borderRadius: '12px'
+          }}
+        >
+          Dettagli Prenotazione
+        </h2>
+
+        {/* Tipologia di Prenotazione - DROPDOWN */}
+        <div className="space-y-3">
+          <label
+            className="block text-sm font-medium text-warm-wood mb-2"
             style={{
               backgroundColor: 'rgba(255, 255, 255, 0.5)',
               backdropFilter: 'blur(6px)',
-              padding: '12px 20px',
-              borderRadius: '12px'
+              padding: '8px 16px',
+              borderRadius: '12px',
+              display: 'inline-block'
             }}
           >
-            Dettagli Prenotazione
-          </h2>
+            Tipologia di Prenotazione *
+          </label>
+          <select
+            id="booking_type"
+            value={formData.booking_type}
+            onChange={(e) => {
+              setFormData({ ...formData, booking_type: e.target.value as 'tavolo' | 'rinfresco_laurea' })
+              setErrors({ ...errors, booking_type: '' })
+            }}
+            className="block rounded-full border bg-white/50 backdrop-blur-[6px] shadow-sm transition-all"
+            style={{
+              borderColor: 'rgba(0,0,0,0.2)',
+              height: '56px',
+              padding: '16px',
+              fontSize: '16px',
+              fontWeight: '500',
+              backgroundColor: 'rgba(255, 255, 255, 0.5)',
+              backdropFilter: 'blur(6px)',
+              color: 'black',
+              width: '100%'
+            }}
+            onFocus={(e) => (e.target as HTMLSelectElement).style.borderColor = '#8B6914'}
+            onBlur={(e) => (e.target as HTMLSelectElement).style.borderColor = 'rgba(0,0,0,0.2)'}
+          >
+            <option value="tavolo">Prenota un Tavolo</option>
+            <option value="rinfresco_laurea">Rinfresco di Laurea</option>
+          </select>
+          {errors.booking_type && (
+            <p className="text-sm text-red-500">{errors.booking_type}</p>
+          )}
+        </div>
 
-          {/* Tipologia di Prenotazione - DROPDOWN (Issue 1 Fixed) */}
-          <div className="space-y-3">
-            <label
-              className="block text-sm font-medium text-warm-wood mb-2"
+        {/* Data */}
+        <div className="space-y-3">
+          <Input
+            id="desired_date"
+            type="date"
+            value={formData.desired_date}
+            onChange={(e) => {
+              const newDate = e.target.value
+              setFormData({ ...formData, desired_date: newDate })
+              
+              // Real-time validation for business hours
+              const timeError = newDate && formData.desired_time 
+                ? validateBusinessHours(newDate, formData.desired_time)
+                : null
+              
+              if (timeError) {
+                // Check if it's a day closure error
+                const dayName = businessHours ? getDayOfWeek(newDate) : null
+                const dayHours = businessHours && dayName ? businessHours[dayName] : null
+                
+                if (dayHours === null || (Array.isArray(dayHours) && dayHours.length === 0)) {
+                  setErrors({ ...errors, desired_date: timeError, desired_time: '' })
+                } else {
+                  setErrors({ ...errors, desired_date: '', desired_time: timeError })
+                }
+              } else {
+                setErrors({ ...errors, desired_date: '', desired_time: '' })
+              }
+            }}
+            required
+            className={errors.desired_date ? '!border-red-500' : ''}
+          />
+          {errors.desired_date && (
+            <div
+              className="text-sm text-red-600 p-3 rounded-lg"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                backdropFilter: 'blur(6px)',
-                padding: '8px 16px',
-                borderRadius: '12px',
-                display: 'inline-block'
+                backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(239, 68, 68, 0.3)'
               }}
             >
-              Tipologia di Prenotazione *
-            </label>
-            <select
-              id="booking_type"
-              value={formData.booking_type}
-              onChange={(e) => {
-                setFormData({ ...formData, booking_type: e.target.value as 'tavolo' | 'rinfresco_laurea' })
-                setErrors({ ...errors, booking_type: '' })
-              }}
-              className="block rounded-full border bg-white/50 backdrop-blur-[6px] shadow-sm transition-all"
+              {errors.desired_date}
+            </div>
+          )}
+        </div>
+
+        {/* Ora */}
+        <div className="space-y-3">
+          <Input
+            id="desired_time"
+            type="time"
+            value={formData.desired_time || ''}
+            onChange={(e) => {
+              const newTime = e.target.value
+              setFormData({ ...formData, desired_time: newTime })
+              
+              // Real-time validation for business hours
+              const timeError = formData.desired_date && newTime 
+                ? validateBusinessHours(formData.desired_date, newTime)
+                : null
+              
+              if (timeError) {
+                // Check if it's a day closure error
+                const dayName = businessHours && formData.desired_date ? getDayOfWeek(formData.desired_date) : null
+                const dayHours = businessHours && dayName ? businessHours[dayName] : null
+                
+                if (dayHours === null || (Array.isArray(dayHours) && dayHours.length === 0)) {
+                  setErrors({ ...errors, desired_date: timeError, desired_time: '' })
+                } else {
+                  setErrors({ ...errors, desired_date: '', desired_time: timeError })
+                }
+              } else {
+                setErrors({ ...errors, desired_date: '', desired_time: '' })
+              }
+            }}
+            required
+            className={errors.desired_time ? '!border-red-500' : ''}
+          />
+          {errors.desired_time && (
+            <div
+              className="text-sm text-red-600 p-3 rounded-lg"
               style={{
-                borderColor: 'rgba(0,0,0,0.2)',
-                height: '56px',
-                padding: '16px',
-                fontSize: '16px',
-                fontWeight: '500',
-                backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                backdropFilter: 'blur(6px)',
-                color: 'black',
-                width: 'auto',
-                minWidth: '280px'
+                backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid rgba(239, 68, 68, 0.3)'
               }}
-              onFocus={(e) => (e.target as HTMLSelectElement).style.borderColor = '#8B6914'}
-              onBlur={(e) => (e.target as HTMLSelectElement).style.borderColor = 'rgba(0,0,0,0.2)'}
             >
-              <option value="tavolo">Prenota un Tavolo</option>
-              <option value="rinfresco_laurea">Rinfresco di Laurea</option>
-            </select>
-            {errors.booking_type && (
-              <p className="text-sm text-red-500">{errors.booking_type}</p>
-            )}
-          </div>
+              {errors.desired_time}
+            </div>
+          )}
+        </div>
 
-          {/* Data */}
-          <div className="space-y-3">
-            <Input
-              id="desired_date"
-              type="date"
-              value={formData.desired_date}
-              onChange={(e) => {
-                setFormData({ ...formData, desired_date: e.target.value })
-                setErrors({ ...errors, desired_date: '' })
-              }}
-              required
-              className={errors.desired_date ? '!border-red-500' : ''}
-            />
-            {errors.desired_date && (
-              <p className="text-sm text-red-500">{errors.desired_date}</p>
-            )}
-          </div>
-
-          {/* Ora */}
-          <div className="space-y-3">
-            <Input
-              id="desired_time"
-              type="time"
-              value={formData.desired_time || ''}
-              onChange={(e) => {
-                setFormData({ ...formData, desired_time: e.target.value })
-                setErrors({ ...errors, desired_time: '' })
-              }}
-              required
-              className={errors.desired_time ? '!border-red-500' : ''}
-            />
-            {errors.desired_time && (
-              <p className="text-sm text-red-500">{errors.desired_time}</p>
-            )}
-          </div>
-
-          {/* Numero Ospiti */}
-          <div className="space-y-3">
-            <Input
-              id="num_guests"
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              min="1"
-              max="110"
-              value={formData.num_guests || ''}
-              onChange={handleNumGuestsChange}
-              onKeyPress={handleNumGuestsKeyPress}
-              required
-              placeholder="Numero Ospiti * (es: 15)"
-              className={errors.num_guests ? '!border-red-500' : ''}
-            />
-            {errors.num_guests && (
-              <p className="text-sm text-red-500">{errors.num_guests}</p>
-            )}
-          </div>
+        {/* Numero Ospiti */}
+        <div className="space-y-3">
+          <Input
+            id="num_guests"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            min="1"
+            max="80"
+            value={formData.num_guests || ''}
+            onChange={handleNumGuestsChange}
+            onKeyPress={handleNumGuestsKeyPress}
+            required
+            placeholder="Numero Ospiti * (es: 15)"
+            className={errors.num_guests ? '!border-red-500' : ''}
+          />
+          {errors.num_guests && (
+            <p className="text-sm text-red-500">{errors.num_guests}</p>
+          )}
         </div>
       </div>
 
