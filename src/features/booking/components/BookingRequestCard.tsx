@@ -207,6 +207,16 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
           {booking.booking_type === 'rinfresco_laurea' && booking.menu_selection && (
             <div className="pt-6 mt-6 border-t border-gray-200">
               <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-3">Menu Selezionato</p>
+              
+              {/* Mostra Menu Predefinito se presente */}
+              {booking.preset_menu && (
+                <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm font-semibold text-blue-700">
+                    📋 Menu Predefinito: {booking.preset_menu === 'menu_1' ? 'Menù 1' : booking.preset_menu === 'menu_2' ? 'Menù 2' : 'Menù 3'}
+                  </p>
+                </div>
+              )}
+              
               <div className="space-y-2">
                 {booking.menu_total_per_person && (
                   <p className="text-sm font-bold text-warm-wood">

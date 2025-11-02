@@ -165,6 +165,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
         )}
         <div className="flex gap-3">
           <button
+            type="button"
             onClick={handleAdd}
             className="flex items-center justify-center gap-2 text-white font-semibold transition-all duration-300 hover:shadow-xl hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-green-500/30"
             style={{
@@ -186,6 +187,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
           </button>
           {editingIndex !== null && (
             <button
+              type="button"
               onClick={handleCancel}
               className="flex items-center gap-2 px-6 py-3 border-2 border-warm-wood text-warm-wood font-semibold rounded-xl transition-all duration-300 hover:bg-warm-wood hover:text-white focus:outline-none focus:ring-4 focus:ring-warm-wood/30"
             >
@@ -218,12 +220,14 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
               </div>
               <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={() => handleEdit(index)}
                   className="p-2 border-2 border-warm-wood text-warm-wood rounded-lg hover:bg-warm-wood hover:text-white transition-all focus:outline-none focus:ring-4 focus:ring-warm-wood/30"
                 >
                   <Edit className="h-4 w-4" />
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleDelete(index)}
                   className="p-2 border-2 border-terracotta text-terracotta rounded-lg hover:bg-terracotta hover:text-white transition-all focus:outline-none focus:ring-4 focus:ring-terracotta/30"
                 >

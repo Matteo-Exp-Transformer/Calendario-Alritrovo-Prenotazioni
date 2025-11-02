@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { usePendingBookings, useAcceptedBookings } from '../hooks/useBookingQueries'
 import { useAcceptBooking, useRejectBooking } from '../hooks/useBookingMutations'
 import { BookingRequestCard } from './BookingRequestCard'
+import { RejectBookingModal } from './RejectBookingModal'
 import { toast } from 'react-toastify'
 import type { BookingRequest } from '@/types/booking'
 import { getSlotsOccupiedByBooking } from '../utils/capacityCalculator'
@@ -13,6 +14,10 @@ export const PendingRequestsTab: React.FC = () => {
   const { data: acceptedBookings = [] } = useAcceptedBookings()
   const acceptMutation = useAcceptBooking()
   const rejectMutation = useRejectBooking()
+  
+  // Stato per gestire il modal di rifiuto
+  const [rejectModalOpen, setRejectModalOpen] = useState(false)
+  const [selectedBookingForReject, setSelectedBookingForReject] = useState<BookingRequest | null>(null)
 
   // Function to check if there are enough seats available
   const checkCapacity = (booking: BookingRequest, startTime: string, endTime: string): boolean => {
@@ -150,17 +155,34 @@ export const PendingRequestsTab: React.FC = () => {
     )
   }
 
-  const handleReject = async (booking: BookingRequest) => {
+  // Apre il modal quando si clicca su "Rifiuta"
+  const handleReject = (booking: BookingRequest) => {
     console.log('🔵 [PendingRequestsTab] handleReject called with:', booking.id)
+    setSelectedBookingForReject(booking)
+    setRejectModalOpen(true)
+  }
+
+  // Conferma il rifiuto con il motivo inserito dall'admin
+  const handleRejectConfirm = async (rejectionReason: string) => {
+    if (!selectedBookingForReject) {
+      console.error('❌ [PendingRequestsTab] No booking selected for rejection')
+      return
+    }
+
+    console.log('🔵 [PendingRequestsTab] handleRejectConfirm called with reason:', rejectionReason)
     
     try {
       await rejectMutation.mutateAsync({
-        bookingId: booking.id,
-        rejectionReason: 'Rifiutata dall\'amministratore',
+        bookingId: selectedBookingForReject.id,
+        rejectionReason: rejectionReason || undefined,
       })
       
       console.log('✅ [PendingRequestsTab] Reject mutation success')
       toast.success('Prenotazione rifiutata con successo!')
+      
+      // Chiudi il modal e resetta lo stato
+      setRejectModalOpen(false)
+      setSelectedBookingForReject(null)
       
       // Forza il refetch delle richieste pending
       await refetch()
@@ -169,6 +191,12 @@ export const PendingRequestsTab: React.FC = () => {
       console.error('❌ [PendingRequestsTab] Reject mutation error:', error)
       toast.error('Errore nel rifiuto della prenotazione')
     }
+  }
+
+  // Chiude il modal senza confermare
+  const handleRejectModalClose = () => {
+    setRejectModalOpen(false)
+    setSelectedBookingForReject(null)
   }
 
   if (isLoading) {
@@ -224,6 +252,15 @@ export const PendingRequestsTab: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Modal per il rifiuto con motivo */}
+      <RejectBookingModal
+        isOpen={rejectModalOpen}
+        onClose={handleRejectModalClose}
+        booking={selectedBookingForReject}
+        onConfirm={handleRejectConfirm}
+        isLoading={rejectMutation.isPending}
+      />
     </div>
   )
 }

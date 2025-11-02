@@ -62,6 +62,7 @@ export interface Database {
           menu_selection: Json | null
           menu_total_per_person: number | null
           menu_total_booking: number | null
+          preset_menu: string | null
           dietary_restrictions: Json | null
           status: string
           confirmed_start: string | null

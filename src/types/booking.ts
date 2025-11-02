@@ -29,6 +29,7 @@ export interface BookingRequest {
   }
   menu_total_per_person?: number
   menu_total_booking?: number
+  preset_menu?: 'menu_1' | 'menu_2' | 'menu_3' | null
   dietary_restrictions?: Array<{
     restriction: string
     guest_count: number
@@ -62,6 +63,7 @@ export interface BookingRequestInput {
   }
   menu_total_per_person?: number
   menu_total_booking?: number
+  preset_menu?: 'menu_1' | 'menu_2' | 'menu_3' | null
   dietary_restrictions?: Array<{
     restriction: string
     guest_count: number

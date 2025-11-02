@@ -127,9 +127,7 @@ export const AdminDashboard: React.FC = () => {
               onExpandedChange={setShowNewBookingPanel}
               headerClassName="bg-al-ritrovo-primary/5 hover:bg-al-ritrovo-primary/10 border-b border-al-ritrovo-primary/20"
             >
-              <div className="bg-white rounded-lg">
-                <AdminBookingForm />
-              </div>
+              <AdminBookingForm />
             </CollapsibleCard>
 
             {/* Collapse Card con Prenotazioni Pendenti */}
