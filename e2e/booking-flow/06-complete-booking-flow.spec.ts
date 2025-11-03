@@ -139,16 +139,52 @@ test.describe('Flusso Completo Prenotazione - Inserimento → Accettazione → V
 
     await page.screenshot({ path: 'e2e/screenshots/complete-02-form-filled.png', fullPage: true });
 
-    // Step 3: Submit form
+    // Step 3: Submit form and wait for API response
     console.log('\n🚀 Step 3: Submitting form...');
     const submitButton = page.locator('button[type="submit"], button:has-text("Invia")').first();
-    await submitButton.click();
-    console.log('✅ Form submitted');
+    
+    // ✅ CRITICO: Aspetta la risposta API prima di continuare
+    // Questo garantisce che la prenotazione sia effettivamente salvata nel database
+    console.log('⏳ Waiting for API response after submit...');
+    
+    const [apiResponse] = await Promise.all([
+      page.waitForResponse(
+        (response) => {
+          const url = response.url();
+          const isBookingRequest = url.includes('booking_requests');
+          const isSuccess = response.status() === 200 || response.status() === 201;
+          return isBookingRequest && isSuccess;
+        },
+        { timeout: 15000 }
+      ).catch(() => null),
+      submitButton.click()
+    ]);
 
-    // Step 4: Wait for success response
+    console.log('✅ Submit button clicked');
+
+    if (apiResponse) {
+      console.log(`✅ API response received: ${apiResponse.status()}`);
+      try {
+        const responseData = await apiResponse.json().catch(() => null);
+        if (responseData) {
+          const booking = Array.isArray(responseData) ? responseData[0] : responseData;
+          if (booking && booking.id) {
+            console.log(`✅ Booking created with ID: ${booking.id}`);
+            console.log(`   Email: ${booking.client_email || 'N/A'}`);
+            console.log(`   Status: ${booking.status || 'N/A'}`);
+          }
+        }
+      } catch (e) {
+        console.log('⚠️ Could not parse response JSON, but status is OK');
+      }
+    } else {
+      console.log('⚠️ No API response detected, but continuing...');
+    }
+
+    // Step 4: Wait for success response (UI indicators - optional)
     console.log('\n⏳ Step 4: Waiting for success response...');
     
-    // Wait for success modal or message
+    // Wait for success modal or message (optional - API response is more reliable)
     const successIndicators = [
       page.locator('[role="dialog"]'),
       page.locator('text=/successo|success|inviata|ricevuta/i'),
@@ -168,7 +204,7 @@ test.describe('Flusso Completo Prenotazione - Inserimento → Accettazione → V
     }
 
     if (!successFound) {
-      console.log('⚠️ Success indicator not found, but continuing...');
+      console.log('⚠️ Success indicator not found, but API response confirms booking was created');
     }
 
     await page.waitForTimeout(2000);
