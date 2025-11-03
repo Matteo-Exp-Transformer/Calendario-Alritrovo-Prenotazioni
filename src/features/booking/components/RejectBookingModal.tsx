@@ -22,12 +22,16 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
   // Reset form when modal closes
   useEffect(() => {
     if (isOpen) {
-      console.log('✅ [RejectModal] Modal opened!')
+      console.log('✅ [RejectModal] Modal opened!', {
+        isOpen,
+        hasBooking: !!booking,
+        bookingId: booking?.id
+      })
     } else {
       setRejectionReason('')
       console.log('🔵 [RejectModal] Modal closed, resetting form')
     }
-  }, [isOpen])
+  }, [isOpen, booking])
 
   useEffect(() => {
     if (isOpen) {
@@ -62,9 +66,17 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
     }
   }, [isOpen, onClose])
 
-  if (!isOpen || !booking) {
+  if (!isOpen) {
+    console.log('⚠️ [RejectModal] Modal not open, isOpen:', isOpen)
     return null
   }
+  
+  if (!booking) {
+    console.warn('⚠️ [RejectModal] Modal open but no booking provided!', { isOpen, booking })
+    return null
+  }
+  
+  console.log('✅ [RejectModal] Rendering modal', { isOpen, bookingId: booking.id })
 
   return (
     <div
@@ -74,14 +86,16 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
         left: 0,
         right: 0,
         bottom: 0,
-        zIndex: 99999,
+        zIndex: 999999, // Aumentato per essere sicuro che sia sopra tutto
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '1rem',
+        pointerEvents: 'auto', // Assicura che gli eventi funzionino
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
+          console.log('🔵 [RejectModal] Clicked on overlay, closing modal')
           onClose()
         }
       }}
@@ -95,7 +109,7 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
           right: 0,
           bottom: 0,
           backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 99998,
+          zIndex: 999998,
         }}
       />
 
@@ -103,7 +117,7 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
       <div
         style={{
           position: 'relative',
-          zIndex: 99999,
+          zIndex: 999999, // Aumentato per essere sicuro che sia sopra tutto
           backgroundColor: '#ffffff',
           borderRadius: '0.5rem',
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
@@ -111,8 +125,12 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
           maxWidth: '32rem',
           maxHeight: '90vh',
           overflow: 'auto',
+          pointerEvents: 'auto', // Assicura che gli eventi funzionino
         }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation()
+          console.log('🔵 [RejectModal] Clicked on modal content')
+        }}
       >
         {/* Header */}
         <div

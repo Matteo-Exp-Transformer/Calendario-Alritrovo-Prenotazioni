@@ -185,15 +185,16 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
       {/* Titolo Sezione */}
       <h2
-        className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
+        className="text-2xl md:text-3xl font-serif text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
         style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.5)',
-          backdropFilter: 'blur(6px)',
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(1px)',
           padding: '12px 24px',
-          borderRadius: '12px'
+          borderRadius: '16px',
+          fontWeight: '700'
         }}
       >
         Menù
@@ -213,7 +214,8 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
           // Controlla se ci sono caraffe selezionate
           const hasCaraffe = selectedItems.some(i => i.category === 'bevande' && 
             (isCaraffeDrinkStandard(i.name) || isCaraffeDrinkPremium(i.name)))
-          if (hasCaraffe) maxLimit = 1 // Solo una caraffe può essere selezionata
+          // Mostra sempre il count per le bevande
+          maxLimit = hasCaraffe ? 1 : null // maxLimit null permette di mostrare il count senza limite massimo
         }
         if (category === 'antipasti') maxLimit = 3
         if (category === 'fritti') maxLimit = 3
@@ -223,22 +225,27 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
         return (
           <div key={category} className="space-y-3 w-full">
             <h3
-              className="text-3xl font-bold border-b border-gray-300 pb-2 flex items-center justify-between w-full"
+              className="text-lg md:text-xl border-b border-gray-300 pb-2 flex items-center justify-between w-full"
               style={{
                 color: '#2563EB',
-                backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                backdropFilter: 'blur(6px)',
-                padding: '16px 28px',
+                backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                backdropFilter: 'blur(1px)',
+                padding: '8px 16px',
                 borderRadius: '12px',
-                width: '100%'
+                width: '100%',
+                fontWeight: '700'
               }}
             >
               <span>{label}</span>
-              {maxLimit !== null && (
+              {category === 'bevande' || maxLimit !== null ? (
                 <span className="text-sm text-gray-600">
-                  ({selectedCount}/{maxLimit} selezionat{selectedCount === 1 ? 'o' : 'i'})
+                  {category === 'bevande' && maxLimit === null ? (
+                    `(${selectedCount} selezionat${selectedCount === 1 ? 'a' : 'e'})`
+                  ) : (
+                    `(${selectedCount}/${maxLimit} selezionat${selectedCount === 1 ? 'o' : 'i'})`
+                  )}
                 </span>
-              )}
+              ) : null}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
               {items.map((item) => {
@@ -247,19 +254,25 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                   <label
                     key={item.id}
                     className={`
-                      flex items-center gap-4 p-8 rounded-xl border-2 cursor-pointer w-full
+                      flex items-center gap-4 rounded-xl border-2 cursor-pointer w-full
                       transition-all duration-200
                     `}
                     style={{
-                      minHeight: '100px',
-                      backgroundColor: isSelected ? 'rgba(245, 222, 179, 0.6)' : 'rgba(255, 255, 255, 0.5)',
-                      backdropFilter: 'blur(6px)',
+                      minHeight: item.description ? '80px' : '80px',
+                      maxHeight: 'none',
+                      backgroundColor: isSelected ? 'rgba(245, 222, 179, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+                      backdropFilter: 'blur(1px)',
                       borderColor: isSelected ? '#8B4513' : 'rgba(0,0,0,0.2)',
-                      padding: '28px 32px',
+                      paddingTop: '6px',
+                      paddingBottom: '6px',
+                      paddingLeft: '24px',
+                      paddingRight: '24px',
                       borderRadius: '16px',
                       marginBottom: '4px',
                       width: '100%',
-                      maxWidth: '100%'
+                      maxWidth: '1800px',
+                      height: item.description ? 'auto' : '80px',
+                      boxSizing: 'border-box'
                     }}
                   >
                     <input
@@ -280,20 +293,20 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                         <Check className="h-4 w-4 text-white" strokeWidth={3} />
                       )}
                     </div>
-                    <div className="flex-1" style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px', minWidth: 0 }}>
-                      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-0">
-                        <span className={`font-bold flex-1 ${isSelected ? 'text-warm-wood' : 'text-gray-700'} text-base md:text-lg`} style={{ fontWeight: '700', wordBreak: 'break-word' }}>
-                          {item.name}
-                        </span>
-                        <span className="text-lg md:text-xl font-bold text-warm-wood md:ml-6 flex-shrink-0" style={{ paddingRight: '12px', fontWeight: '700' }}>
-                          €{item.price.toFixed(2)}
-                        </span>
+                    <div className="flex-1 flex items-center w-full" style={{ paddingLeft: '12px', paddingRight: '12px', paddingTop: '0px', paddingBottom: '0px', minWidth: 0, height: '100%', display: 'grid', gridTemplateColumns: '180px 1fr 100px', gap: '8px', alignItems: 'center' }}>
+                      <span className={`font-bold ${isSelected ? 'text-warm-wood' : 'text-gray-700'}`} style={{ fontWeight: '700', whiteSpace: 'nowrap', fontSize: '20px' }}>
+                        {item.name}
+                      </span>
+                      <div className="flex justify-center items-center" style={{ width: '100%', minHeight: '68px' }}>
+                        {item.description ? (
+                          <p className="font-bold text-gray-600 text-center" style={{ fontWeight: '700', wordBreak: 'break-word', lineHeight: '1.3', fontSize: '20px', width: '100%', margin: 0 }}>
+                            {item.description}
+                          </p>
+                        ) : null}
                       </div>
-                      {item.description && (
-                        <p className="text-sm md:text-base font-bold text-gray-600 mt-2" style={{ fontWeight: '700', wordBreak: 'break-word' }}>
-                          {item.description}
-                        </p>
-                      )}
+                      <span className="text-sm md:text-base font-bold text-warm-wood whitespace-nowrap" style={{ fontWeight: '700', textAlign: 'right' }}>
+                        €{item.price.toFixed(2)}
+                      </span>
                     </div>
                   </label>
                 )
@@ -305,18 +318,19 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
 
       {/* Totale a Persona */}
       {selectedItems.length > 0 && (
-        <div 
-          className="rounded-xl p-8 w-full"
+        <div
+          className="w-full"
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.5)',
-            backdropFilter: 'blur(6px)',
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            backdropFilter: 'blur(1px)',
             border: '2px solid rgba(0, 0, 0, 0.2)',
-            padding: '32px 40px'
+            padding: '28px 32px',
+            borderRadius: '16px'
           }}
         >
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <span className="text-2xl md:text-3xl font-bold text-warm-wood">Totale a Persona:</span>
-            <span className="text-4xl md:text-5xl font-bold text-warm-wood">€{totalPerPerson.toFixed(2)}</span>
+            <span className="text-2xl md:text-3xl text-warm-wood" style={{ fontWeight: '700' }}>Totale a Persona:</span>
+            <span className="text-4xl md:text-5xl text-warm-wood" style={{ fontWeight: '700' }}>€{totalPerPerson.toFixed(2)}</span>
           </div>
         </div>
       )}

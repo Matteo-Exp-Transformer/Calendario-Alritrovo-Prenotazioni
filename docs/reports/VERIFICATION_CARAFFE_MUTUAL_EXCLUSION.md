@@ -162,3 +162,4 @@ if (category === 'bevande') {
 - Il test debug (`test-caraffe-debug-names.spec.ts`) è stato utilizzato per identificare i nomi esatti nel frontend
 
 
+

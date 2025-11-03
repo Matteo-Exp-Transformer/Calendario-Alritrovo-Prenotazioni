@@ -37,6 +37,51 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
   
   // Ref per prevenire doppi submit (anche con React StrictMode)
   const isSubmittingRef = useRef(false)
+  
+  // Protezione globale usando sessionStorage - lock semplice e globale (non dipende dai dati)
+  const GLOBAL_LOCK_KEY = 'booking-submit-global-lock'
+  const LOCK_TIMEOUT = 10000 // 10 secondi
+  
+  const checkGlobalSubmissionLock = (): boolean => {
+    try {
+      const existingLock = sessionStorage.getItem(GLOBAL_LOCK_KEY)
+      
+      if (existingLock) {
+        const lockTime = parseInt(existingLock, 10)
+        const now = Date.now()
+        // Lock valido per il timeout
+        if (now - lockTime < LOCK_TIMEOUT) {
+          console.warn('⚠️ [BookingForm] Submit già in corso (global lock), ignorando', {
+            lockAge: now - lockTime,
+            remaining: LOCK_TIMEOUT - (now - lockTime)
+          })
+          return false
+        }
+        // Lock scaduto, rimuovilo
+        sessionStorage.removeItem(GLOBAL_LOCK_KEY)
+        console.log('🔵 [BookingForm] Lock scaduto, rimosso')
+      }
+      
+      // Imposta nuovo lock IMMEDIATAMENTE
+      sessionStorage.setItem(GLOBAL_LOCK_KEY, Date.now().toString())
+      console.log('✅ [BookingForm] Global lock impostato')
+      return true
+    } catch (error) {
+      // Se sessionStorage non è disponibile, continua comunque (fallback graceful)
+      console.warn('⚠️ [BookingForm] sessionStorage non disponibile, continuo senza lock globale:', error)
+      return true
+    }
+  }
+  
+  const clearGlobalSubmissionLock = () => {
+    try {
+      sessionStorage.removeItem(GLOBAL_LOCK_KEY)
+      console.log('✅ [BookingForm] Global lock rimosso')
+    } catch (error) {
+      // Ignora errori di sessionStorage
+      console.warn('⚠️ [BookingForm] Errore nel clear lock:', error)
+    }
+  }
 
   // Reset num_guests to 0 when cleared - only allow numeric input
   const handleNumGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -207,38 +252,59 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    e.stopPropagation() // Previene propagazione eventi
 
     console.log('🔵 [BookingForm] Submit click')
     console.log('🔵 [BookingForm] Form data:', formData)
     console.log('🔵 [BookingForm] Privacy accepted:', privacyAccepted)
     
-    // ✅ PROTEZIONE CONTRO DOPPI SUBMIT
-    // Previene doppi submit anche se React StrictMode causa doppi render
-    if (isSubmittingRef.current) {
-      console.warn('⚠️ [BookingForm] Submit già in corso, ignorando chiamata duplicata')
+    // ✅ PROTEZIONE MULTI-LIVELLO CONTRO DOPPI SUBMIT
+    // IMPORTANTE: L'ordine è critico - controlla prima il lock globale (più rapido)
+    
+    // 1. Controllo lock globale PRIMA (protezione tra mount diversi - React StrictMode)
+    // Questo è il controllo più importante perché funziona anche tra istanze diverse
+    if (!checkGlobalSubmissionLock()) {
+      console.warn('❌ [BookingForm] Bloccato da global lock')
       return
     }
     
+    // 2. Controllo ref locale (protezione istanza componente)
+    if (isSubmittingRef.current) {
+      console.warn('⚠️ [BookingForm] Submit già in corso (ref lock), ignorando chiamata duplicata')
+      clearGlobalSubmissionLock() // Rimuovi lock globale se ref è già attivo
+      return
+    }
+    
+    // 3. Controllo mutation state (protezione React Query)
     if (isPending) {
-      console.warn('⚠️ [BookingForm] Mutation già in corso, ignorando submit')
+      console.warn('⚠️ [BookingForm] Mutation già in corso (mutation state), ignorando submit')
+      clearGlobalSubmissionLock() // Rimuovi lock globale se mutation è già in corso
       return
     }
 
-    // Check rate limit first
+    // Check rate limit
     if (!checkRateLimit()) {
+      clearGlobalSubmissionLock() // Rimuovi lock se rate limit
       return
     }
 
+    // Validazione
     if (!validate()) {
+      clearGlobalSubmissionLock() // Rimuovi lock se validazione fallisce
       if (!privacyAccepted) {
         toast.error('È necessario accettare la Privacy Policy per inviare la richiesta')
       }
       return
     }
 
-    // Imposta il flag per prevenire doppi submit
+    // Imposta tutti i flag per prevenire doppi submit
     isSubmittingRef.current = true
     console.log('✅ [BookingForm] Validation passed, calling mutate...')
+    console.log('🔵 [BookingForm] Lock state:', {
+      globalLock: sessionStorage.getItem(GLOBAL_LOCK_KEY),
+      refLock: isSubmittingRef.current,
+      isPending
+    })
     
     mutate(formData, {
       onSuccess: () => {
@@ -262,8 +328,9 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         })
         setPrivacyAccepted(false)
         
-        // Reset flag di submit
+        // Reset tutti i flag di submit
         isSubmittingRef.current = false
+        clearGlobalSubmissionLock()
         
         // Mostra la modal di conferma invece del toast
         setShowSuccessModal(true)
@@ -272,8 +339,9 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       },
       onError: (error) => {
         console.error('❌ [BookingForm] Mutation error:', error)
-        // Reset flag in caso di errore per permettere nuovo tentativo
+        // Reset tutti i flag in caso di errore per permettere nuovo tentativo
         isSubmittingRef.current = false
+        clearGlobalSubmissionLock()
       }
     })
   }
@@ -284,12 +352,13 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       {/* Sezione: Dati Personali */}
       <div className="space-y-6">
         <h2
-          className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
+          className="text-2xl md:text-3xl font-serif text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.5)',
-            backdropFilter: 'blur(6px)',
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            backdropFilter: 'blur(1px)',
             padding: '12px 24px',
-            borderRadius: '12px'
+            borderRadius: '16px',
+            fontWeight: '700'
           }}
         >
           Dati Personali
@@ -354,12 +423,13 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       {/* Sezione: Dettagli Prenotazione */}
       <div className="space-y-6">
         <h2
-          className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
+          className="text-2xl md:text-3xl font-serif text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.5)',
-            backdropFilter: 'blur(6px)',
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            backdropFilter: 'blur(1px)',
             padding: '12px 24px',
-            borderRadius: '12px'
+            borderRadius: '16px',
+            fontWeight: '700'
           }}
         >
           Dettagli Prenotazione
@@ -368,15 +438,14 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         {/* Tipologia di Prenotazione - DROPDOWN */}
         <div>
           <label
-            className="block text-sm font-bold text-warm-wood"
+            className="block text-base md:text-lg text-warm-wood mb-2"
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.5)',
-              backdropFilter: 'blur(6px)',
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(1px)',
               padding: '8px 16px',
               borderRadius: '12px',
-              display: 'block',
-              fontWeight: '700',
-              marginBottom: '8px'
+              display: 'inline-block',
+              fontWeight: '700'
             }}
           >
             Tipo di prenotazione *
@@ -388,15 +457,15 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               setFormData({ ...formData, booking_type: e.target.value as 'tavolo' | 'rinfresco_laurea' })
               setErrors({ ...errors, booking_type: '' })
             }}
-            className="block rounded-full border bg-white/50 backdrop-blur-[6px] shadow-sm transition-all"
+            className="block rounded-full border shadow-sm transition-all"
             style={{
               borderColor: 'rgba(0,0,0,0.2)',
               height: '56px',
               padding: '16px',
               fontSize: '16px',
               fontWeight: '700',
-              backgroundColor: 'rgba(255, 255, 255, 0.5)',
-              backdropFilter: 'blur(6px)',
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(1px)',
               color: 'black',
               width: '100%'
             }}
@@ -447,8 +516,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             <div
               className="text-sm text-red-600 p-3 rounded-lg"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                backdropFilter: 'blur(8px)',
+                backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                backdropFilter: 'blur(1px)',
                 border: '1px solid rgba(239, 68, 68, 0.3)'
               }}
             >
@@ -493,8 +562,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             <div
               className="text-sm text-red-600 p-3 rounded-lg"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                backdropFilter: 'blur(8px)',
+                backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                backdropFilter: 'blur(1px)',
                 border: '1px solid rgba(239, 68, 68, 0.3)'
               }}
             >
@@ -526,7 +595,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       </div>
       {/* Menu Selection - Solo per Rinfresco di Laurea */}
       {formData.booking_type === 'rinfresco_laurea' && (
-        <div className="space-y-6">
+        <div className="space-y-6" style={{ position: 'relative', left: '50%', transform: 'translateX(-50%)', width: '100vw', maxWidth: '1400px', paddingLeft: '2rem', paddingRight: '2rem' }}>
           <MenuSelection
             selectedItems={formData.menu_selection?.items || []}
             onMenuChange={(items, totalPerPerson) => {
@@ -603,7 +672,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             <label
               htmlFor="privacy-consent"
               className="cursor-pointer text-sm text-warm-wood-dark font-medium leading-relaxed"
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: '8px 16px', borderRadius: '8px', backdropFilter: 'blur(4px)', maxWidth: '600px' }}
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', padding: '8px 16px', borderRadius: '8px', backdropFilter: 'blur(1px)', maxWidth: '600px' }}
             >
               Accetto la{' '}
               <Link
@@ -622,17 +691,12 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       )}
 
       {/* Submit Button */}
-      <div className="flex justify-center items-center mt-4 w-full px-4">
+      <div className="flex justify-center items-center mt-8 w-full">
         <button
             type="submit"
             disabled={isPending || isBlocked}
-            style={{ 
-              backgroundColor: '#22c55e', 
-              borderRadius: '50px',
-              paddingTop: '25px',
-              paddingBottom: '25px'
-            }}
-            className="group relative overflow-hidden bg-green-600 px-8 py-6 md:px-64 md:py-6 text-xl md:text-2xl font-bold uppercase tracking-wide text-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(34,197,94,0.4)] hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl w-full max-w-full md:w-auto md:max-w-none"
+            className="group relative overflow-hidden px-12 md:px-20 text-xl md:text-2xl uppercase tracking-wide text-white rounded-full bg-green-600 hover:bg-green-700 shadow-2xl hover:shadow-[0_20px_40px_rgba(34,197,94,0.4)] hover:-translate-y-1 transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl w-full md:w-auto max-w-md md:max-w-2xl"
+            style={{ fontWeight: '700', backgroundColor: '#16a34a', paddingTop: '28px', paddingBottom: '28px' }}
           >
             {/* Glow effect on hover */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>

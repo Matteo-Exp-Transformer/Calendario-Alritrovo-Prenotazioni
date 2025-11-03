@@ -112,11 +112,20 @@ export const useRejectBooking = () => {
       return data as BookingRequest
     },
     onSuccess: async (booking: BookingRequest) => {
+      console.log('✅ [useRejectBooking] Mutation successful, invalidating queries...')
+      
       // Invalida tutte le queries per refresh automatico completo
       await queryClient.invalidateQueries({ queryKey: ['bookings'] })
       await queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'] })
       await queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'] })
-      console.log('✅ [useRejectBooking] All bookings queries invalidated')
+      await queryClient.invalidateQueries({ queryKey: ['bookings', 'all'] })
+      await queryClient.invalidateQueries({ queryKey: ['bookings', 'stats'] })
+      
+      // Forza il refetch esplicito delle query critiche
+      await queryClient.refetchQueries({ queryKey: ['bookings', 'pending'] })
+      await queryClient.refetchQueries({ queryKey: ['bookings', 'stats'] })
+      
+      console.log('✅ [useRejectBooking] All bookings queries invalidated and refetched')
       
       // Send email notification
       if (areEmailNotificationsEnabled()) {

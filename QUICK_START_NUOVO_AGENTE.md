@@ -77,3 +77,4 @@ Se il test timeout:
 3. Usa `--headed` per vedere browser: `npx playwright test --headed`
 
 Buon lavoro! 🚀
+

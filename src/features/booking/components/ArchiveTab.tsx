@@ -3,6 +3,7 @@ import { useAllBookings } from '../hooks/useBookingQueries'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { Calendar, Clock, Users, Tag, Mail, Phone, MessageSquare, ChevronDown, ChevronUp, User, UtensilsCrossed, Wine, PartyPopper, GraduationCap, Archive, CheckCircle, XCircle } from 'lucide-react'
+import { extractTimeFromISO } from '../utils/dateUtils'
 
 type ArchiveFilter = 'all' | 'accepted' | 'rejected'
 
@@ -45,7 +46,11 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
   const statusConfig = STATUS_LABELS[booking.status] || STATUS_LABELS.pending
 
   const displayDate = booking.confirmed_start || booking.desired_date
-  const displayTime = booking.desired_time || 'Non specificato'
+  // ✅ FIX: Per prenotazioni accettate, usa confirmed_start invece di desired_time
+  // Questo preserva l'orario esatto inserito dall'utente senza conversioni timezone
+  const displayTime = booking.confirmed_start
+    ? extractTimeFromISO(booking.confirmed_start)
+    : booking.desired_time || 'Non specificato'
 
   return (
     <div style={{

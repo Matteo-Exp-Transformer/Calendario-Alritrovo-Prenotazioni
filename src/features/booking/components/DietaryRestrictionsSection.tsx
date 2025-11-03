@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Input, Textarea } from '@/components/ui'
 import { Link } from 'react-router-dom'
-import { Plus, Edit, Trash2, X, Check } from 'lucide-react'
+import { Plus, Trash2, X, Check } from 'lucide-react'
 import { DIETARY_RESTRICTIONS, type DietaryRestrictionType } from '@/types/menu'
 
 interface DietaryRestriction {
@@ -69,14 +69,6 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
     setOtherNotes('')
   }
 
-  const handleEdit = (index: number) => {
-    const restriction = restrictions[index]
-    setSelectedRestriction(restriction.restriction as DietaryRestrictionType | 'Altro')
-    setGuestCount(restriction.guest_count)
-    setOtherNotes(restriction.notes || '')
-    setEditingIndex(index)
-  }
-
   const handleDelete = (index: number) => {
     const updated = restrictions.filter((_, i) => i !== index)
     onRestrictionsChange(updated)
@@ -99,12 +91,13 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
     <div className="space-y-6">
       {/* Titolo Sezione */}
       <h2
-        className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
+        className="text-2xl md:text-3xl font-serif text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
         style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.5)',
-          backdropFilter: 'blur(6px)',
-          padding: '12px 20px',
-          borderRadius: '12px'
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(1px)',
+          padding: '12px 24px',
+          borderRadius: '16px',
+          fontWeight: '700'
         }}
       >
         Intolleranze e Richieste Speciali
@@ -113,60 +106,86 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
       {/* Form Aggiunta/Modifica */}
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-full">
-          <div>
-            <label 
-              className="block text-sm font-bold text-warm-wood mb-2"
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                backdropFilter: 'blur(6px)',
-                padding: '8px 16px',
-                borderRadius: '12px',
-                display: 'inline-block',
-                fontWeight: '700',
-                marginBottom: '8px'
-              }}
-            >
-              Intolleranza / Esigenza *
-            </label>
-            <select
-              value={selectedRestriction}
-              onChange={(e) => {
-                const value = e.target.value as DietaryRestrictionType | 'Altro'
-                setSelectedRestriction(value)
-                if (value !== 'Altro') {
-                  setOtherNotes('')
-                }
-              }}
-              className="flex rounded-full border bg-white/50 backdrop-blur-[6px] shadow-sm transition-all text-gray-600 w-full"
-              style={{ 
-                borderColor: 'rgba(0,0,0,0.2)', 
-                height: '56px',
-                padding: '16px',
-                fontSize: '16px',
-                fontWeight: '700',
-                backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                backdropFilter: 'blur(6px)',
-                marginBottom: '15px'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#8B6914'}
-              onBlur={(e) => e.target.style.borderColor = 'rgba(0,0,0,0.2)'}
-            >
-              {DIETARY_RESTRICTIONS.map((restriction) => (
-                <option key={restriction} value={restriction}>{restriction}</option>
-              ))}
-            </select>
+          <div className="space-y-4">
+            <div>
+              <label
+                className="block text-base md:text-lg text-warm-wood mb-2"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                  backdropFilter: 'blur(1px)',
+                  padding: '8px 16px',
+                  borderRadius: '12px',
+                  display: 'inline-block',
+                  fontWeight: '700'
+                }}
+              >
+                Intolleranza / Esigenza *
+              </label>
+              <select
+                value={selectedRestriction}
+                onChange={(e) => {
+                  const value = e.target.value as DietaryRestrictionType | 'Altro'
+                  setSelectedRestriction(value)
+                  if (value !== 'Altro') {
+                    setOtherNotes('')
+                  }
+                }}
+                className="flex rounded-full border shadow-sm transition-all text-gray-600 w-full"
+                style={{
+                  borderColor: 'rgba(0,0,0,0.2)',
+                  height: '56px',
+                  padding: '16px',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                  backdropFilter: 'blur(1px)',
+                  marginBottom: '15px'
+                }}
+                onFocus={(e) => e.target.style.borderColor = '#8B6914'}
+                onBlur={(e) => e.target.style.borderColor = 'rgba(0,0,0,0.2)'}
+              >
+                {DIETARY_RESTRICTIONS.map((restriction) => (
+                  <option key={restriction} value={restriction}>{restriction}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Campo Altro - appare subito sotto il dropdown */}
+            {selectedRestriction === 'Altro' && (
+              <div>
+                <label
+                  className="block text-base md:text-lg text-warm-wood mb-2"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                    backdropFilter: 'blur(1px)',
+                    padding: '8px 16px',
+                    borderRadius: '12px',
+                    display: 'inline-block',
+                    fontWeight: '700'
+                  }}
+                >
+                  Specifica intolleranza / esigenza *
+                </label>
+                <Input
+                  value={otherNotes}
+                  onChange={(e) => setOtherNotes(e.target.value)}
+                  placeholder="Descrivi l'intolleranza o esigenza"
+                  className="w-full"
+                />
+              </div>
+            )}
           </div>
+
           <div style={{ marginTop: '15px' }}>
-            <label 
-              className="block text-sm font-bold text-warm-wood mb-2"
+            <label
+              className="block text-base md:text-lg text-warm-wood mb-2"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                backdropFilter: 'blur(6px)',
+                backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                backdropFilter: 'blur(1px)',
                 padding: '8px 16px',
                 borderRadius: '12px',
                 display: 'inline-block',
-                fontWeight: '700',
-                marginBottom: '8px'
+                fontWeight: '700'
               }}
             >
               Numero ospiti con intolleranze alimentari *
@@ -180,44 +199,35 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
             />
           </div>
         </div>
+
         <div className="flex gap-3">
           <button
             type="button"
             onClick={handleAdd}
-            className="flex items-center justify-center gap-2 text-white font-semibold transition-all duration-300 hover:shadow-xl hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-green-500/30"
-            style={{
-              backgroundColor: '#22c55e',
-              borderRadius: '50px',
-              padding: '12px 24px',
-              fontSize: '16px',
-              fontWeight: '600'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#16a34a'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#22c55e'
-            }}
+            className="flex items-center justify-center gap-3 text-lg text-white rounded-full bg-green-600 hover:bg-green-700 shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-green-500/30"
+            style={{ fontWeight: '700', backgroundColor: '#16a34a', paddingTop: '20px', paddingBottom: '20px', paddingLeft: '40px', paddingRight: '40px' }}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-5 w-5" />
             {editingIndex !== null ? 'Salva Modifiche' : 'Aggiungi'}
           </button>
           {editingIndex !== null && (
             <button
               type="button"
               onClick={handleCancel}
-              className="flex items-center gap-2 px-6 py-3 border-2 border-warm-wood text-warm-wood font-semibold rounded-xl transition-all duration-300 hover:bg-warm-wood hover:text-white focus:outline-none focus:ring-4 focus:ring-warm-wood/30"
+              className="flex items-center gap-2 px-6 py-3 border-2 border-warm-wood text-warm-wood rounded-full bg-transparent hover:bg-warm-wood hover:text-white shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-warm-wood/30"
+              style={{ fontWeight: '600' }}
             >
               <X className="h-4 w-4" />
               Annulla
             </button>
           )}
         </div>
-        <p 
+
+        <p
           className="text-xs text-gray-700 mt-2"
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.5)',
-            backdropFilter: 'blur(6px)',
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            backdropFilter: 'blur(1px)',
             padding: '8px 16px',
             borderRadius: '12px',
             display: 'inline-block',
@@ -226,42 +236,19 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
         >
           Nota: Questo numero è solo per associare l'intolleranza specifica e non viene sommato al totale ospiti della prenotazione.
         </p>
-        {selectedRestriction === 'Altro' && (
-          <div>
-            <label 
-              className="block text-sm font-bold text-warm-wood mb-4"
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                backdropFilter: 'blur(6px)',
-                padding: '8px 16px',
-                borderRadius: '12px',
-                display: 'inline-block',
-                fontWeight: '700',
-                marginBottom: '16px'
-              }}
-            >
-              Specifica intolleranza / esigenza *
-            </label>
-            <Input
-              value={otherNotes}
-              onChange={(e) => setOtherNotes(e.target.value)}
-              placeholder="Descrivi l'intolleranza o esigenza"
-              className="w-full"
-            />
-          </div>
-        )}
       </div>
 
       {/* Lista Recap */}
       {restrictions.length > 0 && (
         <div>
           <h3
-            className="text-lg font-bold text-gray-800 mb-4"
+            className="text-lg md:text-xl text-gray-800 mb-4"
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.5)',
-              backdropFilter: 'blur(6px)',
-              padding: '12px 20px',
-              borderRadius: '12px'
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(1px)',
+              padding: '8px 16px',
+              borderRadius: '12px',
+              fontWeight: '700'
             }}
           >
             Intolleranze inserite:
@@ -293,17 +280,10 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
               <div className="flex gap-3 md:ml-auto flex-shrink-0 w-full md:w-auto justify-end md:justify-start">
                 <button
                   type="button"
-                  onClick={() => handleEdit(index)}
-                  className="p-2 border-2 border-warm-wood text-warm-wood rounded-lg hover:bg-warm-wood hover:text-white transition-all focus:outline-none focus:ring-4 focus:ring-warm-wood/30"
-                >
-                  <Edit className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
                   onClick={() => handleDelete(index)}
-                  className="p-2 border-2 border-terracotta text-terracotta rounded-lg hover:bg-terracotta hover:text-white transition-all focus:outline-none focus:ring-4 focus:ring-terracotta/30"
+                  className="p-2.5 border-2 border-terracotta text-terracotta rounded-lg bg-white hover:bg-terracotta hover:text-white shadow-sm hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-terracotta/30"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-5 w-5" />
                 </button>
               </div>
             </div>
@@ -314,16 +294,15 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
 
       {/* Note o Richieste Speciali */}
       <div className="space-y-3 mt-10" style={{ marginTop: '40px' }}>
-        <label 
-          className="block text-sm font-bold text-warm-wood mb-4"
+        <label
+          className="block text-base md:text-lg text-warm-wood mb-2"
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.5)',
-            backdropFilter: 'blur(6px)',
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            backdropFilter: 'blur(1px)',
             padding: '8px 16px',
             borderRadius: '12px',
             display: 'inline-block',
-            fontWeight: '700',
-            marginBottom: '16px'
+            fontWeight: '700'
           }}
         >
           Altre Richieste
@@ -365,7 +344,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
         <label
           htmlFor="privacy-consent-dietary"
           className="cursor-pointer text-sm text-gray-700"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: '8px 16px', borderRadius: '8px', backdropFilter: 'blur(4px)' }}
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', padding: '8px 16px', borderRadius: '8px', backdropFilter: 'blur(1px)' }}
         >
           Accetto la{' '}
           <Link

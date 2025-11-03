@@ -114,7 +114,8 @@ export const BookingRequestPage: React.FC = () => {
                     <UtensilsCrossed className="w-3 h-3 md:w-3.5 md:h-3.5 text-warm-wood" />
                   </div>
                   <h1
-                    className="text-xs md:text-sm font-serif font-semibold text-warm-wood"
+                    className="text-base md:text-lg font-serif text-warm-wood"
+                    style={{ fontWeight: '700' }}
                   >
                     Al Ritrovo
                   </h1>
@@ -122,14 +123,12 @@ export const BookingRequestPage: React.FC = () => {
                 
                 {/* Sotto: Prenota il Tuo Tavolo */}
                 <div className="flex items-center justify-center">
-                  <p
-                    className="text-sm md:text-base font-serif font-bold text-warm-wood"
-                    style={{
-                      fontWeight: '700'
-                    }}
+                  <h2
+                    className="text-lg md:text-xl font-serif text-warm-wood"
+                    style={{ fontWeight: '700' }}
                   >
                     Prenota il Tuo Tavolo
-                  </p>
+                  </h2>
                 </div>
               </div>
             </div>
@@ -157,13 +156,14 @@ export const BookingRequestPage: React.FC = () => {
                   </div>
                   <div className="flex-1">
                     <h3
-                      className="text-xl md:text-2xl font-serif font-semibold text-warm-wood"
+                      className="text-lg md:text-xl font-serif text-warm-wood"
                       style={{
                         backgroundColor: 'rgba(255, 255, 255, 0.5)',
                         backdropFilter: 'blur(6px)',
-                        padding: '12px 20px',
+                        padding: '8px 16px',
                         borderRadius: '12px',
-                        display: 'inline-block'
+                        display: 'inline-block',
+                        fontWeight: '700'
                       }}
                     >
                       Orari e Contatti

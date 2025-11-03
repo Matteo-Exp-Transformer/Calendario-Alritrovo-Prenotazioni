@@ -212,13 +212,10 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
     // Custom event rendering per card eventi migliorate
     eventContent: (arg: any) => {
       const booking = arg.event.extendedProps as BookingRequest
+      // ✅ FIX: Usa extractTimeFromISO invece di new Date() per evitare conversioni timezone
       const formatTime = (dateStr?: string) => {
         if (!dateStr) return ''
-        try {
-          return format(new Date(dateStr), 'HH:mm')
-        } catch {
-          return ''
-        }
+        return extractTimeFromISO(dateStr) || ''
       }
 
       return (

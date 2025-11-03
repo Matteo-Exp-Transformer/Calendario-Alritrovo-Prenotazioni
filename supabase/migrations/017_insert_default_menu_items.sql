@@ -30,8 +30,8 @@ ON CONFLICT DO NOTHING;
 -- =====================================================
 
 INSERT INTO menu_items (name, category, price, description, sort_order) VALUES
-  ('Olive Ascolana', 'fritti', 1.00, '2 pz a persona', 1),
-  ('Anelli di Cipolla', 'fritti', 1.00, '2 pz a persona', 2),
+  ('Olive Ascolana', 'fritti', 1.50, '2 pz a persona', 1),
+  ('Anelli di Cipolla', 'fritti', 1.50, '2 pz a persona', 2),
   ('Patatine fritte', 'fritti', 1.50, NULL, 3),
   ('Camembert', 'fritti', 2.00, '2 pz a persona', 4),
   ('Nachos con cheddar', 'fritti', 2.00, '2 pz a persona', 5),

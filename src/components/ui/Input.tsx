@@ -24,8 +24,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           padding: '16px',
           fontSize: '16px',
           fontWeight: '700',
-          backgroundColor: 'rgba(255, 255, 255, 0.5)',
-          backdropFilter: 'blur(6px)',
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(1px)',
           color: 'black'
         }}
         onFocus={(e) => e.target.style.borderColor = '#8B6914'}

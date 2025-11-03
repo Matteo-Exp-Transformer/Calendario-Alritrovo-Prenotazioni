@@ -381,7 +381,7 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
           {/* Tipologia di Prenotazione - DROPDOWN */}
           <div className="space-y-3">
             <label
-              className="block text-sm font-medium text-warm-wood mb-2"
+              className="block text-base md:text-lg font-medium text-warm-wood mb-2"
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.5)',
                 backdropFilter: 'blur(6px)',
@@ -427,7 +427,7 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
           {formData.booking_type === 'rinfresco_laurea' && (
             <div className="space-y-3">
               <label
-                className="block text-sm font-medium text-warm-wood mb-2"
+                className="block text-base md:text-lg font-medium text-warm-wood mb-2"
                 style={{
                   backgroundColor: 'rgba(255, 255, 255, 0.5)',
                   backdropFilter: 'blur(6px)',

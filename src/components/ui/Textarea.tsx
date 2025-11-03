@@ -23,8 +23,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             padding: '16px',
             fontSize: '16px',
             fontWeight: '700',
-            backgroundColor: 'rgba(255, 255, 255, 0.5)',
-            backdropFilter: 'blur(6px)',
+            backgroundColor: 'rgba(255, 255, 255, 0.85)',
+            backdropFilter: 'blur(1px)',
             color: 'black',
             fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
           }}

@@ -209,3 +209,4 @@ Gestione automatica di destinatari multipli nel log database.
 - [Resend Email Sending](https://resend.com/docs/api-reference/emails/send-email)
 
 
+

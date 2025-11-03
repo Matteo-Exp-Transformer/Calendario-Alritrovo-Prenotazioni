@@ -201,3 +201,4 @@ npx playwright test e2e/verify-card-width-limit.spec.ts
 **Metodo:** Analisi codice + Test automatici + Verifica visiva
 
 
+

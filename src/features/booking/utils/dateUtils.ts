@@ -21,26 +21,40 @@ export function createBookingDateTime(
   const [year, month, day] = date.split('-').map(Number)
   const [hours, minutes] = time.split(':').map(Number)
   
-  // Always use UTC offset (+00:00) to avoid timezone conversion issues
-  // The time stored is the actual time as entered by the user
-  const tzString = '+00:00'
+  // ✅ FIX: L'utente inserisce un orario (es. "20:00") e deve rimanere ESATTAMENTE quello
+  // La soluzione: salviamo l'orario inserito direttamente come UTC (senza conversioni)
+  // In questo modo, quando PostgreSQL lo salva e lo ritorna, la stringa ISO contiene ancora "20:00"
+  // e extractTimeFromISO estrae correttamente "20:00"
   
-  // If this is an end time and we need to check for midnight crossover
+  let finalYear = year
+  let finalMonth = month
+  let finalDay = day
+  let finalHours = hours
+  let finalMinutes = minutes
+  
+  // Gestione attraversamento mezzanotte: se l'orario di fine è prima dell'orario di inizio,
+  // significa che la prenotazione attraversa la mezzanotte (es. 22:00-02:00)
   if (!isStart && startTime) {
     const [startHours] = startTime.split(':').map(Number)
     
-    // If end time is earlier than start time, it's the next day
+    // Se l'orario di fine è prima dell'orario di inizio, è il giorno successivo
     if (hours < startHours || (hours === startHours && startHours >= 22)) {
-      // Add 1 day
-      const nextDay = new Date(year, month - 1, day)
-      nextDay.setDate(nextDay.getDate() + 1)
+      // Aggiungi 1 giorno preservando anno, mese, ore e minuti esattamente come inseriti
+      // Usiamo Date per gestire automaticamente fine mese, fine anno, anni bisestili, ecc.
+      const currentDate = new Date(year, month - 1, day)
+      currentDate.setDate(currentDate.getDate() + 1)
       
-      return `${nextDay.getFullYear()}-${String(nextDay.getMonth() + 1).padStart(2, '0')}-${String(nextDay.getDate()).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00${tzString}`
+      finalYear = currentDate.getFullYear()
+      finalMonth = currentDate.getMonth() + 1
+      finalDay = currentDate.getDate()
+      // finalHours e finalMinutes rimangono invariati (già impostati sopra)
     }
   }
   
-  // Normal case - same day
-  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00${tzString}`
+  // ✅ SALVIAMO L'ORARIO ESATTO COME UTC (+00:00)
+  // Questo fa sì che PostgreSQL non faccia conversioni e la stringa ISO rimanga identica
+  // Quando rileggiamo, extractTimeFromISO estrae l'ora dalla stringa e ottiene esattamente l'orario inserito
+  return `${String(finalYear).padStart(4, '0')}-${String(finalMonth).padStart(2, '0')}-${String(finalDay).padStart(2, '0')}T${String(finalHours).padStart(2, '0')}:${String(finalMinutes).padStart(2, '0')}:00+00:00`
 }
 
 /**

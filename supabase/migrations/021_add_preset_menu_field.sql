@@ -8,3 +8,4 @@ ADD COLUMN IF NOT EXISTS preset_menu TEXT CHECK (preset_menu IN ('menu_1', 'menu
 COMMENT ON COLUMN booking_requests.preset_menu IS 'Menu predefinito selezionato dall admin: menu_1, menu_2, o menu_3';
 
 
+
