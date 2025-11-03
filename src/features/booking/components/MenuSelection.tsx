@@ -221,15 +221,16 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
         if (category === 'secondi') maxLimit = 3
 
         return (
-          <div key={category} className="space-y-3">
+          <div key={category} className="space-y-3 w-full">
             <h3
-              className="text-3xl font-bold border-b border-gray-300 pb-2 flex items-center justify-between"
+              className="text-3xl font-bold border-b border-gray-300 pb-2 flex items-center justify-between w-full"
               style={{
                 color: '#2563EB',
                 backgroundColor: 'rgba(255, 255, 255, 0.5)',
                 backdropFilter: 'blur(6px)',
-                padding: '12px 24px',
-                borderRadius: '12px'
+                padding: '16px 28px',
+                borderRadius: '12px',
+                width: '100%'
               }}
             >
               <span>{label}</span>
@@ -239,14 +240,14 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                 </span>
               )}
             </h3>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
               {items.map((item) => {
                 const isSelected = selectedItems.some(selected => selected.id === item.id)
                 return (
                   <label
                     key={item.id}
                     className={`
-                      flex items-center gap-4 p-8 rounded-xl border-2 cursor-pointer
+                      flex items-center gap-4 p-8 rounded-xl border-2 cursor-pointer w-full
                       transition-all duration-200
                     `}
                     style={{
@@ -254,9 +255,11 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                       backgroundColor: isSelected ? 'rgba(245, 222, 179, 0.6)' : 'rgba(255, 255, 255, 0.5)',
                       backdropFilter: 'blur(6px)',
                       borderColor: isSelected ? '#8B4513' : 'rgba(0,0,0,0.2)',
-                      padding: '24px',
+                      padding: '28px 32px',
                       borderRadius: '16px',
-                      marginBottom: '4px'
+                      marginBottom: '4px',
+                      width: '100%',
+                      maxWidth: '100%'
                     }}
                   >
                     <input
@@ -277,17 +280,17 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                         <Check className="h-4 w-4 text-white" strokeWidth={3} />
                       )}
                     </div>
-                    <div className="flex-1" style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px' }}>
-                      <div className="flex items-center">
-                        <span className={`font-bold flex-1 ${isSelected ? 'text-warm-wood' : 'text-gray-700'}`} style={{ fontWeight: '700' }}>
+                    <div className="flex-1" style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px', minWidth: 0 }}>
+                      <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-0">
+                        <span className={`font-bold flex-1 ${isSelected ? 'text-warm-wood' : 'text-gray-700'} text-base md:text-lg`} style={{ fontWeight: '700', wordBreak: 'break-word' }}>
                           {item.name}
                         </span>
-                        <span className="text-lg font-bold text-warm-wood ml-6" style={{ paddingRight: '12px', fontWeight: '700' }}>
+                        <span className="text-lg md:text-xl font-bold text-warm-wood md:ml-6 flex-shrink-0" style={{ paddingRight: '12px', fontWeight: '700' }}>
                           €{item.price.toFixed(2)}
                         </span>
                       </div>
                       {item.description && (
-                        <p className="text-sm font-bold text-gray-600 mt-2" style={{ fontWeight: '700' }}>
+                        <p className="text-sm md:text-base font-bold text-gray-600 mt-2" style={{ fontWeight: '700', wordBreak: 'break-word' }}>
                           {item.description}
                         </p>
                       )}
@@ -303,16 +306,17 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
       {/* Totale a Persona */}
       {selectedItems.length > 0 && (
         <div 
-          className="rounded-xl p-8"
+          className="rounded-xl p-8 w-full"
           style={{
             backgroundColor: 'rgba(255, 255, 255, 0.5)',
             backdropFilter: 'blur(6px)',
-            border: '2px solid rgba(0, 0, 0, 0.2)'
+            border: '2px solid rgba(0, 0, 0, 0.2)',
+            padding: '32px 40px'
           }}
         >
-          <div className="flex items-center justify-between">
-            <span className="text-xl font-bold text-warm-wood">Totale a Persona:</span>
-            <span className="text-3xl font-bold text-warm-wood">€{totalPerPerson.toFixed(2)}</span>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <span className="text-2xl md:text-3xl font-bold text-warm-wood">Totale a Persona:</span>
+            <span className="text-4xl md:text-5xl font-bold text-warm-wood">€{totalPerPerson.toFixed(2)}</span>
           </div>
         </div>
       )}

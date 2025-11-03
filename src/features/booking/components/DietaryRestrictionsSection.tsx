@@ -115,7 +115,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-full">
           <div>
             <label 
-              className="block text-sm font-bold text-warm-wood mb-4"
+              className="block text-sm font-bold text-warm-wood mb-2"
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.5)',
                 backdropFilter: 'blur(6px)',
@@ -123,7 +123,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
                 borderRadius: '12px',
                 display: 'inline-block',
                 fontWeight: '700',
-                marginBottom: '16px'
+                marginBottom: '8px'
               }}
             >
               Intolleranza / Esigenza *
@@ -145,7 +145,8 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
                 fontSize: '16px',
                 fontWeight: '700',
                 backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                backdropFilter: 'blur(6px)'
+                backdropFilter: 'blur(6px)',
+                marginBottom: '15px'
               }}
               onFocus={(e) => e.target.style.borderColor = '#8B6914'}
               onBlur={(e) => e.target.style.borderColor = 'rgba(0,0,0,0.2)'}
@@ -155,9 +156,9 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
               ))}
             </select>
           </div>
-          <div>
+          <div style={{ marginTop: '15px' }}>
             <label 
-              className="block text-sm font-bold text-warm-wood mb-4"
+              className="block text-sm font-bold text-warm-wood mb-2"
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.5)',
                 backdropFilter: 'blur(6px)',
@@ -165,7 +166,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
                 borderRadius: '12px',
                 display: 'inline-block',
                 fontWeight: '700',
-                marginBottom: '16px'
+                marginBottom: '8px'
               }}
             >
               Numero ospiti con intolleranze alimentari *
@@ -177,45 +178,8 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
               onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
               className="w-full"
             />
-            <p 
-              className="text-xs text-gray-700 mt-2"
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                backdropFilter: 'blur(6px)',
-                padding: '8px 16px',
-                borderRadius: '12px',
-                display: 'inline-block',
-                fontWeight: '600'
-              }}
-            >
-              Nota: Questo numero è solo per associare l'intolleranza specifica e non viene sommato al totale ospiti della prenotazione.
-            </p>
           </div>
         </div>
-        {selectedRestriction === 'Altro' && (
-          <div>
-            <label 
-              className="block text-sm font-bold text-warm-wood mb-4"
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                backdropFilter: 'blur(6px)',
-                padding: '8px 16px',
-                borderRadius: '12px',
-                display: 'inline-block',
-                fontWeight: '700',
-                marginBottom: '16px'
-              }}
-            >
-              Specifica intolleranza / esigenza *
-            </label>
-            <Input
-              value={otherNotes}
-              onChange={(e) => setOtherNotes(e.target.value)}
-              placeholder="Descrivi l'intolleranza o esigenza"
-              className="w-full"
-            />
-          </div>
-        )}
         <div className="flex gap-3">
           <button
             type="button"
@@ -249,6 +213,43 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
             </button>
           )}
         </div>
+        <p 
+          className="text-xs text-gray-700 mt-2"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+            backdropFilter: 'blur(6px)',
+            padding: '8px 16px',
+            borderRadius: '12px',
+            display: 'inline-block',
+            fontWeight: '600'
+          }}
+        >
+          Nota: Questo numero è solo per associare l'intolleranza specifica e non viene sommato al totale ospiti della prenotazione.
+        </p>
+        {selectedRestriction === 'Altro' && (
+          <div>
+            <label 
+              className="block text-sm font-bold text-warm-wood mb-4"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(6px)',
+                padding: '8px 16px',
+                borderRadius: '12px',
+                display: 'inline-block',
+                fontWeight: '700',
+                marginBottom: '16px'
+              }}
+            >
+              Specifica intolleranza / esigenza *
+            </label>
+            <Input
+              value={otherNotes}
+              onChange={(e) => setOtherNotes(e.target.value)}
+              placeholder="Descrivi l'intolleranza o esigenza"
+              className="w-full"
+            />
+          </div>
+        )}
       </div>
 
       {/* Lista Recap */}
@@ -269,21 +270,25 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
           {restrictions.map((restriction, index) => (
             <div
               key={index}
-              className="flex items-center gap-6 p-8 bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent rounded-xl border-2 border-warm-beige hover:shadow-md transition-all"
+              className="flex flex-col md:flex-row items-start md:items-center gap-4 p-8 bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent rounded-xl border-2 border-warm-beige hover:shadow-md transition-all w-full"
               style={{
-                minHeight: '64px'
+                padding: '28px 32px',
+                borderRadius: '16px',
+                marginBottom: '4px',
+                minHeight: '64px',
+                maxWidth: '100%'
               }}
             >
-              <div className="flex items-center gap-4 flex-shrink-0">
-                <span className="font-bold text-gray-900">{restriction.restriction}</span>
+              <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 flex-1 min-w-0">
+                <span className="font-bold text-gray-900 text-base md:text-lg" style={{ wordBreak: 'break-word' }}>{restriction.restriction}</span>
                 {restriction.restriction === 'Altro' && restriction.notes && (
-                  <span className="text-sm font-bold text-gray-600 italic">({restriction.notes})</span>
+                  <span className="text-sm md:text-base font-bold text-gray-600 italic" style={{ wordBreak: 'break-word' }}>({restriction.notes})</span>
                 )}
-                <span className="text-warm-wood font-bold">
+                <span className="text-warm-wood font-bold text-base md:text-lg">
                   {restriction.guest_count} {restriction.guest_count === 1 ? 'ospite' : 'ospiti'}
                 </span>
               </div>
-              <div className="flex gap-3 ml-auto flex-shrink-0">
+              <div className="flex gap-3 md:ml-auto flex-shrink-0 w-full md:w-auto justify-end md:justify-start">
                 <button
                   type="button"
                   onClick={() => handleEdit(index)}
@@ -306,7 +311,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
       )}
 
       {/* Note o Richieste Speciali */}
-      <div className="space-y-3 mt-6">
+      <div className="space-y-3 mt-10" style={{ marginTop: '40px' }}>
         <label 
           className="block text-sm font-bold text-warm-wood mb-4"
           style={{
@@ -319,7 +324,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
             marginBottom: '16px'
           }}
         >
-          Note o richieste speciali
+          Altre Richieste
         </label>
         <Textarea
           id="special_requests"
@@ -380,4 +385,5 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
     </div>
   )
 }
+
 

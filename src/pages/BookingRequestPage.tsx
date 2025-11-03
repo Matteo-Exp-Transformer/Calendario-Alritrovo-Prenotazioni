@@ -101,7 +101,7 @@ export const BookingRequestPage: React.FC = () => {
           {/* Header semi-trasparente in alto */}
           <div className="pt-4 md:pt-6 pb-4">
             <div
-              className="rounded-lg shadow-md px-8 py-3 md:px-16 md:py-4 animate-fade-in"
+              className="rounded-lg shadow-md header-padding animate-fade-in"
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.3)',
                 backdropFilter: 'blur(16px)',
@@ -123,9 +123,10 @@ export const BookingRequestPage: React.FC = () => {
                 {/* Sotto: Prenota il Tuo Tavolo */}
                 <div className="flex items-center justify-center">
                   <p
-                    className="text-sm md:text-base font-serif font-bold text-warm-wood"
+                    className="font-serif font-bold text-warm-wood"
                     style={{
-                      fontWeight: '700'
+                      fontWeight: '700',
+                      fontSize: '20px'
                     }}
                   >
                     Prenota il Tuo Tavolo
@@ -180,7 +181,7 @@ export const BookingRequestPage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   <MapPin className="w-5 h-5 text-warm-orange flex-shrink-0" />
-                  <span className="text-base text-warm-wood-dark font-medium">Via Centotrecento 1/1B - Bologna, 40126</span>
+                  <span className="text-base text-warm-wood-dark font-bold" style={{ fontWeight: '700' }}>Via Centotrecento 1/1B - Bologna, 40126</span>
                 </div>
               </div>
               

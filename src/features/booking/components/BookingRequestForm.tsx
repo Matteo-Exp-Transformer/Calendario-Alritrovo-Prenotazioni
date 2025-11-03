@@ -280,7 +280,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
   return (
     <>
-    <form onSubmit={handleSubmit} className="w-full max-w-[55vw] mx-auto px-4 md:px-6 space-y-8 font-bold">
+    <form onSubmit={handleSubmit} className="w-full max-w-[55vw] mx-auto px-2 md:px-6 space-y-8 font-bold">
       {/* Sezione: Dati Personali */}
       <div className="space-y-6">
         <h2

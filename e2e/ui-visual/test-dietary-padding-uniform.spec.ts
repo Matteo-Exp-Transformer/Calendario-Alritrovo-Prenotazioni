@@ -9,17 +9,25 @@ test.describe('Dietary Restrictions Padding Uniformity', () => {
     await page.selectOption('select#booking_type', 'rinfresco_laurea')
     await page.waitForTimeout(500)
 
-    // Add some dietary restrictions to make cards visible
-    await page.selectOption('select[value="No Lattosio"]', 'No Lattosio')
-    await page.fill('input[type="number"][min="1"]', '2')
+    // Wait for dietary restrictions section to be visible
+    await page.waitForSelector('h2:has-text("Intolleranze e Richieste Speciali")')
+
+    // Find the select in dietary section (first select after the h2)
+    const dietarySection = page.locator('h2:has-text("Intolleranze e Richieste Speciali")').locator('..')
+    const dietarySelect = dietarySection.locator('select').first()
+    const guestCountInput = dietarySection.locator('input[type="number"]').first()
+
+    // Add first dietary restriction
+    await dietarySelect.selectOption('No Lattosio')
+    await guestCountInput.fill('2')
     await page.click('button:has-text("Aggiungi")')
-    await page.waitForTimeout(300)
+    await page.waitForTimeout(500)
 
     // Add another one
-    await page.selectOption('select[value="No Glutine"]', 'No Glutine')
-    await page.fill('input[type="number"][min="1"]', '1')
+    await dietarySelect.selectOption('No Glutine')
+    await guestCountInput.fill('1')
     await page.click('button:has-text("Aggiungi")')
-    await page.waitForTimeout(300)
+    await page.waitForTimeout(500)
 
     // Get computed styles for menu card (first menu item)
     const menuCard = page.locator('label').filter({ hasText: 'Polpette Vegane' }).first()
