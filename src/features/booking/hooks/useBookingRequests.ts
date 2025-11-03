@@ -57,23 +57,41 @@ const releaseMutationLock = (lockId: string | null) => {
   console.log('✅ [useCreateBookingRequest] Mutation lock rilasciato:', lockId)
 }
 
+// Contatore globale per tracciare chiamate alla mutation (debug)
+let mutationCallCount = 0
+const mutationCallTracker: Array<{ timestamp: number; lockId: string | null; success: boolean }> = []
+
 // Hook for creating booking requests (public - needs to use ANON key)
 export const useCreateBookingRequest = () => {
   const queryClient = useQueryClient()
   
   return useMutation({
+    // Disabilita retry per prevenire chiamate multiple automatiche
+    retry: false,
     mutationFn: async (data: BookingRequestInput) => {
+      // Traccia chiamata
+      mutationCallCount++
+      const callTimestamp = Date.now()
+      
+      console.log(`🚨 [useCreateBookingRequest] ========== MUTATION CALL #${mutationCallCount} ==========`)
+      console.log(`🚨 [useCreateBookingRequest] Timestamp: ${callTimestamp}`)
+      console.log(`🚨 [useCreateBookingRequest] Stack:`, new Error().stack?.split('\n').slice(1, 6).join('\n'))
+      
       // ✅ Protezione atomica a livello di mutation
       const lockId = acquireMutationLock()
       
+      console.log(`🚨 [useCreateBookingRequest] Lock acquisition:`, lockId ? `✅ ACQUIRED ${lockId.substring(0, 20)}` : '❌ FAILED')
+      
       if (!lockId) {
-        console.warn('⚠️ [useCreateBookingRequest] Impossibile acquisire lock, mutation già in corso')
-        console.warn('⚠️ [useCreateBookingRequest] Stack trace:', new Error().stack)
+        mutationCallTracker.push({ timestamp: callTimestamp, lockId: null, success: false })
+        console.error('❌ [useCreateBookingRequest] Impossibile acquisire lock, mutation già in corso')
+        console.error('❌ [useCreateBookingRequest] Current lock:', mutationLockId)
+        console.error('❌ [useCreateBookingRequest] Recent calls:', mutationCallTracker.slice(-5))
         throw new Error('Una richiesta è già in corso. Attendi qualche secondo.')
       }
       
       try {
-        console.log('🔵 [useCreateBookingRequest] Starting mutation...')
+        console.log('🔵 [useCreateBookingRequest] Starting mutation with lock:', lockId.substring(0, 20))
         console.log('🔵 [useCreateBookingRequest] Input data:', data)
         
         // Normalizza desired_time a formato HH:MM (rimuove secondi se presenti)
@@ -118,12 +136,35 @@ export const useCreateBookingRequest = () => {
           insertData.dietary_restrictions = data.dietary_restrictions
         }
 
-        console.log('🔵 [useCreateBookingRequest] Insert data:', insertData)
-        console.log('🔵 [useCreateBookingRequest] Calling Supabase insert...')
+        // Traccia questo tentativo di insert
+        const insertAttemptId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+        
+        console.log('🔵 [useCreateBookingRequest] ========== INSERT ATTEMPT START ==========')
+        console.log('🔵 [useCreateBookingRequest] Insert attempt ID:', insertAttemptId)
+        console.log('🔵 [useCreateBookingRequest] Lock ID:', lockId)
+        console.log('🔵 [useCreateBookingRequest] Insert data:', {
+          client_name: insertData.client_name,
+          desired_date: insertData.desired_date,
+          desired_time: insertData.desired_time,
+          num_guests: insertData.num_guests
+        })
 
         // Use supabasePublic client (ANON key) for public form submissions
         // This respects the INSERT policy for anon role
-        console.log('🔵 [useCreateBookingRequest] Using supabasePublic client...')
+        console.log('🔵 [useCreateBookingRequest] Calling Supabase insert...')
+
+        // ⚠️ CRITICO: Verifica lock PRIMA di inserire
+        if (mutationLockId !== lockId) {
+          console.error('❌ [useCreateBookingRequest] Lock perso! Lock ID non corrisponde:', {
+            expected: lockId,
+            current: mutationLockId,
+            insertAttemptId
+          })
+          throw new Error('Lock perso durante l\'inserimento - possibile doppio submit')
+        }
+
+        console.log('🔵 [useCreateBookingRequest] Lock verificato, procedendo con INSERT...')
+        console.log('🔵 [useCreateBookingRequest] Current lock state:', mutationLockId)
 
         // @ts-ignore - Supabase types are not fully generated
         const { data: result, error } = await supabasePublic
@@ -131,8 +172,23 @@ export const useCreateBookingRequest = () => {
           .insert(insertData)
           .select()
           .single()
+        
+        console.log('🔵 [useCreateBookingRequest] INSERT eseguito, verificando lock...')
+        
+        // Verifica lock DOPO l'insert per assicurarsi che non sia cambiato
+        if (mutationLockId !== lockId) {
+          console.error('❌ [useCreateBookingRequest] Lock cambiato durante INSERT!', {
+            expected: lockId,
+            current: mutationLockId,
+            insertAttemptId
+          })
+        }
 
-        console.log('🔵 [useCreateBookingRequest] Supabase response:', { result, error })
+        console.log('🔵 [useCreateBookingRequest] Supabase INSERT completato')
+        console.log('🔵 [useCreateBookingRequest] Response:', { 
+          result: result ? { id: result.id, client_name: result.client_name } : null, 
+          error: error ? { message: error.message, code: error.code } : null 
+        })
 
         if (error) {
           console.error('❌ [useCreateBookingRequest] Error:', error)
@@ -145,13 +201,19 @@ export const useCreateBookingRequest = () => {
           throw new Error(handleSupabaseError(error))
         }
 
-        console.log('✅ [useCreateBookingRequest] Success! Result:', result)
+        console.log('✅ [useCreateBookingRequest] Success! Result ID:', result?.id)
+        console.log(`🚨 [useCreateBookingRequest] ========== MUTATION CALL #${mutationCallCount} COMPLETED ==========`)
+        
+        mutationCallTracker.push({ timestamp: Date.now(), lockId, success: true })
         
         // Rilascia lock immediatamente dopo successo
         releaseMutationLock(lockId)
         
         return result as BookingRequest
       } catch (error) {
+        console.error(`❌ [useCreateBookingRequest] ========== MUTATION CALL #${mutationCallCount} FAILED ==========`)
+        mutationCallTracker.push({ timestamp: Date.now(), lockId, success: false })
+        
         // Rilascia lock in caso di errore
         releaseMutationLock(lockId)
         throw error

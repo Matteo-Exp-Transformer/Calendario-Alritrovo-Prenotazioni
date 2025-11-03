@@ -70,10 +70,25 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   const { data: acceptedBookings = [] } = useAcceptedBookings()
 
   const [formData, setFormData] = useState(() => {
+    // ✅ FIX: Usa desired_time se disponibile per preservare l'orario originale
+    const startTime = booking.desired_time 
+      ? booking.desired_time.split(':').slice(0, 2).join(':')
+      : extractTimeFromISO(booking.confirmed_start)
+    
+    // Calcola endTime: se desired_time è disponibile, fine = inizio + 3h
+    let endTime: string
+    if (booking.desired_time) {
+      const [hours, minutes] = booking.desired_time.split(':').map(Number)
+      const endHours = (hours + 3) % 24
+      endTime = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+    } else {
+      endTime = extractTimeFromISO(booking.confirmed_end)
+    }
+    
     return {
-      date: extractDateFromISO(booking.confirmed_start),
-      startTime: extractTimeFromISO(booking.confirmed_start),
-      endTime: extractTimeFromISO(booking.confirmed_end),
+      date: extractDateFromISO(booking.confirmed_start || booking.desired_date),
+      startTime,
+      endTime,
       numGuests: booking.num_guests,
       specialRequests: booking.special_requests || '',
       menu: booking.menu || '',
@@ -82,16 +97,30 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
   // Aggiorna formData quando cambia il booking
   useEffect(() => {
-    // Use utility functions to extract date and time directly from ISO strings to avoid timezone issues
+    // ✅ FIX: Usa desired_time se disponibile per preservare l'orario originale
+    const startTime = booking.desired_time 
+      ? booking.desired_time.split(':').slice(0, 2).join(':')
+      : extractTimeFromISO(booking.confirmed_start)
+    
+    // Calcola endTime: se desired_time è disponibile, fine = inizio + 3h
+    let endTime: string
+    if (booking.desired_time) {
+      const [hours, minutes] = booking.desired_time.split(':').map(Number)
+      const endHours = (hours + 3) % 24
+      endTime = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+    } else {
+      endTime = extractTimeFromISO(booking.confirmed_end)
+    }
+    
     setFormData({
-      date: extractDateFromISO(booking.confirmed_start),
-      startTime: extractTimeFromISO(booking.confirmed_start),
-      endTime: extractTimeFromISO(booking.confirmed_end),
+      date: extractDateFromISO(booking.confirmed_start || booking.desired_date),
+      startTime,
+      endTime,
       numGuests: booking.num_guests,
       specialRequests: booking.special_requests || '',
       menu: booking.menu || '',
     })
-  }, [booking.id, booking.confirmed_start, booking.confirmed_end, booking.num_guests, booking.special_requests, booking.menu])
+  }, [booking.id, booking.confirmed_start, booking.confirmed_end, booking.desired_time, booking.num_guests, booking.special_requests, booking.menu])
 
   // Function to check if there are enough seats available
   const checkCapacity = (date: string, startTime: string, endTime: string, numGuests: number): boolean => {

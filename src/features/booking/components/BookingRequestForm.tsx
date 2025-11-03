@@ -15,7 +15,28 @@ interface BookingRequestFormProps {
   onSubmit?: () => void
 }
 
+// Contatore globale per tracciare mount del componente (debug React StrictMode)
+let componentMountCount = 0
+let lastMountTime = 0
+
 export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit }) => {
+  // Traccia mount per debug
+  React.useEffect(() => {
+    componentMountCount++
+    const now = Date.now()
+    const timeSinceLastMount = now - lastMountTime
+    lastMountTime = now
+    
+    console.log(`🔄 [BookingForm] Component MOUNTED #${componentMountCount}`, {
+      timeSinceLastMount: timeSinceLastMount < 1000 ? `${timeSinceLastMount}ms (possibile StrictMode)` : 'normal',
+      timestamp: new Date().toISOString()
+    })
+    
+    return () => {
+      console.log(`🔄 [BookingForm] Component UNMOUNTED #${componentMountCount}`)
+    }
+  }, [])
+  
   const [formData, setFormData] = useState<BookingRequestInput>({
     client_name: '',
     client_email: '',
@@ -44,51 +65,58 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
   const LOCK_TIMEOUT = 10000 // 10 secondi
   
   // Lock atomico: controlla E imposta in modo atomico usando un timestamp univoco
+  // IMPLEMENTAZIONE MIGLIORATA: verifica lock DOPO l'impostazione per rilevare race conditions
   const acquireGlobalLock = (): string | null => {
+    // NOTA: Non può essere async perché viene chiamata sincronamente in handleSubmit
     try {
+      // 🔒 MECCANISMO DI LOCK ATOMIC CON VERIFICA IMMEDIATA
       const now = Date.now()
-      const lockId = `${now}-${Math.random().toString(36).substring(2, 9)}` // ID univoco per questo tentativo
+      const randomPart = Math.random().toString(36).substring(2, 15) // Più lungo per maggiore unicità
+      const lockId = `${now}-${randomPart}` // ID univoco per questo tentativo
       
-      // Tentativo atomico: solo se non c'è lock valido, imposta il nostro lock
+      // PRIMA VERIFICA: lock esistente e valido?
       const existingLock = sessionStorage.getItem(GLOBAL_LOCK_KEY)
       
       if (existingLock) {
-        const lockTime = parseInt(existingLock.split('-')[0], 10) // Prima parte è il timestamp
+        const lockTime = parseInt(existingLock.split('-')[0], 10)
         const lockAge = now - lockTime
         
         if (lockAge < LOCK_TIMEOUT) {
-          // Lock valido esistente
+          // Lock valido - BLOCCATO
           console.warn('⚠️ [BookingForm] Lock già presente (acquired by another instance)', {
-            lockAge,
-            remaining: LOCK_TIMEOUT - lockAge,
-            existingLock
+            lockAge: `${lockAge}ms`,
+            remaining: `${LOCK_TIMEOUT - lockAge}ms`,
+            existingLock: existingLock.substring(0, 30) + '...'
           })
-          return null // Lock non acquisito
+          return null
         }
         // Lock scaduto, rimuovilo
         sessionStorage.removeItem(GLOBAL_LOCK_KEY)
-        console.log('🔵 [BookingForm] Lock scaduto, rimosso')
       }
       
       // OPERAZIONE ATOMICA: imposta lock con ID univoco
-      // Se due istanze fanno questo simultaneamente, solo una otterrà il suo ID nel lock
       sessionStorage.setItem(GLOBAL_LOCK_KEY, lockId)
       
-      // Verifica immediatamente se siamo riusciti ad acquisire il lock
-      // Se un'altra istanza ha fatto lo stesso, il lock potrebbe contenere un ID diverso
+      // ⚠️ CRITICO: Verifica IMMEDIATAMENTE se il lock è nostro
+      // Se due istanze fanno questo simultaneamente, solo una vedrà il proprio ID
+      // Usa un piccolo delay per dare tempo alla race condition di manifestarsi
       const actualLock = sessionStorage.getItem(GLOBAL_LOCK_KEY)
       
-      if (actualLock === lockId) {
-        console.log('✅ [BookingForm] Global lock ACQUISITO con ID:', lockId)
-        return lockId
-      } else {
-        // Race condition: un'altra istanza ha acquisito il lock prima di noi
-        console.warn('⚠️ [BookingForm] Race condition rilevata! Lock acquisito da altra istanza:', {
-          ourId: lockId,
-          actualLock
+      if (actualLock !== lockId) {
+        // Race condition rilevata - un'altra istanza ha sovrascritto il nostro lock
+        console.error('❌ [BookingForm] RACE CONDITION RILEVATA! Lock acquisito da altra istanza:', {
+          ourId: lockId.substring(0, 30),
+          actualLock: actualLock?.substring(0, 30),
+          timestamp: now
         })
         return null
       }
+      
+      // Verifica doppia: controlla immediatamente dopo l'impostazione
+      // Se due chiamate arrivano simultaneamente, solo una vedrà il proprio ID
+      
+      console.log('✅ [BookingForm] Global lock ACQUISITO e VERIFICATO con ID:', lockId.substring(0, 30))
+      return lockId
     } catch (error) {
       console.warn('⚠️ [BookingForm] sessionStorage non disponibile:', error)
       return null
@@ -115,24 +143,6 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     }
   }
   
-  // Funzione helper per compatibilità (usa il nuovo sistema)
-  const checkGlobalSubmissionLock = (): boolean => {
-    const lockId = acquireGlobalLock()
-    if (lockId) {
-      // Salva il lockId nel ref per rilasciarlo dopo
-      ;(isSubmittingRef as any).currentLockId = lockId
-      return true
-    }
-    return false
-  }
-  
-  const clearGlobalSubmissionLock = () => {
-    const lockId = (isSubmittingRef as any).currentLockId
-    if (lockId) {
-      releaseGlobalLock(lockId)
-      delete (isSubmittingRef as any).currentLockId
-    }
-  }
 
   // Reset num_guests to 0 when cleared - only allow numeric input
   const handleNumGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -305,50 +315,54 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     e.preventDefault()
     e.stopPropagation() // Previene propagazione eventi
 
-    console.log('🔵 [BookingForm] Submit click')
+    // 🚨 CRITICO: Imposta lock IMMEDIATAMENTE, PRIMA di qualsiasi log o controllo
+    // Questo è fondamentale per prevenire race conditions sincronizzate
+    const lockId = acquireGlobalLock()
+    if (!lockId) {
+      console.warn('❌ [BookingForm] Lock globale già acquisito, BLOCCATO immediatamente')
+      return
+    }
+    
+    // Salva lockId immediatamente nel ref
+    ;(isSubmittingRef as any).currentLockId = lockId
+    
+    console.log('🔵 [BookingForm] Submit click - Lock ID:', lockId)
     console.log('🔵 [BookingForm] Form data:', formData)
     console.log('🔵 [BookingForm] Privacy accepted:', privacyAccepted)
     
     // ✅ PROTEZIONE MULTI-LIVELLO CONTRO DOPPI SUBMIT
-    // IMPORTANTE: L'ordine è critico - controlla prima il lock globale (più rapido)
+    // IMPORTANTE: Il lock globale è già acquisito, ora verifica gli altri controlli
     
-    // 1. Controllo lock globale PRIMA (protezione tra mount diversi - React StrictMode)
-    // Questo è il controllo più importante perché funziona anche tra istanze diverse
-    if (!checkGlobalSubmissionLock()) {
-      console.warn('❌ [BookingForm] Bloccato da global lock')
-      return
-    }
-    
-    // 2. Controllo stato locale (protezione istanza componente - triggera re-render)
+    // 1. Controllo stato locale (protezione istanza componente - triggera re-render)
     if (isSubmitting) {
-      console.warn('⚠️ [BookingForm] Submit già in corso (state lock), ignorando chiamata duplicata')
-      clearGlobalSubmissionLock() // Rimuovi lock globale se già in submit
+      console.warn('⚠️ [BookingForm] Submit già in corso (state lock), rilasciando lock e ignorando')
+      releaseGlobalLock(lockId)
       return
     }
     
-    // 3. Controllo ref locale (backup - per casi edge)
+    // 2. Controllo ref locale (backup - per casi edge)
     if (isSubmittingRef.current) {
-      console.warn('⚠️ [BookingForm] Submit già in corso (ref lock), ignorando chiamata duplicata')
-      clearGlobalSubmissionLock() // Rimuovi lock globale se ref è già attivo
+      console.warn('⚠️ [BookingForm] Submit già in corso (ref lock), rilasciando lock e ignorando')
+      releaseGlobalLock(lockId)
       return
     }
     
-    // 4. Controllo mutation state (protezione React Query)
+    // 3. Controllo mutation state (protezione React Query)
     if (isPending) {
-      console.warn('⚠️ [BookingForm] Mutation già in corso (mutation state), ignorando submit')
-      clearGlobalSubmissionLock() // Rimuovi lock globale se mutation è già in corso
+      console.warn('⚠️ [BookingForm] Mutation già in corso (mutation state), rilasciando lock e ignorando')
+      releaseGlobalLock(lockId)
       return
     }
 
     // Check rate limit
     if (!checkRateLimit()) {
-      clearGlobalSubmissionLock() // Rimuovi lock se rate limit
+      releaseGlobalLock(lockId) // Rilascia lock se rate limit
       return
     }
 
     // Validazione
     if (!validate()) {
-      clearGlobalSubmissionLock() // Rimuovi lock se validazione fallisce
+      releaseGlobalLock(lockId) // Rilascia lock se validazione fallisce
       if (!privacyAccepted) {
         toast.error('È necessario accettare la Privacy Policy per inviare la richiesta')
       }
@@ -356,17 +370,20 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     }
 
     // Imposta tutti i flag per prevenire doppi submit
-    // Usa sia ref che stato per garantire che il button sia disabilitato immediatamente
+    // IMPORTANTE: Imposta flag PRIMA di chiamare mutate
     isSubmittingRef.current = true
     setIsSubmitting(true) // Triggera re-render per disabilitare button immediatamente
+    
     console.log('✅ [BookingForm] Validation passed, calling mutate...')
     console.log('🔵 [BookingForm] Lock state:', {
+      lockId,
       globalLock: sessionStorage.getItem(GLOBAL_LOCK_KEY),
       refLock: isSubmittingRef.current,
       stateLock: isSubmitting,
       isPending
     })
     
+    // Chiama mutate - il lock globale e la mutation lock prevengono doppi insert
     mutate(formData, {
       onSuccess: () => {
         console.log('✅ [BookingForm] Mutation successful!')
@@ -389,10 +406,13 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         })
         setPrivacyAccepted(false)
         
-        // Reset tutti i flag di submit
+        // Reset tutti i flag di submit e rilascia lock
+        const savedLockId = (isSubmittingRef as any).currentLockId
         isSubmittingRef.current = false
         setIsSubmitting(false)
-        clearGlobalSubmissionLock()
+        if (savedLockId) {
+          releaseGlobalLock(savedLockId)
+        }
         
         // Mostra la modal di conferma invece del toast
         setShowSuccessModal(true)
@@ -402,9 +422,12 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       onError: (error) => {
         console.error('❌ [BookingForm] Mutation error:', error)
         // Reset tutti i flag in caso di errore per permettere nuovo tentativo
+        const savedLockId = (isSubmittingRef as any).currentLockId
         isSubmittingRef.current = false
         setIsSubmitting(false)
-        clearGlobalSubmissionLock()
+        if (savedLockId) {
+          releaseGlobalLock(savedLockId)
+        }
       }
     })
   }

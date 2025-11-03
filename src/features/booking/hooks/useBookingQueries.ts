@@ -57,6 +57,16 @@ export const useAcceptedBookings = () => {
         .eq('status', 'accepted')
         .order('confirmed_start', { ascending: true })
 
+      // Debug: verifica che desired_time sia presente nei risultati
+      if (data && data.length > 0) {
+        console.log('🔵 [useAcceptedBookings] Sample booking with desired_time:', {
+          id: data[0]?.id,
+          desired_time: data[0]?.desired_time,
+          confirmed_start: data[0]?.confirmed_start,
+          client_name: data[0]?.client_name
+        })
+      }
+      
       console.log('🔵 [useAcceptedBookings] Query result:', { 
         data, 
         error, 
