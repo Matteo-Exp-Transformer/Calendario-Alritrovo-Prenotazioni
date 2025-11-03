@@ -159,8 +159,10 @@ export const PendingRequestsTab: React.FC = () => {
   // Apre il modal quando si clicca su "Rifiuta"
   const handleReject = (booking: BookingRequest) => {
     console.log('🔵 [PendingRequestsTab] handleReject called with:', booking.id)
+    console.log('🔵 [PendingRequestsTab] Setting selectedBookingForReject and opening modal')
     setSelectedBookingForReject(booking)
     setRejectModalOpen(true)
+    console.log('✅ [PendingRequestsTab] Modal state should be open now')
   }
 
   // Conferma il rifiuto con il motivo inserito dall'admin
@@ -262,6 +264,7 @@ export const PendingRequestsTab: React.FC = () => {
         onConfirm={handleRejectConfirm}
         isLoading={rejectMutation.isPending}
       />
+      
     </div>
   )
 }

@@ -69,7 +69,12 @@ export const Modal: React.FC<ModalProps> = ({
     }
   }, [isOpen, onClose, closeOnEscape])
 
-  if (!isOpen) return null
+  if (!isOpen) {
+    console.log('🔵 [Modal] Not rendering - isOpen is false')
+    return null
+  }
+
+  console.log('✅ [Modal] Rendering modal!', { title, size, position, isOpen })
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (closeOnOverlayClick && e.target === e.currentTarget) {
@@ -79,10 +84,11 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] ${position === 'right' ? 'overflow-hidden' : 'overflow-y-auto'}`}
+      className={`fixed inset-0 z-[10001] ${position === 'right' ? 'overflow-hidden' : 'overflow-y-auto'}`}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
+      style={{ display: 'block', visibility: 'visible' }}
     >
       <div className={`flex min-h-full ${position === 'right' ? 'items-start justify-end' : 'items-center justify-center'} ${position === 'right' ? '' : 'p-4'}`}>
         {/* Overlay */}
@@ -90,6 +96,7 @@ export const Modal: React.FC<ModalProps> = ({
           className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
           aria-hidden="true"
           onClick={handleOverlayClick}
+          style={{ zIndex: 10001 }}
         />
 
         {/* Modal */}
@@ -97,12 +104,24 @@ export const Modal: React.FC<ModalProps> = ({
           ref={modalRef}
           className={`relative bg-white ${position === 'right' ? 'shadow-2xl w-full max-w-2xl h-full flex flex-col' : 'rounded-lg shadow-xl w-full'} ${sizeClasses[size]} focus:outline-none`}
           tabIndex={-1}
+          style={{ 
+            display: 'block', 
+            visibility: 'visible', 
+            opacity: 1,
+            backgroundColor: '#ffffff',
+            background: '#ffffff',
+            zIndex: 10002
+          }}
         >
           {/* Header */}
-          <div className={`flex items-center justify-between p-6 border-b border-gray-200 ${position === 'right' ? 'flex-shrink-0' : ''}`}>
+          <div 
+            className={`flex items-center justify-between p-6 border-b border-gray-200 ${position === 'right' ? 'flex-shrink-0' : ''}`}
+            style={{ backgroundColor: '#ffffff', color: '#111827' }}
+          >
             <h2
               id="modal-title"
               className="text-lg font-semibold text-gray-900"
+              style={{ color: '#111827' }}
             >
               {title}
             </h2>
@@ -120,7 +139,12 @@ export const Modal: React.FC<ModalProps> = ({
           </div>
 
           {/* Content */}
-          <div className={`p-6 ${position === 'right' ? 'overflow-y-auto flex-1' : ''}`}>{children}</div>
+          <div 
+            className={`p-6 ${position === 'right' ? 'overflow-y-auto flex-1' : ''}`}
+            style={{ backgroundColor: '#ffffff', color: '#111827' }}
+          >
+            {children}
+          </div>
         </div>
       </div>
     </div>
