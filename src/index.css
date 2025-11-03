@@ -21,6 +21,50 @@
     --tw-gradient-to: rgba(255, 248, 220, 0) var(--tw-gradient-to-position);
     --tw-gradient-stops: var(--tw-gradient-from), rgba(255, 248, 220, 0.4) var(--tw-gradient-via-position), var(--tw-gradient-to);
   }
+  
+  /* Grid 2 colonne per desktop */
+  .grid-2cols-desktop {
+    grid-template-columns: 1fr;
+  }
+  
+  @media (min-width: 768px) {
+    .grid-2cols-desktop {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  
+  /* Header 2 colonne mobile, 3 colonne desktop */
+  .grid-header-responsive {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  @media (min-width: 768px) {
+    .grid-header-responsive {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+}
+
+/* Custom padding classes for header */
+.header-padding {
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .header-padding {
+    padding-left: 4rem;
+    padding-right: 4rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}
+
+/* Custom padding top for orario column */
+.orario-padding-top {
+  padding-top: 2rem;
 }
 
 :root {

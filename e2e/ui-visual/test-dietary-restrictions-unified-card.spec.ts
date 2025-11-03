@@ -21,20 +21,22 @@ test.describe('DietaryRestrictionsSection - Card Unificata', () => {
 
     // Seleziona "Rinfresco di Laurea" per far apparire la sezione intolleranze
     await page.selectOption('select#booking_type', 'rinfresco_laurea')
-    await page.waitForTimeout(500)
-
-    // Scrolla fino alla sezione intolleranze (usa heading)
-    const intolleranzeHeading = page.locator('h2:has-text("Intolleranze")')
-    await intolleranzeHeading.scrollIntoViewIfNeeded({ timeout: 10000 })
-    await page.waitForTimeout(500)
+    await page.waitForTimeout(2000) // Attendi il rendering
 
     // 🔴 RED PHASE: Verifica presenza card unificata con sfondo semi-trasparente
     // Stessa classe usata per BookingDetailsModal
-    const unifiedCard = page.locator('.bg-white\\/95.backdrop-blur-md.border-2.border-gray-200.rounded-xl.shadow-lg').filter({
-      has: page.locator('text=Intolleranze')
-    })
-
+    // Il titolo è "Intolleranze e Richieste Speciali"
+    const intolleranzeH2 = page.locator('h2').filter({ hasText: 'Intolleranze' })
+    await expect(intolleranzeH2).toBeVisible({ timeout: 15000 })
+    
+    // Il parent della card ha la classe bg-white/95
+    const unifiedCard = intolleranzeH2.locator('xpath=ancestor::div[contains(@class, "bg-white/95")]').first()
+    
     await expect(unifiedCard).toBeVisible({ timeout: 5000 })
+    
+    // Scrolla dopo che è visibile
+    await unifiedCard.scrollIntoViewIfNeeded()
+    await page.waitForTimeout(500)
 
     // Verifica che la card contenga il form intolleranze
     const restrictionSelect = unifiedCard.locator('select, [role="combobox"]').first()
@@ -80,17 +82,19 @@ test.describe('DietaryRestrictionsSection - Card Unificata', () => {
 
     // Seleziona "Rinfresco di Laurea" per far apparire la sezione intolleranze
     await page.selectOption('select#booking_type', 'rinfresco_laurea')
+    await page.waitForTimeout(1000)
+
+    const intolleranzeH2Desktop = page.locator('h2').filter({ hasText: 'Intolleranze' })
+    await expect(intolleranzeH2Desktop).toBeVisible({ timeout: 15000 })
+    
+    const unifiedCardDesktop = intolleranzeH2Desktop.locator('xpath=ancestor::div[contains(@class, "bg-white/95")]').first()
+    
+    await expect(unifiedCardDesktop).toBeVisible({ timeout: 5000 })
+    await unifiedCardDesktop.scrollIntoViewIfNeeded()
     await page.waitForTimeout(500)
 
-    const unifiedCard = page.locator('.bg-white\\/95.backdrop-blur-md.border-2.border-gray-200.rounded-xl.shadow-lg').filter({
-      has: page.locator('text=Intolleranze')
-    })
-
-    await expect(unifiedCard).toBeVisible()
-
     // Screenshot desktop
-    const intolleranzeHeading = page.locator('h2:has-text("Intolleranze")')
-    await intolleranzeHeading.scrollIntoViewIfNeeded({ timeout: 10000 })
+    await unifiedCardDesktop.scrollIntoViewIfNeeded()
     await page.screenshot({
       path: 'e2e/screenshots/dietary-card-desktop.png',
       fullPage: false
@@ -103,12 +107,19 @@ test.describe('DietaryRestrictionsSection - Card Unificata', () => {
 
     // Seleziona "Rinfresco di Laurea" per far apparire la sezione intolleranze
     await page.selectOption('select#booking_type', 'rinfresco_laurea')
+    await page.waitForTimeout(1000)
+
+    // Ricrea il locator per mobile dopo il nuovo goto
+    const intolleranzeH2Mobile = page.locator('h2').filter({ hasText: 'Intolleranze' })
+    await expect(intolleranzeH2Mobile).toBeVisible({ timeout: 15000 })
+    
+    const unifiedCardMobile = intolleranzeH2Mobile.locator('xpath=ancestor::div[contains(@class, "bg-white/95")]').first()
+    
+    await expect(unifiedCardMobile).toBeVisible({ timeout: 5000 })
+    await unifiedCardMobile.scrollIntoViewIfNeeded()
     await page.waitForTimeout(500)
 
-    await expect(unifiedCard).toBeVisible()
-
     // Screenshot mobile
-    await intolleranzeHeading.scrollIntoViewIfNeeded({ timeout: 10000 })
     await page.screenshot({
       path: 'e2e/screenshots/dietary-card-mobile.png',
       fullPage: false

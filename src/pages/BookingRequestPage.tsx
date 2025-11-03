@@ -72,7 +72,7 @@ export const BookingRequestPage: React.FC = () => {
   const groupedHours = getGroupedHours()
 
   return (
-    <div className="min-h-screen relative overflow-hidden font-bold">
+    <div className="min-h-screen relative font-bold">
       {/* Overlay scuro per leggibilità */}
       <div
         className="fixed inset-0 z-0"
@@ -95,37 +95,43 @@ export const BookingRequestPage: React.FC = () => {
       />
 
       {/* Main Content */}
-      <div className="relative z-10 flex items-center justify-center min-h-screen p-4 md:p-8">
-        <div className="w-full max-w-6xl">
-          {/* Hero Section con Glassmorphism */}
-          <div className="text-center mb-8 animate-fade-in">
-            <div className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-warm-cream shadow-2xl animate-slide-in-up">
-              <UtensilsCrossed className="w-10 h-10 text-warm-wood" />
-            </div>
-            <h1
-              className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 text-warm-cream drop-shadow-lg"
-              style={{
-                textShadow: '2px 2px 8px rgba(0,0,0,0.8)'
-              }}
-            >
-              Prenota il Tuo Tavolo
-            </h1>
-            <p
-              className="text-2xl md:text-3xl font-serif font-semibold mb-3 text-gold-warm"
-              style={{
-                textShadow: '2px 2px 8px rgba(0,0,0,0.8)'
-              }}
-            >
-              Al Ritrovo
-            </p>
+      <div className="relative z-10 min-h-screen">
+        <div className="w-full max-w-6xl mx-auto px-4 md:px-8">
+          
+          {/* Header semi-trasparente in alto */}
+          <div className="pt-4 md:pt-6 pb-4">
             <div
-              className="flex items-center justify-center gap-2 mb-6 text-warm-beige"
+              className="rounded-lg shadow-md px-8 py-3 md:px-16 md:py-4 animate-fade-in"
               style={{
-                textShadow: '2px 2px 8px rgba(0,0,0,0.8)'
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                backdropFilter: 'blur(16px)',
               }}
             >
-              <MapPin className="w-5 h-5" />
-              <span className="text-base md:text-lg">Bologna, Italia</span>
+              <div className="flex flex-col items-center justify-center gap-3">
+                {/* In alto: Al Ritrovo con icona */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-warm-cream shadow-md">
+                    <UtensilsCrossed className="w-4 h-4 text-warm-wood" />
+                  </div>
+                  <h1
+                    className="text-sm md:text-base font-serif font-semibold text-warm-wood"
+                  >
+                    Al Ritrovo
+                  </h1>
+                </div>
+                
+                {/* Sotto: Prenota il Tuo Tavolo */}
+                <div className="flex items-center justify-center">
+                  <p
+                    className="text-sm md:text-base font-serif font-bold text-warm-wood"
+                    style={{
+                      fontWeight: '700'
+                    }}
+                  >
+                    Prenota il Tuo Tavolo
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -136,60 +142,66 @@ export const BookingRequestPage: React.FC = () => {
 
           {/* Info Box Ridisegnata */}
           <div
-            className="rounded-2xl shadow-xl p-6 md:p-8 animate-fade-in"
+            className="rounded-2xl shadow-xl px-6 md:px-8 py-6 md:py-8 animate-fade-in"
             style={{
               backgroundColor: 'rgba(255, 255, 255, 0.3)',
               backdropFilter: 'blur(16px)',
             }}
           >
-            <div className="flex items-start gap-4 md:gap-6">
-              <div className="flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-terracotta to-warm-orange shadow-lg">
-                <Clock className="w-7 h-7 text-white" />
+            <div className="grid gap-6 grid-2cols-desktop">
+              {/* Colonna 1: Contatti */}
+              <div className="space-y-3">
+                <div className="flex items-start gap-4 md:gap-6 mb-4">
+                  <div className="flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br from-terracotta to-warm-orange shadow-lg">
+                    <Clock className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3
+                      className="text-xl md:text-2xl font-serif font-semibold text-warm-wood"
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                        backdropFilter: 'blur(6px)',
+                        padding: '12px 20px',
+                        borderRadius: '12px',
+                        display: 'inline-block'
+                      }}
+                    >
+                      Orari e Contatti
+                    </h3>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Mail className="w-5 h-5 text-warm-orange flex-shrink-0" />
+                  <span className="text-base text-warm-wood-dark font-medium">Alritrovobologna@gmail.com</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Phone className="w-5 h-5 text-warm-orange flex-shrink-0" />
+                  <span className="text-base text-warm-wood-dark font-medium">3505362538</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <MapPin className="w-5 h-5 text-warm-orange flex-shrink-0" />
+                  <span className="text-base text-warm-wood-dark font-medium">Via Centotrecento 1/1B - Bologna, 40126</span>
+                </div>
               </div>
-              <div className="flex-1">
-                <h3
-                  className="text-xl md:text-2xl font-serif font-semibold mb-4 text-warm-wood"
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                    backdropFilter: 'blur(6px)',
-                    padding: '12px 20px',
-                    borderRadius: '12px',
-                    display: 'inline-block'
-                  }}
-                >
-                  Orari e Contatti
-                </h3>
-                <p className="text-base md:text-lg mb-6 text-gray-700">
-                  Per informazioni urgenti, chiamaci direttamente:
-                </p>
-                <div className="space-y-3 text-base md:text-lg text-warm-wood-dark">
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-warm-orange" />
-                    <span className="font-medium">Alritrovobologna@gmail.com</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-warm-orange" />
-                    <span className="font-medium">3505362538</span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <Clock className="w-5 h-5 text-warm-orange" />
-                      <span className="font-medium">Orario:</span>
-                    </div>
-                    <div className="ml-8 space-y-1">
-                      {isLoading ? (
-                        <div className="font-medium">Caricamento orari...</div>
-                      ) : (
-                        groupedHours.map((group, index) => (
-                          <div key={index} className="font-medium">
-                            {group.days.length === 1
-                              ? `${group.days[0]}: ${group.hours}`
-                              : `${group.days[0]} - ${group.days[group.days.length - 1]}: ${group.hours}`}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
+              
+              {/* Colonna 2: Orari */}
+              <div className="space-y-2 orario-padding-top">
+                <div className="flex items-center gap-3">
+                  <Clock className="w-5 h-5 text-warm-orange flex-shrink-0" />
+                  <span className="text-base text-warm-wood-dark font-medium">Orario:</span>
+                </div>
+                <div className="space-y-1">
+                  {isLoading ? (
+                    <div className="font-medium text-base text-warm-wood-dark ml-8">Caricamento orari...</div>
+                  ) : (
+                    groupedHours.map((group, index) => (
+                      <div key={index} className="font-medium text-base text-warm-wood-dark ml-8">
+                        {group.days.length === 1
+                          ? `${group.days[0]}: ${group.hours}`
+                          : `${group.days[0]} - ${group.days[group.days.length - 1]}: ${group.hours}`}
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>

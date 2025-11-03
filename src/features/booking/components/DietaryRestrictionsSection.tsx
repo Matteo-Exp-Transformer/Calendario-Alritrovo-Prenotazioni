@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { Input } from '@/components/ui'
-import { Plus, Edit, Trash2, X } from 'lucide-react'
+import { Input, Textarea } from '@/components/ui'
+import { Link } from 'react-router-dom'
+import { Plus, Edit, Trash2, X, Check } from 'lucide-react'
 import { DIETARY_RESTRICTIONS, type DietaryRestrictionType } from '@/types/menu'
 
 interface DietaryRestriction {
@@ -12,11 +13,19 @@ interface DietaryRestriction {
 interface DietaryRestrictionsSectionProps {
   restrictions: DietaryRestriction[]
   onRestrictionsChange: (restrictions: DietaryRestriction[]) => void
+  specialRequests: string
+  onSpecialRequestsChange: (value: string) => void
+  privacyAccepted: boolean
+  onPrivacyChange: (value: boolean) => void
 }
 
 export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProps> = ({
   restrictions,
-  onRestrictionsChange
+  onRestrictionsChange,
+  specialRequests,
+  onSpecialRequestsChange,
+  privacyAccepted,
+  onPrivacyChange
 }) => {
   const [selectedRestriction, setSelectedRestriction] = useState<DietaryRestrictionType | 'Altro'>('No Lattosio')
   const [guestCount, setGuestCount] = useState<number>(1)
@@ -87,7 +96,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
   }
 
   return (
-    <div className="bg-white/95 backdrop-blur-md border-2 border-gray-200 rounded-xl shadow-lg p-6 md:p-8 space-y-6">
+    <div className="space-y-6">
       {/* Titolo Sezione */}
       <h2
         className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
@@ -98,14 +107,25 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
           borderRadius: '12px'
         }}
       >
-        Intolleranze Alimentari
+        Intolleranze e Richieste Speciali
       </h2>
 
       {/* Form Aggiunta/Modifica */}
-      <div className="bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent border-2 border-warm-beige rounded-xl p-8 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-full">
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-full">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label 
+              className="block text-sm font-bold text-warm-wood mb-4"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(6px)',
+                padding: '8px 16px',
+                borderRadius: '12px',
+                display: 'inline-block',
+                fontWeight: '700',
+                marginBottom: '16px'
+              }}
+            >
               Intolleranza / Esigenza *
             </label>
             <select
@@ -136,7 +156,18 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label 
+              className="block text-sm font-bold text-warm-wood mb-4"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(6px)',
+                padding: '8px 16px',
+                borderRadius: '12px',
+                display: 'inline-block',
+                fontWeight: '700',
+                marginBottom: '16px'
+              }}
+            >
               Numero ospiti con intolleranze alimentari *
             </label>
             <Input
@@ -146,14 +177,35 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
               onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
               className="w-full"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p 
+              className="text-xs text-gray-700 mt-2"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(6px)',
+                padding: '8px 16px',
+                borderRadius: '12px',
+                display: 'inline-block',
+                fontWeight: '600'
+              }}
+            >
               Nota: Questo numero è solo per associare l'intolleranza specifica e non viene sommato al totale ospiti della prenotazione.
             </p>
           </div>
         </div>
         {selectedRestriction === 'Altro' && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label 
+              className="block text-sm font-bold text-warm-wood mb-4"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(6px)',
+                padding: '8px 16px',
+                borderRadius: '12px',
+                display: 'inline-block',
+                fontWeight: '700',
+                marginBottom: '16px'
+              }}
+            >
               Specifica intolleranza / esigenza *
             </label>
             <Input
@@ -201,28 +253,28 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
 
       {/* Lista Recap */}
       {restrictions.length > 0 && (
-        <div className="space-y-3">
+        <div>
           <h3
-            className="text-lg font-bold text-gray-800"
+            className="text-lg font-bold text-gray-800 mb-4"
             style={{
               backgroundColor: 'rgba(255, 255, 255, 0.5)',
               backdropFilter: 'blur(6px)',
               padding: '12px 20px',
-              borderRadius: '12px',
-              display: 'inline-block'
+              borderRadius: '12px'
             }}
           >
             Intolleranze inserite:
           </h3>
+          <div className="space-y-4">
           {restrictions.map((restriction, index) => (
             <div
               key={index}
-              className="flex items-center gap-6 p-6 bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent rounded-lg border-2 border-warm-beige hover:shadow-md transition-all"
+              className="flex items-center gap-6 p-8 bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent rounded-xl border-2 border-warm-beige hover:shadow-md transition-all"
               style={{
                 minHeight: '64px'
               }}
             >
-              <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="flex items-center gap-4 flex-shrink-0">
                 <span className="font-bold text-gray-900">{restriction.restriction}</span>
                 {restriction.restriction === 'Altro' && restriction.notes && (
                   <span className="text-sm font-bold text-gray-600 italic">({restriction.notes})</span>
@@ -249,8 +301,82 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
               </div>
             </div>
           ))}
+          </div>
         </div>
       )}
+
+      {/* Note o Richieste Speciali */}
+      <div className="space-y-3 mt-6">
+        <label 
+          className="block text-sm font-bold text-warm-wood mb-4"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+            backdropFilter: 'blur(6px)',
+            padding: '8px 16px',
+            borderRadius: '12px',
+            display: 'inline-block',
+            fontWeight: '700',
+            marginBottom: '16px'
+          }}
+        >
+          Note o richieste speciali
+        </label>
+        <Textarea
+          id="special_requests"
+          value={specialRequests}
+          onChange={(e) => onSpecialRequestsChange(e.target.value)}
+          rows={4}
+          placeholder="Inserisci eventuali richieste particolari..."
+          className="w-full"
+        />
+      </div>
+
+      {/* Privacy Policy */}
+      <div className="flex items-start gap-3">
+        <div className="relative flex-shrink-0">
+          <input
+            type="checkbox"
+            id="privacy-consent-dietary"
+            checked={privacyAccepted}
+            onChange={(e) => onPrivacyChange(e.target.checked)}
+            required
+            className="peer sr-only"
+          />
+          <label
+            htmlFor="privacy-consent-dietary"
+            className="flex h-5 w-5 cursor-pointer items-center justify-center border-2 border-warm-wood/40 shadow-sm transition-all duration-300 hover:border-warm-wood hover:shadow-md peer-checked:border-warm-orange peer-checked:shadow-lg peer-focus-visible:ring-4 peer-focus-visible:ring-warm-wood/20"
+            style={{ backgroundColor: privacyAccepted ? '#D2691E' : 'white' }}
+          >
+            <Check
+              className={`h-3.5 w-3.5 text-white transition-all duration-300 ${
+                privacyAccepted ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+              }`}
+              strokeWidth={3}
+            />
+          </label>
+        </div>
+        <label
+          htmlFor="privacy-consent-dietary"
+          className="cursor-pointer text-sm text-gray-700"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: '8px 16px', borderRadius: '8px', backdropFilter: 'blur(4px)' }}
+        >
+          Accetto la{' '}
+          <Link
+            to="/privacy"
+            target="_blank"
+            className="text-al-ritrovo-primary hover:text-al-ritrovo-primary-dark underline font-medium"
+            onClick={(e) => e.stopPropagation()}
+          >
+            Privacy Policy
+          </Link>
+          {' '}*
+        </label>
+      </div>
+
+      {/* Campi obbligatori */}
+      <p className="text-xs text-gray-500 italic">
+        * I campi contrassegnati sono obbligatori
+      </p>
     </div>
   )
 }

@@ -25,7 +25,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             fontWeight: '700',
             backgroundColor: 'rgba(255, 255, 255, 0.5)',
             backdropFilter: 'blur(6px)',
-            color: 'black'
+            color: 'black',
+            fontFamily: 'Inter, system-ui, -apple-system, sans-serif'
           }}
           onFocus={(e) => e.target.style.borderColor = '#8B6914'}
           onBlur={(e) => e.target.style.borderColor = 'rgba(0,0,0,0.2)'}

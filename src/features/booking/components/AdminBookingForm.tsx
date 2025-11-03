@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Input, Textarea } from '@/components/ui'
+import { Input } from '@/components/ui'
 import type { BookingRequestInput } from '@/types/booking'
 import { useCreateAdminBooking } from '../hooks/useAdminBookingRequests'
 import { useQueryClient } from '@tanstack/react-query'
@@ -33,6 +33,7 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [selectedPreset, setSelectedPreset] = useState<PresetMenuType>(null)
+  const [privacyAccepted, setPrivacyAccepted] = useState(false)
 
   const { mutate, isPending } = useCreateAdminBooking()
   const queryClient = useQueryClient()
@@ -537,20 +538,15 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
                 dietary_restrictions: restrictions
               })
             }}
+            specialRequests={formData.special_requests || ''}
+            onSpecialRequestsChange={(value) => {
+              setFormData({ ...formData, special_requests: value })
+            }}
+            privacyAccepted={privacyAccepted}
+            onPrivacyChange={setPrivacyAccepted}
           />
         </div>
       )}
-
-      {/* Note Speciali - Full Width sotto le 2 colonne */}
-      <div className="space-y-3">
-        <Textarea
-          id="special_requests"
-          value={formData.special_requests}
-          onChange={(e) => setFormData({ ...formData, special_requests: e.target.value })}
-          placeholder="Note o Richieste Speciali (es: Tavolo specifico, richieste particolari...)"
-          rows={4}
-        />
-      </div>
 
       {/* Nota campi obbligatori e Submit Button */}
       <div className="flex items-center justify-between gap-4 mt-4">

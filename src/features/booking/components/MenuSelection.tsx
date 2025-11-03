@@ -185,14 +185,14 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
   }
 
   return (
-    <div className="bg-white/95 backdrop-blur-md border-2 border-gray-200 rounded-xl shadow-lg p-6 md:p-8 space-y-6">
+    <div className="space-y-6">
       {/* Titolo Sezione */}
       <h2
         className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
         style={{
           backgroundColor: 'rgba(255, 255, 255, 0.5)',
           backdropFilter: 'blur(6px)',
-          padding: '12px 20px',
+          padding: '12px 24px',
           borderRadius: '12px'
         }}
       >
@@ -228,7 +228,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                 color: '#2563EB',
                 backgroundColor: 'rgba(255, 255, 255, 0.5)',
                 backdropFilter: 'blur(6px)',
-                padding: '12px 20px',
+                padding: '12px 24px',
                 borderRadius: '12px'
               }}
             >
@@ -239,14 +239,14 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                 </span>
               )}
             </h3>
-            <div className="grid md:grid-cols-2 gap-3">
+            <div className="grid md:grid-cols-2 gap-4">
               {items.map((item) => {
                 const isSelected = selectedItems.some(selected => selected.id === item.id)
                 return (
                   <label
                     key={item.id}
                     className={`
-                      flex items-center gap-4 p-8 rounded-lg border-2 cursor-pointer
+                      flex items-center gap-4 p-8 rounded-xl border-2 cursor-pointer
                       transition-all duration-200
                     `}
                     style={{
@@ -254,7 +254,9 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                       backgroundColor: isSelected ? 'rgba(245, 222, 179, 0.6)' : 'rgba(255, 255, 255, 0.5)',
                       backdropFilter: 'blur(6px)',
                       borderColor: isSelected ? '#8B4513' : 'rgba(0,0,0,0.2)',
-                      padding: '20px'
+                      padding: '24px',
+                      borderRadius: '16px',
+                      marginBottom: '4px'
                     }}
                   >
                     <input
@@ -275,7 +277,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                         <Check className="h-4 w-4 text-white" strokeWidth={3} />
                       )}
                     </div>
-                    <div className="flex-1" style={{ paddingLeft: '12px', paddingRight: '12px', paddingTop: '8px', paddingBottom: '8px' }}>
+                    <div className="flex-1" style={{ paddingLeft: '16px', paddingRight: '16px', paddingTop: '12px', paddingBottom: '12px' }}>
                       <div className="flex items-center">
                         <span className={`font-bold flex-1 ${isSelected ? 'text-warm-wood' : 'text-gray-700'}`} style={{ fontWeight: '700' }}>
                           {item.name}

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Input, Textarea } from '@/components/ui'
+import { Input } from '@/components/ui'
 import type { BookingRequestInput } from '@/types/booking'
 import { useCreateBookingRequest } from '../hooks/useBookingRequests'
 import { useRateLimit } from '@/hooks/useRateLimit'
@@ -282,13 +282,13 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     <>
     <form onSubmit={handleSubmit} className="w-full max-w-[55vw] mx-auto px-4 md:px-6 space-y-8 font-bold">
       {/* Sezione: Dati Personali */}
-      <div className="bg-white/95 backdrop-blur-md border-2 border-gray-200 rounded-xl shadow-lg p-6 md:p-8 space-y-6">
+      <div className="space-y-6">
         <h2
           className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
           style={{
             backgroundColor: 'rgba(255, 255, 255, 0.5)',
             backdropFilter: 'blur(6px)',
-            padding: '12px 20px',
+            padding: '12px 24px',
             borderRadius: '12px'
           }}
         >
@@ -352,13 +352,13 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       </div>
 
       {/* Sezione: Dettagli Prenotazione */}
-      <div className="bg-white/95 backdrop-blur-md border-2 border-gray-200 rounded-xl shadow-lg p-6 md:p-8 space-y-6">
+      <div className="space-y-6">
         <h2
           className="text-3xl font-serif font-bold text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
           style={{
             backgroundColor: 'rgba(255, 255, 255, 0.5)',
             backdropFilter: 'blur(6px)',
-            padding: '12px 20px',
+            padding: '12px 24px',
             borderRadius: '12px'
           }}
         >
@@ -366,18 +366,20 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         </h2>
 
         {/* Tipologia di Prenotazione - DROPDOWN */}
-        <div className="space-y-3">
+        <div>
           <label
-            className="block text-sm font-medium text-warm-wood mb-2"
+            className="block text-sm font-bold text-warm-wood"
             style={{
               backgroundColor: 'rgba(255, 255, 255, 0.5)',
               backdropFilter: 'blur(6px)',
               padding: '8px 16px',
               borderRadius: '12px',
-              display: 'inline-block'
+              display: 'block',
+              fontWeight: '700',
+              marginBottom: '8px'
             }}
           >
-            Tipologia di Prenotazione *
+            Tipo di prenotazione *
           </label>
           <select
             id="booking_type"
@@ -562,92 +564,75 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
                 // NOTA: num_guests non viene modificato quando si aggiungono intolleranze
               })
             }}
+            specialRequests={formData.special_requests || ''}
+            onSpecialRequestsChange={(value) => {
+              setFormData({ ...formData, special_requests: value })
+            }}
+            privacyAccepted={privacyAccepted}
+            onPrivacyChange={setPrivacyAccepted}
           />
         </div>
       )}
 
-      {/* Note Speciali - Full Width sotto le 2 colonne */}
-      <div className="space-y-3">
-        <Textarea
-          id="special_requests"
-          value={formData.special_requests}
-          onChange={(e) => setFormData({ ...formData, special_requests: e.target.value })}
-          placeholder="Note o Richieste Speciali (es: Tavolo specifico, richieste particolari...)"
-          rows={4}
-        />
-      </div>
-
-      {/* Privacy Policy - Checkbox Piccolo e Stondato */}
-      <div className="rounded-xl p-4 bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent border-2 border-warm-beige shadow-sm">
-        <div className="flex items-center gap-3">
-          {/* Custom Checkbox - Più piccolo */}
-          <div className="relative flex-shrink-0">
-            <input
-              type="checkbox"
-              id="privacy-consent"
-              checked={privacyAccepted}
-              onChange={(e) => setPrivacyAccepted(e.target.checked)}
-              required
-              className="peer sr-only"
-            />
+      {/* Privacy Policy - Solo per Prenota un Tavolo (per Rinfresco di Laurea è dentro DietaryRestrictionsSection) */}
+      {formData.booking_type !== 'rinfresco_laurea' && (
+        <div className="rounded-xl p-4 bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent border-2 border-warm-beige shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="relative flex-shrink-0">
+              <input
+                type="checkbox"
+                id="privacy-consent"
+                checked={privacyAccepted}
+                onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                required
+                className="peer sr-only"
+              />
+              <label
+                htmlFor="privacy-consent"
+                className="flex h-5 w-5 cursor-pointer items-center justify-center border-2 border-warm-wood/40 shadow-sm transition-all duration-300 hover:border-warm-wood hover:shadow-md peer-checked:border-warm-orange peer-checked:shadow-lg peer-focus-visible:ring-4 peer-focus-visible:ring-warm-wood/20"
+                style={{ backgroundColor: 'white' }}
+              >
+                <Check
+                  className={`h-3.5 w-3.5 text-white transition-all duration-300 ${
+                    privacyAccepted ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+                  }`}
+                  strokeWidth={3}
+                />
+              </label>
+            </div>
             <label
               htmlFor="privacy-consent"
-              className="flex h-5 w-5 cursor-pointer items-center justify-center border-2 border-warm-wood/40 shadow-sm transition-all duration-300 hover:border-warm-wood hover:shadow-md peer-checked:border-warm-orange peer-checked:shadow-lg peer-focus-visible:ring-4 peer-focus-visible:ring-warm-wood/20"
-              style={{ backgroundColor: 'white' }}
+              className="cursor-pointer text-sm text-warm-wood-dark font-medium leading-relaxed"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: '8px 16px', borderRadius: '8px', backdropFilter: 'blur(4px)', maxWidth: '600px' }}
             >
-              <Check
-                className={`h-3.5 w-3.5 text-white transition-all duration-300 ${
-                  privacyAccepted ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
-                }`}
-                strokeWidth={3}
-              />
+              Accetto la{' '}
+              <Link
+                to="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-warm-orange hover:text-terracotta underline decoration-2 underline-offset-2 transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Privacy Policy
+              </Link>
+              {' '}di Al Ritrovo *
             </label>
           </div>
-
-          {/* Label */}
-          <label
-            htmlFor="privacy-consent"
-            className="cursor-pointer text-sm text-warm-wood-dark font-medium leading-relaxed"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', padding: '8px 16px', borderRadius: '8px', backdropFilter: 'blur(4px)', maxWidth: '600px' }}
-          >
-            Accetto la{' '}
-            <Link
-              to="/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-semibold text-warm-orange hover:text-terracotta underline decoration-2 underline-offset-2 transition-colors"
-              onClick={(e) => e.stopPropagation()}
-            >
-              Privacy Policy
-            </Link>
-            {' '}di Al Ritrovo *
-          </label>
         </div>
-      </div>
-
-      {/* Nota campi obbligatori */}
-      <div className="mt-4">
-        <p
-          className="text-xs text-gray-600"
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.5)',
-            backdropFilter: 'blur(6px)',
-            padding: '8px 16px',
-            borderRadius: '12px',
-            display: 'inline-block'
-          }}
-        >
-          * I campi contrassegnati sono obbligatori.
-        </p>
-      </div>
+      )}
 
       {/* Submit Button */}
-      <div className="flex justify-center mt-4">
+      <div className="flex justify-center items-center mt-4 w-full px-4">
         <button
             type="submit"
             disabled={isPending || isBlocked}
-            style={{ backgroundColor: '#22c55e', paddingLeft: '256px', paddingRight: '256px', paddingTop: '25px', paddingBottom: '25px', borderRadius: '50px' }}
-            className="group relative overflow-hidden bg-green-600 px-[256px] py-6 text-2xl font-bold uppercase tracking-wide text-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(34,197,94,0.4)] hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl md:w-auto"
+            style={{ 
+              backgroundColor: '#22c55e', 
+              borderRadius: '50px',
+              paddingTop: '25px',
+              paddingBottom: '25px'
+            }}
+            className="group relative overflow-hidden bg-green-600 px-8 py-6 md:px-64 md:py-6 text-xl md:text-2xl font-bold uppercase tracking-wide text-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(34,197,94,0.4)] hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl w-full max-w-full md:w-auto md:max-w-none"
           >
             {/* Glow effect on hover */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
@@ -657,14 +642,14 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               {isPending ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  <span className="text-sm md:text-base">Invio in corso...</span>
+                  <span className="text-base md:text-lg">Invio in corso...</span>
                 </>
               ) : isBlocked ? (
-                <span className="text-sm md:text-base">Limite richieste raggiunto</span>
+                <span className="text-base md:text-lg">Limite richieste raggiunto</span>
               ) : (
                 <>
-                  <span className="text-2xl">Invia Prenotazione</span>
-                  <Send className="h-6 w-6 transition-transform duration-300 group-hover:translate-x-1" />
+                  <span className="text-xl md:text-2xl">Invia Prenotazione</span>
+                  <Send className="h-6 w-6 md:h-7 md:w-7 transition-transform duration-300 group-hover:translate-x-1" />
                 </>
               )}
             </div>

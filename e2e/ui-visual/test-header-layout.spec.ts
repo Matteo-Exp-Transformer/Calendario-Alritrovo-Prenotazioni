@@ -1,55 +1,83 @@
 import { test, expect } from '@playwright/test'
-import { loginAsAdmin } from '../helpers/auth'
 
-test('Verifica posizionamento User Info e Logout accanto a Rifiutate', async ({ page }) => {
-  // Login con helper
-  const loginSuccess = await loginAsAdmin(page)
-  
-  if (!loginSuccess) {
-    console.log('❌ Login fallito, ma continuiamo per verificare lo stato')
-  }
-  
-  await page.waitForTimeout(3000)
-  
-  // Prendi uno screenshot
-  await page.screenshot({ path: 'screenshots/header-layout-test.png', fullPage: true })
-  
-  // Trova la card "Rifiutate"
-  const rifiutateCard = page.locator('text=Rifiutate').locator('..').locator('..')
-  
-  // Trova User Info
-  const userInfo = page.locator('text=/Admin|Staff/').locator('..').locator('..').locator('..')
-  
-  // Trova Logout button
-  const logoutButton = page.locator('button:has-text("Logout")')
-  
-  const rifiutateCount = await rifiutateCard.count()
-  const userInfoCount = await userInfo.count()
-  const logoutCount = await logoutButton.count()
-  
-  console.log(`Card Rifiutate trovata: ${rifiutateCount}`)
-  console.log(`User Info trovata: ${userInfoCount}`)
-  console.log(`Logout button trovato: ${logoutCount}`)
-  
-  if (rifiutateCount > 0 && userInfoCount > 0) {
-    // Verifica posizione relativa
-    const rifiutateBox = await rifiutateCard.first().boundingBox()
-    const userInfoBox = await userInfo.first().boundingBox()
+/**
+ * Test per verificare il layout dell'header su mobile e desktop
+ */
+
+test.describe('Header Layout Verification', () => {
+  test('dovrebbe mostrare header con Al Ritrovo e Prenota il Tuo Tavolo su desktop', async ({ page }) => {
+    // Set desktop viewport
+    await page.setViewportSize({ width: 1280, height: 720 })
     
-    if (rifiutateBox && userInfoBox) {
-      const distance = userInfoBox.x - (rifiutateBox.x + rifiutateBox.width)
-      console.log(`Distanza tra Rifiutate e User Info: ${distance}px`)
-      
-      // Verifica che siano sulla stessa riga (y simili)
-      const yDifference = Math.abs(userInfoBox.y - rifiutateBox.y)
-      console.log(`Differenza verticale: ${yDifference}px`)
-      
-      expect(yDifference).toBeLessThan(50) // Dovrebbero essere sulla stessa riga
-    }
-  }
+    await page.goto('/prenota')
+    await page.waitForLoadState('networkidle')
+    
+    // Verifica "Al Ritrovo" a sinistra
+    const leftText = page.locator('h1:has-text("Al Ritrovo")')
+    await expect(leftText).toBeVisible()
+    
+    // Verifica "Prenota il Tuo Tavolo" a destra
+    const rightText = page.locator('text=Prenota il Tuo Tavolo')
+    await expect(rightText).toBeVisible()
+    
+    // Screenshot
+    await page.screenshot({
+      path: 'e2e/screenshots/header-layout-desktop.png',
+      fullPage: false
+    })
+  })
   
-  expect(rifiutateCount + userInfoCount + logoutCount).toBeGreaterThan(0)
+  test('dovrebbe mostrare sezione orari e contatti con 2 colonne su desktop', async ({ page }) => {
+    // Set desktop viewport
+    await page.setViewportSize({ width: 1280, height: 720 })
+    
+    await page.goto('/prenota')
+    await page.waitForLoadState('networkidle')
+    
+    // Scroll fino alla sezione Orari e Contatti
+    const orariSection = page.locator('h3:has-text("Orari e Contatti")')
+    await expect(orariSection).toBeVisible()
+    await orariSection.scrollIntoViewIfNeeded()
+    await page.waitForTimeout(500)
+    
+    // Verifica che ci sia il grid con 2 colonne
+    const grid = page.locator('div:has(h3:has-text("Orari e Contatti"))').locator('.grid.gap-6.grid-2cols-desktop')
+    await expect(grid).toBeVisible()
+    
+    // Verifica che il grid abbia 2 colonne su desktop
+    const gridTemplateColumns = await grid.evaluate((el) => {
+      const cs = window.getComputedStyle(el)
+      return cs.gridTemplateColumns
+    })
+    // Dovrebbe avere 2 colonne, quindi 2 valori con "px"
+    const columns = gridTemplateColumns.split(' ').filter(val => val.includes('px'))
+    expect(columns.length).toBe(2)
+    
+    // Screenshot
+    await page.screenshot({
+      path: 'e2e/screenshots/orari-contatti-2colonne-desktop.png',
+      fullPage: false
+    })
+  })
+  
+  test('dovrebbe mostrare layout responsive su mobile', async ({ page }) => {
+    // Set mobile viewport
+    await page.setViewportSize({ width: 375, height: 667 })
+    
+    await page.goto('/prenota')
+    await page.waitForLoadState('networkidle')
+    
+    // Verifica header
+    const leftText = page.locator('h1:has-text("Al Ritrovo")')
+    await expect(leftText).toBeVisible()
+    
+    const rightText = page.locator('text=Prenota il Tuo Tavolo')
+    await expect(rightText).toBeVisible()
+    
+    // Screenshot
+    await page.screenshot({
+      path: 'e2e/screenshots/header-layout-mobile.png',
+      fullPage: false
+    })
+  })
 })
-
-
-
