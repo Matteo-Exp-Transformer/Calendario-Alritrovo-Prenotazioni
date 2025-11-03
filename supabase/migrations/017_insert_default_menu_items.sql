@@ -8,7 +8,7 @@
 
 INSERT INTO menu_items (name, category, price, description, sort_order) VALUES
   ('Caraffe / Drink', 'bevande', 6.50, '0,5 l x Persona (Vino - Birra - Spritz inclusi)', 2),
-  ('Caraffe / Drink Premium', 'bevande', 8.00, '0,5l x persona / 1 drink per persona (Gin Tonic - Negroni - Moscow mule inclusi)', 3),
+  ('Caraffe / Drink Premium', 'bevande', 8.00, '0,5l x persona / 1 drink (Gin Tonic, Negroni, Moscow mule inclusi)', 3),
   ('Caffè', 'bevande', 1.00, NULL, 4)
 ON CONFLICT DO NOTHING;
 

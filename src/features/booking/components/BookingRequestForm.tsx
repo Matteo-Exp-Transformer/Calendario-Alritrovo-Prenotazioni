@@ -34,52 +34,103 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false) // Stato per triggerare re-render e disabilitare button
   
   // Ref per prevenire doppi submit (anche con React StrictMode)
   const isSubmittingRef = useRef(false)
   
-  // Protezione globale usando sessionStorage - lock semplice e globale (non dipende dai dati)
+  // Protezione globale usando sessionStorage - lock atomico per prevenire race condition
   const GLOBAL_LOCK_KEY = 'booking-submit-global-lock'
   const LOCK_TIMEOUT = 10000 // 10 secondi
   
-  const checkGlobalSubmissionLock = (): boolean => {
+  // Lock atomico: controlla E imposta in modo atomico usando un timestamp univoco
+  const acquireGlobalLock = (): string | null => {
     try {
+      const now = Date.now()
+      const lockId = `${now}-${Math.random().toString(36).substring(2, 9)}` // ID univoco per questo tentativo
+      
+      // Tentativo atomico: solo se non c'è lock valido, imposta il nostro lock
       const existingLock = sessionStorage.getItem(GLOBAL_LOCK_KEY)
       
       if (existingLock) {
-        const lockTime = parseInt(existingLock, 10)
-        const now = Date.now()
-        // Lock valido per il timeout
-        if (now - lockTime < LOCK_TIMEOUT) {
-          console.warn('⚠️ [BookingForm] Submit già in corso (global lock), ignorando', {
-            lockAge: now - lockTime,
-            remaining: LOCK_TIMEOUT - (now - lockTime)
+        const lockTime = parseInt(existingLock.split('-')[0], 10) // Prima parte è il timestamp
+        const lockAge = now - lockTime
+        
+        if (lockAge < LOCK_TIMEOUT) {
+          // Lock valido esistente
+          console.warn('⚠️ [BookingForm] Lock già presente (acquired by another instance)', {
+            lockAge,
+            remaining: LOCK_TIMEOUT - lockAge,
+            existingLock
           })
-          return false
+          return null // Lock non acquisito
         }
         // Lock scaduto, rimuovilo
         sessionStorage.removeItem(GLOBAL_LOCK_KEY)
         console.log('🔵 [BookingForm] Lock scaduto, rimosso')
       }
       
-      // Imposta nuovo lock IMMEDIATAMENTE
-      sessionStorage.setItem(GLOBAL_LOCK_KEY, Date.now().toString())
-      console.log('✅ [BookingForm] Global lock impostato')
-      return true
+      // OPERAZIONE ATOMICA: imposta lock con ID univoco
+      // Se due istanze fanno questo simultaneamente, solo una otterrà il suo ID nel lock
+      sessionStorage.setItem(GLOBAL_LOCK_KEY, lockId)
+      
+      // Verifica immediatamente se siamo riusciti ad acquisire il lock
+      // Se un'altra istanza ha fatto lo stesso, il lock potrebbe contenere un ID diverso
+      const actualLock = sessionStorage.getItem(GLOBAL_LOCK_KEY)
+      
+      if (actualLock === lockId) {
+        console.log('✅ [BookingForm] Global lock ACQUISITO con ID:', lockId)
+        return lockId
+      } else {
+        // Race condition: un'altra istanza ha acquisito il lock prima di noi
+        console.warn('⚠️ [BookingForm] Race condition rilevata! Lock acquisito da altra istanza:', {
+          ourId: lockId,
+          actualLock
+        })
+        return null
+      }
     } catch (error) {
-      // Se sessionStorage non è disponibile, continua comunque (fallback graceful)
-      console.warn('⚠️ [BookingForm] sessionStorage non disponibile, continuo senza lock globale:', error)
-      return true
+      console.warn('⚠️ [BookingForm] sessionStorage non disponibile:', error)
+      return null
     }
   }
   
-  const clearGlobalSubmissionLock = () => {
+  const releaseGlobalLock = (lockId: string | null) => {
+    if (!lockId) return
+    
     try {
-      sessionStorage.removeItem(GLOBAL_LOCK_KEY)
-      console.log('✅ [BookingForm] Global lock rimosso')
+      const currentLock = sessionStorage.getItem(GLOBAL_LOCK_KEY)
+      // Rilascia solo se è il nostro lock (non quello di un'altra istanza)
+      if (currentLock === lockId) {
+        sessionStorage.removeItem(GLOBAL_LOCK_KEY)
+        console.log('✅ [BookingForm] Global lock rilasciato:', lockId)
+      } else {
+        console.warn('⚠️ [BookingForm] Tentativo di rilasciare lock non nostro:', {
+          ourId: lockId,
+          currentLock
+        })
+      }
     } catch (error) {
-      // Ignora errori di sessionStorage
-      console.warn('⚠️ [BookingForm] Errore nel clear lock:', error)
+      console.warn('⚠️ [BookingForm] Errore nel release lock:', error)
+    }
+  }
+  
+  // Funzione helper per compatibilità (usa il nuovo sistema)
+  const checkGlobalSubmissionLock = (): boolean => {
+    const lockId = acquireGlobalLock()
+    if (lockId) {
+      // Salva il lockId nel ref per rilasciarlo dopo
+      ;(isSubmittingRef as any).currentLockId = lockId
+      return true
+    }
+    return false
+  }
+  
+  const clearGlobalSubmissionLock = () => {
+    const lockId = (isSubmittingRef as any).currentLockId
+    if (lockId) {
+      releaseGlobalLock(lockId)
+      delete (isSubmittingRef as any).currentLockId
     }
   }
 
@@ -268,14 +319,21 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       return
     }
     
-    // 2. Controllo ref locale (protezione istanza componente)
+    // 2. Controllo stato locale (protezione istanza componente - triggera re-render)
+    if (isSubmitting) {
+      console.warn('⚠️ [BookingForm] Submit già in corso (state lock), ignorando chiamata duplicata')
+      clearGlobalSubmissionLock() // Rimuovi lock globale se già in submit
+      return
+    }
+    
+    // 3. Controllo ref locale (backup - per casi edge)
     if (isSubmittingRef.current) {
       console.warn('⚠️ [BookingForm] Submit già in corso (ref lock), ignorando chiamata duplicata')
       clearGlobalSubmissionLock() // Rimuovi lock globale se ref è già attivo
       return
     }
     
-    // 3. Controllo mutation state (protezione React Query)
+    // 4. Controllo mutation state (protezione React Query)
     if (isPending) {
       console.warn('⚠️ [BookingForm] Mutation già in corso (mutation state), ignorando submit')
       clearGlobalSubmissionLock() // Rimuovi lock globale se mutation è già in corso
@@ -298,11 +356,14 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     }
 
     // Imposta tutti i flag per prevenire doppi submit
+    // Usa sia ref che stato per garantire che il button sia disabilitato immediatamente
     isSubmittingRef.current = true
+    setIsSubmitting(true) // Triggera re-render per disabilitare button immediatamente
     console.log('✅ [BookingForm] Validation passed, calling mutate...')
     console.log('🔵 [BookingForm] Lock state:', {
       globalLock: sessionStorage.getItem(GLOBAL_LOCK_KEY),
       refLock: isSubmittingRef.current,
+      stateLock: isSubmitting,
       isPending
     })
     
@@ -330,6 +391,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         
         // Reset tutti i flag di submit
         isSubmittingRef.current = false
+        setIsSubmitting(false)
         clearGlobalSubmissionLock()
         
         // Mostra la modal di conferma invece del toast
@@ -341,6 +403,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         console.error('❌ [BookingForm] Mutation error:', error)
         // Reset tutti i flag in caso di errore per permettere nuovo tentativo
         isSubmittingRef.current = false
+        setIsSubmitting(false)
         clearGlobalSubmissionLock()
       }
     })
@@ -694,7 +757,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       <div className="flex justify-center items-center mt-8 w-full">
         <button
             type="submit"
-            disabled={isPending || isBlocked}
+            disabled={isPending || isBlocked || isSubmitting}
             className="group relative overflow-hidden px-12 md:px-20 text-xl md:text-2xl uppercase tracking-wide text-white rounded-full bg-green-600 hover:bg-green-700 shadow-2xl hover:shadow-[0_20px_40px_rgba(34,197,94,0.4)] hover:-translate-y-1 transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl w-full md:w-auto max-w-md md:max-w-2xl"
             style={{ fontWeight: '700', backgroundColor: '#16a34a', paddingTop: '28px', paddingBottom: '28px' }}
           >

@@ -440,14 +440,71 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                       <Calendar className="h-5 w-5 text-gray-400" />
                       <div>
                         <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">Data e Ora</p>
-                        <p className="text-base font-normal text-gray-900">{formatDateTime(booking.confirmed_start)}</p>
+                        {/* ✅ FIX: Usa desired_time se disponibile (orario originale), altrimenti estrai da confirmed_start */}
+                        {(() => {
+                          const date = extractDateFromISO(booking.confirmed_start || booking.desired_date)
+                          
+                          // ✅ PRIORITÀ: Usa desired_time se disponibile (è l'orario originale inserito dall'utente, non soggetto a conversioni timezone)
+                          // desired_time è un campo TIME nel database, quindi non viene convertito da PostgreSQL
+                          // Se desired_time non è disponibile, usa extractTimeFromISO da confirmed_start
+                          // MA ATTENZIONE: extractTimeFromISO estrae dalla stringa ISO, che potrebbe essere già convertita da PostgreSQL
+                          let time: string
+                          
+                          // Debug: verifica disponibilità desired_time
+                          const hasDesiredTime = booking.desired_time && booking.desired_time.trim() !== ''
+                          
+                          if (hasDesiredTime) {
+                            // Usa desired_time (orario originale, sempre corretto)
+                            time = booking.desired_time.split(':').slice(0, 2).join(':')
+                            console.log(`✅ [BookingDetailsModal] Using desired_time: ${time}`)
+                          } else if (booking.confirmed_start) {
+                            // Fallback: estrai da confirmed_start
+                            // Nota: questo potrebbe essere convertito se PostgreSQL ha convertito il timestamp
+                            time = extractTimeFromISO(booking.confirmed_start)
+                            console.log(`⚠️ [BookingDetailsModal] desired_time not available, using confirmed_start extracted time: ${time}`)
+                            console.log(`⚠️ [BookingDetailsModal] confirmed_start ISO: ${booking.confirmed_start}`)
+                          } else {
+                            time = ''
+                            console.log(`❌ [BookingDetailsModal] No time available in booking`)
+                          }
+                          
+                          if (!date || !time) return 'Non specificato'
+                          const [year, month, day] = date.split('-').map(Number)
+                          const localDate = new Date(year, month - 1, day)
+                          const formattedDate = format(localDate, 'dd MMM yyyy', { locale: it })
+                          
+                          return <p className="text-base font-normal text-gray-900">{formattedDate} {time}</p>
+                        })()}
                       </div>
                     </div>
                     <div className="flex items-start space-x-3 py-2">
                       <Clock className="h-5 w-5 text-gray-400" />
                       <div>
                         <p className="text-xs font-bold uppercase tracking-wide text-gray-500 mb-1">Fine Evento</p>
-                        <p className="text-base font-normal text-gray-900">{formatDateTime(booking.confirmed_end)}</p>
+                        {/* ✅ FIX: Per confirmed_end, calcoliamo l'orario fine dall'orario inizio + durata standard (3h) */}
+                        {(() => {
+                          // Per l'orario di fine, se desired_time è disponibile, calcoliamo fine = inizio + 3h
+                          const startTime = booking.desired_time 
+                            ? booking.desired_time.split(':').slice(0, 2).join(':')
+                            : extractTimeFromISO(booking.confirmed_start)
+                          
+                          let endTime: string
+                          if (startTime && booking.desired_time) {
+                            // Calcola fine = inizio + 3 ore (durata standard)
+                            const [hours, minutes] = startTime.split(':').map(Number)
+                            const endHours = (hours + 3) % 24
+                            endTime = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+                          } else {
+                            endTime = extractTimeFromISO(booking.confirmed_end)
+                          }
+                          
+                          const date = extractDateFromISO(booking.confirmed_end || booking.confirmed_start || booking.desired_date)
+                          if (!date || !endTime) return 'Non specificato'
+                          const [year, month, day] = date.split('-').map(Number)
+                          const localDate = new Date(year, month - 1, day)
+                          const formattedDate = format(localDate, 'dd MMM yyyy', { locale: it })
+                          return <p className="text-base font-normal text-gray-900">{formattedDate} {endTime}</p>
+                        })()}
                       </div>
                     </div>
                     <div className="flex items-start space-x-3 py-2">

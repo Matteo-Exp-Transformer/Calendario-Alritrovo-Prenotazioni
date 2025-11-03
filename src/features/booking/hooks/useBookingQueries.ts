@@ -50,9 +50,10 @@ export const useAcceptedBookings = () => {
       
       // Show ALL accepted bookings (past, present, and future)
       // For a restaurant calendar, we want to show historical data too
+      // ✅ IMPORTANTE: Selezioniamo tutti i campi incluso desired_time per preservare l'orario originale
       const { data, error } = await supabase
         .from('booking_requests')
-        .select('*')
+        .select('*') // Include tutti i campi incluso desired_time
         .eq('status', 'accepted')
         .order('confirmed_start', { ascending: true })
 

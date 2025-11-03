@@ -415,42 +415,165 @@ test.describe('Flusso Completo Prenotazione - Inserimento → Accettazione → V
     if (calendarEvent && await calendarEvent.count() > 0) {
       await calendarEvent.scrollIntoViewIfNeeded();
       await page.waitForTimeout(500);
-      await calendarEvent.click();
-      await page.waitForTimeout(2000);
-
-      // Check if modal opened
-      const modalTimeInputs = page.locator('input[type="time"]');
       
-      try {
-        await modalTimeInputs.first().waitFor({ state: 'visible', timeout: 5000 });
-        const modalStartTime = await modalTimeInputs.first().inputValue();
-        const modalEndTime = await modalTimeInputs.nth(1).inputValue();
+      // Click the event
+      await calendarEvent.click({ force: true });
+      await page.waitForTimeout(3000);
+
+      // Check if modal opened - try multiple indicators
+      console.log('🔍 Checking if modal opened...');
+      
+      const modalIndicators = [
+        () => page.locator('input[type="time"]').first(),
+        () => page.locator('input[type="date"]').first(),
+        () => page.locator('text=/Prenotazione|Dettagli/i').first(),
+        () => page.locator('[class*="modal"], [role="dialog"]').first(),
+      ];
+
+      let modalOpened = false;
+      
+      for (const indicatorFn of modalIndicators) {
+        try {
+          const indicator = indicatorFn();
+          await indicator.waitFor({ state: 'visible', timeout: 5000 });
+          modalOpened = true;
+          console.log('✅ Modal opened');
+          break;
+        } catch (e) {
+          // Continue
+        }
+      }
+
+      if (modalOpened) {
+        // First, verify we're looking at the correct booking by checking name or email
+        console.log(`🔍 Verifying modal shows correct booking (${testName} or ${testEmail})...`);
+        const modalContent = page.locator('[class*="modal"], [role="dialog"]').first();
+        const bookingInModal = modalContent.locator(`text=/${testName}|${testEmail}/i`);
         
-        console.log(`📋 Modal start time: ${modalStartTime}`);
-        console.log(`📋 Modal end time: ${modalEndTime}`);
-        
-        const modalHour = modalStartTime.split(':')[0];
-        const testHour = testTime.split(':')[0];
-        
-        if (modalHour === testHour) {
-          console.log(`✅ ✅ ✅ SUCCESS! Modal time matches: ${modalStartTime} matches ${testTime}`);
+        if (await bookingInModal.count() === 0) {
+          console.log('⚠️ WARNING: Modal might be showing different booking than expected');
+          console.log('⚠️ Continuing anyway to check time...');
         } else {
-          console.log(`⚠️ WARNING: Modal time mismatch! Expected ${testTime}, found ${modalStartTime}`);
+          console.log('✅ Modal shows correct booking');
+        }
+        
+        // Try to get time from input fields (edit mode or view mode)
+        const modalTimeInputs = page.locator('input[type="time"]');
+        const timeInputCount = await modalTimeInputs.count();
+        
+        if (timeInputCount >= 2) {
+          // Edit mode - check input values
+          const modalStartTime = await modalTimeInputs.first().inputValue();
+          const modalEndTime = await modalTimeInputs.nth(1).inputValue();
+          
+          console.log(`📋 Modal start time (input): ${modalStartTime}`);
+          console.log(`📋 Modal end time (input): ${modalEndTime}`);
+          
+          const modalHour = modalStartTime.split(':')[0];
+          const testHour = testTime.split(':')[0];
+          
+          if (modalHour === testHour) {
+            console.log(`✅ ✅ ✅ SUCCESS! Modal input time matches: ${modalStartTime} matches ${testTime}`);
+          } else {
+            console.log(`❌ ❌ ❌ ERROR! Modal input time mismatch! Expected ${testTime}, found ${modalStartTime}`);
+            throw new Error(`Modal time mismatch! Expected ${testTime}, found ${modalStartTime}`);
+          }
+        } else {
+          // View mode - check displayed text
+          console.log('📋 Modal is in view mode, checking displayed time...');
+          
+          // Look specifically for "Data e Ora" section and extract time from there
+          // Find the section that contains both the label "Data e Ora" and the time
+          const dataEOraLabel = page.locator('text=/Data e Ora/i').first();
+          
+          let displayedTime = null;
+          let displayedText = null;
+          
+          if (await dataEOraLabel.count() > 0) {
+            // Find the parent container
+            const container = dataEOraLabel.locator('xpath=ancestor::div[contains(@class, "space-y") or contains(@class, "flex")]').first();
+            
+            // Find all text with time pattern in the container
+            const timeInContainer = container.locator(`text=/\\d{2}:\\d{2}/`).first();
+            
+            if (await timeInContainer.count() > 0) {
+              displayedText = await timeInContainer.textContent();
+              const timeMatch = displayedText?.match(/(\d{2}):(\d{2})/);
+              if (timeMatch) {
+                displayedTime = timeMatch[0];
+                console.log(`📋 Found time in "Data e Ora" section: ${displayedTime}`);
+                console.log(`📋 Full text: ${displayedText}`);
+              }
+            }
+          }
+          
+          if (!displayedTime) {
+            // Fallback: find any time in modal near "Data e Ora"
+            const modalBody = page.locator('[class*="modal"]').first();
+            const allTimes = modalBody.locator(`text=/\\d{2}:\\d{2}/`);
+            const timeCount = await allTimes.count();
+            
+            console.log(`📋 Found ${timeCount} time patterns in modal`);
+            
+            // Try first time found
+            if (timeCount > 0) {
+              displayedText = await allTimes.first().textContent();
+              const timeMatch = displayedText?.match(/(\d{2}):(\d{2})/);
+              if (timeMatch) {
+                displayedTime = timeMatch[0];
+                console.log(`📋 Found time (fallback): ${displayedTime}`);
+                console.log(`📋 Full text: ${displayedText}`);
+              }
+            }
+          }
+          
+          if (displayedTime) {
+            const displayedHour = displayedTime.split(':')[0];
+            const testHour = testTime.split(':')[0];
+            
+            console.log(`📋 Comparing: Expected hour ${testHour} (${testTime}), Found hour ${displayedHour} (${displayedTime})`);
+            
+            if (displayedHour === testHour) {
+              console.log(`✅ ✅ ✅ SUCCESS! Modal displayed time matches: ${displayedTime} matches ${testTime}`);
+            } else {
+              console.log(`❌ ❌ ❌ ERROR! Modal displayed time mismatch!`);
+              console.log(`   Expected: ${testTime} (hour: ${testHour})`);
+              console.log(`   Found: ${displayedTime} (hour: ${displayedHour})`);
+              console.log(`   Full text where time was found: ${displayedText}`);
+              console.log(`   NOTE: This indicates desired_time might not be available or PostgreSQL converted the timestamp`);
+              throw new Error(`Modal displayed time mismatch! Expected ${testTime}, found ${displayedTime}`);
+            }
+          } else {
+            console.log('⚠️ Time not found in modal display');
+            console.log('⚠️ Full modal content might be needed for debugging');
+          }
         }
 
         await page.screenshot({ path: 'e2e/screenshots/complete-10-modal-verification.png', fullPage: true });
         
         // Close modal
-        const closeButton = page.locator('button').filter({ 
-          has: page.locator('svg, [aria-label*="chiudi" i]')
-        }).first();
+        const closeButtons = [
+          () => page.locator('button').filter({ has: page.locator('svg') }).first(),
+          () => page.locator('button:has-text("Chiudi"), button:has-text("Annulla")').first(),
+          () => page.locator('button[aria-label*="chiudi" i], button[aria-label*="close" i]').first(),
+        ];
         
-        if (await closeButton.count() > 0) {
-          await closeButton.click();
-          await page.waitForTimeout(500);
+        for (const buttonFn of closeButtons) {
+          try {
+            const closeButton = buttonFn();
+            if (await closeButton.count() > 0 && await closeButton.isVisible()) {
+              await closeButton.click();
+              await page.waitForTimeout(500);
+              console.log('✅ Modal closed');
+              break;
+            }
+          } catch (e) {
+            // Continue
+          }
         }
-      } catch (e) {
-        console.log('⚠️ Modal did not open or time inputs not found');
+      } else {
+        console.log('⚠️ Modal did not open - might need different selector or waiting');
+        await page.screenshot({ path: 'e2e/screenshots/complete-error-modal-not-opened.png', fullPage: true });
       }
     }
 

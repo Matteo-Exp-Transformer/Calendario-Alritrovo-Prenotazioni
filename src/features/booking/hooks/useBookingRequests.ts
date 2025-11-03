@@ -6,8 +6,56 @@ import type { BookingRequest, BookingRequestInput } from '@/types/booking'
 import { toast } from 'react-toastify'
 
 // Lock globale per prevenire chiamate multiple simultanee alla mutation
-let isMutationInProgress = false
-const mutationLockTimeout = 5000 // 5 secondi
+// Usa un lock atomico con ID univoco per prevenire race conditions
+let mutationLockId: string | null = null
+let mutationLockTimeout: NodeJS.Timeout | null = null
+const MUTATION_LOCK_TIMEOUT = 10000 // 10 secondi
+
+// Funzione atomica per acquisire il lock della mutation
+const acquireMutationLock = (): string | null => {
+  const now = Date.now()
+  const lockId = `${now}-${Math.random().toString(36).substring(2, 9)}`
+  
+  // Se c'è già un lock valido, fallisci
+  if (mutationLockId) {
+    console.warn('⚠️ [useCreateBookingRequest] Mutation lock già presente:', mutationLockId)
+    return null
+  }
+  
+  // Acquisisci lock
+  mutationLockId = lockId
+  
+  // Imposta timeout di sicurezza
+  if (mutationLockTimeout) {
+    clearTimeout(mutationLockTimeout)
+  }
+  mutationLockTimeout = setTimeout(() => {
+    console.log('⏰ [useCreateBookingRequest] Lock timeout scaduto, rilasciando lock')
+    mutationLockId = null
+    mutationLockTimeout = null
+  }, MUTATION_LOCK_TIMEOUT)
+  
+  console.log('✅ [useCreateBookingRequest] Mutation lock ACQUISITO:', lockId)
+  return lockId
+}
+
+const releaseMutationLock = (lockId: string | null) => {
+  if (!lockId || mutationLockId !== lockId) {
+    console.warn('⚠️ [useCreateBookingRequest] Tentativo di rilasciare lock non valido:', {
+      provided: lockId,
+      current: mutationLockId
+    })
+    return
+  }
+  
+  if (mutationLockTimeout) {
+    clearTimeout(mutationLockTimeout)
+    mutationLockTimeout = null
+  }
+  
+  mutationLockId = null
+  console.log('✅ [useCreateBookingRequest] Mutation lock rilasciato:', lockId)
+}
 
 // Hook for creating booking requests (public - needs to use ANON key)
 export const useCreateBookingRequest = () => {
@@ -15,22 +63,14 @@ export const useCreateBookingRequest = () => {
   
   return useMutation({
     mutationFn: async (data: BookingRequestInput) => {
-      // ✅ Protezione a livello di mutation contro chiamate multiple simultanee
-      // Controlla il lock PRIMA di fare qualsiasi altra cosa
-      if (isMutationInProgress) {
-        console.warn('⚠️ [useCreateBookingRequest] Mutation già in corso, ignorando chiamata duplicata')
+      // ✅ Protezione atomica a livello di mutation
+      const lockId = acquireMutationLock()
+      
+      if (!lockId) {
+        console.warn('⚠️ [useCreateBookingRequest] Impossibile acquisire lock, mutation già in corso')
         console.warn('⚠️ [useCreateBookingRequest] Stack trace:', new Error().stack)
         throw new Error('Una richiesta è già in corso. Attendi qualche secondo.')
       }
-      
-      // Imposta lock IMMEDIATAMENTE (questo deve essere atomico)
-      console.log('🔒 [useCreateBookingRequest] Impostazione lock mutation...')
-      isMutationInProgress = true
-      const lockTimeout = setTimeout(() => {
-        console.log('⏰ [useCreateBookingRequest] Lock timeout scaduto, rilasciando lock')
-        isMutationInProgress = false
-      }, mutationLockTimeout)
-      console.log('✅ [useCreateBookingRequest] Lock mutation impostato')
       
       try {
         console.log('🔵 [useCreateBookingRequest] Starting mutation...')
@@ -108,14 +148,12 @@ export const useCreateBookingRequest = () => {
         console.log('✅ [useCreateBookingRequest] Success! Result:', result)
         
         // Rilascia lock immediatamente dopo successo
-        clearTimeout(lockTimeout)
-        isMutationInProgress = false
+        releaseMutationLock(lockId)
         
         return result as BookingRequest
       } catch (error) {
         // Rilascia lock in caso di errore
-        clearTimeout(lockTimeout)
-        isMutationInProgress = false
+        releaseMutationLock(lockId)
         throw error
       }
     },
