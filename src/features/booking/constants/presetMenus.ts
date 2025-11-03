@@ -15,26 +15,26 @@ export interface PresetMenu {
 
 /**
  * Menù 1: Base
- * Caraffe/Drink + Pizza Margherita
+ * Caraffe drink + Pizza Margherita
  */
 export const MENU_1: PresetMenu = {
   id: 'menu_1',
   label: 'Menù 1',
   itemNames: [
-    'Caraffe / Drink',
+    'Caraffe drink',
     'Pizza Margherita'
   ]
 }
 
 /**
  * Menù 2: Medio
- * Caraffe/Drink + Pizza Margherita + Farinata + Anelli di Cipolla + Patatine Fritte + Olive Ascolana
+ * Caraffe drink + Pizza Margherita + Farinata + Anelli di Cipolla + Patatine Fritte + Olive Ascolana
  */
 export const MENU_2: PresetMenu = {
   id: 'menu_2',
   label: 'Menù 2',
   itemNames: [
-    'Caraffe / Drink',
+    'Caraffe drink',
     'Pizza Margherita',
     'Farinata',
     'Anelli di Cipolla',
@@ -51,7 +51,7 @@ export const MENU_3: PresetMenu = {
   id: 'menu_3',
   label: 'Menù 3',
   itemNames: [
-    'Caraffe / Drink',
+    'Caraffe drink',
     'Pizza Margherita',
     'Farinata',
     'Anelli di Cipolla',
