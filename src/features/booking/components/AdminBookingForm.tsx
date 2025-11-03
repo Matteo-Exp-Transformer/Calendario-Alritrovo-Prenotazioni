@@ -92,15 +92,61 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
     const preset = getPresetMenu(presetType)
     if (!preset) return
 
-    // Trova gli items nel database per nome
+    // Helper per normalizzare i nomi per il matching (case-insensitive, ignora spazi extra)
+    const normalizeName = (name: string): string => {
+      return name.toLowerCase().trim().replace(/\s+/g, ' ').replace(/\//g, '/').replace(/\/\s*/g, '/').replace(/\s*\/\s*/g, '/')
+    }
+
+    // Helper per match flessibile - cerca anche varianti comuni
+    const matchesName = (itemName: string, presetName: string): boolean => {
+      const normalizedItem = normalizeName(itemName)
+      const normalizedPreset = normalizeName(presetName)
+      
+      // Match esatto normalizzato
+      if (normalizedItem === normalizedPreset) return true
+      
+      // Match parziale (uno contiene l'altro)
+      if (normalizedItem.includes(normalizedPreset) || normalizedPreset.includes(normalizedItem)) return true
+      
+      // Match per "Caraffe/Drink" - cerca varianti comuni
+      if (normalizeName(presetName).includes('caraffe') && normalizeName(presetName).includes('drink')) {
+        const hasCaraffe = normalizedItem.includes('caraffe')
+        const hasDrink = normalizedItem.includes('drink')
+        const hasPremium = normalizedItem.includes('premium')
+        const presetHasPremium = normalizedPreset.includes('premium')
+        
+        // Se il preset è Caraffe/Drink (non premium) e l'item è Caraffe/Drink (non premium)
+        if (!presetHasPremium && hasCaraffe && hasDrink && !hasPremium) return true
+        
+        // Se il preset è Caraffe/Drink Premium e l'item è Premium
+        if (presetHasPremium && hasCaraffe && hasDrink && hasPremium) return true
+      }
+      
+      return false
+    }
+
+    // Trova gli items nel database per nome (matching flessibile)
     const selectedItems = menuItems
-      .filter(item => preset.itemNames.includes(item.name))
+      .filter(item => {
+        const matches = preset.itemNames.some(presetName => matchesName(item.name, presetName))
+        
+        // Log per debug Caraffe/Drink
+        if (matches && (normalizeName(item.name).includes('caraffe') || normalizeName(item.name).includes('drink'))) {
+          console.log('✅ [AdminBookingForm] Trovato Caraffe/Drink:', item.name, 'match con preset:', presetType)
+        }
+        
+        return matches
+      })
       .map(item => ({
         id: item.id,
         name: item.name,
         price: item.price,
         category: item.category
       }))
+
+    console.log('🔵 [AdminBookingForm] Preset selezionato:', presetType)
+    console.log('🔵 [AdminBookingForm] Items nel preset:', preset.itemNames)
+    console.log('🔵 [AdminBookingForm] Items trovati e selezionati:', selectedItems.map(i => `${i.name} (${i.id})`))
 
     // Calcola totale
     const totalPerPerson = selectedItems.reduce((sum, item) => sum + item.price, 0)
