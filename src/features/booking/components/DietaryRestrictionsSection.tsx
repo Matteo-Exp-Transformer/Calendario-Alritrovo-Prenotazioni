@@ -270,21 +270,23 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
           {restrictions.map((restriction, index) => (
             <div
               key={index}
-              className="flex flex-col md:flex-row items-start md:items-center gap-4 p-8 bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent rounded-xl border-2 border-warm-beige hover:shadow-md transition-all w-full"
+              className="flex flex-col md:flex-row items-start md:items-center gap-4 p-8 rounded-xl border-2 border-warm-beige hover:shadow-md transition-all w-full"
               style={{
                 padding: '28px 32px',
                 borderRadius: '16px',
                 marginBottom: '4px',
                 minHeight: '64px',
-                maxWidth: '100%'
+                maxWidth: '100%',
+                backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(6px)'
               }}
             >
               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 flex-1 min-w-0">
-                <span className="font-bold text-gray-900 text-base md:text-lg" style={{ wordBreak: 'break-word' }}>{restriction.restriction}</span>
+                <span className="font-bold text-gray-900 text-base md:text-lg" style={{ wordBreak: 'break-word', fontWeight: '700' }}>{restriction.restriction}</span>
                 {restriction.restriction === 'Altro' && restriction.notes && (
-                  <span className="text-sm md:text-base font-bold text-gray-600 italic" style={{ wordBreak: 'break-word' }}>({restriction.notes})</span>
+                  <span className="text-sm md:text-base font-bold text-gray-600 italic" style={{ wordBreak: 'break-word', fontWeight: '700' }}>({restriction.notes})</span>
                 )}
-                <span className="text-warm-wood font-bold text-base md:text-lg">
+                <span className="text-warm-wood font-bold text-base md:text-lg" style={{ fontWeight: '700' }}>
                   {restriction.guest_count} {restriction.guest_count === 1 ? 'ospite' : 'ospiti'}
                 </span>
               </div>

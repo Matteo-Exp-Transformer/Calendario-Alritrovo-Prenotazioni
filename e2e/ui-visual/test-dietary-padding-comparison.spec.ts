@@ -39,14 +39,16 @@ test('dietary padding comparison screenshot', async ({ page }) => {
   await page.click('button:has-text("Aggiungi")');
   await page.waitForTimeout(500);
 
-  // Scroll to show both menu cards and dietary restriction cards
-  // First, scroll to the menu section to bring it into view
-  const menuSection = page.locator('text=Selezione Menu').first();
-  await menuSection.scrollIntoViewIfNeeded();
+  // Wait for all dietary restrictions to be added to the list
+  await page.waitForSelector('text=Intolleranze inserite:', { timeout: 2000 });
   await page.waitForTimeout(500);
 
-  // Scroll up a bit to show both menu and dietary cards in the viewport
-  await page.evaluate(() => window.scrollBy(0, -150));
+  // Scroll to show the added dietary restrictions cards
+  await page.locator('text=Intolleranze inserite:').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(500);
+
+  // Scroll up to show both menu cards and dietary restriction cards together
+  await page.evaluate(() => window.scrollBy(0, -400));
   await page.waitForTimeout(500);
 
   // Take screenshot showing the comparison
