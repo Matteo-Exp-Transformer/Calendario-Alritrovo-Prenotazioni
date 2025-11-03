@@ -4,7 +4,6 @@ import { Input } from '@/components/ui'
 import type { BookingRequestInput } from '@/types/booking'
 import { useCreateBookingRequest } from '../hooks/useBookingRequests'
 import { useRateLimit } from '@/hooks/useRateLimit'
-import { toast } from 'react-toastify'
 import { Check, Send, Loader2, CheckCircle } from 'lucide-react'
 import { MenuSelection } from './MenuSelection'
 import { DietaryRestrictionsSection } from './DietaryRestrictionsSection'
@@ -304,10 +303,13 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
     // Privacy consent validation
     if (!privacyAccepted) {
+      newErrors.privacyAccepted = 'È necessario accettare la Privacy Policy per inviare la richiesta'
       isValid = false
+      console.log('❌ [BookingForm] Privacy non accettata, errore impostato:', newErrors.privacyAccepted)
     }
 
     setErrors(newErrors)
+    console.log('🔵 [BookingForm] Errors state dopo validazione:', newErrors)
     return isValid
   }
 
@@ -363,9 +365,6 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     // Validazione
     if (!validate()) {
       releaseGlobalLock(lockId) // Rilascia lock se validazione fallisce
-      if (!privacyAccepted) {
-        toast.error('È necessario accettare la Privacy Policy per inviare la richiesta')
-      }
       return
     }
 
@@ -731,20 +730,30 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
       {/* Privacy Policy - Solo per Prenota un Tavolo (per Rinfresco di Laurea è dentro DietaryRestrictionsSection) */}
       {formData.booking_type !== 'rinfresco_laurea' && (
-        <div className="rounded-xl p-4 bg-gradient-to-br from-warm-cream-60 via-warm-cream-40 to-transparent border-2 border-warm-beige shadow-sm">
+        <div className="space-y-2">
           <div className="flex items-center gap-3">
             <div className="relative flex-shrink-0">
               <input
                 type="checkbox"
                 id="privacy-consent"
                 checked={privacyAccepted}
-                onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                onChange={(e) => {
+                  setPrivacyAccepted(e.target.checked)
+                  // Rimuovi errore quando viene selezionata
+                  if (e.target.checked && errors.privacyAccepted) {
+                    setErrors({ ...errors, privacyAccepted: '' })
+                  }
+                }}
                 required
                 className="peer sr-only"
               />
               <label
                 htmlFor="privacy-consent"
-                className="flex h-5 w-5 cursor-pointer items-center justify-center border-2 border-warm-wood/40 shadow-sm transition-all duration-300 hover:border-warm-wood hover:shadow-md peer-checked:border-warm-orange peer-checked:shadow-lg peer-focus-visible:ring-4 peer-focus-visible:ring-warm-wood/20"
+                className={`flex h-5 w-5 cursor-pointer items-center justify-center border-2 shadow-sm transition-all duration-300 hover:shadow-md peer-checked:border-warm-orange peer-checked:shadow-lg peer-focus-visible:ring-4 peer-focus-visible:ring-warm-wood/20 ${
+                  errors.privacyAccepted 
+                    ? 'border-red-500 hover:border-red-600' 
+                    : 'border-warm-wood/40 hover:border-warm-wood'
+                }`}
                 style={{ backgroundColor: 'white' }}
               >
                 <Check
@@ -758,7 +767,13 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             <label
               htmlFor="privacy-consent"
               className="cursor-pointer text-sm text-warm-wood-dark font-medium leading-relaxed"
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', padding: '8px 16px', borderRadius: '8px', backdropFilter: 'blur(1px)', maxWidth: '600px' }}
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.85)', 
+                backdropFilter: 'blur(1px)',
+                padding: '8px 16px', 
+                borderRadius: '12px',
+                maxWidth: '600px' 
+              }}
             >
               Accetto la{' '}
               <Link
@@ -773,6 +788,9 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               {' '}di Al Ritrovo *
             </label>
           </div>
+          {errors.privacyAccepted && (
+            <p className="text-sm text-red-500 ml-8 mt-2">{errors.privacyAccepted}</p>
+          )}
         </div>
       )}
 
