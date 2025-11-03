@@ -248,30 +248,6 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     )
   }
 
-  const formatDateTime = (dateStr?: string) => {
-    if (!dateStr) return 'Non specificato'
-    try {
-      // ✅ FIX: Usa extractDateFromISO e extractTimeFromISO invece di new Date()
-      // per evitare conversioni timezone che causano shift di 1 ora
-      const date = extractDateFromISO(dateStr)
-      const time = extractTimeFromISO(dateStr)
-      
-      if (!date || !time) return dateStr
-      
-      // Formatta la data usando date-fns ma senza conversioni timezone
-      // Parse la data locale senza timezone
-      const [year, month, day] = date.split('-').map(Number)
-      const localDate = new Date(year, month - 1, day)
-      
-      // Formatta solo la data (senza orario da date-fns)
-      const formattedDate = format(localDate, 'dd MMM yyyy', { locale: it })
-      
-      // Aggiungi l'orario estratto direttamente (senza conversioni)
-      return `${formattedDate} ${time}`
-    } catch {
-      return dateStr
-    }
-  }
 
   if (!isOpen) {
     return null
@@ -482,7 +458,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                           // Debug: verifica disponibilità desired_time
                           const hasDesiredTime = booking.desired_time && booking.desired_time.trim() !== ''
                           
-                          if (hasDesiredTime) {
+                          if (hasDesiredTime && booking.desired_time) {
                             // Usa desired_time (orario originale, sempre corretto)
                             time = booking.desired_time.split(':').slice(0, 2).join(':')
                             console.log(`✅ [BookingDetailsModal] Using desired_time: ${time}`)
