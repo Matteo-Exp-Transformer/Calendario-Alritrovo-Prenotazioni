@@ -91,11 +91,18 @@ export const PendingRequestsTab: React.FC = () => {
 
   const handleAccept = (booking: BookingRequest) => {
     console.log('🔵 [PendingRequestsTab] handleAccept called with:', booking)
-    
+
+    // ✅ VALIDAZIONE: desired_time deve essere presente
+    if (!booking.desired_time || booking.desired_time.trim() === '') {
+      console.error('❌ [PendingRequestsTab] No desired_time found for booking:', booking.id)
+      toast.error('Errore: Orario di prenotazione non specificato. Impossibile accettare la prenotazione.')
+      return
+    }
+
     // Calcola i dati per l'accettazione usando la stessa logica del modale
     const date = booking.desired_date
-    const startTime = booking.desired_time || '20:00'
-    console.log(' [PORCA MADONNNNAAAAAAAAAAAAAAAAAAAAAAAA] startTime:', startTime)
+    const startTime = booking.desired_time
+    console.log('🔵 [PendingRequestsTab] Using desired_time:', startTime)
     // Calculate end time (default +3 hours)
     const [hours, minutes] = startTime.split(':').map(Number)
     const endHours = (hours + 3) % 24
@@ -138,6 +145,7 @@ export const PendingRequestsTab: React.FC = () => {
         bookingId: booking.id,
         confirmedStart,
         confirmedEnd,
+        desiredTime: startTimeFormatted, // ✅ Preserva l'orario originale del cliente
         numGuests: booking.num_guests,
       },
       {

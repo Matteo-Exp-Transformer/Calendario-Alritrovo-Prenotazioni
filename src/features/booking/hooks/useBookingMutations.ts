@@ -14,6 +14,7 @@ interface AcceptBookingInput {
   bookingId: string
   confirmedStart: string
   confirmedEnd: string
+  desiredTime?: string // ✅ Orario inserito dal cliente (tipo TIME, senza timezone)
   numGuests?: number
   internalNotes?: string
 }
@@ -44,6 +45,7 @@ export const useAcceptBooking = () => {
           status: 'accepted',
           confirmed_start: input.confirmedStart,
           confirmed_end: input.confirmedEnd,
+          desired_time: input.desiredTime, // ✅ Preserva l'orario inserito dal cliente
           num_guests: input.numGuests,
           updated_at: new Date().toISOString(),
         })
