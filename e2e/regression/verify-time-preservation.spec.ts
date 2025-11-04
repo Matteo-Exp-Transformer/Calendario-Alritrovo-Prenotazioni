@@ -1,5 +1,10 @@
 import { test, expect } from '@playwright/test'
-import { supabase } from '../../src/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
+
+// Initialize Supabase client for E2E tests
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://dphuttzgdcerexunebct.supabase.co'
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwaHV0dHpnZGNlcmV4dW5lYmN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1MTI0NDMsImV4cCI6MjA3NzA4ODQ0M30.8OpmfjuZkT2vdSbOcr4fUeaKaKibuF4vdFLnNSk7h60'
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 /**
  * REGRESSION TEST: Verify Time Preservation

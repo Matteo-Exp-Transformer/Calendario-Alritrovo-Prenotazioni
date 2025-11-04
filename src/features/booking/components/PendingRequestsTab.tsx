@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { usePendingBookings, useAcceptedBookings } from '../hooks/useBookingQueries'
 import { useAcceptBooking, useRejectBooking } from '../hooks/useBookingMutations'
 import { BookingRequestCard } from './BookingRequestCard'
@@ -14,10 +14,26 @@ export const PendingRequestsTab: React.FC = () => {
   const { data: acceptedBookings = [] } = useAcceptedBookings()
   const acceptMutation = useAcceptBooking()
   const rejectMutation = useRejectBooking()
-  
+
   // Stato per gestire il modal di rifiuto
   const [rejectModalOpen, setRejectModalOpen] = useState(false)
   const [selectedBookingForReject, setSelectedBookingForReject] = useState<BookingRequest | null>(null)
+
+  // ✅ FIX: Deduplicazione prenotazioni pending per evitare visualizzazioni doppie
+  // Usa Set per tracciare ID già visti e filtra duplicati
+  const uniquePendingBookings = useMemo(() => {
+    if (!pendingBookings) return []
+
+    const seenIds = new Set<string>()
+    return pendingBookings.filter((booking) => {
+      if (seenIds.has(booking.id)) {
+        console.warn('⚠️ [PendingRequestsTab] Duplicate booking detected:', booking.id, booking.client_email)
+        return false // Filtra duplicato
+      }
+      seenIds.add(booking.id)
+      return true // Mantieni primo occurrence
+    })
+  }, [pendingBookings])
 
   // Function to check if there are enough seats available
   const checkCapacity = (booking: BookingRequest, startTime: string, endTime: string): boolean => {
@@ -237,7 +253,7 @@ export const PendingRequestsTab: React.FC = () => {
     )
   }
 
-  if (!pendingBookings || pendingBookings.length === 0) {
+  if (!uniquePendingBookings || uniquePendingBookings.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow-sm p-12 text-center">
         <div className="text-6xl mb-4">✅</div>
@@ -255,12 +271,12 @@ export const PendingRequestsTab: React.FC = () => {
       <div className="space-y-4">
         <div className="mb-4">
           <h3 className="text-lg font-semibold text-gray-900">
-            📋 Richieste in Attesa ({pendingBookings.length})
+            📋 Richieste in Attesa ({uniquePendingBookings.length})
           </h3>
         </div>
 
       <div className="flex flex-col">
-        {pendingBookings.map((booking) => (
+        {uniquePendingBookings.map((booking) => (
           <div key={booking.id} style={{ marginBottom: '24px' }}>
             <BookingRequestCard
               booking={booking}

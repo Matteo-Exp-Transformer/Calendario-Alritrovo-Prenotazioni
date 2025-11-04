@@ -2,6 +2,20 @@ import type { BookingRequest } from '@/types/booking'
 import type { CalendarEvent } from '@/types/booking'
 
 import { CAPACITY_CONFIG } from '../constants/capacity'
+import { extractDateFromISO, extractTimeFromISO } from './dateUtils'
+
+/**
+ * Helper per ottenere l'orario accurato di una prenotazione
+ * Preferisce desired_time (TIME senza timezone) a confirmed_start (TIMESTAMP WITH TIME ZONE)
+ * per evitare shift timezone in production
+ */
+const getAccurateTime = (booking: BookingRequest): string => {
+  // Preferisci desired_time (accurato, senza conversioni timezone)
+  if (booking.desired_time) return booking.desired_time
+  // Fallback a confirmed_start (può avere shift timezone in production)
+  if (booking.confirmed_start) return extractTimeFromISO(booking.confirmed_start)
+  return ''
+}
 
 // Colori in base alla fascia oraria (delicati e leggibili)
 const TIME_SLOT_COLORS = {
@@ -52,42 +66,65 @@ function getTimeSlotColor(startDate: Date): { bg: string; border: string; text: 
 export const transformBookingToCalendarEvent = (
   booking: BookingRequest
 ): CalendarEvent => {
-  // Parse dates and ensure they're interpreted as local time
-  const startStr = booking.confirmed_start!
-  const endStr = booking.confirmed_end!
-  
+  // ✅ FIX: Usa desired_time (TIME senza timezone) invece di confirmed_start (TIMESTAMP WITH TIME ZONE)
+  // per evitare shift timezone in production
+  const startTimeStr = getAccurateTime(booking)
+  const endTimeStr = booking.confirmed_end ? extractTimeFromISO(booking.confirmed_end) : ''
+  const dateStr = booking.confirmed_start ? extractDateFromISO(booking.confirmed_start) : ''
+
   let startDate: Date
   let endDate: Date
-  
-  // Always extract time components directly from ISO string to avoid timezone issues
-  const startMatch = startStr.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
-  const endMatch = endStr.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
-  
-  if (startMatch && endMatch) {
-    // Extract time components directly from string to avoid timezone conversion
-    const [, year, month, day, hour, minute, second] = startMatch
-    startDate = new Date(
-      parseInt(year), 
-      parseInt(month) - 1, 
-      parseInt(day), 
-      parseInt(hour), 
-      parseInt(minute),
-      parseInt(second)
-    )
-    
-    const [, endYear, endMonth, endDay, endHour, endMinute, endSecond] = endMatch
-    endDate = new Date(
-      parseInt(endYear), 
-      parseInt(endMonth) - 1, 
-      parseInt(endDay), 
-      parseInt(endHour), 
-      parseInt(endMinute),
-      parseInt(endSecond)
-    )
+
+  // Costruisci Date objects usando desired_time per accuratezza
+  if (startTimeStr && endTimeStr && dateStr) {
+    const [year, month, day] = dateStr.split('-').map(Number)
+    const [startHour, startMinute] = startTimeStr.split(':').map(Number)
+    const [endHour, endMinute] = endTimeStr.split(':').map(Number)
+
+    // Crea date con orari estratti direttamente (no timezone conversion)
+    startDate = new Date(year, month - 1, day, startHour, startMinute, 0)
+
+    // Gestisci attraversamento mezzanotte: se endHour < startHour, è il giorno dopo
+    let endDay = day
+    if (endHour < startHour || (endHour === startHour && startHour >= 22)) {
+      const nextDay = new Date(year, month - 1, day)
+      nextDay.setDate(nextDay.getDate() + 1)
+      endDay = nextDay.getDate()
+    }
+
+    endDate = new Date(year, month - 1, endDay, endHour, endMinute, 0)
   } else {
-    // Fallback to Date parsing if format doesn't match
-    startDate = new Date(startStr)
-    endDate = new Date(endStr)
+    // Fallback al vecchio metodo se mancano i campi
+    const startStr = booking.confirmed_start!
+    const endStr = booking.confirmed_end!
+
+    const startMatch = startStr.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
+    const endMatch = endStr.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
+
+    if (startMatch && endMatch) {
+      const [, year, month, day, hour, minute, second] = startMatch
+      startDate = new Date(
+        parseInt(year),
+        parseInt(month) - 1,
+        parseInt(day),
+        parseInt(hour),
+        parseInt(minute),
+        parseInt(second)
+      )
+
+      const [, endYear, endMonth, endDay, endHour, endMinute, endSecond] = endMatch
+      endDate = new Date(
+        parseInt(endYear),
+        parseInt(endMonth) - 1,
+        parseInt(endDay),
+        parseInt(endHour),
+        parseInt(endMinute),
+        parseInt(endSecond)
+      )
+    } else {
+      startDate = new Date(startStr)
+      endDate = new Date(endStr)
+    }
   }
 
   const color = getTimeSlotColor(startDate)
