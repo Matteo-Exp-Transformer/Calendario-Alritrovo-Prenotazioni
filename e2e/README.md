@@ -2,6 +2,143 @@
 
 Suite completa di test end-to-end organizzata per categorie funzionali.
 
+---
+
+## ⚡ Comandi Rapidi Test E2E
+
+### 🎯 Test Core (Massima Priorità - Sempre Funzionanti)
+
+```bash
+# Esegui tutti i test core (2 test fondamentali)
+npx playwright test e2e/core-tests/
+
+# Test #1: Inserimento + Verifica Orario (no timezone shift)
+npx playwright test e2e/core-tests/test-1-insert-booking-verify-time.spec.ts
+
+# Test #2: Protezione Anti-Duplicati (lock atomico)
+npx playwright test e2e/core-tests/test-2-no-duplicate-pending.spec.ts
+
+# Con UI mode (interattivo)
+npx playwright test e2e/core-tests/ --ui
+
+# Debug step-by-step
+npx playwright test e2e/core-tests/test-1-insert-booking-verify-time.spec.ts --debug
+```
+
+---
+
+### 🎫 Test Booking Flow (Flusso Completo)
+
+```bash
+# Tutti i test booking flow
+npx playwright test e2e/booking-flow/
+
+# Test specifici critici
+npx playwright test e2e/booking-flow/01-insert-booking.spec.ts
+npx playwright test e2e/booking-flow/02-verify-time-transcription.spec.ts
+npx playwright test e2e/booking-flow/06-complete-booking-flow.spec.ts
+```
+
+---
+
+### 👨‍💼 Test Admin CRUD
+
+```bash
+# Tutti i test admin
+npx playwright test e2e/admin-crud/
+
+# Test critici
+npx playwright test e2e/admin-crud/02-accept-booking.spec.ts
+npx playwright test e2e/admin-crud/03-reject-booking.spec.ts
+npx playwright test e2e/admin-crud/11-admin-booking-insertion.spec.ts
+```
+
+---
+
+### 🍽️ Test Menu Selection
+
+```bash
+# Tutti i test menu
+npx playwright test e2e/menu/
+
+# Test critici
+npx playwright test e2e/menu/test-menu-selection-limits.spec.ts
+npx playwright test e2e/menu/test-caraffe-mutual-exclusion.spec.ts
+npx playwright test e2e/menu/final-menu-verification.spec.ts
+```
+
+---
+
+### 📱 Test Mobile Responsive
+
+```bash
+# Tutti i test mobile
+npx playwright test e2e/mobile/
+
+# Test critici
+npx playwright test e2e/mobile/test-menu-cards-before-mobile.spec.ts
+npx playwright test e2e/mobile/test-archive-mobile.spec.ts
+npx playwright test e2e/mobile/09-test-modal-mobile-size.spec.ts
+```
+
+---
+
+### 🎨 Test UI Visual
+
+```bash
+# Tutti i test visual
+npx playwright test e2e/ui-visual/
+
+# Test menu cards mobile
+npx playwright test e2e/ui-visual/test-menu-cards-mobile.spec.ts
+npx playwright test e2e/ui-visual/test-mobile-vintage-bg.spec.ts
+```
+
+---
+
+### 🛠️ Comandi Utility Playwright
+
+```bash
+# Esegui tutti i test E2E
+npm run test:e2e
+
+# UI mode (interattivo, con browser visibile)
+npx playwright test --ui
+
+# Debug mode (step-by-step)
+npx playwright test e2e/core-tests/ --debug
+
+# Headed mode (browser visibile durante test)
+npx playwright test --headed
+
+# Esegui singolo file
+npx playwright test e2e/path/to/test.spec.ts
+
+# Esegui singolo test dentro file
+npx playwright test e2e/path/to/test.spec.ts -g "test name"
+
+# Esegui solo test che contengono parola chiave
+npx playwright test -g "mobile"
+
+# Vedi report HTML
+npx playwright show-report
+```
+
+---
+
+### 📸 Screenshot e Debug
+
+Gli screenshot vengono salvati in: `e2e/screenshots/`
+
+Pattern naming: `[feature]-[viewport]-[description].png`
+
+Esempi:
+- `menu-cards-before-desktop.png`
+- `menu-cards-before-mobile-375.png`
+- `mobile-dashboard-updated.png`
+
+---
+
 ## 📁 Struttura Test
 
 I test sono organizzati in cartelle per categoria:
