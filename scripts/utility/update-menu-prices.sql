@@ -36,3 +36,8 @@ ORDER BY name;
 -- Dovresti vedere 2 righe aggiornate (una per Anelli di Cipolla, una per Olive Ascolana)
 
 
+
+
+
+
+

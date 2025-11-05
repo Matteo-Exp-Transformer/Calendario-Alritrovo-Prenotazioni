@@ -64,7 +64,8 @@
       "Bash(git -C \"c:\\Users\\matte.MIO\\Documents\\GitHub\\Calendarbackup\" log --oneline -5 -- src/features/booking/components/DietaryRestrictionsSection.tsx)",
       "Bash(/tmp/ui_modernizer_clarification.txt)",
       "Bash(git -C \"c:\\Users\\matte.MIO\\Documents\\GitHub\\Calendarbackup\" diff src/features/booking/components/BookingRequestForm.tsx)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(git show:*)"
     ],
     "deny": [],
     "ask": []

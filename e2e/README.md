@@ -1,4 +1,4 @@
-# ?? E2E Test Suite - Al Ritrovo Booking System
+# E2E Test Suite - Al Ritrovo Booking System
 
 Suite completa di test end-to-end organizzata per categorie funzionali.
 
