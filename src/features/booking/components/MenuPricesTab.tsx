@@ -6,10 +6,12 @@ import type { MenuItem, MenuItemInput, MenuCategory } from '@/types/menu'
 
 const CATEGORY_LABELS: Record<MenuCategory, string> = {
   bevande: 'Bevande',
+  pizza: 'Pizza',
   antipasti: 'Antipasti',
   fritti: 'Fritti',
   primi: 'Primi Piatti',
-  secondi: 'Secondi Piatti'
+  secondi: 'Secondi Piatti',
+  dolci: 'Dolci'
 }
 
 export const MenuPricesTab: React.FC = () => {
@@ -275,4 +277,3 @@ export const MenuPricesTab: React.FC = () => {
     </div>
   )
 }
-

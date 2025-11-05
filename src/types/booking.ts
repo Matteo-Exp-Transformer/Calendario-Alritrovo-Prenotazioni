@@ -1,5 +1,7 @@
 // Type definitions for Al Ritrovo Booking System
 
+import type { SelectedMenuItem } from './menu'
+
 export type BookingStatus = 'pending' | 'accepted' | 'rejected'
 export type EventType = 'cena' | 'aperitivo' | 'evento' | 'laurea' | 'drink_caraffe' | 'drink_rinfresco_leggero' | 'drink_rinfresco_completo' | 'drink_rinfresco_completo_primo' | 'menu_pranzo_cena'
 export type AdminRole = 'admin' | 'staff'
@@ -25,7 +27,9 @@ export interface BookingRequest {
   
   // Menu selection (nuovo sistema)
   menu_selection?: {
-    items: Array<{ id: string; name: string; price: number; category: string }>
+    items: SelectedMenuItem[]
+    tiramisu_total?: number
+    tiramisu_kg?: number
   }
   menu_total_per_person?: number
   menu_total_booking?: number
@@ -59,7 +63,9 @@ export interface BookingRequestInput {
   num_guests: number
   special_requests?: string
   menu_selection?: {
-    items: Array<{ id: string; name: string; price: number; category: string }>
+    items: SelectedMenuItem[]
+    tiramisu_total?: number
+    tiramisu_kg?: number
   }
   menu_total_per_person?: number
   menu_total_booking?: number

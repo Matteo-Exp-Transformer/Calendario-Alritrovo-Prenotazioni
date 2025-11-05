@@ -1,6 +1,13 @@
 // Type definitions for Menu Items
 
-export type MenuCategory = 'bevande' | 'antipasti' | 'fritti' | 'primi' | 'secondi'
+export type MenuCategory =
+  | 'bevande'
+  | 'pizza'
+  | 'antipasti'
+  | 'fritti'
+  | 'primi'
+  | 'secondi'
+  | 'dolci'
 
 export interface MenuItem {
   id: string
@@ -19,6 +26,15 @@ export interface MenuItemInput {
   price: number
   description?: string
   sort_order?: number
+}
+
+export interface SelectedMenuItem {
+  id: string
+  name: string
+  price: number
+  category: MenuCategory
+  quantity?: number
+  totalPrice?: number
 }
 
 // Dietary restriction types

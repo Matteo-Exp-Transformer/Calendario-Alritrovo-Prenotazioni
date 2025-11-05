@@ -25,7 +25,9 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
     num_guests: 0,
     special_requests: '',
     menu_selection: {
-      items: []
+      items: [],
+      tiramisu_total: 0,
+      tiramisu_kg: 0
     },
     dietary_restrictions: [],
     preset_menu: null
@@ -45,20 +47,19 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
 
     // Only allow numeric characters
     if (inputValue === '') {
-      const newFormData = { ...formData, num_guests: 0 }
-      // Aggiorna menu_total_booking se c'è un menu
-      if (newFormData.menu_total_per_person) {
-        newFormData.menu_total_booking = 0
-      }
+      const tiramisuTotal = formData.menu_selection?.tiramisu_total || 0
+      const newFormData = { ...formData, num_guests: 0, menu_total_booking: tiramisuTotal }
       setFormData(newFormData)
       setErrors({ ...errors, num_guests: '' })
     } else if (/^\d+$/.test(inputValue)) {
       const value = parseInt(inputValue, 10)
       if (value >= 1 && value <= 110) {
-        const newFormData = { ...formData, num_guests: value }
-        // Aggiorna menu_total_booking se c'è un menu
-        if (newFormData.menu_total_per_person) {
-          newFormData.menu_total_booking = newFormData.menu_total_per_person * value
+        const tiramisuTotal = formData.menu_selection?.tiramisu_total || 0
+        const perPerson = formData.menu_total_per_person || 0
+        const newFormData = {
+          ...formData,
+          num_guests: value,
+          menu_total_booking: perPerson * value + tiramisuTotal
         }
         setFormData(newFormData)
         setErrors({ ...errors, num_guests: '' })
@@ -82,7 +83,7 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
       setFormData({
         ...formData,
         preset_menu: null,
-        menu_selection: { items: [] },
+        menu_selection: { items: [], tiramisu_total: 0, tiramisu_kg: 0 },
         menu_total_per_person: 0,
         menu_total_booking: 0
       })
@@ -137,27 +138,43 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
         
         return matches
       })
-      .map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        category: item.category
-      }))
+      .map(item => {
+        const isTiramisu = item.name.toLowerCase().includes('tiramis')
+        return {
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          category: item.category,
+          quantity: isTiramisu ? 1 : undefined,
+          totalPrice: isTiramisu ? item.price : item.price
+        }
+      })
 
     console.log('🔵 [AdminBookingForm] Preset selezionato:', presetType)
     console.log('🔵 [AdminBookingForm] Items nel preset:', preset.itemNames)
     console.log('🔵 [AdminBookingForm] Items trovati e selezionati:', selectedItems.map(i => `${i.name} (${i.id})`))
 
     // Calcola totale
-    const totalPerPerson = selectedItems.reduce((sum, item) => sum + item.price, 0)
+    const totalPerPerson = selectedItems
+      .filter(item => !item.name.toLowerCase().includes('tiramis'))
+      .reduce((sum, item) => sum + item.price, 0)
     const numGuests = formData.num_guests || 0
+
+    const tiramisuSelection = selectedItems.find((item) => item.name.toLowerCase().includes('tiramis'))
+    const tiramisuUnitPrice = tiramisuSelection?.price || 0
+    const tiramisuKg = tiramisuSelection?.quantity || 0
+    const tiramisuTotal = tiramisuKg > 0 ? tiramisuUnitPrice * tiramisuKg : 0
 
     setFormData({
       ...formData,
       preset_menu: presetType,
-      menu_selection: { items: selectedItems },
+      menu_selection: {
+        items: selectedItems,
+        tiramisu_total: tiramisuTotal,
+        tiramisu_kg: tiramisuKg
+      },
       menu_total_per_person: totalPerPerson,
-      menu_total_booking: totalPerPerson * numGuests
+      menu_total_booking: totalPerPerson * numGuests + tiramisuTotal
     })
   }
 
@@ -267,7 +284,9 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
           num_guests: 0,
           special_requests: '',
           menu_selection: {
-            items: []
+            items: [],
+            tiramisu_total: 0,
+            tiramisu_kg: 0
           },
           dietary_restrictions: [],
           preset_menu: null
@@ -533,7 +552,8 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
         <div className="space-y-6">
           <MenuSelection
             selectedItems={formData.menu_selection?.items || []}
-            onMenuChange={(items, totalPerPerson) => {
+            numGuests={formData.num_guests || 0}
+            onMenuChange={({ items, totalPerPerson, tiramisuTotal, tiramisuKg }) => {
               const numGuests = formData.num_guests || 0
               // Mantieni preset_menu se gli items corrispondono ancora al preset
               const currentPreset = selectedPreset
@@ -559,10 +579,12 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
                 ...formData,
                 preset_menu: updatedPreset,
                 menu_selection: {
-                  items
+                  items,
+                  tiramisu_total: tiramisuTotal,
+                  tiramisu_kg: tiramisuKg
                 },
                 menu_total_per_person: totalPerPerson,
-                menu_total_booking: totalPerPerson * numGuests
+                menu_total_booking: totalPerPerson * numGuests + tiramisuTotal
               })
               setErrors({ ...errors, menu: '' })
             }}

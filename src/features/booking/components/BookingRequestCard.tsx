@@ -261,9 +261,22 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
                   <div className="text-sm text-gray-700">
                     <p className="font-semibold mb-1">Prodotti:</p>
                     <ul className="list-disc list-inside space-y-1">
-                      {booking.menu_selection.items.map((item: any, idx: number) => (
-                        <li key={idx}>{item.name} - €{item.price.toFixed(2)}</li>
-                      ))}
+                      {booking.menu_selection.items.map((item: any, idx: number) => {
+                        const quantityLabel = item.quantity ? ` - ${item.quantity} Kg` : ''
+                        const priceValue =
+                          typeof item.totalPrice === 'number' && item.totalPrice > 0
+                            ? item.totalPrice
+                            : item.price
+
+                        return (
+                          <li key={idx}>
+                            {item.name}
+                            {quantityLabel}
+                            {' - €'}
+                            {priceValue?.toFixed ? priceValue.toFixed(2) : Number(priceValue || 0).toFixed(2)}
+                          </li>
+                        )
+                      })}
                     </ul>
                   </div>
                 )}
@@ -322,4 +335,9 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
     </div>
   )
 }
+
+
+
+
+
 

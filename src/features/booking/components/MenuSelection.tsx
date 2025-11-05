@@ -1,19 +1,90 @@
 import React, { useMemo } from 'react'
-import { Check } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import { useMenuItems } from '../hooks/useMenuItems'
-import type { MenuItem } from '@/types/menu'
+import type { MenuCategory, MenuItem, SelectedMenuItem } from '@/types/menu'
 
 interface MenuSelectionProps {
-  selectedItems: Array<{ id: string; name: string; price: number; category: string }>
-  onMenuChange: (items: Array<{ id: string; name: string; price: number; category: string }>, totalPerPerson: number) => void
+  selectedItems: SelectedMenuItem[]
+  numGuests: number
+  onMenuChange: (payload: {
+    items: SelectedMenuItem[]
+    totalPerPerson: number
+    tiramisuTotal: number
+    tiramisuKg: number
+  }) => void
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
+type NormalizedMenuItem = {
+  id: string
+  name: string
+  price: number
+  category: MenuCategory
+  description?: string
+  sort_order: number
+  priceSuffix?: string
+}
+
+const ORDERED_CATEGORIES: MenuCategory[] = [
+  'bevande',
+  'pizza',
+  'antipasti',
+  'fritti',
+  'primi',
+  'secondi',
+  'dolci'
+]
+
+const CATEGORY_LABELS: Record<MenuCategory, string> = {
   bevande: 'Bevande',
+  pizza: 'Pizza',
   antipasti: 'Antipasti',
   fritti: 'Fritti',
   primi: 'Primi Piatti',
-  secondi: 'Secondi Piatti'
+  secondi: 'Secondi Piatti',
+  dolci: 'Dolci'
+}
+
+const CATEGORY_LIMITS: Partial<Record<MenuCategory, number>> = {
+  bevande: 1,
+  pizza: 1,
+  antipasti: 3,
+  fritti: 3,
+  primi: 1,
+  secondi: 3
+}
+
+const FALLBACK_DESSERT_ITEMS: NormalizedMenuItem[] = [
+  {
+    id: 'fallback-dolci-cannoli',
+    name: 'Cannoli siciliani',
+    price: 3,
+    category: 'dolci',
+    description: undefined,
+    sort_order: 1000
+  },
+  {
+    id: 'fallback-dolci-tiramisu',
+    name: 'Tiramis\u00f9',
+    price: 20,
+    category: 'dolci',
+    description: 'Consigliato 1Kg x 10 Persone',
+    sort_order: 1010,
+    priceSuffix: ' al Kg'
+  }
+]
+
+const isTiramisuItem = (itemName: string): boolean =>
+  itemName.toLowerCase().includes('tiramis')
+
+const TIRAMISU_MIN_KG = 1
+const TIRAMISU_MAX_KG = 6
+const DEFAULT_TIRAMISU_KG = 1
+
+const clampTiramisuQuantity = (qty: number): number => {
+  if (Number.isNaN(qty) || qty <= 0) {
+    return 0
+  }
+  return Math.min(TIRAMISU_MAX_KG, Math.max(TIRAMISU_MIN_KG, qty))
 }
 
 // Helper functions for menu validation
@@ -39,136 +110,263 @@ const isCaraffeDrinkStandard = (itemName: string): boolean => {
          !nameLower.includes('caffe')     // Escludi anche varianti
 }
 
+const PIZZA_ITEM_NAMES = ['Pizza Margherita', 'Pizza rossa', 'Focaccia Rosmarino']
+
 const isPizzaOrFocaccia = (itemName: string): boolean => {
-  const pizzaFocaccia = ['Pizza Margherita', 'Pizza rossa', 'Focaccia Rosmarino']
-  return pizzaFocaccia.some(item => itemName.includes(item))
+  const nameLower = itemName.toLowerCase()
+  return PIZZA_ITEM_NAMES.some(item => nameLower.includes(item.toLowerCase()))
 }
+
+const isKnownCategory = (category: string): category is MenuCategory =>
+  ORDERED_CATEGORIES.includes(category as MenuCategory)
 
 export const MenuSelection: React.FC<MenuSelectionProps> = ({
   selectedItems,
+  numGuests,
   onMenuChange
 }) => {
   const { data: menuItems = [], isLoading, error } = useMenuItems()
 
-  // Raggruppa per categoria
-  const itemsByCategory = useMemo(() => {
-    return menuItems.reduce((acc, item) => {
-      if (!acc[item.category]) {
-        acc[item.category] = []
+  const formatPrice = (item: NormalizedMenuItem) =>
+    `€${item.price.toFixed(2)}${item.priceSuffix ?? ''}`
+  const formatCurrency = (value: number) => `€${value.toFixed(2)}`
+
+  const normalizedMenuItems = useMemo<NormalizedMenuItem[]>(() => {
+    const mapped = menuItems.map<NormalizedMenuItem>((item) => {
+      const category = isPizzaOrFocaccia(item.name)
+        ? 'pizza'
+        : isKnownCategory(item.category)
+          ? item.category
+          : 'antipasti'
+      const lowerName = item.name.toLowerCase()
+      const priceSuffix =
+        lowerName.includes('tiramis') && category === 'dolci'
+          ? ' al Kg'
+          : undefined
+
+      return {
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        category,
+        description: item.description ?? undefined,
+        sort_order: item.sort_order ?? 0,
+        priceSuffix
       }
-      acc[item.category].push(item)
-      return acc
-    }, {} as Record<string, MenuItem[]>)
+    })
+
+    const existingNames = new Set(
+      mapped.map((item) => item.name.toLowerCase().trim())
+    )
+
+    FALLBACK_DESSERT_ITEMS.forEach((fallback) => {
+      const fallbackKey = fallback.name.toLowerCase().trim()
+      if (!existingNames.has(fallbackKey)) {
+        mapped.push({ ...fallback })
+      }
+    })
+
+    return mapped
   }, [menuItems])
 
-  // Calcola totale a persona
-  const totalPerPerson = useMemo(() => {
-    return selectedItems.reduce((sum, item) => sum + item.price, 0)
-  }, [selectedItems])
+  const tiramisuUnitPrice = useMemo(() => {
+    const tiramisuItem = normalizedMenuItems.find((item) => isTiramisuItem(item.name))
+    return tiramisuItem?.price ?? 20
+  }, [normalizedMenuItems])
+
+  // Raggruppa per categoria
+  const itemsByCategory = useMemo(() => {
+    const grouped = ORDERED_CATEGORIES.reduce((acc, category) => {
+      acc[category] = []
+      return acc
+    }, {} as Record<MenuCategory, NormalizedMenuItem[]>)
+
+    normalizedMenuItems.forEach((item) => {
+      if (!grouped[item.category]) {
+        grouped[item.category] = []
+      }
+      grouped[item.category].push(item)
+    })
+
+    ORDERED_CATEGORIES.forEach((category) => {
+      grouped[category]?.sort((a, b) => {
+        if (a.sort_order === b.sort_order) {
+          return a.name.localeCompare(b.name)
+        }
+        return a.sort_order - b.sort_order
+      })
+    })
+
+    return grouped
+  }, [normalizedMenuItems])
+
+  const { totalPerPerson, tiramisuKg, tiramisuTotal } = useMemo(() => {
+    const tiramisuSelection = selectedItems.find((item) => isTiramisuItem(item.name))
+    const quantity = tiramisuSelection?.quantity ?? 0
+    const totalForTiramisu = quantity > 0 ? tiramisuUnitPrice * quantity : 0
+
+    const baseTotal = selectedItems
+      .filter((item) => !isTiramisuItem(item.name))
+      .reduce((sum, item) => sum + item.price, 0)
+
+    return {
+      totalPerPerson: baseTotal,
+      tiramisuKg: quantity,
+      tiramisuTotal: totalForTiramisu
+    }
+  }, [selectedItems, tiramisuUnitPrice])
 
   // Rimosso useEffect che causava loop infinito
   // Il callback viene chiamato direttamente da handleItemToggle e handleBisPrimiToggle
 
-  const handleItemToggle = (item: MenuItem) => {
+  const emitMenuSelectionChange = (items: SelectedMenuItem[]) => {
+    const itemsWithTotals = items.map((selected) => {
+      if (isTiramisuItem(selected.name)) {
+        const rawQuantity = selected.quantity ?? DEFAULT_TIRAMISU_KG
+        const clampedQuantity = clampTiramisuQuantity(rawQuantity)
+        const totalPrice = clampedQuantity > 0 ? tiramisuUnitPrice * clampedQuantity : 0
+        return {
+          ...selected,
+          quantity: clampedQuantity > 0 ? clampedQuantity : undefined,
+          totalPrice: totalPrice > 0 ? totalPrice : undefined
+        }
+      }
+
+      return {
+        ...selected,
+        totalPrice: selected.totalPrice ?? selected.price
+      }
+    })
+
+    const tiramisuSelection = itemsWithTotals.find((item) => isTiramisuItem(item.name))
+    const tiramisuQuantity = tiramisuSelection?.quantity ?? 0
+    const tiramisuTotalValue = tiramisuSelection?.totalPrice ?? 0
+
+    const baseTotal = itemsWithTotals
+      .filter((item) => !isTiramisuItem(item.name))
+      .reduce((sum, item) => sum + item.price, 0)
+
+    onMenuChange({
+      items: itemsWithTotals,
+      totalPerPerson: baseTotal,
+      tiramisuTotal: tiramisuTotalValue,
+      tiramisuKg: tiramisuQuantity
+    })
+  }
+
+  const handleItemToggle = (item: NormalizedMenuItem) => {
     const isSelected = selectedItems.some(selected => selected.id === item.id)
 
-    let newItems: typeof selectedItems = selectedItems
-
     if (isSelected) {
-      // Remove item - always allowed
-      newItems = selectedItems.filter(selected => selected.id !== item.id)
-    } else {
-      // Add item - apply category-specific rules
-
-      // === BEVANDE RULES ===
-      if (item.category === 'bevande') {
-        // Mutual exclusion per Caraffe / Drink e Caraffe / Drink Premium (come primi piatti)
-        // Se è una caraffe, rimuovi tutte le altre caraffe (standard e premium)
-        if (isCaraffeDrinkStandard(item.name) || isCaraffeDrinkPremium(item.name)) {
-          // Rimuovi tutte le bevande che sono caraffe (sia standard che premium)
-          newItems = selectedItems.filter(selected =>
-            !(selected.category === 'bevande' && 
-              (isCaraffeDrinkStandard(selected.name) || isCaraffeDrinkPremium(selected.name)))
-          )
-        } else {
-          // Non è una caraffe, mantieni tutte le selezioni
-          newItems = selectedItems
-        }
-
-        // Add the new item (only if not already present)
-        const itemAlreadyExists = newItems.some(selected => selected.id === item.id)
-        if (!itemAlreadyExists) {
-          newItems = [...newItems, {
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            category: item.category
-          }]
-        }
-
-        // Calculate total and return early
-        const newTotal = newItems.reduce((sum, item) => sum + item.price, 0)
-        onMenuChange(newItems, newTotal)
-        return
-      }
-
-      // === ANTIPASTI RULES ===
-      if (item.category === 'antipasti') {
-        const antipastiCount = selectedItems.filter(s => s.category === 'antipasti').length
-
-        // Check max 3 limit
-        if (antipastiCount >= 3) {
-          alert('Puoi scegliere massimo 3 antipasti')
-          return
-        }
-
-        // Auto-deselect other pizza/focaccia if selecting one
-        if (isPizzaOrFocaccia(item.name)) {
-          // Remove any other pizza/focaccia
-          newItems = selectedItems.filter(selected =>
-            !(selected.category === 'antipasti' && isPizzaOrFocaccia(selected.name))
-          )
-        }
-      }
-
-      // === FRITTI RULES ===
-      if (item.category === 'fritti') {
-        const frittiCount = selectedItems.filter(s => s.category === 'fritti').length
-        if (frittiCount >= 3) {
-          alert('Puoi scegliere massimo 3 fritti')
-          return
-        }
-      }
-
-      // === PRIMI RULES ===
-      // Auto-deselect existing primo when selecting a new one (mutual exclusion)
-      if (item.category === 'primi') {
-        // Remove any existing primi (user can only select one primo at a time)
-        newItems = selectedItems.filter(selected => selected.category !== 'primi')
-      }
-
-      // === SECONDI RULES ===
-      if (item.category === 'secondi') {
-        const secondiCount = selectedItems.filter(s => s.category === 'secondi').length
-        if (secondiCount >= 3) {
-          alert('Puoi scegliere massimo 3 secondi')
-          return
-        }
-      }
-
-      // All validations passed - add item
-      // newItems may have been filtered (for pizza/focaccia), or still equals selectedItems
-      newItems = [...newItems, {
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        category: item.category
-      }]
+      const remainingItems = selectedItems.filter(selected => selected.id !== item.id)
+      emitMenuSelectionChange(remainingItems)
+      return
     }
 
-    // Calculate new total - simple sum
-    const newTotal = newItems.reduce((sum, item) => sum + item.price, 0)
-    onMenuChange(newItems, newTotal)
+    let updatedItems: SelectedMenuItem[] = selectedItems
+
+    // === BEVANDE RULES ===
+    if (item.category === 'bevande') {
+      const isCaraffe = isCaraffeDrinkStandard(item.name) || isCaraffeDrinkPremium(item.name)
+      if (isCaraffe) {
+        updatedItems = selectedItems.filter(selected =>
+          !(
+            selected.category === 'bevande' &&
+            (isCaraffeDrinkStandard(selected.name) || isCaraffeDrinkPremium(selected.name))
+          )
+        )
+      }
+    }
+
+    // === ANTIPASTI RULES ===
+    if (item.category === 'antipasti') {
+      const antipastiCount = selectedItems.filter(s => s.category === 'antipasti').length
+      if (antipastiCount >= 3) {
+        alert('Puoi scegliere massimo 3 antipasti')
+        return
+      }
+    }
+
+    // === FRITTI RULES ===
+    if (item.category === 'fritti') {
+      const frittiCount = selectedItems.filter(s => s.category === 'fritti').length
+      if (frittiCount >= 3) {
+        alert('Puoi scegliere massimo 3 fritti')
+        return
+      }
+    }
+
+    // === PIZZA RULES ===
+    if (item.category === 'pizza') {
+      updatedItems = updatedItems.filter(selected => selected.category !== 'pizza')
+    }
+
+    // === PRIMI RULES ===
+    if (item.category === 'primi') {
+      updatedItems = updatedItems.filter(selected => selected.category !== 'primi')
+    }
+
+    // === SECONDI RULES ===
+    if (item.category === 'secondi') {
+      const secondiCount = selectedItems.filter(s => s.category === 'secondi').length
+      if (secondiCount >= 3) {
+        alert('Puoi scegliere massimo 3 secondi')
+        return
+      }
+    }
+
+    const newItem: SelectedMenuItem = {
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      category: item.category
+    }
+
+    if (isTiramisuItem(item.name)) {
+      newItem.quantity = DEFAULT_TIRAMISU_KG
+    }
+
+    emitMenuSelectionChange([
+      ...updatedItems.filter(selected => selected.id !== item.id),
+      newItem
+    ])
+  }
+
+  const handleRemoveSelectedItem = (itemId: string) => {
+    const remainingItems = selectedItems.filter(item => item.id !== itemId)
+    emitMenuSelectionChange(remainingItems)
+  }
+
+  const handleTiramisuQuantityChange = (value: string) => {
+    const trimmed = value.trim()
+    const isEmpty = trimmed === ''
+
+    if (isEmpty) {
+      const itemsWithoutQuantity = selectedItems.map((item) =>
+        isTiramisuItem(item.name)
+          ? { ...item, quantity: undefined, totalPrice: undefined }
+          : item
+      )
+      emitMenuSelectionChange(itemsWithoutQuantity)
+      return
+    }
+
+    const parsed = Number.parseInt(trimmed, 10)
+    if (Number.isNaN(parsed)) {
+      return
+    }
+
+    const clamped = clampTiramisuQuantity(parsed)
+    const updatedItems = selectedItems.map((item) =>
+      isTiramisuItem(item.name)
+        ? {
+            ...item,
+            quantity: clamped,
+            totalPrice: clamped > 0 ? tiramisuUnitPrice * clamped : undefined
+          }
+        : item
+    )
+    emitMenuSelectionChange(updatedItems)
   }
 
   if (isLoading) {
@@ -197,33 +395,47 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
           backdropFilter: 'blur(1px)',
           padding: '12px 24px',
           borderRadius: '16px',
-          fontWeight: '700'
+          fontWeight: '700',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '16px'
         }}
       >
-        Menù
+        <span>Men\u00f9</span>
+        <span className="text-base md:text-lg font-sans font-semibold text-warm-wood/80 whitespace-nowrap">
+          Prezzo x persona
+        </span>
       </h2>
 
       {/* Lista per Categoria */}
-      {Object.entries(CATEGORY_LABELS).map(([category, label]) => {
+      {ORDERED_CATEGORIES.map((category) => {
+        const label = CATEGORY_LABELS[category]
         const items = itemsByCategory[category] || []
-        if (items.length === 0) return null
+        if (!items || items.length === 0) return null
 
-        // Count selected items in this category
         const selectedCount = selectedItems.filter(i => i.category === category).length
 
-        // Determine max limit for counter display
-        let maxLimit: number | null = null
+        let counterText: string | null = null
         if (category === 'bevande') {
-          // Controlla se ci sono caraffe selezionate
-          const hasCaraffe = selectedItems.some(i => i.category === 'bevande' && 
-            (isCaraffeDrinkStandard(i.name) || isCaraffeDrinkPremium(i.name)))
-          // Mostra sempre il count per le bevande
-          maxLimit = hasCaraffe ? 1 : null // maxLimit null permette di mostrare il count senza limite massimo
+          const caraffeCount = selectedItems.filter(i =>
+            i.category === 'bevande' &&
+            (isCaraffeDrinkStandard(i.name) || isCaraffeDrinkPremium(i.name))
+          ).length
+          const limit = CATEGORY_LIMITS[category]
+          if (typeof limit === 'number') {
+            counterText = `(${caraffeCount}/${limit} selezionat${caraffeCount === 1 ? 'a' : 'e'})`
+          } else {
+            counterText = `(${caraffeCount} selezionat${caraffeCount === 1 ? 'a' : 'e'})`
+          }
+        } else {
+          const limit = CATEGORY_LIMITS[category]
+          if (typeof limit === 'number') {
+            counterText = `(${selectedCount}/${limit} selezionat${selectedCount === 1 ? 'o' : 'i'})`
+          } else if (selectedCount > 0) {
+            counterText = `(${selectedCount} selezionat${selectedCount === 1 ? 'o' : 'i'})`
+          }
         }
-        if (category === 'antipasti') maxLimit = 3
-        if (category === 'fritti') maxLimit = 3
-        if (category === 'primi') maxLimit = 1
-        if (category === 'secondi') maxLimit = 3
 
         return (
           <div key={category} className="space-y-3 w-full flex flex-col items-center px-1 sm:px-2">
@@ -243,93 +455,118 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
               }}
             >
               <span>{label}</span>
-              {category === 'bevande' || maxLimit !== null ? (
+              {counterText ? (
                 <span className="text-sm text-gray-600">
-                  {category === 'bevande' && maxLimit === null ? (
-                    `(${selectedCount} selezionat${selectedCount === 1 ? 'a' : 'e'})`
-                  ) : (
-                    `(${selectedCount}/${maxLimit} selezionat${selectedCount === 1 ? 'o' : 'i'})`
-                  )}
+                  {counterText}
                 </span>
               ) : null}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full justify-items-center md:max-w-5xl mx-auto">
               {items.map((item) => {
                 const isSelected = selectedItems.some(selected => selected.id === item.id)
+                const isTiramisu = isTiramisuItem(item.name)
+                const tiramisuValue = tiramisuKg > 0 ? String(tiramisuKg) : ''
                 return (
-                  <label
-                    key={item.id}
-                    className={`
-                      flex items-center gap-4 rounded-xl border-2 cursor-pointer w-full
-                      transition-all duration-200
-                    `}
-                    style={{
-                      minHeight: item.description ? '80px' : '80px',
-                      maxHeight: 'none',
-                      backgroundColor: isSelected ? 'rgba(245, 222, 179, 0.85)' : 'rgba(255, 255, 255, 0.85)',
-                      backdropFilter: 'blur(1px)',
-                      borderColor: isSelected ? '#8B4513' : 'rgba(0,0,0,0.2)',
-                      paddingTop: '6px',
-                      paddingBottom: '6px',
-                      paddingLeft: '24px',
-                      paddingRight: '24px',
-                      borderRadius: '16px',
-                      marginBottom: '4px',
-                      width: '100%',
-                      maxWidth: '560px',
-                      height: item.description ? 'auto' : '80px',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => handleItemToggle(item)}
-                      className="peer sr-only"
-                    />
-                    <div className={`
-                      flex h-6 w-6 flex-shrink-0 items-center justify-center
-                      border-2 shadow-sm transition-all duration-300
-                      ${isSelected
-                        ? 'border-warm-orange bg-warm-orange shadow-lg'
-                        : 'border-warm-wood/40 bg-white hover:border-warm-wood'
-                      }
-                    `}>
-                      {isSelected && (
-                        <Check className="h-4 w-4 text-white" strokeWidth={3} />
-                      )}
-                    </div>
-                    <div
-                      className="flex-1 w-full flex flex-col gap-2 md:flex-row md:items-center md:gap-4 md:justify-between"
-                      style={{ paddingLeft: '12px', paddingRight: '12px', paddingTop: '0px', paddingBottom: '0px', minWidth: 0, height: '100%' }}
+                  <div key={item.id} className="w-full flex flex-col items-center gap-2">
+                    <label
+                      className={`
+                        flex items-center gap-4 rounded-xl border-2 cursor-pointer w-full
+                        transition-all duration-200
+                      `}
+                      style={{
+                        minHeight: item.description ? '80px' : '80px',
+                        maxHeight: 'none',
+                        backgroundColor: isSelected ? 'rgba(245, 222, 179, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+                        backdropFilter: 'blur(1px)',
+                        borderColor: isSelected ? '#8B4513' : 'rgba(0,0,0,0.2)',
+                        paddingTop: '6px',
+                        paddingBottom: '6px',
+                        paddingLeft: '24px',
+                        paddingRight: '24px',
+                        borderRadius: '16px',
+                        marginBottom: '4px',
+                        width: '100%',
+                        maxWidth: '560px',
+                        height: item.description ? 'auto' : '80px',
+                        boxSizing: 'border-box'
+                      }}
                     >
-                      <div className="flex items-center justify-between gap-2 md:gap-4 md:w-[180px] md:flex-shrink-0">
-                        <span className={`font-bold ${isSelected ? 'text-warm-wood' : 'text-gray-700'}`} style={{ fontWeight: '700', whiteSpace: 'nowrap', fontSize: '20px' }}>
-                          {item.name}
-                        </span>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleItemToggle(item)}
+                        className="peer sr-only"
+                      />
+                      <div className={`
+                        flex h-6 w-6 flex-shrink-0 items-center justify-center
+                        border-2 shadow-sm transition-all duration-300
+                        ${isSelected
+                          ? 'border-warm-orange bg-warm-orange shadow-lg'
+                          : 'border-warm-wood/40 bg-white hover:border-warm-wood'
+                        }
+                      `}>
+                        {isSelected && (
+                          <Check className="h-4 w-4 text-white" strokeWidth={3} />
+                        )}
+                      </div>
+                      <div
+                        className="flex-1 w-full flex flex-col gap-2 md:flex-row md:items-center md:gap-4 md:justify-between"
+                        style={{ paddingLeft: '12px', paddingRight: '12px', paddingTop: '0px', paddingBottom: '0px', minWidth: 0, height: '100%' }}
+                      >
+                        <div className="flex items-center justify-between gap-2 md:gap-4 md:w-[180px] md:flex-shrink-0">
+                          <span className={`font-bold ${isSelected ? 'text-warm-wood' : 'text-gray-700'}`} style={{ fontWeight: '700', whiteSpace: 'nowrap', fontSize: '20px' }}>
+                            {item.name}
+                          </span>
+                          <span
+                            className="text-sm font-bold text-warm-wood whitespace-nowrap md:hidden"
+                            style={{ fontWeight: '700', textAlign: 'right' }}
+                          >
+                            {formatPrice(item)}
+                          </span>
+                        </div>
+                        {item.description ? (
+                          <p
+                            className="text-sm md:text-base font-bold text-gray-600 leading-snug md:text-center md:flex-1"
+                            style={{ wordBreak: 'break-word', lineHeight: '1.3', fontSize: '20px', width: '100%', margin: 0 }}
+                          >
+                            {item.description}
+                          </p>
+                        ) : null}
                         <span
-                          className="text-sm font-bold text-warm-wood whitespace-nowrap md:hidden"
+                          className="hidden md:block text-sm md:text-base font-bold text-warm-wood whitespace-nowrap"
                           style={{ fontWeight: '700', textAlign: 'right' }}
                         >
-                          €{item.price.toFixed(2)}
+                          {formatPrice(item)}
                         </span>
                       </div>
-                      {item.description ? (
-                        <p
-                          className="text-sm md:text-base font-bold text-gray-600 leading-snug md:text-center md:flex-1"
-                          style={{ wordBreak: 'break-word', lineHeight: '1.3', fontSize: '20px', width: '100%', margin: 0 }}
-                        >
-                          {item.description}
-                        </p>
-                      ) : null}
-                      <span
-                        className="hidden md:block text-sm md:text-base font-bold text-warm-wood whitespace-nowrap"
-                        style={{ fontWeight: '700', textAlign: 'right' }}
+                    </label>
+                    {isTiramisu && isSelected && (
+                      <div
+                        className="w-full max-w-[560px] bg-white/85 border border-warm-beige rounded-xl px-4 py-3 shadow-sm flex flex-col gap-2"
+                        style={{ backdropFilter: 'blur(1px)' }}
                       >
-                        €{item.price.toFixed(2)}
-                      </span>
-                    </div>
-                  </label>
+                        <label
+                          htmlFor="tiramisu-quantity"
+                          className="text-sm font-semibold text-warm-wood"
+                        >
+                          Quanti Kg di Tiramis\u00f9 desideri? (1-6)
+                        </label>
+                        <input
+                          id="tiramisu-quantity"
+                          type="number"
+                          min={TIRAMISU_MIN_KG}
+                          max={TIRAMISU_MAX_KG}
+                          inputMode="numeric"
+                          value={tiramisuValue}
+                          onChange={(event) => handleTiramisuQuantityChange(event.target.value)}
+                          className="w-full rounded-lg border border-warm-wood/40 px-3 py-2 text-base font-semibold text-gray-800 focus:border-warm-wood focus:ring-2 focus:ring-warm-wood/30"
+                        />
+                        <p className="text-xs text-gray-500">
+                          Il tiramis\u00f9 viene preparato in teglie da 1 Kg. Ogni Kg corrisponde a €{tiramisuUnitPrice.toFixed(2)}.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 )
               })}
             </div>
@@ -337,24 +574,66 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
         )
       })}
 
-      {/* Totale a Persona */}
+      {/* Riepilogo Scelte */}
       {selectedItems.length > 0 && (
         <div className="w-full flex justify-center">
           <div
-            style={{
-              backgroundColor: 'rgba(255, 240, 220, 0.92)',
-              backdropFilter: 'blur(1px)',
-              border: '2px solid rgba(139, 69, 19, 0.25)',
-              padding: '24px 32px',
-              borderRadius: '18px',
-              width: '100%',
-              maxWidth: '520px',
-              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)'
-            }}
+            className="w-full max-w-[560px] border-2 border-warm-beige rounded-2xl bg-white/90 shadow-lg"
+            style={{ backdropFilter: 'blur(2px)' }}
           >
-            <div className="flex flex-col items-center gap-3 text-center md:flex-row md:gap-6 md:justify-center">
-              <span className="text-2xl md:text-3xl text-warm-wood font-semibold" style={{ fontWeight: '700' }}>Totale a Persona:</span>
-              <span className="text-4xl md:text-5xl text-warm-wood font-extrabold" style={{ fontWeight: '800' }}>€{totalPerPerson.toFixed(2)}</span>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-warm-beige/60">
+              <h3 className="text-xl font-semibold text-warm-wood">Riepilogo Scelte</h3>
+              <span className="text-sm font-medium text-gray-600">{selectedItems.length} elementi</span>
+            </div>
+            <div className="px-5 py-4">
+              <div className="flex flex-wrap gap-3">
+                {selectedItems.map((item) => {
+                  const isTiramisu = isTiramisuItem(item.name)
+                  const quantityLabel = isTiramisu && item.quantity ? ` - ${item.quantity} Kg` : ''
+                  const chipLabel = `${item.name}${quantityLabel}`
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleRemoveSelectedItem(item.id)}
+                      className="group flex items-center gap-2 rounded-full border border-warm-wood/40 bg-white/80 px-4 py-2 text-sm font-semibold text-warm-wood shadow-sm transition-all hover:border-warm-wood hover:bg-warm-beige/30"
+                    >
+                      <span className="truncate max-w-[180px] text-left">{chipLabel}</span>
+                      <X className="h-4 w-4 text-warm-wood/80 transition-colors group-hover:text-warm-wood" />
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Totali */}
+      {selectedItems.length > 0 && (
+        <div className="w-full flex justify-center">
+          <div
+            className="w-full max-w-[560px] border-2 border-warm-beige rounded-2xl bg-gradient-to-br from-warm-cream/70 to-warm-beige/40 shadow-xl"
+            style={{ backdropFilter: 'blur(2px)' }}
+          >
+            <div className="px-6 py-6 space-y-4">
+              <div className="flex items-center justify-between text-lg font-semibold text-warm-wood">
+                <span>Prezzo a persona</span>
+                <span>{formatCurrency(totalPerPerson)}</span>
+              </div>
+              {tiramisuTotal > 0 && (
+                <div className="flex items-center justify-between text-lg font-semibold text-warm-wood">
+                  <span>Tiramis\u00f9</span>
+                  <span>{formatCurrency(tiramisuTotal)}</span>
+                </div>
+              )}
+              <div className="h-px bg-warm-beige/60" />
+              <div className="flex items-center justify-between text-2xl font-bold text-warm-wood">
+                <span>Prezzo totale rinfresco</span>
+                <span>
+                  {formatCurrency(totalPerPerson * Math.max(numGuests, 0) + tiramisuTotal)}
+                </span>
+              </div>
             </div>
           </div>
         </div>

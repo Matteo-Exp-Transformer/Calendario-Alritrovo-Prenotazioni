@@ -46,7 +46,9 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     num_guests: 0,
     special_requests: '',
     menu_selection: {
-      items: []
+      items: [],
+      tiramisu_total: 0,
+      tiramisu_kg: 0
     },
     dietary_restrictions: []
   })
@@ -149,20 +151,19 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
     // Only allow numeric characters
     if (inputValue === '') {
-      const newFormData = { ...formData, num_guests: 0 }
-      // Aggiorna menu_total_booking se c'è un menu
-      if (newFormData.menu_total_per_person) {
-        newFormData.menu_total_booking = 0
-      }
+      const tiramisuTotal = formData.menu_selection?.tiramisu_total || 0
+      const newFormData = { ...formData, num_guests: 0, menu_total_booking: tiramisuTotal }
       setFormData(newFormData)
       setErrors({ ...errors, num_guests: '' })
     } else if (/^\d+$/.test(inputValue)) {
       const value = parseInt(inputValue, 10)
       if (value >= 1 && value <= 110) {
-        const newFormData = { ...formData, num_guests: value }
-        // Aggiorna menu_total_booking se c'è un menu
-        if (newFormData.menu_total_per_person) {
-          newFormData.menu_total_booking = newFormData.menu_total_per_person * value
+        const tiramisuTotal = formData.menu_selection?.tiramisu_total || 0
+        const perPerson = formData.menu_total_per_person || 0
+        const newFormData = {
+          ...formData,
+          num_guests: value,
+          menu_total_booking: perPerson * value + tiramisuTotal
         }
         setFormData(newFormData)
         setErrors({ ...errors, num_guests: '' })
@@ -399,7 +400,9 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           num_guests: 0,
           special_requests: '',
           menu_selection: {
-            items: []
+            items: [],
+            tiramisu_total: 0,
+            tiramisu_kg: 0
           },
           dietary_restrictions: []
         })
@@ -683,15 +686,18 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         <div className="space-y-6" style={{ position: 'relative', left: '50%', transform: 'translateX(-50%)', width: '100vw', maxWidth: '1400px', paddingLeft: '2rem', paddingRight: '2rem' }}>
           <MenuSelection
             selectedItems={formData.menu_selection?.items || []}
-            onMenuChange={(items, totalPerPerson) => {
+            numGuests={formData.num_guests || 0}
+            onMenuChange={({ items, totalPerPerson, tiramisuTotal, tiramisuKg }) => {
               const numGuests = formData.num_guests || 0
               setFormData({
                 ...formData,
                 menu_selection: {
-                  items
+                  items,
+                  tiramisu_total: tiramisuTotal,
+                  tiramisu_kg: tiramisuKg
                 },
                 menu_total_per_person: totalPerPerson,
-                menu_total_booking: totalPerPerson * numGuests
+                menu_total_booking: totalPerPerson * numGuests + tiramisuTotal
               })
               setErrors({ ...errors, menu: '' })
             }}
