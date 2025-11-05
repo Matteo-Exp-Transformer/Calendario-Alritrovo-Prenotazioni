@@ -217,6 +217,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         numGuests: formData.numGuests,
         specialRequests: formData.specialRequests,
         menu: formData.menu,
+        desiredTime: formData.startTime,
       },
       {
         onSuccess: (updatedBooking) => {
@@ -674,4 +675,3 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     </div>
   )
 }
-

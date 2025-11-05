@@ -1,9 +1,41 @@
-# 🧪 E2E Test Suite - Al Ritrovo Booking System
+# ?? E2E Test Suite - Al Ritrovo Booking System
 
 Suite completa di test end-to-end organizzata per categorie funzionali.
 
 ---
+### Test produzione con Vercel
 
+```bash
+# 1. Esporta le variabili dalla tua .env.local (PowerShell)
+$env:VITE_SUPABASE_URL = "<VITE_SUPABASE_URL>"
+$env:VITE_SUPABASE_ANON_KEY = "<VITE_SUPABASE_ANON_KEY>"
+$env:RESEND_API_KEY = "<RESEND_API_KEY>"
+$env:SENDER_EMAIL = "<SENDER_EMAIL>"
+$env:SENDER_NAME = "<SENDER_NAME>"
+
+# 2. Deploy rapido della build locale (senza commit)
+vercel deploy --yes `
+  --build-env VITE_SUPABASE_URL=$env:VITE_SUPABASE_URL `
+  --build-env VITE_SUPABASE_ANON_KEY=$env:VITE_SUPABASE_ANON_KEY `
+  --env VITE_SUPABASE_URL=$env:VITE_SUPABASE_URL `
+  --env VITE_SUPABASE_ANON_KEY=$env:VITE_SUPABASE_ANON_KEY `
+  --env RESEND_API_KEY=$env:RESEND_API_KEY `
+  --env SENDER_EMAIL=$env:SENDER_EMAIL `
+  --env SENDER_NAME=$env:SENDER_NAME
+```
+
+```bash
+# Test automatici Playwright contro l'URL di preview
+npx playwright test --base-url=https://<url-preview-vercel>
+```
+
+```bash
+# Test manuale
+# 1. Apri l'URL di preview dal comando di deploy
+# 2. Inserisci una prenotazione di prova
+# 3. Accettala dall'area admin e controlla il calendario
+# 4. Cancella la prenotazione di prova
+```
 ## ⚡ Comandi Rapidi Test E2E
 
 ### 🎯 Test Core (Massima Priorità - Sempre Funzionanti)
@@ -442,3 +474,5 @@ Funzioni helper condivise in `e2e/helpers/`:
 
 **Ultimo aggiornamento**: Gennaio 2025
 **Status**: ✅ Test organizzati e funzionanti
+
+

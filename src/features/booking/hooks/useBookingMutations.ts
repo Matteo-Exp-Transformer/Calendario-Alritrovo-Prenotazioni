@@ -9,6 +9,7 @@ import {
   sendBookingCancelledEmail,
   areEmailNotificationsEnabled,
 } from './useEmailNotifications'
+import { extractTimeFromISO } from '../utils/dateUtils'
 
 interface AcceptBookingInput {
   bookingId: string
@@ -31,6 +32,7 @@ interface UpdateBookingInput {
   numGuests: number
   specialRequests?: string
   menu?: string
+  desiredTime?: string
 }
 
 // Mutation per accettare una prenotazione
@@ -164,6 +166,14 @@ export const useUpdateBooking = () => {
       if (input.menu !== undefined) {
         updateData.menu = input.menu
       }
+
+      const desiredTime =
+        input.desiredTime ||
+        (input.confirmedStart ? extractTimeFromISO(input.confirmedStart) : '')
+
+      if (desiredTime) {
+        updateData.desired_time = desiredTime
+      }
       
       console.log('🔵 [useUpdateBooking] Update payload:', updateData)
 
@@ -244,4 +254,3 @@ export const useCancelBooking = () => {
     },
   })
 }
-
