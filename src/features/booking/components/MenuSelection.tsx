@@ -185,7 +185,10 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
   }
 
   return (
-    <div className="space-y-6" style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
+    <div
+      className="space-y-6 px-4 md:px-6 lg:px-0"
+      style={{ maxWidth: '1400px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}
+    >
       {/* Titolo Sezione */}
       <h2
         className="text-2xl md:text-3xl font-serif text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
@@ -223,7 +226,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
         if (category === 'secondi') maxLimit = 3
 
         return (
-          <div key={category} className="space-y-3 w-full">
+          <div key={category} className="space-y-3 w-full flex flex-col items-center px-1 sm:px-2">
             <h3
               className="text-lg md:text-xl border-b border-gray-300 pb-2 flex items-center justify-between w-full"
               style={{
@@ -233,6 +236,9 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                 padding: '8px 16px',
                 borderRadius: '12px',
                 width: '100%',
+                maxWidth: '560px',
+                margin: '0 auto',
+                boxSizing: 'border-box',
                 fontWeight: '700'
               }}
             >
@@ -247,7 +253,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                 </span>
               ) : null}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full justify-items-center md:max-w-5xl mx-auto">
               {items.map((item) => {
                 const isSelected = selectedItems.some(selected => selected.id === item.id)
                 return (
@@ -270,7 +276,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                       borderRadius: '16px',
                       marginBottom: '4px',
                       width: '100%',
-                      maxWidth: '1800px',
+                      maxWidth: '560px',
                       height: item.description ? 'auto' : '80px',
                       boxSizing: 'border-box'
                     }}
@@ -293,18 +299,33 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                         <Check className="h-4 w-4 text-white" strokeWidth={3} />
                       )}
                     </div>
-                    <div className="flex-1 flex items-center w-full" style={{ paddingLeft: '12px', paddingRight: '12px', paddingTop: '0px', paddingBottom: '0px', minWidth: 0, height: '100%', display: 'grid', gridTemplateColumns: '180px 1fr 100px', gap: '8px', alignItems: 'center' }}>
-                      <span className={`font-bold ${isSelected ? 'text-warm-wood' : 'text-gray-700'}`} style={{ fontWeight: '700', whiteSpace: 'nowrap', fontSize: '20px' }}>
-                        {item.name}
-                      </span>
-                      <div className="flex justify-center items-center" style={{ width: '100%', minHeight: '68px' }}>
-                        {item.description ? (
-                          <p className="font-bold text-gray-600 text-center" style={{ fontWeight: '700', wordBreak: 'break-word', lineHeight: '1.3', fontSize: '20px', width: '100%', margin: 0 }}>
-                            {item.description}
-                          </p>
-                        ) : null}
+                    <div
+                      className="flex-1 w-full flex flex-col gap-2 md:flex-row md:items-center md:gap-4 md:justify-between"
+                      style={{ paddingLeft: '12px', paddingRight: '12px', paddingTop: '0px', paddingBottom: '0px', minWidth: 0, height: '100%' }}
+                    >
+                      <div className="flex items-center justify-between gap-2 md:gap-4 md:w-[180px] md:flex-shrink-0">
+                        <span className={`font-bold ${isSelected ? 'text-warm-wood' : 'text-gray-700'}`} style={{ fontWeight: '700', whiteSpace: 'nowrap', fontSize: '20px' }}>
+                          {item.name}
+                        </span>
+                        <span
+                          className="text-sm font-bold text-warm-wood whitespace-nowrap md:hidden"
+                          style={{ fontWeight: '700', textAlign: 'right' }}
+                        >
+                          €{item.price.toFixed(2)}
+                        </span>
                       </div>
-                      <span className="text-sm md:text-base font-bold text-warm-wood whitespace-nowrap" style={{ fontWeight: '700', textAlign: 'right' }}>
+                      {item.description ? (
+                        <p
+                          className="text-sm md:text-base font-bold text-gray-600 leading-snug md:text-center md:flex-1"
+                          style={{ wordBreak: 'break-word', lineHeight: '1.3', fontSize: '20px', width: '100%', margin: 0 }}
+                        >
+                          {item.description}
+                        </p>
+                      ) : null}
+                      <span
+                        className="hidden md:block text-sm md:text-base font-bold text-warm-wood whitespace-nowrap"
+                        style={{ fontWeight: '700', textAlign: 'right' }}
+                      >
                         €{item.price.toFixed(2)}
                       </span>
                     </div>
@@ -318,19 +339,23 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
 
       {/* Totale a Persona */}
       {selectedItems.length > 0 && (
-        <div
-          className="w-full"
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.85)',
-            backdropFilter: 'blur(1px)',
-            border: '2px solid rgba(0, 0, 0, 0.2)',
-            padding: '28px 32px',
-            borderRadius: '16px'
-          }}
-        >
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <span className="text-2xl md:text-3xl text-warm-wood" style={{ fontWeight: '700' }}>Totale a Persona:</span>
-            <span className="text-4xl md:text-5xl text-warm-wood" style={{ fontWeight: '700' }}>€{totalPerPerson.toFixed(2)}</span>
+        <div className="w-full flex justify-center">
+          <div
+            style={{
+              backgroundColor: 'rgba(255, 240, 220, 0.92)',
+              backdropFilter: 'blur(1px)',
+              border: '2px solid rgba(139, 69, 19, 0.25)',
+              padding: '24px 32px',
+              borderRadius: '18px',
+              width: '100%',
+              maxWidth: '520px',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08)'
+            }}
+          >
+            <div className="flex flex-col items-center gap-3 text-center md:flex-row md:gap-6 md:justify-center">
+              <span className="text-2xl md:text-3xl text-warm-wood font-semibold" style={{ fontWeight: '700' }}>Totale a Persona:</span>
+              <span className="text-4xl md:text-5xl text-warm-wood font-extrabold" style={{ fontWeight: '800' }}>€{totalPerPerson.toFixed(2)}</span>
+            </div>
           </div>
         </div>
       )}
