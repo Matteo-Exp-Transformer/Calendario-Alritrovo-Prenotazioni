@@ -47,8 +47,33 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
     return timeStr.split(':').slice(0, 2).join(':')
   }
 
-  const eventConfig = booking.event_type ? (EVENT_TYPE_CONFIG[booking.event_type] || EVENT_TYPE_CONFIG.drink_caraffe) : EVENT_TYPE_CONFIG.drink_caraffe
-  const EventIcon = eventConfig.icon
+  // ✅ FIX: Determina il tipo evento solo se esiste un valore valido
+  // Non usare drink_caraffe come fallback di default
+  const getEventTypeLabel = () => {
+    // Prima controlla booking_type (più specifico)
+    if (booking.booking_type === 'rinfresco_laurea') {
+      return 'Rinfresco di Laurea'
+    }
+    if (booking.booking_type === 'tavolo') {
+      return 'Prenota un Tavolo'
+    }
+    
+    // Poi controlla event_type solo se valido
+    if (booking.event_type && EVENT_TYPE_CONFIG[booking.event_type]) {
+      return EVENT_TYPE_CONFIG[booking.event_type].label
+    }
+    
+    // Se non c'è nessun tipo valido, ritorna null
+    return null
+  }
+
+  const eventTypeLabel = getEventTypeLabel()
+  // Usa eventConfig solo se event_type è valido, altrimenti usa valori di default per l'icona
+  const eventConfig = booking.event_type && EVENT_TYPE_CONFIG[booking.event_type] 
+    ? EVENT_TYPE_CONFIG[booking.event_type] 
+    : null
+  const EventIcon = eventConfig?.icon || UtensilsCrossed
+  const eventIconColor = eventConfig?.color || 'bg-gray-500'
   const statusConfig = STATUS_CONFIG[booking.status] || STATUS_CONFIG.pending
 
   return (
@@ -63,7 +88,7 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
             {/* Icona Tipo Evento */}
             <div className={`
               w-16 h-16 rounded-xl flex items-center justify-center
-              ${eventConfig.color} shadow-md flex-shrink-0
+              ${eventIconColor} shadow-md flex-shrink-0
             `}>
               <EventIcon className="w-8 h-8 text-white" />
             </div>
@@ -71,13 +96,15 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
             {/* TUTTI I DATI in formato 2 colonne */}
             <div className="text-left flex-1">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-                {/* Colonna Sinistra */}
+                                {/* Colonna Sinistra */}
                 <div className="space-y-3">
-                  {/* Tipo Evento */}
-                  <div className="flex items-center gap-2">
-                    <Tag className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                    <span className="text-sm font-semibold text-gray-900">{eventConfig.label}</span>
-                  </div>
+                  {/* Tipo Evento - Mostra solo se esiste un valore valido */}
+                  {eventTypeLabel && (
+                    <div className="flex items-center gap-2">
+                      <Tag className="w-4 h-4 text-gray-500 flex-shrink-0" />     
+                      <span className="text-sm font-semibold text-gray-900">{eventTypeLabel}</span>                                                            
+                    </div>
+                  )}
 
                   {/* Nome Cliente */}
                   <div className="flex items-center gap-2">
@@ -194,13 +221,15 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
               <span className="text-sm font-medium text-gray-900">{booking.num_guests}</span>
             </div>
 
-            {/* Tipo */}
-            <div className="flex items-start gap-3 py-3">
-              <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Tipo:</span>
-              <span className="text-sm font-medium text-gray-900">
-                {booking.booking_type === 'rinfresco_laurea' ? 'Rinfresco di Laurea' : booking.booking_type === 'tavolo' ? 'Prenota un Tavolo' : eventConfig.label}
-              </span>
-            </div>
+                        {/* Tipo - Mostra solo se esiste un valore valido */}
+            {eventTypeLabel && (
+              <div className="flex items-start gap-3 py-3">
+                <span className="text-xs text-gray-500 w-20 font-medium uppercase tracking-wide">Tipo:</span>                                                     
+                <span className="text-sm font-medium text-gray-900">
+                  {eventTypeLabel}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Menu Info - Solo per Rinfresco di Laurea */}

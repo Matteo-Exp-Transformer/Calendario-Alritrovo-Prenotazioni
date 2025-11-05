@@ -27,29 +27,17 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
         hasBooking: !!booking,
         bookingId: booking?.id
       })
+      document.body.style.overflow = 'hidden'
     } else {
       setRejectionReason('')
       console.log('🔵 [RejectModal] Modal closed, resetting form')
-    }
-  }, [isOpen, booking])
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
       document.body.style.overflow = 'unset'
     }
+
     return () => {
       document.body.style.overflow = 'unset'
     }
-  }, [isOpen])
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log('🔵 [RejectModal] handleSubmit called')
-    console.log('🔵 [RejectModal] rejectionReason:', rejectionReason)
-    onConfirm(rejectionReason)
-  }
+  }, [isOpen, booking])
 
   useEffect(() => {
     if (!isOpen) return
@@ -66,141 +54,158 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
     }
   }, [isOpen, onClose])
 
-  if (!isOpen) {
-    console.log('⚠️ [RejectModal] Modal not open, isOpen:', isOpen)
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log('🔵 [RejectModal] handleSubmit called')
+    console.log('🔵 [RejectModal] rejectionReason:', rejectionReason)
+    onConfirm(rejectionReason)
+  }
+
+  if (!isOpen || !booking) {
     return null
   }
-  
-  if (!booking) {
-    console.warn('⚠️ [RejectModal] Modal open but no booking provided!', { isOpen, booking })
-    return null
-  }
-  
+
   console.log('✅ [RejectModal] Rendering modal', { isOpen, bookingId: booking.id })
 
   return (
-    <div
+    <div 
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        zIndex: 999999, // Aumentato per essere sicuro che sia sopra tutto
+        zIndex: 9999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '1rem',
-        pointerEvents: 'auto', // Assicura che gli eventi funzionino
+        padding: '1rem'
       }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          console.log('🔵 [RejectModal] Clicked on overlay, closing modal')
-          onClose()
-        }
-      }}
+      onClick={onClose}
     >
-      {/* Overlay */}
-      <div
+      {/* Overlay - Completamente opaco */}
+      <div 
         style={{
           position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 999998,
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)'
         }}
       />
 
-      {/* Modal Content */}
-      <div
+      {/* Modal - Centrato */}
+      <div 
         style={{
           position: 'relative',
-          zIndex: 999999, // Aumentato per essere sicuro che sia sopra tutto
           backgroundColor: '#ffffff',
-          borderRadius: '0.5rem',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          borderRadius: '0.75rem',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           width: '100%',
           maxWidth: '32rem',
           maxHeight: '90vh',
-          overflow: 'auto',
-          pointerEvents: 'auto', // Assicura che gli eventi funzionino
+          overflow: 'hidden',
+          border: '1px solid #e5e7eb',
+          zIndex: 10000
         }}
-        onClick={(e) => {
-          e.stopPropagation()
-          console.log('🔵 [RejectModal] Clicked on modal content')
-        }}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '1.5rem',
-            borderBottom: '1px solid #e5e7eb',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '1.125rem',
-              fontWeight: 600,
-              color: '#111827',
-              margin: 0,
-            }}
-          >
-            Rifiuta Prenotazione
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '1.5rem',
+          borderBottom: '1px solid #e5e7eb',
+          backgroundColor: '#fef2f2'
+        }}>
+          <h2 style={{
+            margin: 0,
+            fontSize: '1.25rem',
+            fontWeight: 700,
+            color: '#111827'
+          }}>
+            ❌ Rifiuta Prenotazione
           </h2>
           <button
             onClick={onClose}
             style={{
-              background: 'none',
+              background: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              padding: '0.25rem',
+              padding: '0.5rem',
+              borderRadius: '0.5rem',
+              color: '#6b7280',
               display: 'flex',
               alignItems: 'center',
-              color: '#6b7280',
+              justifyContent: 'center'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = '#f3f4f6'
+              e.currentTarget.style.color = '#374151'
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = '#6b7280'
             }}
             aria-label="Chiudi"
+            disabled={isLoading}
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Content */}
-        <div style={{ padding: '1.5rem' }}>
-          <form onSubmit={handleSubmit}>
+        <div style={{
+          padding: '1.5rem',
+          backgroundColor: '#ffffff',
+          maxHeight: 'calc(90vh - 180px)',
+          overflowY: 'auto'
+        }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {/* Warning */}
-            <div
-              style={{
-                backgroundColor: '#fef2f2',
-                border: '2px solid #fecaca',
-                borderRadius: '0.5rem',
-                padding: '1rem',
-                marginBottom: '1.5rem',
-              }}
-            >
-              <p style={{ fontSize: '0.875rem', color: '#991b1b', margin: 0, fontWeight: 500 }}>
-                <strong>⚠️ Attenzione:</strong> Stai per rifiutare la prenotazione di{' '}
-                <strong>{booking.client_name}</strong>. Questa azione può essere reversibile solo manualmente.
+            <div style={{
+              backgroundColor: '#fef3c7',
+              borderLeft: '4px solid #f59e0b',
+              borderRadius: '0 0.5rem 0.5rem 0',
+              padding: '1rem',
+              display: 'flex',
+              gap: '0.75rem',
+              alignItems: 'flex-start'
+            }}>
+              <div style={{ flexShrink: 0, marginTop: '0.125rem' }}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" fill="#f59e0b"/>
+                </svg>
+              </div>
+              <p style={{
+                margin: 0,
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                color: '#92400e',
+                lineHeight: '1.5'
+              }}>
+                <strong>Attenzione:</strong> Stai per rifiutare la prenotazione di{' '}
+                <strong style={{ color: '#78350f' }}>{booking.client_name}</strong>. 
+                Questa azione può essere reversibile solo manualmente.
               </p>
             </div>
 
             {/* Textarea */}
-            <div style={{ marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               <label
                 htmlFor="rejection-reason-textarea"
                 style={{
                   display: 'block',
-                  fontSize: '1rem',
+                  fontSize: '0.875rem',
                   fontWeight: 600,
-                  color: '#111827',
-                  marginBottom: '0.5rem',
+                  color: '#374151'
                 }}
               >
-                Motivo rifiuto (opzionale)
+                Motivo rifiuto <span style={{ color: '#9ca3af', fontWeight: 400 }}>(opzionale)</span>
               </label>
               <textarea
                 id="rejection-reason-textarea"
@@ -211,40 +216,59 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
                 style={{
                   width: '100%',
                   padding: '0.75rem',
-                  border: '2px solid #9ca3af',
+                  border: '2px solid #d1d5db',
                   borderRadius: '0.5rem',
                   fontSize: '1rem',
-                  fontFamily: 'inherit',
-                  minHeight: '120px',
-                  resize: 'vertical',
                   backgroundColor: '#ffffff',
                   color: '#111827',
+                  minHeight: '120px',
+                  fontFamily: 'inherit',
+                  resize: 'vertical'
                 }}
                 rows={5}
                 autoFocus
               />
-              <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem', margin: 0 }}>
+              <p style={{
+                margin: 0,
+                fontSize: '0.75rem',
+                color: '#6b7280'
+              }}>
                 Puoi lasciare questo campo vuoto se preferisci.
               </p>
             </div>
 
             {/* Buttons */}
-            <div style={{ display: 'flex', gap: '0.75rem', paddingTop: '1rem' }}>
+            <div style={{
+              display: 'flex',
+              gap: '0.75rem',
+              paddingTop: '1rem',
+              borderTop: '1px solid #e5e7eb'
+            }}>
               <button
                 type="button"
                 onClick={onClose}
                 disabled={isLoading}
                 style={{
                   flex: 1,
-                  padding: '0.5rem 1rem',
-                  backgroundColor: '#e5e7eb',
+                  padding: '0.625rem 1rem',
+                  backgroundColor: '#f3f4f6',
                   color: '#374151',
-                  border: 'none',
-                  borderRadius: '0.375rem',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '0.5rem',
                   fontSize: '0.875rem',
                   fontWeight: 500,
                   cursor: isLoading ? 'not-allowed' : 'pointer',
-                  opacity: isLoading ? 0.5 : 1,
+                  opacity: isLoading ? 0.5 : 1
+                }}
+                onMouseOver={(e) => {
+                  if (!isLoading) {
+                    e.currentTarget.style.backgroundColor = '#e5e7eb'
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isLoading) {
+                    e.currentTarget.style.backgroundColor = '#f3f4f6'
+                  }
                 }}
               >
                 Annulla
@@ -254,18 +278,29 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
                 disabled={isLoading}
                 style={{
                   flex: 1,
-                  padding: '0.5rem 1rem',
+                  padding: '0.625rem 1rem',
                   backgroundColor: '#dc2626',
                   color: '#ffffff',
                   border: 'none',
-                  borderRadius: '0.375rem',
+                  borderRadius: '0.5rem',
                   fontSize: '0.875rem',
                   fontWeight: 500,
                   cursor: isLoading ? 'not-allowed' : 'pointer',
                   opacity: isLoading ? 0.5 : 1,
+                  boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                }}
+                onMouseOver={(e) => {
+                  if (!isLoading) {
+                    e.currentTarget.style.backgroundColor = '#b91c1c'
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!isLoading) {
+                    e.currentTarget.style.backgroundColor = '#dc2626'
+                  }
                 }}
               >
-                {isLoading ? 'Conferma...' : '❌ Rifiuta Prenotazione'}
+                {isLoading ? 'Rifiutando...' : '❌ Rifiuta Prenotazione'}
               </button>
             </div>
           </form>

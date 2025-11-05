@@ -41,8 +41,33 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
     return timeStr.split(':').slice(0, 2).join(':')
   }
 
-  const eventConfig = EVENT_TYPE_CONFIG[booking.event_type] || EVENT_TYPE_CONFIG.cena
-  const EventIcon = eventConfig.icon
+  // ✅ FIX: Determina il tipo evento solo se esiste un valore valido
+  // Non usare 'cena' come fallback di default
+  const getEventTypeLabel = () => {
+    // Prima controlla booking_type (più specifico)
+    if (booking.booking_type === 'rinfresco_laurea') {
+      return 'Rinfresco di Laurea'
+    }
+    if (booking.booking_type === 'tavolo') {
+      return 'Prenota un Tavolo'
+    }
+    
+    // Poi controlla event_type solo se valido
+    if (booking.event_type && EVENT_TYPE_CONFIG[booking.event_type]) {
+      return EVENT_TYPE_CONFIG[booking.event_type].label
+    }
+    
+    // Se non c'è nessun tipo valido, ritorna null
+    return null
+  }
+
+  const eventTypeLabel = getEventTypeLabel()
+  // Usa eventConfig solo se event_type è valido, altrimenti usa valori di default
+  const eventConfig = booking.event_type && EVENT_TYPE_CONFIG[booking.event_type] 
+    ? EVENT_TYPE_CONFIG[booking.event_type] 
+    : null
+  const EventIcon = eventConfig?.icon || UtensilsCrossed
+  const eventIconColor = eventConfig?.color || 'bg-gray-500'
   const statusConfig = STATUS_LABELS[booking.status] || STATUS_LABELS.pending
 
   const displayDate = booking.confirmed_start || booking.desired_date
@@ -69,20 +94,22 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4 flex-1">
             {/* Icona Tipo Evento */}
-            <div className={`w-16 h-16 rounded-xl flex items-center justify-center ${eventConfig.color} shadow-md flex-shrink-0`}>
+            <div className={`w-16 h-16 rounded-xl flex items-center justify-center ${eventIconColor} shadow-md flex-shrink-0`}>
               <EventIcon className="w-8 h-8 text-white" />
             </div>
 
             {/* Layout 2 colonne come BookingRequestCard */}
             <div className="text-left flex-1">
               <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                {/* Colonna Sinistra */}
+                                {/* Colonna Sinistra */}
                 <div className="space-y-3">
-                  {/* Tipo Evento */}
-                  <div className="flex items-center gap-2">
-                    <Tag className="w-4 h-4 text-warm-orange flex-shrink-0" />
-                    <span className="text-base font-bold text-warm-wood">{eventConfig.label}</span>
-                  </div>
+                  {/* Tipo Evento - Mostra solo se esiste un valore valido */}
+                  {eventTypeLabel && (
+                    <div className="flex items-center gap-2">
+                      <Tag className="w-4 h-4 text-warm-orange flex-shrink-0" />  
+                      <span className="text-base font-bold text-warm-wood">{eventTypeLabel}</span>                                                             
+                    </div>
+                  )}
 
                   {/* Nome Cliente */}
                   <div className="flex items-center gap-2">
@@ -196,11 +223,13 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
               <span className="text-sm md:text-base font-semibold text-warm-wood-dark">{booking.num_guests}</span>
             </div>
 
-            {/* Tipo */}
-            <div className="flex flex-row items-start gap-3 py-1.5 md:py-2">
-              <span className="text-xs text-gray-500 w-24 md:w-28 font-medium uppercase tracking-wide flex-shrink-0">Tipo:</span>
-              <span className="text-sm md:text-base font-semibold text-warm-wood-dark">{eventConfig.label}</span>
-            </div>
+                        {/* Tipo - Mostra solo se esiste un valore valido */}
+            {eventTypeLabel && (
+              <div className="flex flex-row items-start gap-3 py-1.5 md:py-2">  
+                <span className="text-xs text-gray-500 w-24 md:w-28 font-medium uppercase tracking-wide flex-shrink-0">Tipo:</span>
+                <span className="text-sm md:text-base font-semibold text-warm-wood-dark">{eventTypeLabel}</span>
+              </div>
+            )}
           </div>
 
           {/* Note Richieste Speciali - Fuori dalla griglia */}

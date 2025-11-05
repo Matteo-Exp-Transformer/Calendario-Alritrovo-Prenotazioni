@@ -52,16 +52,12 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, badge, onC
 
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('calendar')
-  const [showPendingPanel, setShowPendingPanel] = useState(false)
   const [showNewBookingPanel, setShowNewBookingPanel] = useState(false)
-  const { data: stats, isLoading: isLoadingStats } = useBookingStats()
+  const { data: stats } = useBookingStats()
 
-  // Chiudi il pannello pendenti quando cambi tab
+  // Chiudi il pannello nuova prenotazione quando cambi tab (se necessario)
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab)
-    if (tab !== 'calendar') {
-      setShowPendingPanel(false)
-    }
   }
 
   return (
@@ -91,10 +87,7 @@ export const AdminDashboard: React.FC = () => {
               label="Prenotazioni Pendenti"
               active={activeTab === 'pending'}
               badge={stats?.pending}
-              onClick={() => {
-                handleTabChange('pending')
-                setShowPendingPanel(true)
-              }}
+              onClick={() => handleTabChange('pending')}
             />
             <NavItem
               icon={Archive}
@@ -128,22 +121,6 @@ export const AdminDashboard: React.FC = () => {
               headerClassName="bg-al-ritrovo-primary/5 hover:bg-al-ritrovo-primary/10 border-b border-al-ritrovo-primary/20"
             >
               <AdminBookingForm />
-            </CollapsibleCard>
-
-            {/* Collapse Card con Prenotazioni Pendenti */}
-            <CollapsibleCard
-              title="Prenotazioni Pendenti"
-              subtitle={isLoadingStats ? 'Caricamento...' : `${stats?.pending || 0} in attesa`}
-              icon={Clock}
-              defaultExpanded={false}
-              expanded={showPendingPanel}
-              onExpandedChange={setShowPendingPanel}
-              counter={stats?.pending}
-              headerClassName="bg-yellow-50 hover:bg-yellow-100 border-b border-yellow-200"
-            >
-              <div className="p-4 max-h-[600px] overflow-y-auto">
-                <PendingRequestsTab />
-              </div>
             </CollapsibleCard>
           </div>
         )}
