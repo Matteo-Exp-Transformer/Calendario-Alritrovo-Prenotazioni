@@ -436,11 +436,11 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
   return (
     <>
-    <form onSubmit={handleSubmit} className="w-full max-w-[55vw] mx-auto px-2 md:px-6 space-y-8 font-bold">
+    <form onSubmit={handleSubmit} className="w-full max-w-[55vw] mx-auto px-2 md:px-6 space-y-8 font-bold booking-form-mobile">
       {/* Sezione: Dati Personali */}
       <div className="space-y-6">
         <h2
-          className="text-2xl md:text-3xl font-serif text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
+          className="booking-section-title text-lg md:text-xl font-serif text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
           style={{
             backgroundColor: 'rgba(255, 255, 255, 0.85)',
             backdropFilter: 'blur(1px)',
@@ -511,7 +511,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       {/* Sezione: Dettagli Prenotazione */}
       <div className="space-y-6">
         <h2
-          className="text-2xl md:text-3xl font-serif text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
+          className="booking-section-title text-lg md:text-xl font-serif text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
           style={{
             backgroundColor: 'rgba(255, 255, 255, 0.85)',
             backdropFilter: 'blur(1px)',
@@ -661,21 +661,23 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         </div>
 
         {/* Numero Ospiti */}
-        <div className="space-y-3">
-          <Input
-            id="num_guests"
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            min="1"
-            max="80"
-            value={formData.num_guests || ''}
-            onChange={handleNumGuestsChange}
-            onKeyPress={handleNumGuestsKeyPress}
-            required
-            placeholder="Numero Ospiti * (es: 15)"
-            className={errors.num_guests ? '!border-red-500' : ''}
-          />
+        <div className="space-y-3 guest-card-container">
+          <div className="guest-card-mobile">
+            <Input
+              id="num_guests"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              min="1"
+              max="80"
+              value={formData.num_guests || ''}
+              onChange={handleNumGuestsChange}
+              onKeyPress={handleNumGuestsKeyPress}
+              required
+              placeholder="Numero Ospiti * (es: 15)"
+              className={errors.num_guests ? '!border-red-500' : ''}
+            />
+          </div>
           {errors.num_guests && (
             <p className="text-sm text-red-500">{errors.num_guests}</p>
           )}
@@ -683,7 +685,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       </div>
       {/* Menu Selection - Solo per Rinfresco di Laurea */}
       {formData.booking_type === 'rinfresco_laurea' && (
-        <div className="space-y-6" style={{ position: 'relative', left: '50%', transform: 'translateX(-50%)', width: '100vw', maxWidth: '1400px', paddingLeft: '2rem', paddingRight: '2rem' }}>
+        <div className="space-y-6">
           <MenuSelection
             selectedItems={formData.menu_selection?.items || []}
             numGuests={formData.num_guests || 0}

@@ -91,7 +91,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
     <div className="space-y-6">
       {/* Titolo Sezione */}
       <h2
-        className="text-2xl md:text-3xl font-serif text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
+        className="booking-section-title text-lg md:text-xl font-serif text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
         style={{
           backgroundColor: 'rgba(255, 255, 255, 0.85)',
           backdropFilter: 'blur(1px)',
@@ -176,7 +176,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
             )}
           </div>
 
-          <div style={{ marginTop: '15px' }}>
+          <div style={{ marginTop: '15px' }} className="guest-card-container">
             <label
               className="block text-base md:text-lg text-warm-wood mb-2"
               style={{
@@ -190,13 +190,14 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
             >
               Numero ospiti con intolleranze alimentari *
             </label>
-            <Input
-              type="number"
-              min="1"
-              value={guestCount}
-              onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
-              className="w-full"
-            />
+            <div className="guest-card-mobile">
+              <Input
+                type="number"
+                min="1"
+                value={guestCount}
+                onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
+              />
+            </div>
           </div>
         </div>
 
