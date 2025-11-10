@@ -107,29 +107,37 @@ export const BookingRequestPage: React.FC = () => {
                 backdropFilter: 'blur(16px)',
               }}
             >
-              <div className="flex flex-col items-center justify-center gap-1.5">
+              <div className="flex flex-col items-center justify-center gap-2 text-center">
                 {/* In alto: Al Ritrovo con icona */}
                 <div className="flex items-center gap-1.5">
                   <div className="flex items-center justify-center w-5 h-5 md:w-6 md:h-6 rounded-full bg-warm-cream shadow-md">
                     <UtensilsCrossed className="w-3 h-3 md:w-3.5 md:h-3.5 text-warm-wood" />
                   </div>
                   <h1
-                    className="text-base md:text-lg font-serif text-warm-wood"
+                    className="text-2xl md:text-3xl font-serif text-warm-wood"
                     style={{ fontWeight: '700' }}
                   >
                     Al Ritrovo
                   </h1>
                 </div>
                 
-                {/* Sotto: Prenota il Tuo Tavolo */}
+                {/* Sotto: Richiesta Prenotazione Tavolo */}
                 <div className="flex items-center justify-center">
                   <h2
-                    className="text-lg md:text-xl font-serif text-warm-wood"
+                    className="text-xl md:text-2xl font-serif text-warm-wood"
                     style={{ fontWeight: '700' }}
                   >
-                    Prenota il Tuo Tavolo
+                    Richiesta Prenotazione Tavolo
                   </h2>
                 </div>
+
+                {/* Nota esplicativa */}
+                <p
+                  className="text-sm md:text-base text-warm-wood-dark leading-relaxed max-w-3xl md:max-w-4xl px-3 md:px-8 opacity-90"
+                  style={{ fontWeight: 700 }}
+                >
+                  Compilando questo form invierai una richiesta allo staff. Ti contatteremo al più presto per comunicarti l&apos;esito della richiesta!
+                </p>
               </div>
             </div>
           </div>
