@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react'
 import { Check, X } from 'lucide-react'
 import { useMenuItems } from '../hooks/useMenuItems'
-import type { MenuCategory, MenuItem, SelectedMenuItem } from '@/types/menu'
+import type { MenuCategory, SelectedMenuItem } from '@/types/menu'
 
 interface MenuSelectionProps {
   selectedItems: SelectedMenuItem[]
@@ -126,6 +126,48 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
   onMenuChange
 }) => {
   const { data: menuItems = [], isLoading, error } = useMenuItems()
+
+  // 🔍 DEBUG: Traccia il viewport e gli stili responsive
+  React.useEffect(() => {
+    const logViewportDebug = () => {
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      const scrollWidth = document.documentElement.scrollWidth
+      const clientWidth = document.documentElement.clientWidth
+      const hasHorizontalScroll = scrollWidth > clientWidth
+
+      console.group('📐 [MenuSelection] Viewport & Layout Debug')
+      console.log(`Viewport: ${vw}x${vh}px`)
+      console.log(`scrollWidth: ${scrollWidth}px`)
+      console.log(`clientWidth: ${clientWidth}px`)
+      console.log(`Has horizontal scroll: ${hasHorizontalScroll ? '⚠️ YES' : '✅ NO'}`)
+      console.log(`Breakpoint < 510px: ${vw < 510 ? '📱 SMALL MOBILE' : '📱 REGULAR/DESKTOP'}`)
+      
+      // Traccia le card
+      const cards = document.querySelectorAll('.menu-card-mobile')
+      if (cards.length > 0) {
+        const firstCard = cards[0] as HTMLElement
+        const cardBox = firstCard.getBoundingClientRect()
+        const computedStyle = window.getComputedStyle(firstCard)
+        
+        console.log(`\n📦 First Card Metrics:`)
+        console.log(`  Width: ${cardBox.width}px`)
+        console.log(`  Height: ${cardBox.height}px`)
+        console.log(`  Left offset: ${cardBox.left}px`)
+        console.log(`  Padding: ${computedStyle.paddingLeft} ${computedStyle.paddingRight}`)
+        console.log(`  MaxWidth (CSS): ${computedStyle.maxWidth}`)
+        console.log(`  Overflow (CSS): ${computedStyle.overflow}`)
+        console.log(`  BoxSizing: ${computedStyle.boxSizing}`)
+      }
+      console.groupEnd()
+    }
+
+    // Log su mount e resize
+    logViewportDebug()
+    window.addEventListener('resize', logViewportDebug)
+    
+    return () => window.removeEventListener('resize', logViewportDebug)
+  }, [])
 
   const formatPrice = (item: NormalizedMenuItem) =>
     `€${item.price.toFixed(2)}${item.priceSuffix ?? ''}`
@@ -383,28 +425,30 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
   }
 
   return (
-    <div
-      className="space-y-6 px-4 md:px-6 lg:px-0"
-      style={{ maxWidth: '1400px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}
-    >
+    <div className="space-y-6">
       {/* Titolo Sezione */}
       <h2
-        className="text-2xl md:text-3xl font-serif text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
+        className="booking-section-title booking-section-title-mobile text-lg md:text-xl font-serif text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
         style={{
           backgroundColor: 'rgba(255, 255, 255, 0.85)',
           backdropFilter: 'blur(1px)',
-          padding: '12px 24px',
+          padding: '12px 16px',
           borderRadius: '16px',
           fontWeight: '700',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '16px'
+          gap: '12px',
+          width: '100%',
+          maxWidth: 'min(560px, calc(100% - 16px))',
+          margin: '0 auto',
+          boxSizing: 'border-box',
+          overflow: 'hidden'
         }}
       >
-        <span>Men\u00f9</span>
-        <span className="text-base md:text-lg font-sans font-semibold text-warm-wood/80 whitespace-nowrap">
-          Prezzo x persona
+        <span style={{ flexShrink: 0 }}>Menù</span>
+        <span className="text-xs md:text-sm font-sans font-semibold text-warm-wood/80" style={{ whiteSpace: 'normal', wordBreak: 'break-word', overflowWrap: 'break-word', flexShrink: 1, minWidth: 0, textAlign: 'right' }}>
+          € x Persona
         </span>
       </h2>
 
@@ -438,9 +482,9 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
         }
 
         return (
-          <div key={category} className="space-y-3 w-full flex flex-col items-center px-1 sm:px-2">
+          <div key={category} className="space-y-3 w-full flex flex-col items-stretch menu-grid-container">
             <h3
-              className="text-lg md:text-xl border-b border-gray-300 pb-2 flex items-center justify-between w-full"
+              className="text-lg md:text-xl border-b border-gray-300 pb-2 flex items-center justify-between w-full booking-section-title-mobile"
               style={{
                 color: '#2563EB',
                 backgroundColor: 'rgba(255, 255, 255, 0.85)',
@@ -448,7 +492,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                 padding: '8px 16px',
                 borderRadius: '12px',
                 width: '100%',
-                maxWidth: '560px',
+                maxWidth: 'min(560px, calc(100% - 16px))',
                 margin: '0 auto',
                 boxSizing: 'border-box',
                 fontWeight: '700'
@@ -461,16 +505,16 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                 </span>
               ) : null}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full justify-items-center md:max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full justify-items-center md:max-w-5xl md:mx-auto">
               {items.map((item) => {
                 const isSelected = selectedItems.some(selected => selected.id === item.id)
                 const isTiramisu = isTiramisuItem(item.name)
                 const tiramisuValue = tiramisuKg > 0 ? String(tiramisuKg) : ''
                 return (
-                  <div key={item.id} className="w-full flex flex-col items-center gap-2">
+                  <div key={item.id} className="w-full flex flex-col items-stretch gap-2">
                     <label
                       className={`
-                        flex items-center gap-4 rounded-xl border-2 cursor-pointer w-full
+                        flex items-center gap-4 rounded-xl border-2 cursor-pointer w-full menu-card-mobile
                         transition-all duration-200
                       `}
                       style={{
@@ -481,14 +525,15 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                         borderColor: isSelected ? '#8B4513' : 'rgba(0,0,0,0.2)',
                         paddingTop: '6px',
                         paddingBottom: '6px',
-                        paddingLeft: '24px',
-                        paddingRight: '24px',
+                        paddingLeft: '8px',
+                        paddingRight: '8px',
                         borderRadius: '16px',
                         marginBottom: '4px',
                         width: '100%',
                         maxWidth: '560px',
                         height: item.description ? 'auto' : '80px',
-                        boxSizing: 'border-box'
+                        boxSizing: 'border-box',
+                        overflow: 'hidden'
                       }}
                     >
                       <input
@@ -511,10 +556,10 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                       </div>
                       <div
                         className="flex-1 w-full flex flex-col gap-2 md:flex-row md:items-center md:gap-4 md:justify-between"
-                        style={{ paddingLeft: '12px', paddingRight: '12px', paddingTop: '0px', paddingBottom: '0px', minWidth: 0, height: '100%' }}
+                        style={{ paddingLeft: '12px', paddingRight: '12px', paddingTop: '0px', paddingBottom: '0px', minWidth: 0, height: '100%', overflow: 'hidden' }}
                       >
-                        <div className="flex items-center justify-between gap-2 md:gap-4 md:w-[180px] md:flex-shrink-0">
-                          <span className={`font-bold ${isSelected ? 'text-warm-wood' : 'text-gray-700'}`} style={{ fontWeight: '700', whiteSpace: 'nowrap', fontSize: '20px' }}>
+                        <div className="flex items-center justify-between gap-2 md:gap-4 md:w-[180px] md:flex-shrink-0" style={{ minWidth: 0, flex: '1 1 auto' }}>
+                          <span className={`font-bold text-base md:text-lg ${isSelected ? 'text-warm-wood' : 'text-gray-700'} md:whitespace-nowrap`} style={{ fontWeight: '700', whiteSpace: 'normal', wordBreak: 'break-word', overflowWrap: 'break-word', flex: '1 1 auto', minWidth: 0 }}>
                             {item.name}
                           </span>
                           <span
@@ -526,14 +571,14 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                         </div>
                         {item.description ? (
                           <p
-                            className="text-sm md:text-base font-bold text-gray-600 leading-snug md:text-center md:flex-1"
-                            style={{ wordBreak: 'break-word', lineHeight: '1.3', fontSize: '20px', width: '100%', margin: 0 }}
+                            className="text-base md:text-lg font-bold text-gray-600 leading-snug md:text-center md:flex-1"
+                            style={{ wordBreak: 'break-word', overflowWrap: 'break-word', lineHeight: '1.3', width: '100%', margin: 0, hyphens: 'auto' }}
                           >
                             {item.description}
                           </p>
                         ) : null}
                         <span
-                          className="hidden md:block text-sm md:text-base font-bold text-warm-wood whitespace-nowrap"
+                          className="hidden md:block text-base md:text-lg font-bold text-warm-wood whitespace-nowrap"
                           style={{ fontWeight: '700', textAlign: 'right' }}
                         >
                           {formatPrice(item)}

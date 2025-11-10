@@ -43,6 +43,17 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
+  
+  /* Forza dimensione font per titoli sezioni booking */
+  .booking-section-title {
+    font-size: 1.125rem; /* text-lg */
+  }
+  
+  @media (min-width: 768px) {
+    .booking-section-title {
+      font-size: 1.25rem; /* text-xl */
+    }
+  }
 }
 
 /* Custom padding classes for header */
@@ -191,4 +202,65 @@ body {
 
 .rounded-modern-xl {
   border-radius: 32px !important;
+}
+
+/* ===== RESPONSIVE MOBILE FIX (< 510px) ===== */
+/* Media query per viewport mobile piccoli */
+@media (max-width: 510px) {
+  /* Menu card - espansione full-width su mobile */
+  .menu-card-mobile {
+    max-width: 100% !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-left-width: 2px !important;
+    border-right-width: 2px !important;
+    border-radius: 12px !important; /* Ridotto da 16px per evitare overflow visivo */
+  }
+
+  /* Menu container grid */
+  .menu-grid-container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Grid gap ridotto su mobile per evitare overflow */
+  .menu-grid-container .grid {
+    gap: 0.5rem !important; /* gap-2 invece di gap-4 */
+  }
+
+  /* Wrapper principale MenuSelection - rimuovi padding/margin */
+  .menu-grid-container > * {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* Assicura che il container principale non abbia overflow */
+  body {
+    overflow-x: hidden !important;
+  }
+
+  /* Booking form container */
+  .booking-form-mobile {
+    max-width: 100% !important;
+    width: 100%;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Titolo sezione booking su mobile */
+  .booking-section-title-mobile {
+    max-width: calc(100% - 16px) !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
 }
