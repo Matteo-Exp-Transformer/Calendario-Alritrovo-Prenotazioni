@@ -127,48 +127,6 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
 }) => {
   const { data: menuItems = [], isLoading, error } = useMenuItems()
 
-  // 🔍 DEBUG: Traccia il viewport e gli stili responsive
-  React.useEffect(() => {
-    const logViewportDebug = () => {
-      const vw = window.innerWidth
-      const vh = window.innerHeight
-      const scrollWidth = document.documentElement.scrollWidth
-      const clientWidth = document.documentElement.clientWidth
-      const hasHorizontalScroll = scrollWidth > clientWidth
-
-      console.group('📐 [MenuSelection] Viewport & Layout Debug')
-      console.log(`Viewport: ${vw}x${vh}px`)
-      console.log(`scrollWidth: ${scrollWidth}px`)
-      console.log(`clientWidth: ${clientWidth}px`)
-      console.log(`Has horizontal scroll: ${hasHorizontalScroll ? '⚠️ YES' : '✅ NO'}`)
-      console.log(`Breakpoint < 510px: ${vw < 510 ? '📱 SMALL MOBILE' : '📱 REGULAR/DESKTOP'}`)
-      
-      // Traccia le card
-      const cards = document.querySelectorAll('.menu-card-mobile')
-      if (cards.length > 0) {
-        const firstCard = cards[0] as HTMLElement
-        const cardBox = firstCard.getBoundingClientRect()
-        const computedStyle = window.getComputedStyle(firstCard)
-        
-        console.log(`\n📦 First Card Metrics:`)
-        console.log(`  Width: ${cardBox.width}px`)
-        console.log(`  Height: ${cardBox.height}px`)
-        console.log(`  Left offset: ${cardBox.left}px`)
-        console.log(`  Padding: ${computedStyle.paddingLeft} ${computedStyle.paddingRight}`)
-        console.log(`  MaxWidth (CSS): ${computedStyle.maxWidth}`)
-        console.log(`  Overflow (CSS): ${computedStyle.overflow}`)
-        console.log(`  BoxSizing: ${computedStyle.boxSizing}`)
-      }
-      console.groupEnd()
-    }
-
-    // Log su mount e resize
-    logViewportDebug()
-    window.addEventListener('resize', logViewportDebug)
-    
-    return () => window.removeEventListener('resize', logViewportDebug)
-  }, [])
-
   const formatPrice = (item: NormalizedMenuItem) =>
     `€${item.price.toFixed(2)}${item.priceSuffix ?? ''}`
   const formatCurrency = (value: number) => `€${value.toFixed(2)}`
@@ -482,7 +440,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
         }
 
         return (
-          <div key={category} className="space-y-3 w-full flex flex-col items-stretch menu-grid-container">
+          <div key={category} className="space-y-3 w-full flex flex-col items-center px-1 sm:px-2 menu-grid-container">
             <h3
               className="text-lg md:text-xl border-b border-gray-300 pb-2 flex items-center justify-between w-full booking-section-title-mobile"
               style={{
@@ -505,7 +463,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                 </span>
               ) : null}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full justify-items-center md:max-w-5xl md:mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full justify-items-center md:max-w-5xl mx-auto">
               {items.map((item) => {
                 const isSelected = selectedItems.some(selected => selected.id === item.id)
                 const isTiramisu = isTiramisuItem(item.name)

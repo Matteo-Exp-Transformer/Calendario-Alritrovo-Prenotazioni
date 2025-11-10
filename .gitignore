@@ -56,4 +56,11 @@ alritrovo_fullpage.png
 !PRD.md
 !PLANNING_TASKS.md
 
+# IDE specific
+.cursor/
+
+# Dev server artifacts
+dev-server.pid
+dev-server.log
+
 .vercel
