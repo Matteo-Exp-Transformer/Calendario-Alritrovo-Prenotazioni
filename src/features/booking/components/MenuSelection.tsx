@@ -473,6 +473,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                     <label
                       className={`
                         flex items-center gap-4 rounded-xl border-2 cursor-pointer w-full menu-card-mobile
+                        ${isTiramisu && isSelected ? 'menu-card-with-ingredient' : ''}
                         transition-all duration-200
                       `}
                       style={{
@@ -545,8 +546,12 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                     </label>
                     {isTiramisu && isSelected && (
                       <div
-                        className="w-full max-w-[560px] bg-white/85 border border-warm-beige rounded-xl px-4 py-3 shadow-sm flex flex-col gap-2"
-                        style={{ backdropFilter: 'blur(1px)' }}
+                        className="w-full max-w-[560px] bg-white/85 border-2 rounded-xl px-4 py-3 flex flex-col gap-2 tiramisu-ingredient-card transition-all duration-200"
+                        style={{
+                          backdropFilter: 'blur(1px)',
+                          borderColor: 'rgba(0,0,0,0.2)',
+                          borderRadius: '16px'
+                        }}
                       >
                         <label
                           htmlFor="tiramisu-quantity"
@@ -581,8 +586,12 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
       {selectedItems.length > 0 && (
         <div className="w-full flex justify-center">
           <div
-            className="w-full max-w-[560px] border-2 border-warm-beige rounded-2xl bg-white/90 shadow-lg"
-            style={{ backdropFilter: 'blur(2px)' }}
+            className="w-full max-w-[560px] border-2 rounded-xl bg-white/85 transition-all duration-200"
+            style={{
+              backdropFilter: 'blur(1px)',
+              borderColor: 'rgba(0,0,0,0.2)',
+              borderRadius: '16px'
+            }}
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-warm-beige/60">
               <h3 className="text-xl font-semibold text-warm-wood">Riepilogo Scelte</h3>
@@ -616,8 +625,12 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
       {selectedItems.length > 0 && (
         <div className="w-full flex justify-center">
           <div
-            className="w-full max-w-[560px] border-2 border-warm-beige rounded-2xl bg-gradient-to-br from-warm-cream/70 to-warm-beige/40 shadow-xl"
-            style={{ backdropFilter: 'blur(2px)' }}
+            className="w-full max-w-[560px] border-2 rounded-xl bg-white/85 transition-all duration-200"
+            style={{
+              backdropFilter: 'blur(1px)',
+              borderColor: 'rgba(0,0,0,0.2)',
+              borderRadius: '16px'
+            }}
           >
             <div className="px-6 py-6 space-y-4">
               <div className="flex items-center justify-between text-lg font-semibold text-warm-wood">

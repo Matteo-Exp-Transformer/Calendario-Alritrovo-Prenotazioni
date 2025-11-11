@@ -295,3 +295,24 @@ body {
     padding-right: 12px !important;
   }
 }
+
+/* Desktop: Center menu cards using align-self */
+@media (min-width: 511px) {
+  .menu-card-mobile {
+    align-self: center;
+  }
+
+  /* Tiramisu selected: remove centering, use margin auto instead */
+  .menu-card-with-ingredient {
+    align-self: auto;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Tiramisu ingredient input card: center it too */
+  .tiramisu-ingredient-card {
+    align-self: auto;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
