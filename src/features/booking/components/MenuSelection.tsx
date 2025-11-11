@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { Check, X } from 'lucide-react'
 import { useMenuItems } from '../hooks/useMenuItems'
 import type { MenuCategory, SelectedMenuItem } from '@/types/menu'
@@ -64,7 +64,7 @@ const FALLBACK_DESSERT_ITEMS: NormalizedMenuItem[] = [
   },
   {
     id: 'fallback-dolci-tiramisu',
-    name: 'Tiramis\u00f9',
+    name: 'Tiramisù',
     price: 20,
     category: 'dolci',
     description: 'Consigliato 1Kg x 10 Persone',
@@ -77,7 +77,7 @@ const isTiramisuItem = (itemName: string): boolean =>
   itemName.toLowerCase().includes('tiramis')
 
 const TIRAMISU_MIN_KG = 1
-const TIRAMISU_MAX_KG = 6
+const TIRAMISU_MAX_KG = 7
 const DEFAULT_TIRAMISU_KG = 1
 
 const clampTiramisuQuantity = (qty: number): number => {
@@ -216,6 +216,21 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
     }
   }, [selectedItems, tiramisuUnitPrice])
 
+  // Stato locale per l'input del tiramisù per permettere digitazione libera
+  const [localTiramisuValue, setLocalTiramisuValue] = useState<string>('')
+  const isInitializedRef = React.useRef<boolean>(false)
+
+  // Inizializza lo stato locale solo una volta quando tiramisuKg è disponibile
+  useEffect(() => {
+    if (!isInitializedRef.current && tiramisuKg > 0) {
+      setLocalTiramisuValue(String(tiramisuKg))
+      isInitializedRef.current = true
+    } else if (tiramisuKg === 0 && localTiramisuValue !== '') {
+      // Reset solo se tiramisuKg è 0 e il valore locale non è vuoto (caso di rimozione tiramisù)
+      setLocalTiramisuValue('')
+    }
+  }, [tiramisuKg])
+
   // Rimosso useEffect che causava loop infinito
   // Il callback viene chiamato direttamente da handleItemToggle e handleBisPrimiToggle
 
@@ -338,6 +353,9 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
   }
 
   const handleTiramisuQuantityChange = (value: string) => {
+    // Aggiorna immediatamente lo stato locale per permettere digitazione libera
+    setLocalTiramisuValue(value)
+
     const trimmed = value.trim()
     const isEmpty = trimmed === ''
 
@@ -351,22 +369,105 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
       return
     }
 
+    // Permetti solo numeri
+    if (!/^\d+$/.test(trimmed)) {
+      return
+    }
+
     const parsed = Number.parseInt(trimmed, 10)
     if (Number.isNaN(parsed)) {
       return
     }
 
-    const clamped = clampTiramisuQuantity(parsed)
+    // Se il numero è fuori range (0 o > 7)
+    if (parsed < TIRAMISU_MIN_KG || parsed > TIRAMISU_MAX_KG) {
+      // Se è chiaramente fuori range (es. > 7), clampalo immediatamente
+      if (parsed > TIRAMISU_MAX_KG) {
+        const clamped = TIRAMISU_MAX_KG
+        setLocalTiramisuValue(String(clamped))
+        const updatedItems = selectedItems.map((item) =>
+          isTiramisuItem(item.name)
+            ? {
+                ...item,
+                quantity: clamped,
+                totalPrice: clamped > 0 ? tiramisuUnitPrice * clamped : undefined
+              }
+            : item
+        )
+        emitMenuSelectionChange(updatedItems)
+      }
+      // Se è < 1, lascia che l'utente continui a digitare (potrebbe voler digitare 1, 2, etc.)
+      return
+    }
+
+    // Valore valido (1-7), aggiorna immediatamente
     const updatedItems = selectedItems.map((item) =>
       isTiramisuItem(item.name)
         ? {
             ...item,
-            quantity: clamped,
-            totalPrice: clamped > 0 ? tiramisuUnitPrice * clamped : undefined
+            quantity: parsed,
+            totalPrice: parsed > 0 ? tiramisuUnitPrice * parsed : undefined
           }
         : item
     )
     emitMenuSelectionChange(updatedItems)
+  }
+
+  const handleTiramisuQuantityBlur = () => {
+    // Al blur, assicurati che il valore sia valido
+    const trimmed = localTiramisuValue.trim()
+    if (trimmed === '') {
+      const itemsWithoutQuantity = selectedItems.map((item) =>
+        isTiramisuItem(item.name)
+          ? { ...item, quantity: undefined, totalPrice: undefined }
+          : item
+      )
+      emitMenuSelectionChange(itemsWithoutQuantity)
+      return
+    }
+
+    const parsed = Number.parseInt(trimmed, 10)
+    if (Number.isNaN(parsed) || parsed < TIRAMISU_MIN_KG) {
+      // Se vuoto o invalido, imposta a default
+      const clamped = DEFAULT_TIRAMISU_KG
+      setLocalTiramisuValue(String(clamped))
+      const updatedItems = selectedItems.map((item) =>
+        isTiramisuItem(item.name)
+          ? {
+              ...item,
+              quantity: clamped,
+              totalPrice: clamped > 0 ? tiramisuUnitPrice * clamped : undefined
+            }
+          : item
+      )
+      emitMenuSelectionChange(updatedItems)
+    } else if (parsed > TIRAMISU_MAX_KG) {
+      // Se troppo grande, clampalo
+      const clamped = TIRAMISU_MAX_KG
+      setLocalTiramisuValue(String(clamped))
+      const updatedItems = selectedItems.map((item) =>
+        isTiramisuItem(item.name)
+          ? {
+              ...item,
+              quantity: clamped,
+              totalPrice: clamped > 0 ? tiramisuUnitPrice * clamped : undefined
+            }
+          : item
+      )
+      emitMenuSelectionChange(updatedItems)
+    } else {
+      // Valore valido, assicurati che sia sincronizzato
+      const updatedItems = selectedItems.map((item) =>
+        isTiramisuItem(item.name)
+          ? {
+              ...item,
+              quantity: parsed,
+              totalPrice: parsed > 0 ? tiramisuUnitPrice * parsed : undefined
+            }
+          : item
+      )
+      emitMenuSelectionChange(updatedItems)
+    }
   }
 
   if (isLoading) {
@@ -467,7 +568,6 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
               {items.map((item) => {
                 const isSelected = selectedItems.some(selected => selected.id === item.id)
                 const isTiramisu = isTiramisuItem(item.name)
-                const tiramisuValue = tiramisuKg > 0 ? String(tiramisuKg) : ''
                 return (
                   <div key={item.id} className="w-full flex flex-col items-stretch gap-2">
                     <label
@@ -558,7 +658,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                           htmlFor="tiramisu-quantity"
                           className="text-sm font-semibold text-warm-wood"
                         >
-                          Quanti Kg di Tiramis\u00f9 desideri? (1-6)
+                          Quanti Kg di Tiramisù desideri? (1-7)
                         </label>
                         <input
                           id="tiramisu-quantity"
@@ -566,12 +666,13 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                           min={TIRAMISU_MIN_KG}
                           max={TIRAMISU_MAX_KG}
                           inputMode="numeric"
-                          value={tiramisuValue}
+                          value={localTiramisuValue}
                           onChange={(event) => handleTiramisuQuantityChange(event.target.value)}
+                          onBlur={handleTiramisuQuantityBlur}
                           className="w-full rounded-lg border border-warm-wood/40 px-3 py-2 text-base font-semibold text-gray-800 focus:border-warm-wood focus:ring-2 focus:ring-warm-wood/30"
                         />
                         <p className="text-xs text-gray-500">
-                          Il tiramis\u00f9 viene preparato in teglie da 1 Kg. Ogni Kg corrisponde a €{tiramisuUnitPrice.toFixed(2)}.
+                          Il tiramisù viene preparato in teglie da 1 Kg. Ogni Kg corrisponde a €{tiramisuUnitPrice.toFixed(2)}.
                         </p>
                       </div>
                     )}
@@ -642,7 +743,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
               </div>
               {tiramisuTotal > 0 && (
                 <div className="flex items-center justify-between text-lg font-semibold text-warm-wood">
-                  <span>Tiramis\u00f9</span>
+                  <span>Tiramisù</span>
                   <span>{formatCurrency(tiramisuTotal)}</span>
                 </div>
               )}
