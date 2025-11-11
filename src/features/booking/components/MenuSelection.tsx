@@ -548,6 +548,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                       <div
                         className="w-full max-w-[560px] bg-white/85 border-2 rounded-xl px-4 py-3 flex flex-col gap-2 tiramisu-ingredient-card transition-all duration-200"
                         style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.85)',
                           backdropFilter: 'blur(1px)',
                           borderColor: 'rgba(0,0,0,0.2)',
                           borderRadius: '16px'
@@ -588,6 +589,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
           <div
             className="w-full max-w-[560px] border-2 rounded-xl bg-white/85 transition-all duration-200"
             style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(1px)',
               borderColor: 'rgba(0,0,0,0.2)',
               borderRadius: '16px'
@@ -627,6 +629,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
           <div
             className="w-full max-w-[560px] border-2 rounded-xl bg-white/85 transition-all duration-200"
             style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(1px)',
               borderColor: 'rgba(0,0,0,0.2)',
               borderRadius: '16px'
