@@ -1,0 +1,215 @@
+# 🚀 Cursor Agent Context - Calendario Al Ritrovo
+
+## MANDATORY: Read This First When Starting
+
+You are working on the **Calendario Al Ritrovo** booking system. This file is automatically loaded for ALL Cursor agents (Codex, Sonnet, Composer).
+
+---
+
+## 🔧 Git Worktree Workflow (CRITICAL)
+
+**BEFORE MAKING ANY CHANGES**, check if you're in a worktree:
+
+```bash
+git worktree list
+pwd  # Check your current directory
+```
+
+### Are You in a Worktree?
+
+**YES** - You're in `.worktrees/{name}` or external worktree directory:
+✅ You can work independently
+✅ You have your own branch
+✅ Your commits won't conflict with other agents
+✅ Your `git status` shows only YOUR changes
+
+**NO** - You're in the main repository:
+⚠️ **STOP!** Before making changes:
+1. Check if other agents are working: `git status`
+2. If clean, you can work here
+3. If dirty (other changes), create a worktree: `./scripts/manage-worktrees.sh create agent-{yourname}`
+
+### Quick Worktree Commands
+
+**Create worktree** (recommended for parallel work):
+```bash
+./scripts/manage-worktrees.sh create agent-feature-name
+cd .worktrees/agent-feature-name
+# Now work independently!
+```
+
+**List all worktrees**:
+```bash
+./scripts/manage-worktrees.sh list
+```
+
+**Check for conflicts**:
+```bash
+./scripts/manage-worktrees.sh check
+```
+
+**When done**:
+```bash
+# Commit your work
+git add .
+git commit -m "Your changes"
+
+# Go back to main
+cd ../..
+git checkout main
+git merge agent/agent-feature-name
+
+# Clean up
+./scripts/manage-worktrees.sh remove agent-feature-name
+```
+
+---
+
+## 📖 Essential Documentation
+
+**ALWAYS read these files before starting**:
+
+1. **Worktree Workflow**: `docs/development/WORKTREE_WORKFLOW.md`
+   - Complete guide for multi-agent work
+   - Best practices
+   - Common issues and solutions
+
+2. **Quick Reference**: `.worktree-quickstart.md` (in `.cursor/` or root)
+   - Fast commands reference
+   - One-page cheatsheet
+
+3. **Project Structure**: `.cursor/Skills/PROJECT_NAVIGATION.md`
+   - Where files are located
+   - How to find components, tests, docs
+
+4. **Project Status**: `docs/agent-knowledge/PROJECT_STATUS.md`
+   - Current state of the project
+   - What's done, what's not
+
+---
+
+## 🎯 Repository Information
+
+- **Main branch**: `main`
+- **Remote**: GitHub (origin)
+- **Location**: `c:\Users\matte.MIO\Documents\GitHub\Calendarbackup`
+- **Worktrees location**: `.worktrees/` (local) or `c:\Users\matte.MIO\.cursor\worktrees\` (external)
+
+---
+
+## 🔥 Common Pitfalls for Parallel Agents
+
+### ❌ DON'T:
+- Work directly in main repository when other agents are active
+- Assume `git status` shows all changes (only shows YOUR worktree changes)
+- Commit without checking your current branch
+- Delete worktrees with uncommitted changes
+
+### ✅ DO:
+- Create a worktree for independent work: `./scripts/manage-worktrees.sh create agent-yourname`
+- Check current location: `pwd` and `git branch`
+- Verify worktree independence: `git worktree list`
+- Use the management script: `./scripts/manage-worktrees.sh help`
+
+---
+
+## 📋 Development Checklist
+
+Before making changes:
+- [ ] Check if you're in a worktree: `git worktree list`
+- [ ] Verify your branch: `git branch --show-current`
+- [ ] Check for other agents' work: `./scripts/manage-worktrees.sh list`
+- [ ] Read worktree docs: `docs/development/WORKTREE_WORKFLOW.md`
+
+Before committing:
+- [ ] Verify you're on correct branch: `git branch --show-current`
+- [ ] Stage files: `git add <files>`
+- [ ] Commit with message: `git commit -m "Description"`
+- [ ] Check commit succeeded: `git log -1 --oneline`
+
+---
+
+## 🛠️ Key Scripts
+
+**Worktree Management**:
+```bash
+./scripts/manage-worktrees.sh help        # Show all commands
+./scripts/manage-worktrees.sh list        # List all worktrees
+./scripts/manage-worktrees.sh create NAME # Create worktree
+./scripts/manage-worktrees.sh check       # Check conflicts
+./scripts/manage-worktrees.sh remove NAME # Remove worktree
+./scripts/manage-worktrees.sh cleanup     # Clean abandoned
+```
+
+**Development**:
+```bash
+npm run dev                    # Start dev server (localhost:5175)
+npm run test:e2e               # Run Playwright tests
+npm run lint                   # Lint and fix code
+```
+
+---
+
+## 🧭 File Locations
+
+**Source code**: `src/`
+- Features: `src/features/booking/`
+- Components: `src/components/ui/`
+- Pages: `src/pages/`
+
+**Tests**: `e2e/`
+- By category: `e2e/booking-flow/`, `e2e/admin-crud/`, etc.
+
+**Documentation**: `docs/`
+- Main docs: `docs/agent-knowledge/`
+- Worktree guide: `docs/development/WORKTREE_WORKFLOW.md`
+
+**Database**: `supabase/migrations/`
+
+---
+
+## 🚨 Emergency Commands
+
+**Stuck with git issues?**
+```bash
+git status                     # Check current state
+git worktree list              # Check all worktrees
+git branch --show-current      # Check current branch
+./scripts/manage-worktrees.sh check  # Check for conflicts
+```
+
+**Need to abort changes?**
+```bash
+git reset --hard HEAD          # Discard all changes (CAREFUL!)
+git clean -fd                  # Remove untracked files
+```
+
+**Worktree is broken?**
+```bash
+./scripts/manage-worktrees.sh remove worktree-name
+git worktree prune            # Clean up broken worktrees
+```
+
+---
+
+## 💡 Tips for Success
+
+1. **Always verify your location**: `pwd` and `git branch --show-current`
+2. **Use worktrees for parallel work**: Each agent gets its own directory
+3. **Read the full guide**: `docs/development/WORKTREE_WORKFLOW.md` (800+ lines, 6000+ words)
+4. **Use the management script**: Don't create worktrees manually
+5. **Commit often**: Small commits are easier to manage
+6. **Check before removing**: Worktree script warns about uncommitted changes
+
+---
+
+## 📞 Need Help?
+
+- **Worktree issues**: Read `docs/development/WORKTREE_WORKFLOW.md`
+- **Quick commands**: Check `.worktree-quickstart.md`
+- **Project structure**: Read `.cursor/Skills/PROJECT_NAVIGATION.md`
+- **General info**: Ask the human partner or check `docs/agent-knowledge/`
+
+---
+
+**Remember**: This context is loaded automatically for ALL agents. You don't need to ask for this information - it's already in your context!

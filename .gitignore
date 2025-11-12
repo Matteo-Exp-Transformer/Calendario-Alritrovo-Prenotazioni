@@ -59,6 +59,10 @@ alritrovo_fullpage.png
 # IDE specific
 .cursor/
 
+# Git worktrees for parallel agent work
+.worktrees/
+worktrees/
+
 # Dev server artifacts
 dev-server.pid
 dev-server.log

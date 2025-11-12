@@ -38,6 +38,39 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           color: black !important;
           opacity: 1 !important;
         }
+
+        /* Mobile webkit fixes for date/time inputs visibility */
+        input[type="date"]::-webkit-datetime-edit,
+        input[type="time"]::-webkit-datetime-edit,
+        input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+        input[type="time"]::-webkit-datetime-edit-fields-wrapper,
+        input[type="date"]::-webkit-datetime-edit-text,
+        input[type="time"]::-webkit-datetime-edit-text,
+        input[type="date"]::-webkit-datetime-edit-month-field,
+        input[type="date"]::-webkit-datetime-edit-day-field,
+        input[type="date"]::-webkit-datetime-edit-year-field,
+        input[type="time"]::-webkit-datetime-edit-hour-field,
+        input[type="time"]::-webkit-datetime-edit-minute-field,
+        input[type="time"]::-webkit-datetime-edit-ampm-field {
+          color: black !important;
+          font-weight: 700 !important;
+          padding: 0 !important;
+        }
+
+        /* Make calendar/clock icon visible and properly sized */
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+          opacity: 1 !important;
+          color: black !important;
+          cursor: pointer;
+          filter: brightness(0) saturate(100%); /* Make icon black */
+        }
+
+        /* Ensure webkit inner spin button is visible if present */
+        input[type="date"]::-webkit-inner-spin-button,
+        input[type="time"]::-webkit-inner-spin-button {
+          opacity: 1 !important;
+        }
       `}</style>
     </>
   )
