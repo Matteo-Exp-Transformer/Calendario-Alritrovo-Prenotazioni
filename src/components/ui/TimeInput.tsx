@@ -117,6 +117,22 @@ export const TimeInput: React.FC<TimeInputProps> = ({
             font-size: 18px;
           }
         }
+        /* Full-width expansion on very small screens (< 510px) */
+        @media (max-width: 510px) {
+          .time-input-container {
+            max-width: 100% !important;
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+            margin: 0 !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            border-left-width: 2px !important;
+            border-right-width: 2px !important;
+            border-radius: 12px !important;
+          }
+        }
       `}</style>
     </>
   )
