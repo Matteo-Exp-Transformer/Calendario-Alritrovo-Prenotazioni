@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Input } from '@/components/ui'
+import { DateInput } from '@/components/ui/DateInput'
+import { TimeInput } from '@/components/ui/TimeInput'
 import type { BookingRequestInput } from '@/types/booking'
 import { useCreateBookingRequest } from '../hooks/useBookingRequests'
 import { useRateLimit } from '@/hooks/useRateLimit'
@@ -570,24 +572,22 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
         {/* Data */}
         <div className="space-y-3">
-          <Input
+          <DateInput
             id="desired_date"
-            type="date"
             value={formData.desired_date}
-            onChange={(e) => {
-              const newDate = e.target.value
+            onChange={(newDate) => {
               setFormData({ ...formData, desired_date: newDate })
-              
+
               // Real-time validation for business hours
-              const timeError = newDate && formData.desired_time 
+              const timeError = newDate && formData.desired_time
                 ? validateBusinessHours(newDate, formData.desired_time)
                 : null
-              
+
               if (timeError) {
                 // Check if it's a day closure error
                 const dayName = businessHours ? getDayOfWeek(newDate) : null
                 const dayHours = businessHours && dayName ? businessHours[dayName] : null
-                
+
                 if (dayHours === null || (Array.isArray(dayHours) && dayHours.length === 0)) {
                   setErrors({ ...errors, desired_date: timeError, desired_time: '' })
                 } else {
@@ -616,24 +616,22 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
         {/* Ora */}
         <div className="space-y-3">
-          <Input
+          <TimeInput
             id="desired_time"
-            type="time"
-            value={formData.desired_time || ''}
-            onChange={(e) => {
-              const newTime = e.target.value
+            value={formData.desired_time || '00:00'}
+            onChange={(newTime) => {
               setFormData({ ...formData, desired_time: newTime })
-              
+
               // Real-time validation for business hours
-              const timeError = formData.desired_date && newTime 
+              const timeError = formData.desired_date && newTime
                 ? validateBusinessHours(formData.desired_date, newTime)
                 : null
-              
+
               if (timeError) {
                 // Check if it's a day closure error
                 const dayName = businessHours && formData.desired_date ? getDayOfWeek(formData.desired_date) : null
                 const dayHours = businessHours && dayName ? businessHours[dayName] : null
-                
+
                 if (dayHours === null || (Array.isArray(dayHours) && dayHours.length === 0)) {
                   setErrors({ ...errors, desired_date: timeError, desired_time: '' })
                 } else {
