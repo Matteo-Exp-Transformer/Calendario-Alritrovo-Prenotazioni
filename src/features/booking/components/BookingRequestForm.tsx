@@ -572,6 +572,20 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
         {/* Data */}
         <div className="space-y-3">
+          <label
+            htmlFor="desired_date"
+            className="block text-base md:text-lg text-warm-wood mb-2"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(1px)',
+              padding: '8px 16px',
+              borderRadius: '12px',
+              display: 'inline-block',
+              fontWeight: '700'
+            }}
+          >
+            Data prenotazione *
+          </label>
           <DateInput
             id="desired_date"
             value={formData.desired_date}
@@ -616,6 +630,20 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
         {/* Ora */}
         <div className="space-y-3">
+          <label
+            htmlFor="desired_time"
+            className="block text-base md:text-lg text-warm-wood mb-2"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(1px)',
+              padding: '8px 16px',
+              borderRadius: '12px',
+              display: 'inline-block',
+              fontWeight: '700'
+            }}
+          >
+            Ora prenotazione *
+          </label>
           <TimeInput
             id="desired_time"
             value={formData.desired_time || '00:00'}
