@@ -134,8 +134,8 @@ export const DateInput: React.FC<DateInputProps> = ({
           padding: 0 16px;
           font-size: 16px;
           font-weight: 500;
-          background-color: rgba(255, 255, 255, 0.5);
-          backdrop-filter: blur(6px);
+          background-color: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(1px);
           color: black;
           transition: border-color 0.2s;
         }
