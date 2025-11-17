@@ -6,6 +6,7 @@ interface TimeInputProps {
   className?: string
   required?: boolean
   id?: string
+  hasError?: boolean // Support for error state
 }
 
 export const TimeInput: React.FC<TimeInputProps> = ({
@@ -14,6 +15,7 @@ export const TimeInput: React.FC<TimeInputProps> = ({
   className = '',
   required = false,
   id,
+  hasError = false,
 }) => {
   // Parse current value
   const [hours, minutes] = value ? value.split(':').map(Number) : [0, 0]
@@ -34,8 +36,8 @@ export const TimeInput: React.FC<TimeInputProps> = ({
     onChange(newValue)
   }
 
-  const containerClass = `time-input-container ${className}`
-  
+  const containerClass = `time-input-container ${hasError ? 'error' : ''} ${className}`
+
   return (
     <>
       <div className={containerClass} id={id}>
@@ -82,8 +84,15 @@ export const TimeInput: React.FC<TimeInputProps> = ({
           color: black;
           transition: border-color 0.2s;
         }
+        .time-input-container.error {
+          border-color: #ef4444 !important;
+          border-width: 2px !important;
+        }
         .time-input-container:focus-within {
           border-color: #8B6914;
+        }
+        .time-input-container.error:focus-within {
+          border-color: #dc2626 !important;
         }
         .time-input-container select {
           appearance: none;

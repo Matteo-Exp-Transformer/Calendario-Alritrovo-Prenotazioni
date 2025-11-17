@@ -14,3 +14,6 @@ COMMENT ON COLUMN booking_requests.preset_menu IS 'Menu predefinito selezionato 
 
 
 
+
+
+

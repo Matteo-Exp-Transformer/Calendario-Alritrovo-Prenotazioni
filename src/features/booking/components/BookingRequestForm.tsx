@@ -11,6 +11,7 @@ import { MenuSelection } from './MenuSelection'
 import { DietaryRestrictionsSection } from './DietaryRestrictionsSection'
 import { useBusinessHours } from '@/hooks/useBusinessHours'
 import { isValidBookingDateTime, getDayOfWeek, formatHours } from '@/lib/businessHours'
+import { toast } from 'react-toastify'
 
 interface BookingRequestFormProps {
   onSubmit?: () => void
@@ -162,10 +163,11 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       if (value >= 1 && value <= 110) {
         const tiramisuTotal = formData.menu_selection?.tiramisu_total || 0
         const perPerson = formData.menu_total_per_person || 0
+        const copertoTotal = formData.booking_type === 'rinfresco_laurea' ? 2.00 * value : 0
         const newFormData = {
           ...formData,
           num_guests: value,
-          menu_total_booking: perPerson * value + tiramisuTotal
+          menu_total_booking: perPerson * value + copertoTotal + tiramisuTotal
         }
         setFormData(newFormData)
         setErrors({ ...errors, num_guests: '' })
@@ -211,32 +213,65 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     return null // Valid
   }
 
+  // Helper function to scroll to first error field
+  const scrollToError = (errorKey: string) => {
+    // Map error keys to input IDs
+    const fieldIdMap: Record<string, string> = {
+      client_name: 'client_name',
+      client_email: 'client_email',
+      client_phone: 'client_phone',
+      desired_date: 'desired_date',
+      desired_time: 'desired_time',
+      num_guests: 'num_guests',
+      booking_type: 'booking_type',
+      menu: 'menu-section',
+      privacyAccepted: 'privacy-consent'
+    }
+
+    const fieldId = fieldIdMap[errorKey]
+    if (fieldId) {
+      const element = document.getElementById(fieldId)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        // Focus the element if it's an input
+        if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement) {
+          setTimeout(() => element.focus(), 500)
+        }
+      }
+    }
+  }
+
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {}
     let isValid = true
+    let firstErrorKey: string | null = null
 
     // Name validation
     if (!formData.client_name.trim()) {
       newErrors.client_name = 'Nome obbligatorio'
       isValid = false
+      if (!firstErrorKey) firstErrorKey = 'client_name'
     }
 
     // Email validation - optional but must be valid if provided
     if (formData.client_email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.client_email)) {
       newErrors.client_email = 'Email non valida'
       isValid = false
+      if (!firstErrorKey) firstErrorKey = 'client_email'
     }
 
     // Phone validation - required
     if (!formData.client_phone || !formData.client_phone.trim()) {
       newErrors.client_phone = 'Numero di telefono obbligatorio'
       isValid = false
+      if (!firstErrorKey) firstErrorKey = 'client_phone'
     }
 
     // Date validation
     if (!formData.desired_date) {
       newErrors.desired_date = 'Data obbligatoria'
       isValid = false
+      if (!firstErrorKey) firstErrorKey = 'desired_date'
     } else {
       const selectedDate = new Date(formData.desired_date)
       const today = new Date()
@@ -245,6 +280,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       if (selectedDate < today) {
         newErrors.desired_date = 'La data non può essere nel passato'
         isValid = false
+        if (!firstErrorKey) firstErrorKey = 'desired_date'
       }
     }
 
@@ -252,6 +288,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     if (!formData.desired_time) {
       newErrors.desired_time = 'Orario obbligatorio'
       isValid = false
+      if (!firstErrorKey) firstErrorKey = 'desired_time'
     }
 
     // Business hours validation (non-blocking: only validate if hours are loaded)
@@ -269,10 +306,12 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         if (!dayHours || dayHours.length === 0) {
           newErrors.desired_date = 'Il ristorante è chiuso in questo giorno'
           isValid = false
+          if (!firstErrorKey) firstErrorKey = 'desired_date'
         } else {
           const availableHours = formatHours(dayHours)
           newErrors.desired_time = `Orario non valido. Orari disponibili: ${availableHours}`
           isValid = false
+          if (!firstErrorKey) firstErrorKey = 'desired_time'
         }
       }
     }
@@ -281,15 +320,18 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     if (!formData.num_guests || formData.num_guests < 1) {
       newErrors.num_guests = 'Numero ospiti obbligatorio (min 1)'
       isValid = false
+      if (!firstErrorKey) firstErrorKey = 'num_guests'
     } else if (formData.num_guests > 80) {
       newErrors.num_guests = 'Massimo 80 ospiti'
       isValid = false
+      if (!firstErrorKey) firstErrorKey = 'num_guests'
     }
 
     // Booking type validation
     if (!formData.booking_type) {
       newErrors.booking_type = 'Tipologia di prenotazione obbligatoria'
       isValid = false
+      if (!firstErrorKey) firstErrorKey = 'booking_type'
     }
 
     // Menu validation for Rinfresco di Laurea
@@ -297,10 +339,12 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       if (!formData.menu_selection || !formData.menu_selection.items || formData.menu_selection.items.length === 0) {
         newErrors.menu = 'Seleziona almeno un prodotto dal menù'
         isValid = false
+        if (!firstErrorKey) firstErrorKey = 'menu'
       }
       if (!formData.menu_total_per_person || formData.menu_total_per_person <= 0) {
         newErrors.menu = 'Il totale a persona deve essere maggiore di 0'
         isValid = false
+        if (!firstErrorKey) firstErrorKey = 'menu'
       }
     }
 
@@ -308,11 +352,31 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     if (!privacyAccepted) {
       newErrors.privacyAccepted = 'È necessario accettare la Privacy Policy per inviare la richiesta'
       isValid = false
+      if (!firstErrorKey) firstErrorKey = 'privacyAccepted'
       console.log('❌ [BookingForm] Privacy non accettata, errore impostato:', newErrors.privacyAccepted)
     }
 
     setErrors(newErrors)
     console.log('🔵 [BookingForm] Errors state dopo validazione:', newErrors)
+
+    // If validation failed, show toast and scroll to first error
+    if (!isValid) {
+      const errorCount = Object.keys(newErrors).length
+      toast.error(`Compilazione non valida: ${errorCount} ${errorCount === 1 ? 'campo da correggere' : 'campi da correggere'}`, {
+        position: 'top-center',
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      })
+
+      // Scroll to first error field
+      if (firstErrorKey) {
+        scrollToError(firstErrorKey)
+      }
+    }
+
     return isValid
   }
 
@@ -612,7 +676,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               }
             }}
             required
-            className={errors.desired_date ? '!border-red-500' : ''}
+            hasError={!!errors.desired_date}
           />
           {errors.desired_date && (
             <div
@@ -670,7 +734,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               }
             }}
             required
-            className={errors.desired_time ? '!border-red-500' : ''}
+            hasError={!!errors.desired_time}
           />
           {errors.desired_time && (
             <div
@@ -711,12 +775,13 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       </div>
       {/* Menu Selection - Solo per Rinfresco di Laurea */}
       {formData.booking_type === 'rinfresco_laurea' && (
-        <div className="space-y-6">
+        <div id="menu-section" className="space-y-6">
           <MenuSelection
             selectedItems={formData.menu_selection?.items || []}
             numGuests={formData.num_guests || 0}
             onMenuChange={({ items, totalPerPerson, tiramisuTotal, tiramisuKg }) => {
               const numGuests = formData.num_guests || 0
+              const copertoTotal = 2.00 * numGuests
               setFormData({
                 ...formData,
                 menu_selection: {
@@ -725,7 +790,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
                   tiramisu_kg: tiramisuKg
                 },
                 menu_total_per_person: totalPerPerson,
-                menu_total_booking: totalPerPerson * numGuests + tiramisuTotal
+                menu_total_booking: totalPerPerson * numGuests + copertoTotal + tiramisuTotal
               })
               setErrors({ ...errors, menu: '' })
             }}
@@ -872,7 +937,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             <CheckCircle className="h-16 w-16 text-green-600" />
           </div>
           <h3 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px' }}>
-            Prenotazione Inviata con Successo!
+            Richiesta di Prenotazione Inviata!
           </h3>
           <p style={{ fontSize: '18px', marginBottom: '20px' }}>
             La tua richiesta di prenotazione è stata inoltrata correttamente.<br />

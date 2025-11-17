@@ -741,6 +741,12 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                 <span>Prezzo a persona</span>
                 <span>{formatCurrency(totalPerPerson)}</span>
               </div>
+              {numGuests > 0 && (
+                <div className="flex items-center justify-between text-lg font-semibold text-warm-wood">
+                  <span>Coperto ({numGuests} {numGuests === 1 ? 'persona' : 'persone'})</span>
+                  <span>{formatCurrency(2.00 * numGuests)}</span>
+                </div>
+              )}
               {tiramisuTotal > 0 && (
                 <div className="flex items-center justify-between text-lg font-semibold text-warm-wood">
                   <span>Tiramisù</span>
@@ -751,7 +757,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
               <div className="flex items-center justify-between text-2xl font-bold text-warm-wood">
                 <span>Prezzo totale rinfresco</span>
                 <span>
-                  {formatCurrency(totalPerPerson * Math.max(numGuests, 0) + tiramisuTotal)}
+                  {formatCurrency(totalPerPerson * Math.max(numGuests, 0) + (2.00 * Math.max(numGuests, 0)) + tiramisuTotal)}
                 </span>
               </div>
             </div>

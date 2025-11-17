@@ -6,6 +6,7 @@ interface DateInputProps {
   className?: string
   required?: boolean
   id?: string
+  hasError?: boolean // Support for error state
 }
 
 export const DateInput: React.FC<DateInputProps> = ({
@@ -14,6 +15,7 @@ export const DateInput: React.FC<DateInputProps> = ({
   className = '',
   required = false,
   id,
+  hasError = false,
 }) => {
   // Parse current value or use defaults
   const [year, month, day] = value
@@ -74,7 +76,7 @@ export const DateInput: React.FC<DateInputProps> = ({
     onChange(newValue)
   }
 
-  const containerClass = `date-input-container ${className}`
+  const containerClass = `date-input-container ${hasError ? 'error' : ''} ${className}`
 
   return (
     <>
@@ -139,8 +141,15 @@ export const DateInput: React.FC<DateInputProps> = ({
           color: black;
           transition: border-color 0.2s;
         }
+        .date-input-container.error {
+          border-color: #ef4444 !important;
+          border-width: 2px !important;
+        }
         .date-input-container:focus-within {
           border-color: #8B6914;
+        }
+        .date-input-container.error:focus-within {
+          border-color: #dc2626 !important;
         }
         .date-input-container select {
           appearance: none;
