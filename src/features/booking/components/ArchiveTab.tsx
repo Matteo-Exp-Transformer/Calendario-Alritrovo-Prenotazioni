@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { Calendar, Clock, Users, Tag, Mail, Phone, MessageSquare, ChevronDown, ChevronUp, User, UtensilsCrossed, Wine, PartyPopper, GraduationCap, Archive, CheckCircle, XCircle } from 'lucide-react'
 import { extractTimeFromISO } from '../utils/dateUtils'
+import { getBookingEventTypeLabel } from '../utils/eventTypeLabels'
 
 type ArchiveFilter = 'all' | 'accepted' | 'rejected'
 
@@ -41,27 +42,7 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
     return timeStr.split(':').slice(0, 2).join(':')
   }
 
-  // ✅ FIX: Determina il tipo evento solo se esiste un valore valido
-  // Non usare 'cena' come fallback di default
-  const getEventTypeLabel = () => {
-    // Prima controlla booking_type (più specifico)
-    if (booking.booking_type === 'rinfresco_laurea') {
-      return 'Rinfresco di Laurea'
-    }
-    if (booking.booking_type === 'tavolo') {
-      return 'Prenota un Tavolo'
-    }
-    
-    // Poi controlla event_type solo se valido
-    if (booking.event_type && EVENT_TYPE_CONFIG[booking.event_type]) {
-      return EVENT_TYPE_CONFIG[booking.event_type].label
-    }
-    
-    // Se non c'è nessun tipo valido, ritorna null
-    return null
-  }
-
-  const eventTypeLabel = getEventTypeLabel()
+  const eventTypeLabel = getBookingEventTypeLabel(booking)
   // Usa eventConfig solo se event_type è valido, altrimenti usa valori di default
   const eventConfig = booking.event_type && EVENT_TYPE_CONFIG[booking.event_type] 
     ? EVENT_TYPE_CONFIG[booking.event_type] 

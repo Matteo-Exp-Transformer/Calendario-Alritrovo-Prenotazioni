@@ -3,6 +3,7 @@ import type { BookingRequest } from '@/types/booking'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { Calendar, Clock, Users, Tag, MessageSquare, CheckCircle, XCircle, UtensilsCrossed, ChevronDown, User, Mail, Phone } from 'lucide-react'
+import { getBookingEventTypeLabel } from '../utils/eventTypeLabels'
 
 interface BookingRequestCardProps {
   booking: BookingRequest
@@ -47,27 +48,7 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
     return timeStr.split(':').slice(0, 2).join(':')
   }
 
-  // ✅ FIX: Determina il tipo evento solo se esiste un valore valido
-  // Non usare drink_caraffe come fallback di default
-  const getEventTypeLabel = () => {
-    // Prima controlla booking_type (più specifico)
-    if (booking.booking_type === 'rinfresco_laurea') {
-      return 'Rinfresco di Laurea'
-    }
-    if (booking.booking_type === 'tavolo') {
-      return 'Prenota un Tavolo'
-    }
-    
-    // Poi controlla event_type solo se valido
-    if (booking.event_type && EVENT_TYPE_CONFIG[booking.event_type]) {
-      return EVENT_TYPE_CONFIG[booking.event_type].label
-    }
-    
-    // Se non c'è nessun tipo valido, ritorna null
-    return null
-  }
-
-  const eventTypeLabel = getEventTypeLabel()
+  const eventTypeLabel = getBookingEventTypeLabel(booking)
   // Usa eventConfig solo se event_type è valido, altrimenti usa valori di default per l'icona
   const eventConfig = booking.event_type && EVENT_TYPE_CONFIG[booking.event_type] 
     ? EVENT_TYPE_CONFIG[booking.event_type] 

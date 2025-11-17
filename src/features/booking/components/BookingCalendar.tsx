@@ -14,6 +14,7 @@ import { calculateDailyCapacity, getSlotsOccupiedByBooking } from '../utils/capa
 import { CollapsibleCard } from '@/components/ui/CollapsibleCard'
 
 import { extractDateFromISO, extractTimeFromISO } from '../utils/dateUtils'
+import { getBookingEventTypeLabel } from '../utils/eventTypeLabels'
 
 /**
  * Helper per ottenere l'orario accurato di una prenotazione
@@ -315,8 +316,10 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
             >
               <div className="px-4 sm:px-6 py-4" style={{ backgroundColor: 'rgba(187, 247, 208, 0.8)' }}>
                 {selectedDateData.morningBookings.length > 0 ? (
-                  selectedDateData.morningBookings.map((booking, index) => (
-                    <React.Fragment key={booking.id}>
+                  selectedDateData.morningBookings.map((booking, index) => {
+                    const eventTypeLabel = getBookingEventTypeLabel(booking)
+                    return (
+                      <React.Fragment key={booking.id}>
                       {index > 0 && (
                         <div className="my-8 flex items-center">
                           <div 
@@ -391,7 +394,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                             <UtensilsCrossed className="w-5 h-5 text-green-600 flex-shrink-0" />
                             <div className="flex-1 flex items-center gap-2">
                               <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Evento:</span>
-                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type?.replace(/_/g, ' ') || 'N/A'}</span>
+                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{eventTypeLabel || 'N/A'}</span>
                             </div>
                           </div>
 
@@ -422,8 +425,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                         </div>
                       )}
                       </div>
-                    </React.Fragment>
-                  ))
+                      </React.Fragment>
+                    )
+                  })
                 ) : (
                   <div className="text-center py-8">
                     <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-green-100 flex items-center justify-center">
@@ -461,8 +465,10 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
             >
               <div className="px-4 sm:px-6 py-4" style={{ backgroundColor: 'rgba(253, 230, 138, 0.75)' }}>
                 {selectedDateData.afternoonBookings.length > 0 ? (
-                  selectedDateData.afternoonBookings.map((booking, index) => (
-                    <React.Fragment key={booking.id}>
+                  selectedDateData.afternoonBookings.map((booking, index) => {
+                    const eventTypeLabel = getBookingEventTypeLabel(booking)
+                    return (
+                      <React.Fragment key={booking.id}>
                       {index > 0 && (
                         <div className="my-8 flex items-center">
                           <div 
@@ -537,7 +543,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                             <UtensilsCrossed className="w-5 h-5 text-yellow-600 flex-shrink-0" />
                             <div className="flex-1 flex items-center gap-2">
                               <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Evento:</span>
-                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type?.replace(/_/g, ' ') || 'N/A'}</span>
+                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{eventTypeLabel || 'N/A'}</span>
                             </div>
                           </div>
 
@@ -567,8 +573,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                         </div>
                       )}
                       </div>
-                    </React.Fragment>
-                  ))
+                      </React.Fragment>
+                    )
+                  })
                 ) : (
                   <div className="text-center py-8">
                     <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-yellow-100 flex items-center justify-center">
@@ -605,8 +612,10 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
             >
               <div className="px-4 sm:px-6 py-4" style={{ backgroundColor: 'rgba(147, 197, 253, 0.8)' }}>
                 {selectedDateData.eveningBookings.length > 0 ? (
-                  selectedDateData.eveningBookings.map((booking, index) => (
-                    <React.Fragment key={booking.id}>
+                  selectedDateData.eveningBookings.map((booking, index) => {
+                    const eventTypeLabel = getBookingEventTypeLabel(booking)
+                    return (
+                      <React.Fragment key={booking.id}>
                       {index > 0 && (
                         <div className="my-8 flex items-center">
                           <div 
@@ -681,7 +690,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                             <UtensilsCrossed className="w-5 h-5 text-blue-600 flex-shrink-0" />
                             <div className="flex-1 flex items-center gap-2">
                               <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Evento:</span>
-                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{booking.event_type?.replace(/_/g, ' ') || 'N/A'}</span>
+                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{eventTypeLabel || 'N/A'}</span>
                             </div>
                           </div>
 
@@ -711,8 +720,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                         </div>
                       )}
                       </div>
-                    </React.Fragment>
-                  ))
+                      </React.Fragment>
+                    )
+                  })
                 ) : (
                   <div className="text-center py-8">
                     <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-blue-100 flex items-center justify-center">
