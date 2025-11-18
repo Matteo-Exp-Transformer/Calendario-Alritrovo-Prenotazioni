@@ -40,6 +40,34 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   const [activeTab, setActiveTab] = useState<TabId>('details')
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
 
+  // Responsive width calculation
+  const getResponsiveMaxWidth = () => {
+    if (typeof window === 'undefined') return '28rem' // SSR fallback
+
+    const width = window.innerWidth
+
+    // Mobile: full width (< 640px)
+    if (width < 640) return '100%'
+
+    // Tablet: 90% width (640px - 1024px)
+    if (width < 1024) return '90%'
+
+    // Desktop: large modal (>= 1024px)
+    return '56rem' // 896px (max-w-4xl in Tailwind)
+  }
+
+  const [modalMaxWidth, setModalMaxWidth] = useState(getResponsiveMaxWidth())
+
+  // Update maxWidth on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setModalMaxWidth(getResponsiveMaxWidth())
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
   const updateMutation = useUpdateBooking()
   const cancelMutation = useCancelBooking()
   const { data: acceptedBookings = [] } = useAcceptedBookings()
@@ -367,7 +395,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
             top: 0,
             bottom: 0,
             width: '100%',
-            maxWidth: '28rem',
+            maxWidth: modalMaxWidth,
             backgroundColor: '#fef3c7',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             display: 'flex',
@@ -424,7 +452,10 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
           </div>
 
           {/* Content Area - Scrollable */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 bg-amber-100">
+          <div
+            className="flex-1 overflow-y-auto py-4 bg-amber-100"
+            style={{ paddingLeft: '24px', paddingRight: '24px' }}
+          >
             {activeTab === 'details' && (
               <DetailsTab
                 booking={booking}

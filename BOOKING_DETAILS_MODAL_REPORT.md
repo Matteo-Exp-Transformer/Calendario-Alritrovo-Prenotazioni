@@ -1,8 +1,8 @@
 # 📊 BookingDetailsModal - Complete Redesign Report
 
-**Data:** 2025-01-27
-**Versione:** 2.0 (Redesign Completo)
-**Status:** ✅ Funzionante - ⚠️ Responsive Issues
+**Data:** 2025-01-27 (creato) | 2025-01-19 (aggiornato)
+**Versione:** 3.1 (Responsive + Layout + Padding Fixed)
+**Status:** ✅ Tutti i Fix Implementati
 
 ---
 
@@ -546,138 +546,98 @@ export const useUpdateBooking = () => {
 
 ---
 
-## ⚠️ ISSUE CONOSCIUTI - Responsive Design
+## ✅ AGGIORNAMENTO 2025-01-19: Responsive Design Fixed
 
-### 🚨 Problema Mobile
+### 🎉 Problemi Risolti
 
-**Sintomo:** Su mobile, il modal NON è a schermo intero e richiede scroll orizzontale per vedere il lato destro
-
-**Causa probabile:**
-```typescript
-// Attualmente:
-<div style={{
-  width: '100%',
-  maxWidth: '28rem',  // 448px - TROPPO LARGO per mobile
-  // ...
-}}>
-```
-
-**Impatto:**
-- ❌ Esperienza utente degradata su mobile
-- ❌ Contenuto parzialmente nascosto
-- ❌ Scroll orizzontale necessario
-
-**Fix richiesto:**
-- Rimuovere `maxWidth` su mobile (width: 100%)
-- Usare media queries o CSS responsive
-- Testare su viewport < 640px
-
-### 🚨 Problema Desktop
-
-**Sintomo:** Su desktop, il modal NON è a schermo intero (side drawer invece di full screen)
-
-**Design attuale:**
-- Modal posizionato a destra come "side drawer"
-- `maxWidth: '28rem'` (448px)
-- Non occupa tutto lo schermo
-
-**Se si vuole full-screen su desktop:**
-- Aumentare `maxWidth` o rimuoverlo
-- Centrare il modal invece di allinearlo a destra
-- Aggiungere padding laterale per readability
-
----
-
-## 🎯 Prossime Modifiche Richieste
-
-### 1. Fix Responsive Mobile (PRIORITÀ ALTA)
-
-**Obiettivo:** Modal a schermo intero su mobile
-
-**Modifiche necessarie:**
+#### 1. ✅ Responsive Width Implementation
+**Implementato:** JavaScript-based responsive width calculation
 
 ```typescript
-// In BookingDetailsModal.tsx, linea ~370
+// BookingDetailsModal.tsx, lines 43-69
+const getResponsiveMaxWidth = () => {
+  if (typeof window === 'undefined') return '28rem' // SSR fallback
 
-// ❌ ATTUALE
-<div style={{
-  position: 'absolute',
-  right: 0,
-  top: 0,
-  bottom: 0,
-  width: '100%',
-  maxWidth: '28rem',  // PROBLEMA
-  // ...
-}}>
+  const width = window.innerWidth
 
-// ✅ PROPOSTO
-<div style={{
-  position: 'absolute',
-  right: 0,
-  top: 0,
-  bottom: 0,
-  width: '100%',
-  maxWidth: window.innerWidth < 640 ? 'none' : '28rem',  // Responsive
-  // ...
-}}>
-```
-
-**Oppure con CSS:**
-
-```typescript
-<div className="modal-content-responsive">
-
-// In CSS:
-.modal-content-responsive {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  max-width: 28rem;
+  if (width < 640) return '100%'      // Mobile: full-width
+  if (width < 1024) return '90%'      // Tablet: 90% width
+  return '56rem'                       // Desktop: 896px (max-w-4xl)
 }
 
-@media (max-width: 640px) {
-  .modal-content-responsive {
-    max-width: none !important;
-  }
+const [modalMaxWidth, setModalMaxWidth] = useState(getResponsiveMaxWidth())
+
+// Dynamic resize listener
+useEffect(() => {
+  const handleResize = () => setModalMaxWidth(getResponsiveMaxWidth())
+  window.addEventListener('resize', handleResize)
+  return () => window.removeEventListener('resize', handleResize)
+}, [])
+```
+
+**Risultati verificati (E2E tests):**
+- ✅ Mobile (375px): Modal width = 375px (100% viewport) - NO horizontal scroll
+- ✅ Tablet (768px): Modal width = 691px (~90% viewport)
+- ✅ Desktop (1920px): Modal width = 896px (2x rispetto ai precedenti 448px)
+- ✅ Dynamic resize: Modal si adatta in tempo reale al cambio viewport
+
+#### 2. ✅ Layout Redesign - DetailsTab
+
+**Implementato:** Grid layout con label:valore inline
+
+**Modifiche:**
+- Titoli sezioni in UPPERCASE (TIPO PRENOTAZIONE, INFORMAZIONI CLIENTE, etc.)
+- Layout a griglia responsive (2 colonne desktop, 1 colonna mobile)
+- Labels inline con valori (Nome: Elisa, Email: example@gmail.com)
+- Data con prima lettera maiuscola (Giovedì 30 ottobre 2025)
+- Ora Fine sempre visibile
+
+**File modificato:** [DetailsTab.tsx](src/features/booking/components/DetailsTab.tsx) - 242 righe (completo rewrite)
+
+**Componenti aggiunti:**
+```typescript
+// Helper per capitalizzare prima lettera
+const capitalizeFirst = (str: string): string => {
+  return str.charAt(0).toUpperCase() + str.slice(1)
 }
+
+// Componente riutilizzabile per info inline
+const InfoRow: React.FC<{ label: string; value: string | React.ReactNode }> =
+  ({ label, value }) => (
+    <div className="flex gap-2">
+      <span className="font-semibold text-gray-700">{label}:</span>
+      <span className="text-gray-900">{value}</span>
+    </div>
+  )
 ```
 
-### 2. Fix Responsive Desktop (PRIORITÀ MEDIA)
+**Test E2E passati (3/3):**
+- ✅ Uppercase titles verification
+- ✅ Grid layout with inline labels (38 info rows found)
+- ✅ Date capitalization: "Giovedì 30 ottobre 2025"
+- ✅ "Ora Fine" label always visible
+- ✅ Mobile responsive layout
 
-**Obiettivo:** Decidere se mantenere side drawer o passare a full-screen
+#### 3. ✅ Padding Content Area Fixed
 
-**Opzione A - Mantieni Side Drawer (Design Attuale):**
-- Aumentare `maxWidth` a 36rem o 42rem
-- Migliore per contenuti non troppo larghi
+**Problema:** Tailwind class `px-6` non applicava padding visivamente
 
-**Opzione B - Full Screen Modal:**
+**Causa:** React Portal rendering - Tailwind classes non sempre applicat e correttamente a portals
+
+**Soluzione implementata:** Inline styles (consistente con approccio `maxWidth`)
+
 ```typescript
-<div style={{
-  position: 'absolute',
-  left: '50%',
-  top: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '90vw',
-  maxWidth: '1200px',
-  height: '90vh',
-  // ...
-}}>
+// BookingDetailsModal.tsx, lines 455-458
+<div
+  className="flex-1 overflow-y-auto py-4 bg-amber-100"
+  style={{ paddingLeft: '24px', paddingRight: '24px' }}
+>
 ```
 
-### 3. Responsive Tab Labels (PRIORITÀ BASSA)
-
-**Attuale:**
-```typescript
-<span className="hidden sm:inline">{tab.label}</span>
-```
-
-Solo emoji visibili su mobile, label nascosto.
-
-**Miglioramento possibile:**
-- Aumentare soglia a `md:` invece di `sm:` per più spazio
-- O usare abbreviazioni su mobile ("Det." invece di "Dettagli")
+**Risultato:**
+- ✅ Padding 24px (px-6 equivalent) applicato correttamente
+- ✅ Testo non più attaccato ai margini del modal
+- ✅ Spazio respirabile tra contenuto e bordi
 
 ---
 
@@ -742,8 +702,8 @@ Tutti i componenti hanno strict TypeScript interfaces:
 ## 🔗 File References
 
 **Componenti:**
-- [BookingDetailsModal.tsx](src/features/booking/components/BookingDetailsModal.tsx) - Main modal (603 lines)
-- [DetailsTab.tsx](src/features/booking/components/DetailsTab.tsx) - Details tab (227 lines)
+- [BookingDetailsModal.tsx](src/features/booking/components/BookingDetailsModal.tsx) - Main modal (~630 lines) - Aggiunto responsive width
+- [DetailsTab.tsx](src/features/booking/components/DetailsTab.tsx) - Details tab (242 lines) - Completo redesign con grid layout
 - [MenuTab.tsx](src/features/booking/components/MenuTab.tsx) - Menu tab (184 lines)
 - [DietaryTab.tsx](src/features/booking/components/DietaryTab.tsx) - Dietary tab (199 lines)
 - [CollapsibleSection.tsx](src/features/booking/components/CollapsibleSection.tsx) - Reusable section (49 lines)
@@ -752,11 +712,13 @@ Tutti i componenti hanno strict TypeScript interfaces:
 - [useBookingMutations.ts](src/features/booking/hooks/useBookingMutations.ts) - Enhanced mutations
 
 **Tests:**
-- [verify-modal-fix.spec.ts](e2e/verify-modal-fix.spec.ts) - E2E test suite
+- [verify-modal-fix.spec.ts](e2e/verify-modal-fix.spec.ts) - Original E2E test suite
+- [booking-details-modal-responsive.spec.ts](e2e/booking-details-modal-responsive.spec.ts) - Responsive design tests (4/4 passed)
+- [booking-details-modal-layout.spec.ts](e2e/booking-details-modal-layout.spec.ts) - Layout redesign tests (3/3 passed)
 
 ---
 
 **Report creato:** 2025-01-27
-**Ultima modifica:** 2025-01-27
-**Versione:** 1.0
-**Autore:** Claude Code (frontend-developer agent)
+**Ultima modifica:** 2025-01-19
+**Versione:** 3.0
+**Autori:** Claude Code (frontend-developer agent, backend-specialist agent)

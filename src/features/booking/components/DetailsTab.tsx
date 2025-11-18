@@ -19,6 +19,20 @@ interface Props {
   onBookingTypeChange: (newType: 'tavolo' | 'rinfresco_laurea') => void
 }
 
+// Helper to capitalize first letter of date string
+const capitalizeFirst = (str: string): string => {
+  if (!str) return str
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
+// Reusable component for label:value inline display
+const InfoRow: React.FC<{ label: string; value: string | React.ReactNode }> = ({ label, value }) => (
+  <div className="flex gap-2">
+    <span className="font-semibold text-gray-700">{label}:</span>
+    <span className="text-gray-900">{value}</span>
+  </div>
+)
+
 export const DetailsTab: React.FC<Props> = ({
   booking: _booking,
   isEditMode,
@@ -26,13 +40,28 @@ export const DetailsTab: React.FC<Props> = ({
   onFormDataChange,
   onBookingTypeChange
 }) => {
+  // Format date with capitalized first letter
+  const formatDate = (dateString: string): string => {
+    try {
+      const date = new Date(dateString)
+      const formatted = date.toLocaleDateString('it-IT', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+      return capitalizeFirst(formatted)
+    } catch {
+      return dateString
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Section 1: Booking Type */}
       <div className="space-y-3">
-        <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-          <span>📋</span>
-          <span>Tipo Prenotazione</span>
+        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
+          Tipo Prenotazione
         </h3>
         {isEditMode ? (
           <select
@@ -60,15 +89,14 @@ export const DetailsTab: React.FC<Props> = ({
 
       {/* Section 2: Client Information */}
       <div className="space-y-3">
-        <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-          <span>👤</span>
-          <span>Informazioni Cliente</span>
+        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
+          Informazioni Cliente
         </h3>
-        <div className="space-y-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-          {/* Nome */}
-          <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">Nome</label>
-            {isEditMode ? (
+        {isEditMode ? (
+          <div className="space-y-4">
+            {/* Edit mode - vertical layout for usability */}
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">Nome</label>
               <input
                 type="text"
                 value={formData.client_name}
@@ -76,15 +104,10 @@ export const DetailsTab: React.FC<Props> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
-            ) : (
-              <p className="text-gray-900">{formData.client_name}</p>
-            )}
-          </div>
+            </div>
 
-          {/* Email */}
-          <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            {isEditMode ? (
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">Email</label>
               <input
                 type="email"
                 value={formData.client_email}
@@ -92,15 +115,10 @@ export const DetailsTab: React.FC<Props> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
-            ) : (
-              <p className="text-gray-900">{formData.client_email}</p>
-            )}
-          </div>
+            </div>
 
-          {/* Telefono */}
-          <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">Telefono</label>
-            {isEditMode ? (
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">Telefono</label>
               <input
                 type="tel"
                 value={formData.client_phone}
@@ -108,24 +126,28 @@ export const DetailsTab: React.FC<Props> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Opzionale"
               />
-            ) : (
-              <p className="text-gray-900">{formData.client_phone || 'Non fornito'}</p>
-            )}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* View mode - grid layout without box */}
+            <InfoRow label="Nome" value={formData.client_name} />
+            <InfoRow label="Email" value={formData.client_email} />
+            <InfoRow label="Telefono" value={formData.client_phone || 'Non fornito'} />
+          </div>
+        )}
       </div>
 
       {/* Section 3: Event Details */}
       <div className="space-y-3">
-        <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-          <span>📅</span>
-          <span>Dettagli Evento</span>
+        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
+          Dettagli Evento
         </h3>
-        <div className="space-y-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-          {/* Data */}
-          <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">Data</label>
-            {isEditMode ? (
+        {isEditMode ? (
+          <div className="space-y-4">
+            {/* Edit mode - vertical layout */}
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">Data</label>
               <input
                 type="date"
                 value={formData.date}
@@ -133,54 +155,34 @@ export const DetailsTab: React.FC<Props> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
-            ) : (
-              <p className="text-gray-900">
-                {new Date(formData.date).toLocaleDateString('it-IT', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </p>
-            )}
-          </div>
+            </div>
 
-          {/* Ora Inizio */}
-          <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">Ora Inizio</label>
-            {isEditMode ? (
-              <input
-                type="time"
-                value={formData.startTime}
-                onChange={(e) => onFormDataChange('startTime', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            ) : (
-              <p className="text-gray-900">{formData.startTime}</p>
-            )}
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-gray-700">Ora Inizio</label>
+                <input
+                  type="time"
+                  value={formData.startTime}
+                  onChange={(e) => onFormDataChange('startTime', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
 
-          {/* Ora Fine */}
-          <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">Ora Fine</label>
-            {isEditMode ? (
-              <input
-                type="time"
-                value={formData.endTime}
-                onChange={(e) => onFormDataChange('endTime', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              />
-            ) : (
-              <p className="text-gray-900">{formData.endTime}</p>
-            )}
-          </div>
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-gray-700">Ora Fine</label>
+                <input
+                  type="time"
+                  value={formData.endTime}
+                  onChange={(e) => onFormDataChange('endTime', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
+            </div>
 
-          {/* Numero Ospiti */}
-          <div className="space-y-1">
-            <label className="block text-sm font-medium text-gray-700">Numero Ospiti</label>
-            {isEditMode ? (
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-700">Numero Ospiti</label>
               <input
                 type="number"
                 min="1"
@@ -189,37 +191,43 @@ export const DetailsTab: React.FC<Props> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
-            ) : (
-              <p className="text-gray-900">
-                {formData.numGuests} {formData.numGuests === 1 ? 'ospite' : 'ospiti'}
-              </p>
-            )}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-3">
+            {/* View mode - grid layout without box */}
+            <InfoRow label="Data" value={formatDate(formData.date)} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <InfoRow label="Ora Inizio" value={formData.startTime} />
+              <InfoRow label="Ora Fine" value={formData.endTime} />
+            </div>
+            <InfoRow
+              label="Numero Ospiti"
+              value={`${formData.numGuests} ${formData.numGuests === 1 ? 'ospite' : 'ospiti'}`}
+            />
+          </div>
+        )}
       </div>
 
       {/* Section 4: Special Notes (tavolo only) */}
       {formData.booking_type === 'tavolo' && (
         <div className="space-y-3">
-          <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-            <span>📝</span>
-            <span>Note Speciali</span>
+          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
+            Note Speciali
           </h3>
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            {isEditMode ? (
-              <textarea
-                value={formData.specialRequests}
-                onChange={(e) => onFormDataChange('specialRequests', e.target.value)}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
-                placeholder="Inserisci eventuali richieste particolari..."
-              />
-            ) : (
-              <p className="text-gray-900 whitespace-pre-wrap">
-                {formData.specialRequests || 'Nessuna nota aggiunta'}
-              </p>
-            )}
-          </div>
+          {isEditMode ? (
+            <textarea
+              value={formData.specialRequests}
+              onChange={(e) => onFormDataChange('specialRequests', e.target.value)}
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
+              placeholder="Inserisci eventuali richieste particolari..."
+            />
+          ) : (
+            <p className="text-gray-900 whitespace-pre-wrap">
+              {formData.specialRequests || 'Nessuna nota aggiunta'}
+            </p>
+          )}
         </div>
       )}
     </div>
