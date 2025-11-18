@@ -33,6 +33,24 @@ interface UpdateBookingInput {
   specialRequests?: string
   menu?: string
   desiredTime?: string
+  // New fields for complete booking details editing
+  booking_type?: 'tavolo' | 'rinfresco_laurea'
+  client_name?: string
+  client_email?: string
+  client_phone?: string
+  menu_selection?: {
+    items: any[]
+    tiramisu_total?: number
+    tiramisu_kg?: number
+  }
+  menu_total_per_person?: number
+  menu_total_booking?: number
+  dietary_restrictions?: Array<{
+    restriction: string
+    guest_count: number
+    notes?: string
+  }>
+  preset_menu?: string | null
 }
 
 // Mutation per accettare una prenotazione
@@ -159,14 +177,51 @@ export const useUpdateBooking = () => {
         num_guests: input.numGuests,
       }
 
+      // Client information fields
+      if (input.client_name !== undefined) {
+        updateData.client_name = input.client_name
+      }
+      if (input.client_email !== undefined) {
+        updateData.client_email = input.client_email
+      }
+      if (input.client_phone !== undefined) {
+        updateData.client_phone = input.client_phone
+      }
+
+      // Booking type
+      if (input.booking_type !== undefined) {
+        updateData.booking_type = input.booking_type
+      }
+
+      // Special requests and menu (legacy)
       if (input.specialRequests !== undefined) {
         updateData.special_requests = input.specialRequests
       }
-      
+
       if (input.menu !== undefined) {
         updateData.menu = input.menu
       }
 
+      // Menu selection (new system)
+      if (input.menu_selection !== undefined) {
+        updateData.menu_selection = input.menu_selection
+      }
+      if (input.menu_total_per_person !== undefined) {
+        updateData.menu_total_per_person = input.menu_total_per_person
+      }
+      if (input.menu_total_booking !== undefined) {
+        updateData.menu_total_booking = input.menu_total_booking
+      }
+      if (input.preset_menu !== undefined) {
+        updateData.preset_menu = input.preset_menu
+      }
+
+      // Dietary restrictions
+      if (input.dietary_restrictions !== undefined) {
+        updateData.dietary_restrictions = input.dietary_restrictions
+      }
+
+      // Desired time
       const desiredTime =
         input.desiredTime ||
         (input.confirmedStart ? extractTimeFromISO(input.confirmedStart) : '')
