@@ -906,7 +906,11 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       </div>
       {/* Menu Selection - Solo per Rinfresco di Laurea */}
       {formData.booking_type === 'rinfresco_laurea' && (
-        <div id="menu-section" className="space-y-6">
+        <div 
+          id="menu-section" 
+          className="space-y-6"
+          style={{ paddingTop: '1.5rem', paddingBottom: '0', marginTop: '0', marginBottom: '0' }}
+        >
           <MenuSelection
             selectedItems={formData.menu_selection?.items || []}
             numGuests={formData.num_guests || 0}

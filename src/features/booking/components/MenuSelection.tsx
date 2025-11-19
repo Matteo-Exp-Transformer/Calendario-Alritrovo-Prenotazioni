@@ -491,7 +491,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="isolate">
       {/* Titolo Sezione */}
       <h2
         className="booking-section-title booking-section-title-mobile text-lg md:text-xl font-serif text-warm-wood mb-4 pb-3 border-b-2 border-warm-beige"
@@ -520,7 +520,15 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
 
       {/* Menù Consigliati dallo Staff - Solo per Rinfresco di Laurea */}
       {bookingType === 'rinfresco_laurea' && onPresetMenuChange && (
-        <div className="space-y-3 w-full flex flex-col items-center px-1 sm:px-2">
+        <div 
+          className="w-full flex flex-col items-center px-1 sm:px-2"
+          style={{ 
+            paddingTop: '1rem', 
+            paddingBottom: '0',
+            marginTop: '0',
+            marginBottom: '0'
+          }}
+        >
           <label
             className="block text-base md:text-lg text-warm-wood mb-2 w-full"
             style={{
@@ -569,7 +577,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
       )}
 
       {/* Lista per Categoria */}
-      {ORDERED_CATEGORIES.map((category) => {
+      {ORDERED_CATEGORIES.map((category, index) => {
         const label = CATEGORY_LABELS[category]
         const items = itemsByCategory[category] || []
         if (!items || items.length === 0) return null
@@ -597,8 +605,23 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
           }
         }
 
+        // Padding condizionale: prima categoria (Bevande) ha padding extra se c'è dropdown sopra
+        const hasDropdownAbove = bookingType === 'rinfresco_laurea' && onPresetMenuChange
+        const isFirstCategory = index === 0
+        
+        // Calcola padding top: se è la prima categoria e c'è dropdown, padding extra
+        const paddingTop = isFirstCategory && hasDropdownAbove
+          ? '0.75rem' // Padding extra per prima categoria (Bevande) se c'è dropdown sopra
+          : isFirstCategory
+          ? '0' // Nessun padding se è la prima e non c'è dropdown
+          : '1.5rem' // Padding normale per altre categorie
+
         return (
-          <div key={category} className="space-y-3 w-full flex flex-col items-center px-1 sm:px-2 menu-grid-container">
+          <div 
+            key={category} 
+            className="w-full flex flex-col items-center px-1 sm:px-2 menu-grid-container"
+            style={{ paddingTop, paddingBottom: '0' }}
+          >
             <h3
               className="text-lg md:text-xl border-b border-gray-300 pb-2 flex items-center justify-between w-full booking-section-title-mobile"
               style={{
