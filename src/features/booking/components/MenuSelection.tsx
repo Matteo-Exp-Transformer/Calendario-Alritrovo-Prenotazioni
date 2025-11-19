@@ -514,7 +514,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
       >
         <span style={{ flexShrink: 0 }}>Menù</span>
         <span className="text-xs md:text-sm font-sans font-semibold text-warm-wood/80" style={{ whiteSpace: 'normal', wordBreak: 'break-word', overflowWrap: 'break-word', flexShrink: 1, minWidth: 0, textAlign: 'right' }}>
-          € x Persona
+          € a Persona
         </span>
       </h2>
 
@@ -539,7 +539,8 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
               display: 'inline-block',
               fontWeight: '700',
               maxWidth: 'min(560px, calc(100% - 16px))',
-              margin: '0 auto'
+              margin: '0 auto',
+              marginBottom: '0.5rem'
             }}
           >
             Menù Consigliati dallo Staff
@@ -644,7 +645,10 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                 </span>
               ) : null}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full justify-items-center md:max-w-5xl mx-auto">
+            <div 
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full justify-items-center md:max-w-5xl mx-auto"
+              style={{ paddingTop: '0.5rem', marginTop: '0' }}
+            >
               {items.map((item) => {
                 const isSelected = selectedItems.some(selected => selected.id === item.id)
                 const isTiramisu = isTiramisuItem(item.name)
@@ -731,7 +735,9 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                           backgroundColor: 'rgba(255, 255, 255, 0.85)',
                           backdropFilter: 'blur(1px)',
                           borderColor: 'rgba(0,0,0,0.2)',
-                          borderRadius: '16px'
+                          borderRadius: '16px',
+                          marginTop: '0.5rem',
+                          paddingTop: '0.75rem'
                         }}
                       >
                         <label
