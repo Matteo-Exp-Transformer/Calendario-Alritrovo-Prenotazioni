@@ -9,6 +9,9 @@ import { MenuSelection } from './MenuSelection'
 import { DietaryRestrictionsSection } from './DietaryRestrictionsSection'
 import { useMenuItems } from '../hooks/useMenuItems'
 import { getPresetMenu, type PresetMenuType } from '../constants/presetMenus'
+import { useAcceptedBookings } from '../hooks/useBookingQueries'
+import { useCapacityCheck } from '../hooks/useCapacityCheck'
+import { CapacityWarningModal } from './CapacityWarningModal'
 
 interface AdminBookingFormProps {
   onSubmit?: () => void
@@ -36,10 +39,38 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [selectedPreset, setSelectedPreset] = useState<PresetMenuType>(null)
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
+  const [showCapacityWarning, setShowCapacityWarning] = useState(false)
 
   const { mutate, isPending } = useCreateAdminBooking()
   const queryClient = useQueryClient()
   const { data: menuItems = [] } = useMenuItems()
+  const { data: acceptedBookings = [] } = useAcceptedBookings()
+
+  // Convert desired_time to startTime and endTime for capacity check
+  // Default endTime is startTime + 3 hours (same as AcceptBookingModal)
+  const getTimeRange = (desiredTime: string): { startTime: string; endTime: string } => {
+    if (!desiredTime) return { startTime: '', endTime: '' }
+    
+    const [startHours, startMinutes] = desiredTime.split(':').map(Number)
+    const normalizedStartMinutes = startMinutes === 0 || startMinutes === 30 ? startMinutes : 0
+    const startTime = `${startHours.toString().padStart(2, '0')}:${normalizedStartMinutes.toString().padStart(2, '0')}`
+    
+    // Calculate end time (default +3 hours) with normalized minutes
+    const endHours = (startHours + 3) % 24
+    const endTime = `${endHours.toString().padStart(2, '0')}:${normalizedStartMinutes.toString().padStart(2, '0')}`
+    
+    return { startTime, endTime }
+  }
+
+  // Check capacity in real-time
+  const timeRange = getTimeRange(formData.desired_time || '')
+  const capacityCheck = useCapacityCheck({
+    date: formData.desired_date || '',
+    startTime: timeRange.startTime,
+    endTime: timeRange.endTime,
+    numGuests: formData.num_guests || 0,
+    acceptedBookings,
+  })
 
   // Reset num_guests to 0 when cleared - only allow numeric input
   const handleNumGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,7 +84,7 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
       setErrors({ ...errors, num_guests: '' })
     } else if (/^\d+$/.test(inputValue)) {
       const value = parseInt(inputValue, 10)
-      if (value >= 1 && value <= 110) {
+      if (value >= 1) {
         const tiramisuTotal = formData.menu_selection?.tiramisu_total || 0
         const perPerson = formData.menu_total_per_person || 0
         const newFormData = {
@@ -255,9 +286,6 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
     if (!formData.num_guests || formData.num_guests < 1) {
       newErrors.num_guests = 'Numero ospiti obbligatorio (min 1)'
       isValid = false
-    } else if (formData.num_guests > 80) {
-      newErrors.num_guests = 'Massimo 80 ospiti'
-      isValid = false
     }
 
     // Booking type validation
@@ -289,6 +317,52 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
       return
     }
 
+    // Check capacity before submitting - show modal if capacity exceeded
+    if (!capacityCheck.isAvailable) {
+      console.log('🔵 [AdminBookingForm] Capacity check failed:', {
+        isAvailable: capacityCheck.isAvailable,
+        exceededSlots: capacityCheck.exceededSlots,
+        errorMessage: capacityCheck.errorMessage,
+        slotsStatus: capacityCheck.slotsStatus
+      })
+      
+      // Check if we have exceeded slots info
+      if (capacityCheck.exceededSlots && capacityCheck.exceededSlots.length > 0) {
+        console.log('⚠️ [AdminBookingForm] Opening capacity warning modal with exceeded slots')
+        setShowCapacityWarning(true)
+        return
+      }
+      
+      // Fallback: calculate exceeded slots from slotsStatus if not available
+      const affectedSlots = capacityCheck.slotsStatus.filter(slot => {
+        const totalOccupied = slot.occupied + (formData.num_guests || 0)
+        return totalOccupied > slot.capacity
+      })
+      
+      if (affectedSlots.length > 0) {
+        console.log('⚠️ [AdminBookingForm] Opening capacity warning modal (calculated from slotsStatus)')
+        // Create temporary exceeded slot info
+        const firstExceeded = affectedSlots[0]
+        const exceededBy = (firstExceeded.occupied + (formData.num_guests || 0)) - firstExceeded.capacity
+        const slotName = firstExceeded.slot === 'morning' ? 'mattina' : firstExceeded.slot === 'afternoon' ? 'pomeriggio' : 'sera'
+        
+        // Store in a ref or state to use in modal
+        setShowCapacityWarning(true)
+        return
+      }
+    }
+
+    // If capacity check failed but no exceeded slots, proceed normally (shouldn't happen)
+    if (!capacityCheck.isAvailable) {
+      toast.error(`❌ Capacità insufficiente! ${capacityCheck.errorMessage || 'Non ci sono abbastanza posti disponibili nella fascia oraria selezionata.'}`)
+      return
+    }
+
+    // Proceed with booking creation
+    createBooking()
+  }
+
+  const createBooking = () => {
     mutate(formData, {
       onSuccess: () => {
         toast.success('Prenotazione creata con successo!')
@@ -329,6 +403,7 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
   }
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Layout a 2 Colonne su schermi grandi */}
       <div className="grid md:grid-cols-2 gap-6 md:gap-8">
@@ -505,7 +580,6 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
               inputMode="numeric"
               pattern="[0-9]*"
               min="1"
-              max="80"
               value={formData.num_guests || ''}
               onChange={handleNumGuestsChange}
               onKeyPress={handleNumGuestsKeyPress}
@@ -515,6 +589,22 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
             />
             {errors.num_guests && (
               <p className="text-sm text-red-500">{errors.num_guests}</p>
+            )}
+            {/* Capacity Warning - mostra solo se data, ora e numero ospiti sono compilati */}
+            {capacityCheck.errorMessage && formData.desired_date && formData.desired_time && formData.num_guests > 0 && (
+              <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 mt-2 isolate">
+                <div className="flex items-start gap-2">
+                  <span className="text-2xl">⚠️</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-red-800 mb-1">
+                      Capacità insufficiente
+                    </p>
+                    <p className="text-sm text-red-700">
+                      {capacityCheck.errorMessage}
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 
@@ -640,5 +730,78 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
         </div>
       </div>
     </form>
+
+    {/* Capacity Warning Modal - Fuori dal form per evitare problemi di rendering */}
+    {(() => {
+      if (!showCapacityWarning) {
+        return null
+      }
+      
+      console.log('🔵 [AdminBookingForm] Rendering capacity warning modal, showCapacityWarning:', showCapacityWarning)
+      
+      // Get exceeded slot info from capacityCheck or calculate it
+      let exceededSlot = null
+      
+      if (capacityCheck.exceededSlots && capacityCheck.exceededSlots.length > 0) {
+        exceededSlot = capacityCheck.exceededSlots[0]
+        console.log('✅ [AdminBookingForm] Using exceededSlots from capacityCheck:', exceededSlot)
+      } else if (!capacityCheck.isAvailable && capacityCheck.slotsStatus) {
+        // Calculate from slotsStatus as fallback
+        const affectedSlot = capacityCheck.slotsStatus.find(slot => {
+          const totalOccupied = slot.occupied + (formData.num_guests || 0)
+          return totalOccupied > slot.capacity
+        })
+        
+        if (affectedSlot) {
+          const totalOccupied = affectedSlot.occupied + (formData.num_guests || 0)
+          const exceededBy = totalOccupied - affectedSlot.capacity
+          const slotName = affectedSlot.slot === 'morning' ? 'mattina' : affectedSlot.slot === 'afternoon' ? 'pomeriggio' : 'sera'
+          
+          exceededSlot = {
+            exceededBy,
+            slotName,
+            totalOccupied,
+            capacity: affectedSlot.capacity
+          }
+          console.log('✅ [AdminBookingForm] Calculated exceededSlot from slotsStatus:', exceededSlot)
+        }
+      }
+      
+      if (!exceededSlot) {
+        console.warn('⚠️ [AdminBookingForm] Cannot show capacity warning - no exceeded slot info', {
+          isAvailable: capacityCheck.isAvailable,
+          exceededSlots: capacityCheck.exceededSlots,
+          slotsStatus: capacityCheck.slotsStatus,
+          numGuests: formData.num_guests
+        })
+        return null
+      }
+      
+      console.log('✅ [AdminBookingForm] Rendering CapacityWarningModal with:', exceededSlot)
+      
+      return (
+        <CapacityWarningModal
+          isOpen={showCapacityWarning}
+          onClose={() => {
+            console.log('🔵 [AdminBookingForm] Closing capacity warning modal')
+            setShowCapacityWarning(false)
+          }}
+          onConfirm={() => {
+            console.log('✅ [AdminBookingForm] User confirmed to proceed despite capacity warning')
+            setShowCapacityWarning(false)
+            createBooking()
+          }}
+          onCancel={() => {
+            console.log('❌ [AdminBookingForm] User cancelled capacity warning')
+            setShowCapacityWarning(false)
+          }}
+          exceededBy={exceededSlot.exceededBy}
+          slotName={exceededSlot.slotName}
+          totalOccupied={exceededSlot.totalOccupied}
+          capacity={exceededSlot.capacity}
+        />
+      )
+    })()}
+  </>
   )
 }

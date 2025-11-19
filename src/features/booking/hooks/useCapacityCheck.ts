@@ -93,10 +93,10 @@ export function useCapacityCheck(params: UseCapacityCheckParams): AvailabilityCh
       }
     }
 
-    // Update available seats
-    morning.available = Math.max(0, morning.capacity - morning.occupied)
-    afternoon.available = Math.max(0, afternoon.capacity - afternoon.occupied)
-    evening.available = Math.max(0, evening.capacity - evening.occupied)
+    // Update available seats (can be negative if capacity is exceeded)
+    morning.available = morning.capacity - morning.occupied
+    afternoon.available = afternoon.capacity - afternoon.occupied
+    evening.available = evening.capacity - evening.occupied
 
     // If no date/time selected, return available
     if (!date || !startTime || !endTime || numGuests === 0) {
@@ -109,16 +109,37 @@ export function useCapacityCheck(params: UseCapacityCheckParams): AvailabilityCh
     // Check if there's enough capacity in all affected slots
     let isAvailable = true
     const errorMessages: string[] = []
+    const exceededSlots: Array<{
+      slot: TimeSlot
+      slotName: string
+      exceededBy: number
+      totalOccupied: number
+      capacity: number
+    }> = []
 
     for (const slot of newBookingSlots) {
       const slotData = slot === 'morning' ? morning : slot === 'afternoon' ? afternoon : evening
+      const totalOccupied = slotData.occupied + numGuests
       
       if (slotData.available < numGuests) {
         isAvailable = false
         const slotName = slot === 'morning' ? 'mattina' : slot === 'afternoon' ? 'pomeriggio' : 'sera'
+        const exceededBy = totalOccupied - slotData.capacity
+        
         errorMessages.push(
           `Fascia ${slotName}: ${slotData.available} posti disponibili su ${slotData.capacity} (richiesti: ${numGuests})`
         )
+        
+        // If total exceeds capacity, add to exceeded slots
+        if (totalOccupied > slotData.capacity) {
+          exceededSlots.push({
+            slot,
+            slotName,
+            exceededBy,
+            totalOccupied,
+            capacity: slotData.capacity,
+          })
+        }
       }
     }
 
@@ -126,6 +147,7 @@ export function useCapacityCheck(params: UseCapacityCheckParams): AvailabilityCh
       isAvailable,
       slotsStatus: [morning, afternoon, evening],
       errorMessage: errorMessages.length > 0 ? errorMessages.join('\n') : undefined,
+      exceededSlots: exceededSlots.length > 0 ? exceededSlots : undefined,
     }
   }, [date, startTime, endTime, numGuests, acceptedBookings, excludeBookingId])
 }

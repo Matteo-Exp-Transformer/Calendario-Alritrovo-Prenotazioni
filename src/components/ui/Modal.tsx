@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { Button } from './Button'
 
@@ -82,46 +83,33 @@ export const Modal: React.FC<ModalProps> = ({
     }
   }
 
-  return (
+  const modalContent = (
     <div
-      className={`fixed inset-0 z-[10001] ${position === 'right' ? 'overflow-hidden' : 'overflow-y-auto'}`}
+      className={`fixed inset-0 z-[100000] flex ${position === 'right' ? 'items-start justify-end' : 'items-center justify-center'} ${position === 'right' ? 'overflow-hidden' : 'overflow-y-auto'} ${position === 'right' ? '' : 'p-4'}`}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
-      style={{ display: 'block', visibility: 'visible' }}
     >
-      <div className={`flex min-h-full ${position === 'right' ? 'items-start justify-end' : 'items-center justify-center'} ${position === 'right' ? '' : 'p-4'}`}>
-        {/* Overlay */}
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-          aria-hidden="true"
-          onClick={handleOverlayClick}
-          style={{ zIndex: 10001 }}
-        />
+      {/* Overlay - Must be absolute, not fixed, and must be first sibling */}
+      <div
+        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity z-0"
+        aria-hidden="true"
+        onClick={handleOverlayClick}
+      />
 
-        {/* Modal */}
-        <div
-          ref={modalRef}
-          className={`relative bg-white ${position === 'right' ? 'shadow-2xl w-full max-w-2xl h-full flex flex-col' : 'rounded-lg shadow-xl w-full'} ${sizeClasses[size]} focus:outline-none`}
-          tabIndex={-1}
-          style={{ 
-            display: 'block', 
-            visibility: 'visible', 
-            opacity: 1,
-            backgroundColor: '#ffffff',
-            background: '#ffffff',
-            zIndex: 10002
-          }}
-        >
+      {/* Modal - Must be relative and come after overlay in DOM */}
+      <div
+        ref={modalRef}
+        className={`relative bg-white ${position === 'right' ? 'shadow-2xl w-full max-w-2xl h-full flex flex-col' : 'rounded-lg shadow-xl w-full'} ${sizeClasses[size]} focus:outline-none z-10 isolate`}
+        tabIndex={-1}
+      >
           {/* Header */}
           <div 
-            className={`flex items-center justify-between p-6 border-b border-gray-200 ${position === 'right' ? 'flex-shrink-0' : ''}`}
-            style={{ backgroundColor: '#ffffff', color: '#111827' }}
+            className={`flex items-center justify-between p-6 border-b border-gray-200 bg-white text-gray-900 ${position === 'right' ? 'flex-shrink-0' : ''}`}
           >
             <h2
               id="modal-title"
               className="text-lg font-semibold text-gray-900"
-              style={{ color: '#111827' }}
             >
               {title}
             </h2>
@@ -140,15 +128,16 @@ export const Modal: React.FC<ModalProps> = ({
 
           {/* Content */}
           <div 
-            className={`p-6 ${position === 'right' ? 'overflow-y-auto flex-1' : ''}`}
-            style={{ backgroundColor: '#ffffff', color: '#111827' }}
+            className={`p-6 bg-white text-gray-900 ${position === 'right' ? 'overflow-y-auto flex-1' : ''}`}
           >
             {children}
           </div>
         </div>
-      </div>
     </div>
   )
+
+  // Use portal to render modal directly in body, avoiding any parent container issues
+  return createPortal(modalContent, document.body)
 }
 
 interface ModalActionsProps {

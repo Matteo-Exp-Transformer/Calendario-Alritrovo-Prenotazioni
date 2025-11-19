@@ -131,4 +131,11 @@ export interface AvailabilityCheck {
   isAvailable: boolean
   slotsStatus: TimeSlotCapacity[]
   errorMessage?: string
+  exceededSlots?: Array<{
+    slot: TimeSlot
+    slotName: string
+    exceededBy: number
+    totalOccupied: number
+    capacity: number
+  }>
 }

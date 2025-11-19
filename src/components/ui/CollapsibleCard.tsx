@@ -286,18 +286,30 @@ export const CollapsibleCard = ({
 
               if (isCapacityObject) {
                 const { available, capacity } = counter
+                const isExceeded = available < 0
+                
+                // Debug log
+                if (isExceeded) {
+                  console.log('🔴 [CollapsibleCard] Capacity exceeded:', { available, capacity, isExceeded })
+                }
+                
+                // If capacity is exceeded, show negative available value (e.g., -18)
+                // Otherwise, use percentage-based colors
                 const percentage = capacity > 0 ? (available / capacity) * 100 : 0
 
-                // Determine color based on availability percentage
-                const colorClasses =
-                  percentage > 70
+                // Determine color based on capacity exceeded or availability percentage
+                // Use stronger red colors when capacity is exceeded
+                const colorClasses = isExceeded
+                  ? 'bg-red-200 border-red-600 text-red-950' // Capacity exceeded - Stronger red
+                  : percentage > 70
                     ? 'bg-green-100 border-green-400 text-green-800' // High availability - Green (more vivid)
                     : percentage >= 30
                       ? 'bg-yellow-100 border-yellow-400 text-yellow-800' // Medium availability - Yellow (more vivid)
                       : 'bg-red-100 border-red-400 text-red-800' // Low availability - Red (more vivid)
 
-                const labelColorClasses =
-                  percentage > 70
+                const labelColorClasses = isExceeded
+                  ? 'text-red-950 font-bold'
+                  : percentage > 70
                     ? 'text-green-700'
                     : percentage >= 30
                       ? 'text-yellow-700'
@@ -306,12 +318,19 @@ export const CollapsibleCard = ({
                 return (
                   <div
                     className={`flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg border-2 shadow-sm transition-all duration-200 ${colorClasses} flex-shrink-0`}
-                    aria-label={`${available} posti disponibili su ${capacity} totali`}
+                    style={isExceeded ? {
+                      backgroundColor: '#fecaca',
+                      borderColor: '#dc2626',
+                      color: '#1f2937'
+                    } : undefined}
+                    aria-label={isExceeded 
+                      ? `Capienza superata: ${available} disponibili (eccedenza di ${Math.abs(available)} posti su ${capacity} totali)`
+                      : `${available} posti disponibili su ${capacity} totali`}
                   >
-                    <span className="text-sm font-semibold">
+                    <span className={`text-sm font-semibold ${isExceeded ? 'text-red-950' : ''}`} style={isExceeded ? { color: '#7f1d1d', fontWeight: 'bold' } : undefined}>
                       {available}/{capacity}
                     </span>
-                    <span className={`text-xs font-medium ${labelColorClasses}`}>
+                    <span className={`text-xs font-medium ${labelColorClasses}`} style={isExceeded ? { color: '#7f1d1d', fontWeight: 'bold' } : undefined}>
                       disponibili
                     </span>
                   </div>

@@ -5,6 +5,7 @@ import { format } from 'date-fns'
 import { useCapacityCheck } from '../hooks/useCapacityCheck'
 import { toast } from 'react-toastify'
 import { createBookingDateTime } from '../utils/dateUtils'
+import { CapacityWarningModal } from './CapacityWarningModal'
 
 interface AcceptBookingModalProps {
   isOpen: boolean
@@ -34,6 +35,7 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
     numGuests: 0,
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showCapacityWarning, setShowCapacityWarning] = useState(false)
 
   // Check capacity in real-time
   const capacityCheck = useCapacityCheck({
@@ -126,7 +128,14 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
       return
     }
 
-    // Check capacity before submitting
+    // Check capacity before submitting - show modal if capacity exceeded
+    if (!capacityCheck.isAvailable && capacityCheck.exceededSlots && capacityCheck.exceededSlots.length > 0) {
+      console.log('⚠️ [AcceptModal] Capacity exceeded, showing warning modal')
+      setShowCapacityWarning(true)
+      return
+    }
+
+    // If capacity check failed but no exceeded slots, show error
     if (!capacityCheck.isAvailable) {
       console.error('❌ [AcceptModal] Capacity check failed')
       toast.error(`❌ Posti non disponibili! La prenotazione richiede ${formData.numGuests} posti ma non ci sono abbastanza posti liberi nella fascia oraria selezionata.`)
@@ -134,11 +143,14 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
     }
     
     console.log('✅ [AcceptModal] Validation passed')
+    confirmBooking()
+  }
 
-      // Create ISO strings handling midnight crossover
-      const confirmedStart = createBookingDateTime(formData.date, formData.startTime, true)
-      const confirmedEnd = createBookingDateTime(formData.date, formData.endTime, false, formData.startTime)
-      
+  const confirmBooking = () => {
+    // Create ISO strings handling midnight crossover
+    const confirmedStart = createBookingDateTime(formData.date, formData.startTime, true)
+    const confirmedEnd = createBookingDateTime(formData.date, formData.endTime, false, formData.startTime)
+    
     console.log('🔵 [AcceptModal] Submitting with:', { 
       confirmedStart, 
       confirmedEnd, 
@@ -223,7 +235,6 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
           <input
             type="number"
             min="1"
-            max="80"
             value={formData.numGuests || ''}
             onChange={(e) => {
               setFormData({ ...formData, numGuests: Number(e.target.value) })
@@ -235,20 +246,17 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
           {errors.numGuests && <p className="text-sm text-red-500">{errors.numGuests}</p>}
         </div>
 
-        {/* Capacity Warning */}
-        {capacityCheck.errorMessage && (
-          <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
+        {/* Capacity Warning - mostra solo se data, ora e numero ospiti sono compilati */}
+        {capacityCheck.errorMessage && formData.date && formData.startTime && formData.numGuests > 0 && (
+          <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 isolate">
             <div className="flex items-start gap-2">
               <span className="text-2xl">⚠️</span>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-red-800 mb-1">
                   Capacità insufficiente
                 </p>
                 <p className="text-sm text-red-700">
                   {capacityCheck.errorMessage}
-                </p>
-                <p className="text-xs text-red-600 mt-2">
-                  Verifica la disponibilità nel calendario per questa fascia oraria.
                 </p>
               </div>
             </div>
@@ -267,12 +275,29 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
           <button
             type="submit"
             className="flex-1 px-4 py-2 bg-al-ritrovo-primary text-white rounded-md hover:bg-al-ritrovo-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading || !capacityCheck.isAvailable}
+            disabled={isLoading}
           >
-            {isLoading ? 'Conferma...' : capacityCheck.isAvailable ? '✅ Conferma Prenotazione' : '❌ Capacità Insufficiente'}
+            {isLoading ? 'Conferma...' : '✅ Conferma Prenotazione'}
           </button>
         </div>
       </form>
+
+      {/* Capacity Warning Modal */}
+      {capacityCheck.exceededSlots && capacityCheck.exceededSlots.length > 0 && (
+        <CapacityWarningModal
+          isOpen={showCapacityWarning}
+          onClose={() => setShowCapacityWarning(false)}
+          onConfirm={() => {
+            setShowCapacityWarning(false)
+            confirmBooking()
+          }}
+          onCancel={() => setShowCapacityWarning(false)}
+          exceededBy={capacityCheck.exceededSlots[0].exceededBy}
+          slotName={capacityCheck.exceededSlots[0].slotName}
+          totalOccupied={capacityCheck.exceededSlots[0].totalOccupied}
+          capacity={capacityCheck.exceededSlots[0].capacity}
+        />
+      )}
     </Modal>
   )
 }

@@ -90,9 +90,10 @@ export function calculateDailyCapacity(date: string, bookings: BookingRequest[])
     }
   }
 
-  morning.available = Math.max(0, morning.capacity - morning.occupied)
-  afternoon.available = Math.max(0, afternoon.capacity - afternoon.occupied)
-  evening.available = Math.max(0, evening.capacity - evening.occupied)
+  // Available can be negative if capacity is exceeded
+  morning.available = morning.capacity - morning.occupied
+  afternoon.available = afternoon.capacity - afternoon.occupied
+  evening.available = evening.capacity - evening.occupied
   
   return { date, morning, afternoon, evening }
 }

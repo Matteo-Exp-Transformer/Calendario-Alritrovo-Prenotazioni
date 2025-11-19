@@ -465,10 +465,6 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       newErrors.num_guests = 'Numero ospiti obbligatorio (min 1)'
       isValid = false
       if (!firstErrorKey) firstErrorKey = 'num_guests'
-    } else if (formData.num_guests > 80) {
-      newErrors.num_guests = 'Massimo 80 ospiti'
-      isValid = false
-      if (!firstErrorKey) firstErrorKey = 'num_guests'
     }
 
     // Booking type validation
@@ -908,7 +904,6 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               inputMode="numeric"
               pattern="[0-9]*"
               min="1"
-              max="80"
               value={formData.num_guests || ''}
               onChange={handleNumGuestsChange}
               onKeyPress={handleNumGuestsKeyPress}
