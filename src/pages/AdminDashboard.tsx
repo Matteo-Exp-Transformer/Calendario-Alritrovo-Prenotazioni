@@ -3,13 +3,12 @@ import { useBookingStats } from '@/features/booking/hooks/useBookingQueries'
 import { PendingRequestsTab } from '@/features/booking/components/PendingRequestsTab'
 import { ArchiveTab } from '@/features/booking/components/ArchiveTab'
 import { BookingCalendarTab } from '@/features/booking/components/BookingCalendarTab'
-import { SettingsTab } from '@/features/booking/components/SettingsTab'
 import { AdminBookingForm } from '@/features/booking/components/AdminBookingForm'
-import { Calendar, Clock, Archive, Settings, Plus, User, Shield } from 'lucide-react'
+import { Calendar, Clock, Archive, Plus, User, Shield } from 'lucide-react'
 import { CollapsibleCard } from '@/components/ui/CollapsibleCard'
 import { useAdminAuth } from '@/features/booking/hooks/useAdminAuth'
 
-type Tab = 'calendar' | 'pending' | 'archive' | 'settings'
+type Tab = 'calendar' | 'pending' | 'archive'
 
 interface NavItemProps {
   icon: React.ElementType
@@ -152,42 +151,33 @@ export const AdminDashboard: React.FC = () => {
               active={activeTab === 'archive'}
               onClick={() => handleTabChange('archive')}
             />
-            <NavItem
-              icon={Settings}
-              label="Impostazioni"
-              active={activeTab === 'settings'}
-              onClick={() => handleTabChange('settings')}
-            />
           </nav>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
-        {/* Statistiche Cards - Solo se non in modalità impostazioni */}
-        {activeTab !== 'settings' && (
-          <div className="space-y-4 mb-8">
-            {/* Collapse Card per Inserisci nuova prenotazione */}
-            <CollapsibleCard
-              title="Inserisci nuova prenotazione"
-              subtitle="Crea una nuova prenotazione nel sistema"
-              icon={Plus}
-              defaultExpanded={false}
-              expanded={showNewBookingPanel}
-              onExpandedChange={setShowNewBookingPanel}
-              headerClassName="bg-al-ritrovo-primary/5 hover:bg-al-ritrovo-primary/10 border-b border-al-ritrovo-primary/20"
-            >
-              <AdminBookingForm />
-            </CollapsibleCard>
-          </div>
-        )}
+        {/* Statistiche Cards */}
+        <div className="space-y-4 mb-8">
+          {/* Collapse Card per Inserisci nuova prenotazione */}
+          <CollapsibleCard
+            title="Inserisci nuova prenotazione"
+            subtitle="Crea una nuova prenotazione nel sistema"
+            icon={Plus}
+            defaultExpanded={false}
+            expanded={showNewBookingPanel}
+            onExpandedChange={setShowNewBookingPanel}
+            headerClassName="bg-al-ritrovo-primary/5 hover:bg-al-ritrovo-primary/10 border-b border-al-ritrovo-primary/20"
+          >
+            <AdminBookingForm />
+          </CollapsibleCard>
+        </div>
 
         {/* Tab Content */}
         <div className="bg-white rounded-lg shadow-sm p-6 md:p-8 min-h-[600px] border border-gray-200">
           {activeTab === 'calendar' && <BookingCalendarTab />}
           {activeTab === 'pending' && <PendingRequestsTab />}
           {activeTab === 'archive' && <ArchiveTab />}
-          {activeTab === 'settings' && <SettingsTab />}
         </div>
       </main>
 
