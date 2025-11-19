@@ -1,8 +1,6 @@
 // Type definitions for Al Ritrovo Booking System
 
-import type { SelectedMenuItem } from './menu'
-
-export type BookingStatus = 'pending' | 'accepted' | 'rejected'
+export type BookingStatus = 'pending' | 'accepted' | 'rejected' | 'deleted'
 export type EventType = 'cena' | 'aperitivo' | 'evento' | 'laurea' | 'drink_caraffe' | 'drink_rinfresco_leggero' | 'drink_rinfresco_completo' | 'drink_rinfresco_completo_primo' | 'menu_pranzo_cena'
 export type AdminRole = 'admin' | 'staff'
 
@@ -17,28 +15,12 @@ export interface BookingRequest {
   client_phone?: string
 
   // Booking details
-  event_type?: EventType // Deprecated, mantenuto per retrocompatibilità
-  booking_type?: 'tavolo' | 'rinfresco_laurea'
+  event_type: EventType
   desired_date: string
   desired_time?: string
   num_guests: number
   special_requests?: string
-  menu?: string // Deprecated, usare menu_selection
-  
-  // Menu selection (nuovo sistema)
-  menu_selection?: {
-    items: SelectedMenuItem[]
-    tiramisu_total?: number
-    tiramisu_kg?: number
-  }
-  menu_total_per_person?: number
-  menu_total_booking?: number
-  preset_menu?: 'menu_1' | 'menu_2' | 'menu_3' | null
-  dietary_restrictions?: Array<{
-    restriction: string
-    guest_count: number
-    notes?: string
-  }>
+  menu?: string
 
   // Status management
   status: BookingStatus
@@ -56,25 +38,11 @@ export interface BookingRequestInput {
   client_name: string
   client_email: string
   client_phone?: string
-  event_type?: EventType // Deprecated, mantenuto per retrocompatibilità
-  booking_type: 'tavolo' | 'rinfresco_laurea'
+  event_type: EventType
   desired_date: string
   desired_time?: string
   num_guests: number
   special_requests?: string
-  menu_selection?: {
-    items: SelectedMenuItem[]
-    tiramisu_total?: number
-    tiramisu_kg?: number
-  }
-  menu_total_per_person?: number
-  menu_total_booking?: number
-  preset_menu?: 'menu_1' | 'menu_2' | 'menu_3' | null
-  dietary_restrictions?: Array<{
-    restriction: string
-    guest_count: number
-    notes?: string // per "Altro"
-  }>
 }
 
 export interface AdminUser {

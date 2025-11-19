@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
 import { useAllBookings } from '../hooks/useBookingQueries'
+import { useRestoreBooking } from '../hooks/useBookingMutations'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
-import { Calendar, Clock, Users, Tag, Mail, Phone, MessageSquare, ChevronDown, ChevronUp, User, UtensilsCrossed, Wine, PartyPopper, GraduationCap, Archive, CheckCircle, XCircle } from 'lucide-react'
+import { Calendar, Clock, Users, Tag, Mail, Phone, MessageSquare, ChevronDown, ChevronUp, User, UtensilsCrossed, Wine, PartyPopper, GraduationCap, Archive, CheckCircle, XCircle, Trash2, RotateCcw } from 'lucide-react'
 import { extractTimeFromISO } from '../utils/dateUtils'
 import { getBookingEventTypeLabel } from '../utils/eventTypeLabels'
 
-type ArchiveFilter = 'all' | 'accepted' | 'rejected'
+type ArchiveFilter = 'all' | 'accepted' | 'rejected' | 'deleted'
 type SortOrder = 'created_at' | 'booking_date'
 
 const EVENT_TYPE_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {
@@ -20,14 +21,16 @@ const STATUS_LABELS: Record<string, { label: string; bgColor: string; textColor:
   pending: { label: 'Pendente', bgColor: 'bg-yellow-100', textColor: 'text-yellow-800' },
   accepted: { label: 'Accettata', bgColor: 'bg-green-100', textColor: 'text-green-800' },
   rejected: { label: 'Rifiutata', bgColor: 'bg-red-100', textColor: 'text-red-800' },
+  deleted: { label: 'Rimossa', bgColor: 'bg-gray-100', textColor: 'text-gray-800' },
 }
 
 interface ArchiveBookingCardProps {
   booking: any
   onViewInCalendar?: (date: string) => void
+  onRestore?: (bookingId: string) => void
 }
 
-const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onViewInCalendar }) => {
+const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onViewInCalendar, onRestore }) => {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const formatDate = (dateStr: string) => {
@@ -81,9 +84,17 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
     <div className="relative">
       {/* Badge Data Creazione - Esterno, in alto a sinistra, completamente fuori dalla card */}
       {booking.created_at && (
-        <div className="absolute -top-8 -left-4 z-30">
-          <span className="inline-block px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-md">
-            Data Creazione : {formatDateShort(booking.created_at)}
+        <div className="mb-2">
+          <span 
+            style={{
+              background: 'linear-gradient(to bottom right, rgba(240, 244, 255, 0.9), rgba(224, 231, 255, 0.9), rgba(216, 220, 254, 0.9))',
+              border: '3px solid rgba(129, 140, 248, 0.6)',
+              boxShadow: '0 4px 12px -2px rgba(129, 140, 248, 0.2)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+            }}
+            className="inline-block px-4 py-2 rounded-2xl text-xs font-semibold whitespace-nowrap text-indigo-900 transition-all duration-300">
+            Data Creazione : {formatDateTime(booking.created_at)}
           </span>
         </div>
       )}
@@ -262,6 +273,42 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
             </div>
           )}
 
+          {/* Motivo cancellazione se presente */}
+          {booking.status === 'deleted' && booking.cancellation_reason && (
+            <div className="pt-4 md:pt-6 mt-4 md:mt-6 border-t border-gray-300/30">
+              <p className="text-xs text-gray-600 uppercase tracking-wide font-semibold mb-2 md:mb-3">Motivo Eliminazione</p>
+              <p className="text-sm md:text-base text-gray-700 leading-relaxed break-words">
+                {booking.cancellation_reason}
+              </p>
+            </div>
+          )}
+
+          {/* Data cancellazione se presente */}
+          {booking.status === 'deleted' && booking.cancelled_at && (
+            <div className="pt-2">
+              <p className="text-xs text-gray-500 italic">
+                Eliminata il: {formatDateTime(booking.cancelled_at)}
+              </p>
+            </div>
+          )}
+
+          {/* Pulsante Reinserisci - Solo per prenotazioni eliminate */}
+          {booking.status === 'deleted' && onRestore && (
+            <div className="flex gap-2 md:gap-4 pt-3 md:pt-4 border-t border-warm-orange/20 mt-4 md:mt-6">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onRestore(booking.id)
+                }}
+                style={{ backgroundColor: '#0891b2', color: 'white' }}
+                className="flex-1 flex items-center justify-center gap-2 px-4 md:px-6 py-3 md:py-4 hover:bg-cyan-700 font-bold text-sm md:text-lg shadow-xl rounded-xl transition-all"
+              >
+                <RotateCcw className="w-4 h-4 md:w-5 md:h-5" />
+                <span>Reinserisci</span>
+              </button>
+            </div>
+          )}
+
           {/* Pulsante Visualizza nel Calendario - Solo per prenotazioni accettate */}
           {booking.status === 'accepted' && booking.confirmed_start && onViewInCalendar && (() => {
             // Estrai data da confirmed_start senza conversioni timezone
@@ -302,6 +349,17 @@ export const ArchiveTab: React.FC<ArchiveTabProps> = ({ onViewInCalendar }) => {
   const { data: allBookings, isLoading, error } = useAllBookings()
   const [filter, setFilter] = useState<ArchiveFilter>('all')
   const [sortOrder, setSortOrder] = useState<SortOrder>('booking_date')
+  const restoreBooking = useRestoreBooking()
+
+  const handleRestore = async (bookingId: string) => {
+    if (!confirm('Sei sicuro di voler reinserire questa prenotazione?')) return
+
+    try {
+      await restoreBooking.mutateAsync(bookingId)
+    } catch (error) {
+      console.error('Error restoring booking:', error)
+    }
+  }
 
   const filteredBookings = React.useMemo(() => {
     if (!allBookings) return []
@@ -313,6 +371,9 @@ export const ArchiveTab: React.FC<ArchiveTabProps> = ({ onViewInCalendar }) => {
         break
       case 'rejected':
         filtered = allBookings.filter((b) => b.status === 'rejected')
+        break
+      case 'deleted':
+        filtered = allBookings.filter((b) => b.status === 'deleted')
         break
       default:
         filtered = allBookings
@@ -381,7 +442,7 @@ export const ArchiveTab: React.FC<ArchiveTabProps> = ({ onViewInCalendar }) => {
           </label>
 
           <div className="flex gap-4">
-            {(['all', 'accepted', 'rejected'] as ArchiveFilter[]).map((f) => (
+            {(['all', 'accepted', 'rejected', 'deleted'] as ArchiveFilter[]).map((f) => (
               <button
                 key={f}
                 data-filter={f}
@@ -393,7 +454,9 @@ export const ArchiveTab: React.FC<ArchiveTabProps> = ({ onViewInCalendar }) => {
                       ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-indigo-500'
                       : f === 'accepted'
                       ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-500'
-                      : 'bg-gradient-to-r from-rose-500 to-red-600 text-white border-rose-500'
+                      : f === 'rejected'
+                      ? 'bg-gradient-to-r from-rose-500 to-red-600 text-white border-rose-500'
+                      : 'bg-gradient-to-r from-gray-500 to-gray-700 text-white border-gray-500'
                     : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
                   }
                 `}
@@ -401,7 +464,8 @@ export const ArchiveTab: React.FC<ArchiveTabProps> = ({ onViewInCalendar }) => {
                 {f === 'all' && <Archive className="w-5 h-5" />}
                 {f === 'accepted' && <CheckCircle className="w-5 h-5" />}
                 {f === 'rejected' && <XCircle className="w-5 h-5" />}
-                {f === 'all' ? 'Tutte' : f === 'accepted' ? 'Accettate' : 'Rifiutate'}
+                {f === 'deleted' && <Trash2 className="w-5 h-5" />}
+                {f === 'all' ? 'Tutte' : f === 'accepted' ? 'Accettate' : f === 'rejected' ? 'Rifiutate' : 'Rimosse'}
               </button>
             ))}
           </div>
@@ -461,9 +525,9 @@ export const ArchiveTab: React.FC<ArchiveTabProps> = ({ onViewInCalendar }) => {
             </p>
           </div>
         ) : (
-          <div className="grid gap-[60px] pt-8">
+          <div className="grid gap-[30px]">
             {filteredBookings.map((booking) => {
-              return <ArchiveBookingCard key={booking.id} booking={booking} onViewInCalendar={onViewInCalendar} />
+              return <ArchiveBookingCard key={booking.id} booking={booking} onViewInCalendar={onViewInCalendar} onRestore={handleRestore} />
             })}
           </div>
         )}

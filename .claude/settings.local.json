@@ -16,7 +16,9 @@
       "Skill(test-driven-development)",
       "Bash(npx eslint:*)",
       "Skill(verification-before-completion)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(npx supabase:*)",
+      "Skill(executing-plans)"
     ],
     "deny": [],
     "ask": []

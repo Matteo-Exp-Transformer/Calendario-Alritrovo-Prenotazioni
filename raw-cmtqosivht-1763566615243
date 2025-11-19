@@ -1,0 +1,132 @@
+# Fix Pulsante Elimina in BookingDetailsModal
+
+## Problema Identificato
+
+Il pulsante "Elimina" nel `BookingDetailsModal` non funziona dopo la riscrittura del modal. Quando si clicca sul pulsante, **non succede nulla** - il modal di conferma non appare.
+
+### Analisi del Problema
+
+1. **Z-index conflict**: Il modal di conferma (riga 627) usa `z-[99999]` (Tailwind class) mentre il modal principale (riga 409) usa `zIndex: 99999` (inline style). Entrambi hanno lo stesso valore, quindi il modal di conferma potrebbe essere coperto dal modal principale.
+
+2. **Modal di conferma renderizzato nello stesso portal**: Il modal di conferma è renderizzato dentro lo stesso `createPortal` del modal principale (riga 672), quindi potrebbe essere visivamente coperto anche se ha lo stesso z-index.
+
+3. **Manca campo motivazione**: Il modal di conferma (righe 625-668) non ha un campo textarea per la motivazione facoltativa come richiesto.
+
+4. **Motivazione hardcoded**: La funzione `handleCancelBooking` (riga 380-393) usa una stringa hardcoded `'Cancellato dall\'amministratore'` invece di permettere all'utente di inserire una motivazione.
+
+5. **Manca gestione ESC**: Il modal di conferma non gestisce il tasto ESC per chiudere.
+
+6. **Manca reset motivazione**: Quando il modal di conferma si chiude, la motivazione non viene resettata.
+
+## Soluzione
+
+### File da Modificare
+
+- `src/features/booking/components/BookingDetailsModal.tsx`
+
+### Modifiche Richieste
+
+#### 1. Aggiungere stato per motivazione cancellazione (dopo riga 40)
+
+Aggiungere dopo gli altri stati:
+```typescript
+const [cancellationReason, setCancellationReason] = useState('')
+```
+
+#### 2. Migliorare il modal di conferma eliminazione (righe 625-668)
+
+**Problemi da risolvere:**
+- Aumentare z-index a `100000` (più alto del modal principale `99999`) usando inline style invece di Tailwind class
+- Renderizzare il modal di conferma in un portal separato per evitare conflitti di z-index
+- Aggiungere campo textarea per motivazione facoltativa (simile a `RejectBookingModal.tsx` righe 198-238)
+- Aggiungere gestione ESC per chiudere il modal
+- Reset della motivazione quando il modal si chiude
+
+**Riferimento per implementazione:**
+- `RejectBookingModal.tsx` (righe 42-55) per gestione ESC
+- `RejectBookingModal.tsx` (righe 198-238) per campo textarea motivazione
+- `RejectBookingModal.tsx` (riga 32) per reset form quando modal si chiude
+
+#### 3. Modificare `handleCancelBooking` (riga 380-393)
+
+**Modifiche:**
+- Passare `cancellationReason || 'Cancellato dall\'amministratore'` invece di stringa hardcoded
+- Reset dello stato `cancellationReason` dopo successo (prima di `setShowCancelConfirm(false)`)
+
+#### 4. Aggiungere useEffect per reset motivazione (dopo gli altri useEffect)
+
+Aggiungere useEffect per resettare `cancellationReason` quando `showCancelConfirm` diventa `false`:
+```typescript
+useEffect(() => {
+  if (!showCancelConfirm) {
+    setCancellationReason('')
+  }
+}, [showCancelConfirm])
+```
+
+#### 5. Aggiungere gestione ESC per modal di conferma (dopo useEffect per reset)
+
+Aggiungere useEffect per gestire ESC quando `showCancelConfirm` è true:
+```typescript
+useEffect(() => {
+  if (!showCancelConfirm) return
+
+  const handleEscape = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      setShowCancelConfirm(false)
+    }
+  }
+
+  document.addEventListener('keydown', handleEscape)
+  return () => {
+    document.removeEventListener('keydown', handleEscape)
+  }
+}, [showCancelConfirm])
+```
+
+### Dettagli Implementazione Modal di Conferma
+
+Il modal di conferma deve essere modificato come segue:
+
+1. **Z-index**: Cambiare da `z-[99999]` a `style={{ zIndex: 100000 }}` (inline style)
+2. **Portal separato**: Renderizzare in un `createPortal` separato (opzionale ma consigliato)
+3. **Campo motivazione**: Aggiungere textarea tra riga 647 e 648:
+   ```tsx
+   <div className="mb-6">
+     <label htmlFor="cancellation-reason" className="block text-sm font-semibold text-gray-700 mb-2">
+       Motivo cancellazione <span className="text-gray-500 font-normal">(opzionale)</span>
+     </label>
+     <textarea
+       id="cancellation-reason"
+       value={cancellationReason}
+       onChange={(e) => setCancellationReason(e.target.value)}
+       placeholder="Esempio: Cliente ha richiesto cancellazione, sala non disponibile..."
+       className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-red-500 resize-vertical min-h-[100px]"
+       rows={4}
+     />
+     <p className="text-xs text-gray-500 mt-1">
+       Puoi lasciare questo campo vuoto se preferisci.
+     </p>
+   </div>
+   ```
+
+### Riferimenti
+
+- `RejectBookingModal.tsx` - Esempio completo per modal con campo motivazione
+- `useCancelBooking` hook supporta già `cancellationReason` opzionale (riga 273 in `useBookingMutations.ts`)
+- Modal principale ha `zIndex: 99999` (riga 409) - modal conferma deve avere `100000`
+
+### Checklist Implementazione
+
+- [ ] Aggiungere stato `cancellationReason`
+- [ ] Aggiungere useEffect per reset motivazione
+- [ ] Aggiungere useEffect per gestione ESC
+- [ ] Modificare z-index modal conferma a `100000` (inline style)
+- [ ] Aggiungere campo textarea per motivazione nel modal conferma
+- [ ] Modificare `handleCancelBooking` per usare `cancellationReason`
+- [ ] Testare che il modal di conferma appaia quando si clicca "Elimina"
+- [ ] Testare che il campo motivazione funzioni correttamente
+- [ ] Testare che ESC chiuda il modal
+- [ ] Testare che la motivazione venga resettata quando il modal si chiude
+
+

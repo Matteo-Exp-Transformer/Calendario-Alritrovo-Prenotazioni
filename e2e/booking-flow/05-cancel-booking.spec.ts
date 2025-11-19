@@ -180,9 +180,9 @@ test.describe('Flusso Cancellazione Prenotazione', () => {
 
     await page.screenshot({ path: 'e2e/screenshots/cancel-07-calendar-updated.png', fullPage: true });
 
-    // Step 9: Verifica in Archivio
-    console.log('\n📁 Step 9: Verify in archive (cancelled bookings)...');
-    
+    // Step 9: Verifica in Archivio con filtro "Rimosse"
+    console.log('\n📁 Step 9: Verify in archive (deleted bookings)...');
+
     const archiveTab = await waitForClickable(
       page,
       page.locator('button:has-text("Archivio")').first(),
@@ -192,22 +192,30 @@ test.describe('Flusso Cancellazione Prenotazione', () => {
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
 
+    // Click sul filtro "Rimosse"
+    console.log('🔍 Filtering by "Rimosse"...');
+    const deletedFilterButton = page.locator('button[data-filter="deleted"]');
+    if (await deletedFilterButton.count() > 0) {
+      await deletedFilterButton.click();
+      await page.waitForTimeout(1000);
+      console.log('✅ Deleted filter applied');
+    }
+
     // Cerca la prenotazione cancellata usando il testo dell'evento
-    // (Potrebbe richiedere filtro per "Cancellate")
     if (eventText) {
       const archiveBooking = page.locator(`text=/${eventText.substring(0, 10)}/i`).first();
-      
+
       try {
         await archiveBooking.waitFor({ state: 'visible', timeout: 5000 });
         console.log('✅ Booking found in archive');
-        
-        // Verifica che lo status sia "Cancellata" o simile
-        const cancelledBadge = archiveBooking.locator('xpath=ancestor::div[1]').locator('text=/Cancellata|Cancellato/i');
-        
-        if (await cancelledBadge.count() > 0) {
-          console.log('✅ Booking correctly marked as cancelled in archive');
+
+        // Verifica che lo status sia "Rimossa"
+        const deletedBadge = page.locator('text=/Rimossa/i').first();
+
+        if (await deletedBadge.count() > 0) {
+          console.log('✅ Booking correctly marked as deleted in archive');
         } else {
-          console.log('⚠️ Booking found but cancellation status not verified');
+          console.log('⚠️ Booking found but deleted status not verified');
         }
       } catch (e) {
         console.log('⚠️ Booking not found in archive (might need filter or refresh)');

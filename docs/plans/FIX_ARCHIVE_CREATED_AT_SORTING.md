@@ -277,3 +277,4 @@ La modifica è considerata completata quando:
 **Data creazione plan**: 2025-01-27  
 **Versione**: 1.0 (Unificato da Plan 1 e Plan 2)
 
+
