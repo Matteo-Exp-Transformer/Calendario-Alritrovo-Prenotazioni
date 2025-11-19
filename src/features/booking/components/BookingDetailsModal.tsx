@@ -39,6 +39,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   const [pendingBookingType, setPendingBookingType] = useState<'tavolo' | 'rinfresco_laurea'>('tavolo')
   const [activeTab, setActiveTab] = useState<TabId>('details')
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
+  const [cancellationReason, setCancellationReason] = useState('')
 
   // Responsive width calculation
   const getResponsiveMaxWidth = () => {
@@ -213,6 +214,29 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     }
   }, [isEditMode, activeTab])
 
+  // Reset cancellation reason when cancel confirm modal closes
+  useEffect(() => {
+    if (!showCancelConfirm) {
+      setCancellationReason('')
+    }
+  }, [showCancelConfirm])
+
+  // Handle ESC key for cancel confirmation modal
+  useEffect(() => {
+    if (!showCancelConfirm) return
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowCancelConfirm(false)
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [showCancelConfirm])
+
   // Capacity check function
   const checkCapacity = (date: string, startTime: string, endTime: string, numGuests: number): boolean => {
     const dayBookings = acceptedBookings.filter((b) => {
@@ -381,10 +405,11 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     cancelMutation.mutate(
       {
         bookingId: booking.id,
-        cancellationReason: 'Cancellato dall\'amministratore',
+        cancellationReason: cancellationReason || 'Cancellato dall\'amministratore',
       },
       {
         onSuccess: () => {
+          setCancellationReason('')
           setShowCancelConfirm(false)
           onClose()
         },
@@ -410,9 +435,14 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
           overflow: 'hidden',
           overflowX: 'hidden',
           overflowY: 'hidden',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          // Oscurare ulteriormente quando cancel confirmation è aperto
+          backgroundColor: showCancelConfirm ? 'rgba(0, 0, 0, 0.7)' : 'rgba(0, 0, 0, 0.5)',
           width: '100vw',
-          height: '100vh'
+          height: '100vh',
+          // Disable pointer events when cancel confirmation modal is open
+          pointerEvents: showCancelConfirm ? 'none' : 'auto',
+          // Transizione smooth per il cambio di opacità
+          transition: 'background-color 0.2s ease-in-out'
         }}
         onClick={onClose}
       >
@@ -429,7 +459,9 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             display: 'flex',
             flexDirection: 'column',
-            overflowX: 'hidden'
+            overflowX: 'hidden',
+            // Disable pointer events when cancel confirmation modal is open
+            pointerEvents: showCancelConfirm ? 'none' : 'auto'
           }}
           onClick={(e) => e.stopPropagation()}
         >
@@ -562,7 +594,9 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                       <span className="truncate">Modifica</span>
                     </button>
                     <button
-                      onClick={() => setShowCancelConfirm(true)}
+                      onClick={() => {
+                        setShowCancelConfirm(true)
+                      }}
                       className="flex-1 px-2 sm:px-6 py-2.5 sm:py-3 bg-red-500 text-white rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1 sm:gap-2 font-semibold text-xs sm:text-base min-h-[44px] sm:min-h-[56px]"
                     >
                       <Trash2 className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
@@ -622,52 +656,112 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         </div>
       )}
 
-      {/* Cancel Confirmation Modal */}
-      {showCancelConfirm && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/75" onClick={() => setShowCancelConfirm(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full mx-4 border-2 border-gray-300">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                <span className="text-2xl">⚠️</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">Conferma Cancellazione</h3>
-                <p className="text-sm text-gray-600 mt-1">Questa azione non può essere annullata</p>
-              </div>
-            </div>
-            
-            <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-6">
-              <p className="text-sm text-red-800 font-medium">
-                ⚠️ <strong>Attenzione!</strong> Stai per cancellare questa prenotazione.
-              </p>
-              <p className="text-sm text-red-700 mt-2">
-                Questa azione non può essere annullata e il cliente riceverà una notifica email.
-              </p>
-            </div>
-            
-            <div className="flex gap-4">
-              <button
-                onClick={() => setShowCancelConfirm(false)}
-                className="flex-1 px-6 py-4 bg-green-600 text-white hover:bg-green-700 font-bold text-lg rounded-xl transition-colors flex items-center justify-center gap-2"
-              >
-                <X className="h-5 w-5" />
-                Annulla
-              </button>
-              <button
-                onClick={handleCancelBooking}
-                className="flex-1 px-6 py-4 bg-red-600 text-white hover:bg-red-700 font-bold text-lg rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                disabled={cancelMutation.isPending}
-              >
-                <Trash2 className="h-5 w-5" />
-                {cancelMutation.isPending ? 'Cancellazione...' : 'Conferma'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   )
 
-  return createPortal(modalContent, document.body)
+  // Render cancel confirmation modal separately to avoid z-index/overflow issues
+  const cancelConfirmationPortal = showCancelConfirm ? createPortal(
+    <div 
+      className="fixed inset-0 flex items-center justify-center" 
+      style={{ 
+        zIndex: 100001,
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '1rem'
+      }}
+    >
+      {/* Overlay scuro con blur per distinguere dal modal sottostante */}
+      <div 
+        className="absolute inset-0" 
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)'
+        }}
+        onClick={() => setShowCancelConfirm(false)} 
+      />
+      {/* Dialog box con ombra forte e bordo marcato */}
+      <div 
+        className="relative rounded-2xl p-8 max-w-lg w-full mx-4" 
+        style={{
+          backgroundColor: '#ffffff',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.1)',
+          border: '2px solid rgba(0, 0, 0, 0.15)',
+          zIndex: 1,
+          opacity: 1
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header con icona e titolo */}
+        <div className="flex items-center gap-4 mb-6 pb-4 border-b-2 border-gray-200">
+          <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 shadow-md">
+            <span className="text-2xl">⚠️</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl font-bold text-gray-900">Elimina Prenotazione Accettata</h3>
+            <p className="text-sm text-gray-600 mt-1">Potrà essere reinserita dall'archivio</p>
+          </div>
+        </div>
+
+        {/* Messaggio di conferma */}
+        <div className="mb-6">
+          <p className="text-sm text-gray-800 font-medium mb-2">
+            Sei sicuro di voler eliminare questa prenotazione?
+          </p>
+          <p className="text-sm text-gray-600">
+            La prenotazione verrà spostata nell'archivio e potrà essere reinserita in seguito.
+          </p>
+        </div>
+
+        {/* Textarea per motivazione */}
+        <div className="mb-6">
+          <label htmlFor="cancellation-reason" className="block text-sm font-semibold text-gray-700 mb-2">
+            Motivazione eliminazione <span className="text-gray-500 font-normal">(facoltativa)</span>
+          </label>
+          <textarea
+            id="cancellation-reason"
+            value={cancellationReason}
+            onChange={(e) => setCancellationReason(e.target.value)}
+            placeholder="Esempio: Cliente ha richiesto cancellazione, cambio programma..."
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-vertical min-h-[100px] transition-all"
+            rows={4}
+          />
+        </div>
+
+        {/* Bottoni azione */}
+        <div className="flex gap-4 pt-4 border-t-2 border-gray-200">
+          <button
+            onClick={() => setShowCancelConfirm(false)}
+            className="flex-1 px-6 py-4 bg-green-600 text-white hover:bg-green-700 font-bold text-lg rounded-xl transition-colors flex items-center justify-center gap-2"
+          >
+            <X className="h-5 w-5" />
+            Annulla
+          </button>
+          <button
+            onClick={handleCancelBooking}
+            className="flex-1 px-6 py-4 text-white hover:bg-red-700 font-bold text-lg rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            style={{ backgroundColor: '#dc2626' }}
+            disabled={cancelMutation.isPending}
+          >
+            <Trash2 className="h-5 w-5" />
+            {cancelMutation.isPending ? 'Eliminazione...' : 'Elimina Prenotazione'}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  ) : null
+
+  return (
+    <>
+      {createPortal(modalContent, document.body)}
+      {cancelConfirmationPortal}
+    </>
+  )
 }
