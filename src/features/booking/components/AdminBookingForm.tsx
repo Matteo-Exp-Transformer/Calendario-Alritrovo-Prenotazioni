@@ -364,7 +364,7 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
 
   const createBooking = () => {
     mutate(formData, {
-      onSuccess: () => {
+      onSuccess: async () => {
         toast.success('Prenotazione creata con successo!')
         // Reset form
         setFormData({
@@ -388,10 +388,16 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
         setErrors({})
         
         // Invalidate and refetch all booking-related queries
-        queryClient.invalidateQueries({ queryKey: ['bookings'] })
-        queryClient.invalidateQueries({ queryKey: ['booking-stats'] })
-        queryClient.invalidateQueries({ queryKey: ['pending-bookings'] })
-        queryClient.invalidateQueries({ queryKey: ['accepted-bookings'] })
+        // This will refresh the calendar automatically
+        console.log('🔄 [AdminBookingForm] Invalidating booking queries to refresh calendar...')
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['bookings'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['bookings', 'stats'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['bookings', 'all'], refetchType: 'all' }),
+        ])
+        console.log('✅ [AdminBookingForm] Booking queries invalidated - calendar should refresh automatically')
         
         onSubmit?.()
       },

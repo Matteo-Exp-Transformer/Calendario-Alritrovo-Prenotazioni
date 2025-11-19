@@ -99,13 +99,15 @@ export const DetailsTab: React.FC<Props> = ({
             </div>
 
             <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Email <span className="text-gray-500 font-normal text-xs">(opzionale)</span>
+              </label>
               <input
                 type="email"
                 value={formData.client_email}
                 onChange={(e) => onFormDataChange('client_email', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
+                placeholder="opzionale"
               />
             </div>
 

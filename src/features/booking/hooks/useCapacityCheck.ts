@@ -19,6 +19,7 @@ function parseTime(time: string): number {
 }
 
 // Get slots occupied by a booking based on time strings (HH:MM format)
+// A booking occupies a time slot if it overlaps with that slot's time range
 function getSlotsOccupiedByTimeString(startTime: string, endTime: string): TimeSlot[] {
   const startMinutes = parseTime(startTime)
   const endMinutes = parseTime(endTime)
@@ -32,14 +33,21 @@ function getSlotsOccupiedByTimeString(startTime: string, endTime: string): TimeS
 
   const slots: TimeSlot[] = []
 
-  // Check each slot range
-  if (startMinutes <= morningEnd && endMinutes >= morningStart) {
+  // Check if booking overlaps with morning slot (10:00 - 14:30)
+  // Overlap occurs when: startMinutes < morningEnd && endMinutes > morningStart
+  if (startMinutes < morningEnd && endMinutes > morningStart) {
     slots.push('morning')
   }
-  if (startMinutes <= afternoonEnd && endMinutes >= afternoonStart) {
+  
+  // Check if booking overlaps with afternoon slot (14:31 - 18:30)
+  // Overlap occurs when: startMinutes < afternoonEnd && endMinutes > afternoonStart
+  if (startMinutes < afternoonEnd && endMinutes > afternoonStart) {
     slots.push('afternoon')
   }
-  if (startMinutes <= eveningEnd || endMinutes >= eveningStart || (startMinutes >= eveningStart && endMinutes <= 1439)) {
+  
+  // Check if booking overlaps with evening slot (18:31 - 23:30)
+  // Overlap occurs when: startMinutes < eveningEnd && endMinutes > eveningStart
+  if (startMinutes < eveningEnd && endMinutes > eveningStart) {
     slots.push('evening')
   }
 

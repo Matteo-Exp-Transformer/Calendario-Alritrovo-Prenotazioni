@@ -25,10 +25,20 @@ interface RejectBookingInput {
 
 interface UpdateBookingInput {
   bookingId: string
+  booking_type?: 'tavolo' | 'rinfresco_laurea'
+  client_name?: string
+  client_email?: string
+  client_phone?: string
   confirmedStart: string
   confirmedEnd: string
   numGuests: number
   specialRequests?: string
+  desiredTime?: string
+  menu_selection?: any
+  menu_total_per_person?: number
+  menu_total_booking?: number
+  dietary_restrictions?: any[]
+  preset_menu?: string
   menu?: string
 }
 
@@ -59,10 +69,14 @@ export const useAcceptBooking = () => {
     },
     onSuccess: async (booking: BookingRequest) => {
       // Invalida tutte le queries per refresh automatico completo
-      await queryClient.invalidateQueries({ queryKey: ['bookings'] })
-      await queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'] })
-      await queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'] })
-      console.log('✅ [useAcceptBooking] All bookings queries invalidated')
+      // This will refresh the calendar automatically
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['bookings'], refetchType: 'all' }),
+        queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'], refetchType: 'all' }),
+        queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'], refetchType: 'all' }),
+        queryClient.invalidateQueries({ queryKey: ['bookings', 'stats'], refetchType: 'all' }),
+      ])
+      console.log('✅ [useAcceptBooking] All bookings queries invalidated - calendar should refresh automatically')
 
       // Send email notification
       console.log('🔵 [useAcceptBooking] Checking email notifications...')
@@ -113,10 +127,14 @@ export const useRejectBooking = () => {
     },
     onSuccess: async (booking: BookingRequest) => {
       // Invalida tutte le queries per refresh automatico completo
-      await queryClient.invalidateQueries({ queryKey: ['bookings'] })
-      await queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'] })
-      await queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'] })
-      console.log('✅ [useRejectBooking] All bookings queries invalidated')
+      // This will refresh the calendar automatically
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['bookings'], refetchType: 'all' }),
+        queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'], refetchType: 'all' }),
+        queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'], refetchType: 'all' }),
+        queryClient.invalidateQueries({ queryKey: ['bookings', 'stats'], refetchType: 'all' }),
+      ])
+      console.log('✅ [useRejectBooking] All bookings queries invalidated - calendar should refresh automatically')
       
       // Send email notification
       if (areEmailNotificationsEnabled()) {
@@ -146,12 +164,56 @@ export const useUpdateBooking = () => {
         num_guests: input.numGuests,
       }
 
+      // Update client information if provided
+      if (input.client_name !== undefined) {
+        updateData.client_name = input.client_name
+      }
+      if (input.client_email !== undefined) {
+        // Permetti di salvare email vuota/null (ora che il campo è nullable)
+        // Se è null, salviamo null (email cancellata)
+        // Se è stringa vuota, salviamo null
+        // Se è una stringa valida, salviamo quella
+        updateData.client_email = input.client_email === null || input.client_email === '' 
+          ? null 
+          : input.client_email.trim() || null
+      }
+      if (input.client_phone !== undefined) {
+        updateData.client_phone = input.client_phone || null
+      }
+
+      // Update booking type if provided
+      if (input.booking_type !== undefined) {
+        updateData.booking_type = input.booking_type
+      }
+
+      // Update desired_time if provided
+      if (input.desiredTime !== undefined) {
+        updateData.desired_time = input.desiredTime || null
+      }
+
+      // Update special requests if provided
       if (input.specialRequests !== undefined) {
-        updateData.special_requests = input.specialRequests
+        updateData.special_requests = input.specialRequests || null
       }
       
+      // Update menu fields if provided
       if (input.menu !== undefined) {
-        updateData.menu = input.menu
+        updateData.menu = input.menu || null
+      }
+      if (input.menu_selection !== undefined) {
+        updateData.menu_selection = input.menu_selection || null
+      }
+      if (input.menu_total_per_person !== undefined) {
+        updateData.menu_total_per_person = input.menu_total_per_person || null
+      }
+      if (input.menu_total_booking !== undefined) {
+        updateData.menu_total_booking = input.menu_total_booking || null
+      }
+      if (input.dietary_restrictions !== undefined) {
+        updateData.dietary_restrictions = input.dietary_restrictions || null
+      }
+      if (input.preset_menu !== undefined) {
+        updateData.preset_menu = input.preset_menu || null
       }
       
       console.log('🔵 [useUpdateBooking] Update payload:', updateData)
@@ -175,11 +237,55 @@ export const useUpdateBooking = () => {
     },
     onSuccess: async (data) => {
       console.log('✅ [useUpdateBooking] onSuccess triggered:', data)
-      // Invalida tutte le queries per refresh automatico completo
+      
+      // Aggiorna direttamente la cache con i dati aggiornati per tutte le query che potrebbero contenere questa prenotazione
+      // Usa un approccio sicuro che gestisce diversi formati di dati nella cache
+      queryClient.setQueriesData(
+        { queryKey: ['bookings'] },
+        (oldData: any) => {
+          if (!oldData) return oldData
+          // Verifica che oldData sia un array
+          if (Array.isArray(oldData)) {
+            return oldData.map((booking: BookingRequest) => 
+              booking.id === data.id ? data : booking
+            )
+          }
+          // Se non è un array, restituisci i dati originali (potrebbe essere un oggetto o altro formato)
+          return oldData
+        }
+      )
+      
+      queryClient.setQueriesData(
+        { queryKey: ['bookings', 'pending'] },
+        (oldData: any) => {
+          if (!oldData) return oldData
+          if (Array.isArray(oldData)) {
+            return oldData.map((booking: BookingRequest) => 
+              booking.id === data.id ? data : booking
+            )
+          }
+          return oldData
+        }
+      )
+      
+      queryClient.setQueriesData(
+        { queryKey: ['bookings', 'accepted'] },
+        (oldData: any) => {
+          if (!oldData) return oldData
+          if (Array.isArray(oldData)) {
+            return oldData.map((booking: BookingRequest) => 
+              booking.id === data.id ? data : booking
+            )
+          }
+          return oldData
+        }
+      )
+      
+      // Invalida anche le query per forzare un refetch e assicurarsi che tutto sia sincronizzato
       await queryClient.invalidateQueries({ queryKey: ['bookings'] })
       await queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'] })
       await queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'] })
-      console.log('✅ [useUpdateBooking] All bookings queries invalidated')
+      console.log('✅ [useUpdateBooking] Cache updated and queries invalidated')
       toast.success('Prenotazione aggiornata con successo!')
     },
     onError: (error: Error) => {

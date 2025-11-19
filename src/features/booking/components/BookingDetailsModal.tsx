@@ -40,6 +40,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   const [activeTab, setActiveTab] = useState<TabId>('details')
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
   const [cancellationReason, setCancellationReason] = useState('')
+  const [endTimeManuallyModified, setEndTimeManuallyModified] = useState(false)
 
   // Responsive width calculation
   const getResponsiveMaxWidth = () => {
@@ -149,25 +150,41 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   })
 
   // Update form data when booking changes
+  // IMPORTANTE: Non aggiornare i campi se siamo in edit mode per non sovrascrivere le modifiche dell'utente
   useEffect(() => {
-    try {
-      const startTime = booking.desired_time
-        ? booking.desired_time.split(':').slice(0, 2).join(':')
-        : extractTimeFromISO(booking.confirmed_start || '')
+    // Se siamo in edit mode, non aggiornare formData (l'utente sta modificando)
+    if (isEditMode) {
+      return
+    }
 
+    try {
+      // Preferisci confirmed_start/confirmed_end se disponibili (sono i dati più aggiornati)
+      // Usa desired_time solo come fallback se confirmed_start non è disponibile
+      const startTime = booking.confirmed_start
+        ? extractTimeFromISO(booking.confirmed_start)
+        : (booking.desired_time
+          ? booking.desired_time.split(':').slice(0, 2).join(':')
+          : '')
+
+      // Per endTime, usa sempre confirmed_end se disponibile (è il dato più aggiornato)
+      // Calcola da desired_time solo se confirmed_end non è disponibile
       let endTime: string
-      if (booking.desired_time) {
+      if (booking.confirmed_end) {
+        // Usa confirmed_end che è il dato più aggiornato
+        endTime = extractTimeFromISO(booking.confirmed_end)
+      } else if (booking.desired_time) {
+        // Fallback: calcola da desired_time solo se confirmed_end non esiste
         const [hours, minutes] = booking.desired_time.split(':').map(Number)
         const endHours = (hours + 3) % 24
         endTime = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
       } else {
-        endTime = extractTimeFromISO(booking.confirmed_end || '')
+        endTime = ''
       }
 
       setFormData({
         booking_type: (booking.booking_type || 'tavolo') as 'tavolo' | 'rinfresco_laurea',
         client_name: booking.client_name || '',
-        client_email: booking.client_email || '',
+        client_email: booking.client_email || '', // Può essere null/undefined, quindi stringa vuota
         client_phone: booking.client_phone || '',
         date: extractDateFromISO(booking.confirmed_start || booking.desired_date || ''),
         startTime,
@@ -181,7 +198,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     } catch (error) {
       console.error('[BookingDetailsModal] Error updating form data:', error)
     }
-  }, [booking])
+  }, [booking, isEditMode])
 
   // Dynamic tabs based on booking_type
   const tabs = useMemo<Tab[]>(() => {
@@ -213,6 +230,13 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       setIsMenuExpanded(true)
     }
   }, [isEditMode, activeTab])
+
+  // Reset endTimeManuallyModified when entering edit mode or when booking changes
+  useEffect(() => {
+    if (isEditMode) {
+      setEndTimeManuallyModified(false)
+    }
+  }, [isEditMode, booking.id])
 
   // Reset cancellation reason when cancel confirm modal closes
   useEffect(() => {
@@ -289,7 +313,28 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   }
 
   const handleFormDataChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    if (field === 'startTime') {
+      // Quando cambia startTime, ricalcola automaticamente endTime se non è stato modificato manualmente
+      setFormData(prev => {
+        const newStartTime = value
+        let newEndTime = prev.endTime
+        
+        if (!endTimeManuallyModified) {
+          // Calcola endTime = startTime + 3 ore
+          const [hours, minutes] = newStartTime.split(':').map(Number)
+          const endHours = (hours + 3) % 24
+          newEndTime = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+        }
+        
+        return { ...prev, [field]: value, endTime: newEndTime }
+      })
+    } else if (field === 'endTime') {
+      // Quando l'utente modifica manualmente endTime, segna che è stato modificato
+      setEndTimeManuallyModified(true)
+      setFormData(prev => ({ ...prev, [field]: value }))
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }))
+    }
   }
 
   const handleBookingTypeChange = (newType: 'tavolo' | 'rinfresco_laurea') => {
@@ -338,7 +383,8 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       return
     }
 
-    if (!formData.client_email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.client_email)) {
+    // Email è opzionale, ma se inserita deve essere valida
+    if (formData.client_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.client_email)) {
       toast.error('Inserisci un indirizzo email valido')
       return
     }
@@ -376,7 +422,10 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         bookingId: booking.id,
         booking_type: formData.booking_type,
         client_name: formData.client_name,
-        client_email: formData.client_email,
+        // Email: se vuota, salviamo null (per cancellarla)
+        // Se inserita, deve essere valida (già validata sopra)
+        // Se undefined, non viene aggiornata (mantiene quella esistente)
+        client_email: formData.client_email?.trim() === '' ? null : (formData.client_email?.trim() || undefined),
         client_phone: formData.client_phone || undefined,
         confirmedStart,
         confirmedEnd,
@@ -392,6 +441,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       {
         onSuccess: () => {
           setIsEditMode(false)
+          setEndTimeManuallyModified(false) // Reset flag quando si salva
           toast.success('Prenotazione modificata con successo!')
         },
         onError: (error) => {

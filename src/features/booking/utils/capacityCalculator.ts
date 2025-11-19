@@ -26,10 +26,13 @@ function extractTimeFromISO(isoString: string): string {
 }
 
 // Get slots occupied by a booking
-export function getSlotsOccupiedByBooking(start: string, _end: string): TimeSlot[] {
+// A booking occupies a time slot if it overlaps with that slot's time range
+export function getSlotsOccupiedByBooking(start: string, end: string): TimeSlot[] {
   const startTime = extractTimeFromISO(start)
+  const endTime = extractTimeFromISO(end)
   
   const startMinutes = parseTime(startTime)
+  const endMinutes = parseTime(endTime)
   
   const morningStart = parseTime(CAPACITY_CONFIG.MORNING_START)
   const morningEnd = parseTime(CAPACITY_CONFIG.MORNING_END)
@@ -40,12 +43,21 @@ export function getSlotsOccupiedByBooking(start: string, _end: string): TimeSlot
   
   const slots: TimeSlot[] = []
   
-  // Simple rule: booking goes to the slot where it STARTS
-  if (startMinutes >= morningStart && startMinutes <= morningEnd) {
+  // Check if booking overlaps with morning slot (10:00 - 14:30)
+  // Overlap occurs when: startMinutes < morningEnd && endMinutes > morningStart
+  if (startMinutes < morningEnd && endMinutes > morningStart) {
     slots.push('morning')
-  } else if (startMinutes >= afternoonStart && startMinutes <= afternoonEnd) {
+  }
+  
+  // Check if booking overlaps with afternoon slot (14:31 - 18:30)
+  // Overlap occurs when: startMinutes < afternoonEnd && endMinutes > afternoonStart
+  if (startMinutes < afternoonEnd && endMinutes > afternoonStart) {
     slots.push('afternoon')
-  } else if (startMinutes >= eveningStart && startMinutes <= eveningEnd) {
+  }
+  
+  // Check if booking overlaps with evening slot (18:31 - 23:30)
+  // Overlap occurs when: startMinutes < eveningEnd && endMinutes > eveningStart
+  if (startMinutes < eveningEnd && endMinutes > eveningStart) {
     slots.push('evening')
   }
   

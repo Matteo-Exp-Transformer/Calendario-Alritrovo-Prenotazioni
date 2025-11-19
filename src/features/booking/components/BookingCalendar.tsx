@@ -48,13 +48,15 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
 
   // Aggiorna il selectedBooking quando i bookings cambiano (dopo modifica)
   useEffect(() => {
-    if (selectedBooking) {
+    if (selectedBooking && isModalOpen) {
       const updatedBooking = bookings.find(b => b.id === selectedBooking.id)
-      if (updatedBooking && JSON.stringify(updatedBooking) !== JSON.stringify(selectedBooking)) {
+      if (updatedBooking) {
+        // Aggiorna sempre selectedBooking quando viene trovato un booking aggiornato
+        // Questo assicura che il modal mostri sempre i dati più recenti
         setSelectedBooking(updatedBooking)
       }
     }
-  }, [bookings, selectedBooking])
+  }, [bookings, isModalOpen])
 
   // Force calendar re-render when selectedDate changes
   useEffect(() => {
