@@ -4,6 +4,8 @@ import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
 import { Calendar, Clock, Users, Tag, MessageSquare, CheckCircle, XCircle, UtensilsCrossed, ChevronDown, User, Mail, Phone } from 'lucide-react'
 import { getBookingEventTypeLabel } from '../utils/eventTypeLabels'
+import { getPresetMenuLabel } from '../constants/presetMenus'
+import type { PresetMenuType } from '../constants/presetMenus'
 
 interface BookingRequestCardProps {
   booking: BookingRequest
@@ -222,7 +224,7 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
               {booking.preset_menu && (
                 <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg">
                   <p className="text-sm font-semibold text-blue-700">
-                    📋 Menu Predefinito: {booking.preset_menu === 'menu_1' ? 'Menù 1' : booking.preset_menu === 'menu_2' ? 'Menù 2' : 'Menù 3'}
+                    📋 Menu Predefinito: {getPresetMenuLabel(booking.preset_menu as PresetMenuType)}
                   </p>
                 </div>
               )}

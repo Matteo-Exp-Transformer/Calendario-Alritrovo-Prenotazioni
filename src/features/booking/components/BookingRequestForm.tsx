@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Input } from '@/components/ui'
 import { DateInput } from '@/components/ui/DateInput'
@@ -12,6 +12,8 @@ import { DietaryRestrictionsSection } from './DietaryRestrictionsSection'
 import { useBusinessHours } from '@/hooks/useBusinessHours'
 import { isValidBookingDateTime, getDayOfWeek, formatHours } from '@/lib/businessHours'
 import { toast } from 'react-toastify'
+import { getPresetMenu, type PresetMenuType } from '../constants/presetMenus'
+import { useMenuItems } from '../hooks/useMenuItems'
 
 interface BookingRequestFormProps {
   onSubmit?: () => void
@@ -53,13 +55,15 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       tiramisu_total: 0,
       tiramisu_kg: 0
     },
-    dietary_restrictions: []
+    dietary_restrictions: [],
+    preset_menu: null
   })
 
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false) // Stato per triggerare re-render e disabilitare button
+  const [selectedPreset, setSelectedPreset] = useState<PresetMenuType>(null)
   
   // Ref per prevenire doppi submit (anche con React StrictMode)
   const isSubmittingRef = useRef(false)
@@ -181,13 +185,137 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       e.preventDefault()
     }
   }
+
+  // Gestione selezione menu predefinito
+  const handlePresetMenuChange = (presetType: PresetMenuType) => {
+    setSelectedPreset(presetType)
+    
+    if (!presetType) {
+      // Reset menu se nessun preset
+      setFormData({
+        ...formData,
+        preset_menu: null,
+        menu_selection: { items: [], tiramisu_total: 0, tiramisu_kg: 0 },
+        menu_total_per_person: 0,
+        menu_total_booking: 0
+      })
+      return
+    }
+
+    const preset = getPresetMenu(presetType)
+    if (!preset) return
+
+    // Helper per normalizzare i nomi per il matching (case-insensitive, ignora spazi extra)
+    const normalizeName = (name: string): string => {
+      return name.toLowerCase().trim().replace(/\s+/g, ' ').replace(/\//g, '/').replace(/\/\s*/g, '/').replace(/\s*\/\s*/g, '/')
+    }
+
+    // Helper per match flessibile - cerca anche varianti comuni
+    const matchesName = (itemName: string, presetName: string): boolean => {
+      const normalizedItem = normalizeName(itemName)
+      const normalizedPreset = normalizeName(presetName)
+      
+      // Match esatto normalizzato
+      if (normalizedItem === normalizedPreset) return true
+      
+      // Match per "Caraffe" - gestisci PRIMA il match parziale per evitare match errati
+      // IMPORTANTE: Gestire questo caso PRIMA del match parziale generico
+      const presetHasCaraffe = normalizedPreset.includes('caraffe')
+      const presetHasDrink = normalizedPreset.includes('drink')
+      const presetHasPremium = normalizedPreset.includes('premium')
+      
+      if (presetHasCaraffe) {
+        const hasCaraffe = normalizedItem.includes('caraffe')
+        const hasDrink = normalizedItem.includes('drink')
+        const hasPremium = normalizedItem.includes('premium')
+        
+        // Caso 1: Preset ha "Caraffe Premium" (senza "drink") - matcha "Caraffe Drink Premium" o "Caraffe / Drink Premium"
+        if (presetHasPremium && !presetHasDrink) {
+          if (hasCaraffe && hasPremium) return true
+          // NON matchare se l'item non ha premium
+          return false
+        }
+        
+        // Caso 2: Preset ha "Caraffe/Drink" (con "drink", senza premium) - matcha SOLO items senza premium
+        if (presetHasDrink && !presetHasPremium) {
+          if (hasCaraffe && hasDrink && !hasPremium) return true
+          // NON matchare se l'item ha premium
+          return false
+        }
+        
+        // Caso 3: Preset ha "Caraffe/Drink Premium" (con "drink" e "premium") - matcha SOLO items con premium
+        if (presetHasDrink && presetHasPremium) {
+          if (hasCaraffe && hasDrink && hasPremium) return true
+          // NON matchare se l'item non ha premium
+          return false
+        }
+      }
+      
+      // Match parziale per altri items (solo se non è un caso Caraffe)
+      if (normalizedItem.includes(normalizedPreset) || normalizedPreset.includes(normalizedItem)) return true
+      
+      return false
+    }
+
+    // Trova gli items nel database per nome (matching flessibile)
+    const selectedItems = menuItems
+      .filter(item => {
+        return preset.itemNames.some(presetName => matchesName(item.name, presetName))
+      })
+      .map(item => {
+        const isTiramisu = item.name.toLowerCase().includes('tiramis')
+        return {
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          category: item.category,
+          quantity: isTiramisu ? 1 : undefined,
+          totalPrice: isTiramisu ? item.price : item.price
+        }
+      })
+
+    // Calcola totale
+    const totalPerPerson = selectedItems
+      .filter(item => !item.name.toLowerCase().includes('tiramis'))
+      .reduce((sum, item) => sum + item.price, 0)
+    const numGuests = formData.num_guests || 0
+    const copertoTotal = formData.booking_type === 'rinfresco_laurea' ? 2.00 * numGuests : 0
+
+    const tiramisuSelection = selectedItems.find((item) => item.name.toLowerCase().includes('tiramis'))
+    const tiramisuUnitPrice = tiramisuSelection?.price || 0
+    const tiramisuKg = tiramisuSelection?.quantity || 0
+    const tiramisuTotal = tiramisuKg > 0 ? tiramisuUnitPrice * tiramisuKg : 0
+
+    setFormData({
+      ...formData,
+      preset_menu: presetType,
+      menu_selection: {
+        items: selectedItems,
+        tiramisu_total: tiramisuTotal,
+        tiramisu_kg: tiramisuKg
+      },
+      menu_total_per_person: totalPerPerson,
+      menu_total_booking: totalPerPerson * numGuests + copertoTotal + tiramisuTotal
+    })
+  }
+
+  // Reset preset quando cambia booking_type
+  useEffect(() => {
+    if (formData.booking_type !== 'rinfresco_laurea') {
+      setSelectedPreset(null)
+      setFormData(prev => ({
+        ...prev,
+        preset_menu: null
+      }))
+    }
+  }, [formData.booking_type])
+
   const { mutate, isPending } = useCreateBookingRequest()
   const { checkRateLimit, isBlocked } = useRateLimit({
     maxAttempts: 3,
     timeWindow: 60000 // 1 minuto
   })
-  // Menu items loaded via MenuSelection component
-  // const { data: menuItems = [] } = useMenuItems()
+  const { data: menuItems = [] } = useMenuItems()
 
   // Fetch business hours (non-blocking - form works even if loading/fails)
   const { data: businessHours, isLoading: isLoadingHours, error: hoursError } = useBusinessHours()
@@ -470,8 +598,10 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             tiramisu_total: 0,
             tiramisu_kg: 0
           },
-          dietary_restrictions: []
+          dietary_restrictions: [],
+          preset_menu: null
         })
+        setSelectedPreset(null)
         setPrivacyAccepted(false)
         
         // Reset tutti i flag di submit e rilascia lock
@@ -772,6 +902,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             <p className="text-sm text-red-500">{errors.num_guests}</p>
           )}
         </div>
+
       </div>
       {/* Menu Selection - Solo per Rinfresco di Laurea */}
       {formData.booking_type === 'rinfresco_laurea' && (
@@ -779,11 +910,35 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           <MenuSelection
             selectedItems={formData.menu_selection?.items || []}
             numGuests={formData.num_guests || 0}
+            bookingType={formData.booking_type}
+            presetMenu={selectedPreset}
+            onPresetMenuChange={handlePresetMenuChange}
             onMenuChange={({ items, totalPerPerson, tiramisuTotal, tiramisuKg }) => {
               const numGuests = formData.num_guests || 0
               const copertoTotal = 2.00 * numGuests
+              // Mantieni preset_menu se gli items corrispondono ancora al preset
+              const currentPreset = selectedPreset
+              let updatedPreset: PresetMenuType = currentPreset
+              
+              // Verifica se gli items corrispondono ancora al preset selezionato
+              if (currentPreset) {
+                const preset = getPresetMenu(currentPreset)
+                if (preset) {
+                  const presetItemNames = preset.itemNames.sort()
+                  const selectedItemNames = items.map(i => i.name).sort()
+                  
+                  // Se gli items non corrispondono più, rimuovi il preset
+                  if (presetItemNames.length !== selectedItemNames.length || 
+                      !presetItemNames.every((name, idx) => name === selectedItemNames[idx])) {
+                    updatedPreset = null
+                    setSelectedPreset(null)
+                  }
+                }
+              }
+              
               setFormData({
                 ...formData,
+                preset_menu: updatedPreset,
                 menu_selection: {
                   items,
                   tiramisu_total: tiramisuTotal,

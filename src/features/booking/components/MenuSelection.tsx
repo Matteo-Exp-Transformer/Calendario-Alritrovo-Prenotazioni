@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { Check, X } from 'lucide-react'
 import { useMenuItems } from '../hooks/useMenuItems'
 import type { MenuCategory, SelectedMenuItem } from '@/types/menu'
+import type { PresetMenuType } from '../constants/presetMenus'
 
 interface MenuSelectionProps {
   selectedItems: SelectedMenuItem[]
@@ -12,6 +13,9 @@ interface MenuSelectionProps {
     tiramisuTotal: number
     tiramisuKg: number
   }) => void
+  presetMenu?: PresetMenuType
+  onPresetMenuChange?: (preset: PresetMenuType) => void
+  bookingType?: 'tavolo' | 'rinfresco_laurea'
 }
 
 type NormalizedMenuItem = {
@@ -123,7 +127,10 @@ const isKnownCategory = (category: string): category is MenuCategory =>
 export const MenuSelection: React.FC<MenuSelectionProps> = ({
   selectedItems,
   numGuests,
-  onMenuChange
+  onMenuChange,
+  presetMenu,
+  onPresetMenuChange,
+  bookingType
 }) => {
   const { data: menuItems = [], isLoading, error } = useMenuItems()
 
@@ -510,6 +517,56 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
           € x Persona
         </span>
       </h2>
+
+      {/* Menù Consigliati dallo Staff - Solo per Rinfresco di Laurea */}
+      {bookingType === 'rinfresco_laurea' && onPresetMenuChange && (
+        <div className="space-y-3 w-full flex flex-col items-center px-1 sm:px-2">
+          <label
+            className="block text-base md:text-lg text-warm-wood mb-2 w-full"
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(1px)',
+              padding: '8px 16px',
+              borderRadius: '12px',
+              display: 'inline-block',
+              fontWeight: '700',
+              maxWidth: 'min(560px, calc(100% - 16px))',
+              margin: '0 auto'
+            }}
+          >
+            Menù Consigliati dallo Staff
+          </label>
+          <select
+            id="preset_menu"
+            value={presetMenu || ''}
+            onChange={(e) => {
+              const value = e.target.value
+              onPresetMenuChange(value === '' ? null : (value as Exclude<PresetMenuType, null>))
+            }}
+            className="block rounded-full border shadow-sm transition-all w-full"
+            style={{
+              borderColor: 'rgba(0,0,0,0.2)',
+              height: '56px',
+              padding: '16px',
+              fontSize: '16px',
+              fontWeight: '700',
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(1px)',
+              color: 'black',
+              maxWidth: 'min(560px, calc(100% - 16px))',
+              margin: '0 auto'
+            }}
+            onFocus={(e) => (e.target as HTMLSelectElement).style.borderColor = '#8B6914'}
+            onBlur={(e) => (e.target as HTMLSelectElement).style.borderColor = 'rgba(0,0,0,0.2)'}
+          >
+            <option value="">Scegli un menù consigliato dallo staff</option>
+            <option value="menu_1">Menù 1 Rinfresco Leggero</option>
+            <option value="menu_2">Menù 2 Rinfresco Completo</option>
+            <option value="menu_3">Menù 3 Pranzo o Cena</option>
+            <option value="menu_4">Menù 4 Gourmet</option>
+          </select>
+        </div>
+      )}
 
       {/* Lista per Categoria */}
       {ORDERED_CATEGORIES.map((category) => {

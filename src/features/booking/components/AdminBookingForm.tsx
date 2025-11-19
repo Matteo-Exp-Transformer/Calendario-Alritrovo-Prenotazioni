@@ -106,22 +106,41 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
       // Match esatto normalizzato
       if (normalizedItem === normalizedPreset) return true
       
-      // Match parziale (uno contiene l'altro)
-      if (normalizedItem.includes(normalizedPreset) || normalizedPreset.includes(normalizedItem)) return true
+      // Match per "Caraffe" - gestisci PRIMA il match parziale per evitare match errati
+      // IMPORTANTE: Gestire questo caso PRIMA del match parziale generico
+      const presetHasCaraffe = normalizedPreset.includes('caraffe')
+      const presetHasDrink = normalizedPreset.includes('drink')
+      const presetHasPremium = normalizedPreset.includes('premium')
       
-      // Match per "Caraffe/Drink" - cerca varianti comuni
-      if (normalizeName(presetName).includes('caraffe') && normalizeName(presetName).includes('drink')) {
+      if (presetHasCaraffe) {
         const hasCaraffe = normalizedItem.includes('caraffe')
         const hasDrink = normalizedItem.includes('drink')
         const hasPremium = normalizedItem.includes('premium')
-        const presetHasPremium = normalizedPreset.includes('premium')
         
-        // Se il preset è Caraffe/Drink (non premium) e l'item è Caraffe/Drink (non premium)
-        if (!presetHasPremium && hasCaraffe && hasDrink && !hasPremium) return true
+        // Caso 1: Preset ha "Caraffe Premium" (senza "drink") - matcha "Caraffe Drink Premium" o "Caraffe / Drink Premium"
+        if (presetHasPremium && !presetHasDrink) {
+          if (hasCaraffe && hasPremium) return true
+          // NON matchare se l'item non ha premium
+          return false
+        }
         
-        // Se il preset è Caraffe/Drink Premium e l'item è Premium
-        if (presetHasPremium && hasCaraffe && hasDrink && hasPremium) return true
+        // Caso 2: Preset ha "Caraffe/Drink" (con "drink", senza premium) - matcha SOLO items senza premium
+        if (presetHasDrink && !presetHasPremium) {
+          if (hasCaraffe && hasDrink && !hasPremium) return true
+          // NON matchare se l'item ha premium
+          return false
+        }
+        
+        // Caso 3: Preset ha "Caraffe/Drink Premium" (con "drink" e "premium") - matcha SOLO items con premium
+        if (presetHasDrink && presetHasPremium) {
+          if (hasCaraffe && hasDrink && hasPremium) return true
+          // NON matchare se l'item non ha premium
+          return false
+        }
       }
+      
+      // Match parziale per altri items (solo se non è un caso Caraffe)
+      if (normalizedItem.includes(normalizedPreset) || normalizedPreset.includes(normalizedItem)) return true
       
       return false
     }
@@ -442,52 +461,6 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
             )}
           </div>
 
-          {/* Menu Predefinito - Solo per Rinfresco di Laurea */}
-          {formData.booking_type === 'rinfresco_laurea' && (
-            <div className="space-y-3">
-              <label
-                className="block text-base md:text-lg font-medium text-warm-wood mb-2"
-                style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                  backdropFilter: 'blur(6px)',
-                  padding: '8px 16px',
-                  borderRadius: '12px',
-                  display: 'inline-block'
-                }}
-              >
-                Menu Predefinito
-              </label>
-              <select
-                id="preset_menu"
-                value={selectedPreset || ''}
-                onChange={(e) => {
-                  const value = e.target.value
-                  handlePresetMenuChange(value === '' ? null : (value as Exclude<PresetMenuType, null>))
-                }}
-                className="block rounded-full border bg-white/50 backdrop-blur-[6px] shadow-sm transition-all"
-                style={{
-                  borderColor: 'rgba(0,0,0,0.2)',
-                  height: '56px',
-                  padding: '16px',
-                  fontSize: '16px',
-                  fontWeight: '500',
-                  backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                  backdropFilter: 'blur(6px)',
-                  color: 'black',
-                  width: 'auto',
-                  minWidth: '280px'
-                }}
-                onFocus={(e) => (e.target as HTMLSelectElement).style.borderColor = '#8B6914'}
-                onBlur={(e) => (e.target as HTMLSelectElement).style.borderColor = 'rgba(0,0,0,0.2)'}
-              >
-                <option value="">Scegli un menu predefinito</option>
-                <option value="menu_1">Menù 1</option>
-                <option value="menu_2">Menù 2</option>
-                <option value="menu_3">Menù 3</option>
-              </select>
-            </div>
-          )}
-
           {/* Data */}
           <div className="space-y-3">
             <Input
@@ -544,6 +517,7 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
               <p className="text-sm text-red-500">{errors.num_guests}</p>
             )}
           </div>
+
         </div>
       </div>
 
@@ -553,6 +527,9 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
           <MenuSelection
             selectedItems={formData.menu_selection?.items || []}
             numGuests={formData.num_guests || 0}
+            bookingType={formData.booking_type}
+            presetMenu={selectedPreset}
+            onPresetMenuChange={handlePresetMenuChange}
             onMenuChange={({ items, totalPerPerson, tiramisuTotal, tiramisuKg }) => {
               const numGuests = formData.num_guests || 0
               // Mantieni preset_menu se gli items corrispondono ancora al preset

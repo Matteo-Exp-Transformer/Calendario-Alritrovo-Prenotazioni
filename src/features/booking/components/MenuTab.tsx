@@ -2,6 +2,8 @@ import React, { useMemo } from 'react'
 import { CollapsibleSection } from './CollapsibleSection'
 import { MenuSelection } from './MenuSelection'
 import type { SelectedMenuItem } from '@/types/menu'
+import { getPresetMenuLabel } from '../constants/presetMenus'
+import type { PresetMenuType } from '../constants/presetMenus'
 
 interface MenuTabProps {
   booking: any
@@ -158,7 +160,7 @@ export const MenuTab: React.FC<MenuTabProps> = ({
       {presetMenu && (
         <div>
           <p className="text-sm font-semibold text-gray-900">
-            📋 Menu Predefinito: <span className="uppercase">{presetMenu.replace('_', ' ')}</span>
+            📋 Menu Predefinito: <span>{getPresetMenuLabel(presetMenu as PresetMenuType)}</span>
           </p>
         </div>
       )}
