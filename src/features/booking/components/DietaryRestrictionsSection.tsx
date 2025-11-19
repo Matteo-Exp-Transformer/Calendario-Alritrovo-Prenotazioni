@@ -116,7 +116,8 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
                   padding: '8px 16px',
                   borderRadius: '12px',
                   display: 'inline-block',
-                  fontWeight: '700'
+                  fontWeight: '700',
+                  marginBottom: '0.5rem'
                 }}
               >
                 Intolleranza / Esigenza *
@@ -185,12 +186,13 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
                 padding: '8px 16px',
                 borderRadius: '12px',
                 display: 'inline-block',
-                fontWeight: '700'
+                fontWeight: '700',
+                marginBottom: '0.5rem'
               }}
             >
               Numero ospiti con intolleranze alimentari *
             </label>
-            <div className="guest-card-mobile">
+            <div className="guest-card-mobile" style={{ marginTop: '0.5rem' }}>
               <Input
                 type="number"
                 min="1"
@@ -201,7 +203,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
           </div>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-3" style={{ paddingTop: '0.5rem' }}>
           <button
             type="button"
             onClick={handleAdd}
@@ -303,7 +305,8 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
             padding: '8px 16px',
             borderRadius: '12px',
             display: 'inline-block',
-            fontWeight: '700'
+            fontWeight: '700',
+            marginBottom: '0.5rem'
           }}
         >
           Altre Richieste
@@ -319,7 +322,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
       </div>
 
       {/* Privacy Policy */}
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3" style={{ paddingTop: '0.5rem' }}>
         <div className="relative flex-shrink-0">
           <input
             type="checkbox"

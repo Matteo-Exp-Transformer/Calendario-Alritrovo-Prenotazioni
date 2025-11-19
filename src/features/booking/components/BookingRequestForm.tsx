@@ -667,7 +667,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         </div>
 
         {/* Email */}
-        <div className="space-y-3">
+        <div className="space-y-3" style={{ paddingTop: '0.5rem' }}>
           <Input
             id="client_email"
             type="email"
@@ -685,7 +685,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         </div>
 
         {/* Telefono */}
-        <div className="space-y-3">
+        <div className="space-y-3" style={{ paddingTop: '0.5rem' }}>
           <Input
             id="client_phone"
             type="tel"
@@ -720,7 +720,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         </h2>
 
         {/* Tipologia di Prenotazione - DROPDOWN */}
-        <div>
+        <div style={{ marginBottom: '0' }}>
           <label
             className="block text-base md:text-lg text-warm-wood mb-2"
             style={{
@@ -729,7 +729,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               padding: '8px 16px',
               borderRadius: '12px',
               display: 'inline-block',
-              fontWeight: '700'
+              fontWeight: '700',
+              marginBottom: '0.5rem'
             }}
           >
             Tipo di prenotazione *
@@ -765,7 +766,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         </div>
 
         {/* Data */}
-        <div className="space-y-3">
+        <div className="space-y-3" style={{ paddingTop: '0.5rem' }}>
           <label
             htmlFor="desired_date"
             className="block text-base md:text-lg text-warm-wood mb-2"
@@ -775,7 +776,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               padding: '8px 16px',
               borderRadius: '12px',
               display: 'inline-block',
-              fontWeight: '700'
+              fontWeight: '700',
+              marginBottom: '0.5rem'
             }}
           >
             Data prenotazione *
@@ -823,7 +825,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         </div>
 
         {/* Ora */}
-        <div className="space-y-3">
+        <div className="space-y-3" style={{ paddingTop: '0.5rem' }}>
           <label
             htmlFor="desired_time"
             className="block text-base md:text-lg text-warm-wood mb-2"
@@ -833,7 +835,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               padding: '8px 16px',
               borderRadius: '12px',
               display: 'inline-block',
-              fontWeight: '700'
+              fontWeight: '700',
+              marginBottom: '0.5rem'
             }}
           >
             Ora prenotazione *
@@ -881,7 +884,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         </div>
 
         {/* Numero Ospiti */}
-        <div className="space-y-3 guest-card-container">
+        <div className="space-y-3 guest-card-container" style={{ paddingTop: '0.5rem' }}>
           <div className="guest-card-mobile">
             <Input
               id="num_guests"
