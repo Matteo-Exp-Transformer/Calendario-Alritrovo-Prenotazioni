@@ -14,6 +14,7 @@ interface AcceptBookingInput {
   bookingId: string
   confirmedStart: string
   confirmedEnd: string
+  desiredTime?: string
   numGuests?: number
   internalNotes?: string
 }
@@ -48,15 +49,21 @@ export const useAcceptBooking = () => {
 
   return useMutation({
     mutationFn: async (input: AcceptBookingInput) => {
+      const updateData: any = {
+        status: 'accepted',
+        confirmed_start: input.confirmedStart,
+        confirmed_end: input.confirmedEnd,
+        num_guests: input.numGuests,
+        updated_at: new Date().toISOString(),
+      }
+      
+      if (input.desiredTime !== undefined) {
+        updateData.desired_time = input.desiredTime
+      }
+
       const { data, error } = await supabase
         .from('booking_requests')
-        .update({
-          status: 'accepted',
-          confirmed_start: input.confirmedStart,
-          confirmed_end: input.confirmedEnd,
-          num_guests: input.numGuests,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('id', input.bookingId)
         .select()
         .single()

@@ -340,12 +340,6 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
       
       if (affectedSlots.length > 0) {
         console.log('⚠️ [AdminBookingForm] Opening capacity warning modal (calculated from slotsStatus)')
-        // Create temporary exceeded slot info
-        const firstExceeded = affectedSlots[0]
-        const exceededBy = (firstExceeded.occupied + (formData.num_guests || 0)) - firstExceeded.capacity
-        const slotName = firstExceeded.slot === 'morning' ? 'mattina' : firstExceeded.slot === 'afternoon' ? 'pomeriggio' : 'sera'
-        
-        // Store in a ref or state to use in modal
         setShowCapacityWarning(true)
         return
       }

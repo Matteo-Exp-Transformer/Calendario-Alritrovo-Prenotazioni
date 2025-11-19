@@ -1,8 +1,16 @@
 // Type definitions for Al Ritrovo Booking System
+import type { SelectedMenuItem } from './menu'
+import type { PresetMenuType } from '../features/booking/constants/presetMenus'
 
 export type BookingStatus = 'pending' | 'accepted' | 'rejected' | 'deleted'
 export type EventType = 'cena' | 'aperitivo' | 'evento' | 'laurea' | 'drink_caraffe' | 'drink_rinfresco_leggero' | 'drink_rinfresco_completo' | 'drink_rinfresco_completo_primo' | 'menu_pranzo_cena'
 export type AdminRole = 'admin' | 'staff'
+
+export interface DietaryRestriction {
+  restriction: string
+  guest_count: number
+  notes?: string
+}
 
 export interface BookingRequest {
   id: string
@@ -22,6 +30,18 @@ export interface BookingRequest {
   special_requests?: string
   menu?: string
 
+  // Extended properties for Rinfresco di Laurea
+  booking_type?: 'tavolo' | 'rinfresco_laurea'
+  menu_selection?: {
+    items: SelectedMenuItem[]
+    tiramisu_total: number
+    tiramisu_kg: number
+  }
+  dietary_restrictions?: DietaryRestriction[]
+  preset_menu?: PresetMenuType
+  menu_total_per_person?: number
+  menu_total_booking?: number
+
   // Status management
   status: BookingStatus
   confirmed_start?: string
@@ -38,11 +58,22 @@ export interface BookingRequestInput {
   client_name: string
   client_email: string
   client_phone?: string
-  event_type: EventType
+  event_type?: EventType
   desired_date: string
   desired_time?: string
   num_guests: number
   special_requests?: string
+  // Extended properties for Rinfresco di Laurea
+  booking_type?: 'tavolo' | 'rinfresco_laurea'
+  menu_selection?: {
+    items: SelectedMenuItem[]
+    tiramisu_total: number
+    tiramisu_kg: number
+  }
+  dietary_restrictions?: DietaryRestriction[]
+  preset_menu?: PresetMenuType
+  menu_total_per_person?: number
+  menu_total_booking?: number
 }
 
 export interface AdminUser {

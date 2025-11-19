@@ -55,14 +55,6 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
     }
   }
 
-  const formatDateShort = (dateStr?: string) => {
-    if (!dateStr) return 'Non disponibile'
-    try {
-      return format(new Date(dateStr), 'd MMM yyyy', { locale: it })
-    } catch {
-      return dateStr
-    }
-  }
 
   const eventTypeLabel = getBookingEventTypeLabel(booking)
   // Usa eventConfig solo se event_type è valido, altrimenti usa valori di default

@@ -477,11 +477,6 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         }
       })
 
-    // Calcola totale
-    const totalPerPerson = selectedItems
-      .filter(item => !item.name.toLowerCase().includes('tiramis'))
-      .reduce((sum, item) => sum + item.price, 0)
-
     const tiramisuSelection = selectedItems.find((item) => item.name.toLowerCase().includes('tiramis'))
     const tiramisuUnitPrice = tiramisuSelection?.price || 0
     const tiramisuKg = tiramisuSelection?.quantity || 0
@@ -534,8 +529,8 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     let menuTotalBooking = undefined
     if (formData.booking_type === 'rinfresco_laurea' && formData.menu_selection) {
       const baseTotal = formData.menu_selection.items
-        .filter((item) => !item.name.toLowerCase().includes('tiramis'))
-        .reduce((sum, item) => sum + item.price, 0)
+        .filter((item: any) => !item.name.toLowerCase().includes('tiramis'))
+        .reduce((sum: number, item: any) => sum + item.price, 0)
       const tiramisuTotal = formData.menu_selection.tiramisu_total || 0
       menuTotalPerPerson = baseTotal
       menuTotalBooking = baseTotal * formData.numGuests + tiramisuTotal
@@ -549,7 +544,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         // Email: se vuota, salviamo null (per cancellarla)
         // Se inserita, deve essere valida (già validata sopra)
         // Se undefined, non viene aggiornata (mantiene quella esistente)
-        client_email: formData.client_email?.trim() === '' ? null : (formData.client_email?.trim() || undefined),
+        client_email: formData.client_email?.trim() === '' ? undefined : (formData.client_email?.trim() || undefined),
         client_phone: formData.client_phone || undefined,
         confirmedStart,
         confirmedEnd,
@@ -560,7 +555,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         menu_total_per_person: menuTotalPerPerson,
         menu_total_booking: menuTotalBooking,
         dietary_restrictions: formData.booking_type === 'rinfresco_laurea' ? formData.dietary_restrictions : undefined,
-        preset_menu: formData.booking_type === 'rinfresco_laurea' ? formData.preset_menu : undefined
+        preset_menu: formData.booking_type === 'rinfresco_laurea' ? (formData.preset_menu || undefined) : undefined
       },
       {
         onSuccess: () => {
