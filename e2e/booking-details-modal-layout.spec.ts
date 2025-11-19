@@ -26,14 +26,15 @@ test.describe('BookingDetailsModal - New Layout Verification', () => {
     await expect(modalHeader).toBeVisible({ timeout: 5000 });
     console.log('✅ Modal is visible');
 
-    // VERIFICATION 1: Check that content area has px-6 class
+    // VERIFICATION 1: Check that content area has inline padding styles (24px = 1.5rem = px-6)
     const contentArea = page.locator('.bg-amber-100').first();
-    const hasClass = await contentArea.evaluate((el) => {
-      return el.classList.contains('px-6');
+    const paddingLeft = await contentArea.evaluate((el) => {
+      const computed = window.getComputedStyle(el);
+      return computed.paddingLeft;
     });
-    console.log(`📏 Content area has px-6 class: ${hasClass}`);
-    expect(hasClass).toBe(true);
-    console.log('✅ Padding class px-6 applied');
+    console.log(`📏 Content area paddingLeft: ${paddingLeft}`);
+    expect(paddingLeft).toBe('24px');
+    console.log('✅ Padding 24px applied via inline styles');
 
     // VERIFICATION 2: Check section titles are uppercase
     const sectionTitles = page.locator('h3.uppercase');

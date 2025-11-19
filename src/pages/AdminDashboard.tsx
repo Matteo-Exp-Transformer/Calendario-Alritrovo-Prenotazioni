@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
-import { AdminHeader } from '@/components/AdminHeader'
 import { useBookingStats } from '@/features/booking/hooks/useBookingQueries'
 import { PendingRequestsTab } from '@/features/booking/components/PendingRequestsTab'
 import { ArchiveTab } from '@/features/booking/components/ArchiveTab'
 import { BookingCalendarTab } from '@/features/booking/components/BookingCalendarTab'
 import { SettingsTab } from '@/features/booking/components/SettingsTab'
 import { AdminBookingForm } from '@/features/booking/components/AdminBookingForm'
-import { Calendar, Clock, Archive, Settings, Plus } from 'lucide-react'
+import { Calendar, Clock, Archive, Settings, Plus, User, Shield } from 'lucide-react'
 import { CollapsibleCard } from '@/components/ui/CollapsibleCard'
+import { useAdminAuth } from '@/features/booking/hooks/useAdminAuth'
 
 type Tab = 'calendar' | 'pending' | 'archive' | 'settings'
 
@@ -54,6 +54,7 @@ export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('calendar')
   const [showNewBookingPanel, setShowNewBookingPanel] = useState(false)
   const { data: stats } = useBookingStats()
+  const { user } = useAdminAuth()
 
   // Chiudi il pannello nuova prenotazione quando cambi tab (se necessario)
   const handleTabChange = (tab: Tab) => {
@@ -66,12 +67,68 @@ export const AdminDashboard: React.FC = () => {
       <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-6">
           {/* Top Bar: Logo + User Info */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">Al Ritrovo</h1>
               <p className="text-gray-600 text-sm mt-1">Dashboard Amministratore</p>
             </div>
-            <AdminHeader />
+
+            {/* User Badge */}
+            <div className="bg-white rounded-modern border-2 border-gray-400 shadow-md hover:shadow-lg hover:border-purple-500 transition-all px-3 py-2.5">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center shadow-sm">
+                  <User className="w-4.5 h-4.5 text-white" />
+                </div>
+                <div className="text-left min-w-0">
+                  <p className="text-xs font-bold text-gray-900 leading-tight truncate">
+                    {user?.email}
+                  </p>
+                  <div className="flex items-center gap-1 mt-0.5">
+                    <div className="w-3.5 h-3.5 rounded-md bg-yellow-400 flex items-center justify-center">
+                      <Shield className="w-2 h-2 text-yellow-900" />
+                    </div>
+                    <p className="text-[9px] font-semibold text-gray-600 uppercase">
+                      {user?.role === 'admin' ? 'Admin' : 'Staff'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Badges - Griglia 2x2 responsive */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+            {/* Settimana */}
+            <div className="bg-white rounded-modern border-2 border-violet-400 shadow-md hover:shadow-lg hover:border-violet-500 transition-all p-3 flex flex-col items-center justify-center">
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 text-center">Settimana</p>
+              <p className="text-2xl font-black text-gray-900 leading-none text-center">
+                {stats?.totalWeek || 0}
+              </p>
+            </div>
+
+            {/* Oggi */}
+            <div className="bg-white rounded-modern border-2 border-cyan-400 shadow-md hover:shadow-lg hover:border-cyan-500 transition-all p-3 flex flex-col items-center justify-center">
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 text-center">Oggi</p>
+              <p className="text-2xl font-black text-gray-900 leading-none text-center">
+                {stats?.totalDay || 0}
+              </p>
+            </div>
+
+            {/* Mese */}
+            <div className="bg-white rounded-modern border-2 border-blue-400 shadow-md hover:shadow-lg hover:border-blue-500 transition-all p-3 flex flex-col items-center justify-center">
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 text-center">Mese</p>
+              <p className="text-2xl font-black text-gray-900 leading-none text-center">
+                {stats?.totalMonth || 0}
+              </p>
+            </div>
+
+            {/* Rifiutate */}
+            <div className="bg-white rounded-modern border-2 border-rose-400 shadow-md hover:shadow-lg hover:border-rose-500 transition-all p-3 flex flex-col items-center justify-center">
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 text-center">Rifiutate</p>
+              <p className="text-2xl font-black text-gray-900 leading-none text-center">
+                {stats?.rejected || 0}
+              </p>
+            </div>
           </div>
 
           {/* Navigation Tabs */}

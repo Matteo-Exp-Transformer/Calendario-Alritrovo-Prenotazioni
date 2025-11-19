@@ -7,6 +7,7 @@ import { extractTimeFromISO } from '../utils/dateUtils'
 import { getBookingEventTypeLabel } from '../utils/eventTypeLabels'
 
 type ArchiveFilter = 'all' | 'accepted' | 'rejected'
+type SortOrder = 'created_at' | 'booking_date'
 
 const EVENT_TYPE_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {
   cena: { label: 'Cena', icon: UtensilsCrossed, color: 'bg-booking-cena' },
@@ -42,6 +43,24 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
     return timeStr.split(':').slice(0, 2).join(':')
   }
 
+  const formatDateTime = (dateStr?: string) => {
+    if (!dateStr) return 'Non disponibile'
+    try {
+      return format(new Date(dateStr), 'd MMM yyyy, HH:mm', { locale: it })
+    } catch {
+      return dateStr
+    }
+  }
+
+  const formatDateShort = (dateStr?: string) => {
+    if (!dateStr) return 'Non disponibile'
+    try {
+      return format(new Date(dateStr), 'd MMM yyyy', { locale: it })
+    } catch {
+      return dateStr
+    }
+  }
+
   const eventTypeLabel = getBookingEventTypeLabel(booking)
   // Usa eventConfig solo se event_type è valido, altrimenti usa valori di default
   const eventConfig = booking.event_type && EVENT_TYPE_CONFIG[booking.event_type] 
@@ -59,13 +78,22 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
     : booking.desired_time || 'Non specificato'
 
   return (
-    <div style={{
-      background: 'linear-gradient(to bottom right, rgba(240, 244, 255, 0.9), rgba(224, 231, 255, 0.9), rgba(216, 220, 254, 0.9))',
-      border: '3px solid rgba(129, 140, 248, 0.6)',
-      boxShadow: '0 4px 12px -2px rgba(129, 140, 248, 0.2)',
-      backdropFilter: 'blur(10px)',
-      WebkitBackdropFilter: 'blur(10px)',
-    }} className="rounded-2xl hover:shadow-2xl transition-all duration-300 relative">
+    <div className="relative">
+      {/* Badge Data Creazione - Esterno, in alto a sinistra, completamente fuori dalla card */}
+      {booking.created_at && (
+        <div className="absolute -top-8 -left-4 z-30">
+          <span className="inline-block px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-md">
+            Data Creazione : {formatDateShort(booking.created_at)}
+          </span>
+        </div>
+      )}
+      <div style={{
+        background: 'linear-gradient(to bottom right, rgba(240, 244, 255, 0.9), rgba(224, 231, 255, 0.9), rgba(216, 220, 254, 0.9))',
+        border: '3px solid rgba(129, 140, 248, 0.6)',
+        boxShadow: '0 4px 12px -2px rgba(129, 140, 248, 0.2)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+      }} className="rounded-2xl hover:shadow-2xl transition-all duration-300">
       {/* Header Collapsible */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
@@ -211,6 +239,7 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
                 <span className="text-sm md:text-base font-semibold text-warm-wood-dark">{eventTypeLabel}</span>
               </div>
             )}
+
           </div>
 
           {/* Note Richieste Speciali - Fuori dalla griglia */}
@@ -260,6 +289,7 @@ const ArchiveBookingCard: React.FC<ArchiveBookingCardProps> = ({ booking, onView
           })()}
         </div>
       )}
+      </div>
     </div>
   )
 }
@@ -271,19 +301,50 @@ interface ArchiveTabProps {
 export const ArchiveTab: React.FC<ArchiveTabProps> = ({ onViewInCalendar }) => {
   const { data: allBookings, isLoading, error } = useAllBookings()
   const [filter, setFilter] = useState<ArchiveFilter>('all')
+  const [sortOrder, setSortOrder] = useState<SortOrder>('booking_date')
 
   const filteredBookings = React.useMemo(() => {
     if (!allBookings) return []
 
+    let filtered = []
     switch (filter) {
       case 'accepted':
-        return allBookings.filter((b) => b.status === 'accepted')
+        filtered = allBookings.filter((b) => b.status === 'accepted')
+        break
       case 'rejected':
-        return allBookings.filter((b) => b.status === 'rejected')
+        filtered = allBookings.filter((b) => b.status === 'rejected')
+        break
       default:
-        return allBookings
+        filtered = allBookings
     }
-  }, [allBookings, filter])
+
+    // Ordina in base al tipo di ordinamento selezionato
+    return filtered.sort((a, b) => {
+      if (sortOrder === 'created_at') {
+        // Ordina per data/ora di creazione (più recente in alto)
+        const dateA = a.created_at ? new Date(a.created_at) : null
+        const dateB = b.created_at ? new Date(b.created_at) : null
+        
+        if (!dateA && !dateB) return 0
+        if (!dateA) return 1  // Metti quelle senza data in fondo
+        if (!dateB) return -1
+        
+        // Confronta i timestamp completi (decrescente: più recente prima)
+        return dateB.getTime() - dateA.getTime()
+      } else {
+        // Ordina per data della prenotazione (più recente in alto)
+        const dateA = a.confirmed_start || a.desired_date
+        const dateB = b.confirmed_start || b.desired_date
+        
+        if (!dateA && !dateB) return 0
+        if (!dateA) return 1  // Metti quelle senza data in fondo
+        if (!dateB) return -1
+        
+        // Confronta le date (decrescente: più recente prima)
+        return new Date(dateB).getTime() - new Date(dateA).getTime()
+      }
+    })
+  }, [allBookings, filter, sortOrder])
 
   if (isLoading) {
     return (
@@ -312,35 +373,70 @@ export const ArchiveTab: React.FC<ArchiveTabProps> = ({ onViewInCalendar }) => {
         background: 'linear-gradient(to bottom right, rgba(240, 244, 255, 0.9), rgba(224, 231, 255, 0.9), rgba(216, 220, 254, 0.9))',
         border: '3px solid rgba(129, 140, 248, 0.6)',
         boxShadow: '0 4px 12px -2px rgba(129, 140, 248, 0.2)',
-      }} className="rounded-2xl p-6">
-        <label className="text-base font-bold text-warm-wood uppercase tracking-wide mb-4 block">
-          Filtra per Status
-        </label>
+      }} className="rounded-2xl p-6 space-y-6">
+        {/* Filtro per Status */}
+        <div>
+          <label className="text-base font-bold text-warm-wood uppercase tracking-wide mb-4 block">
+            Filtra per Status
+          </label>
 
-        <div className="flex gap-4">
-          {(['all', 'accepted', 'rejected'] as ArchiveFilter[]).map((f) => (
-            <button
-              key={f}
-              data-filter={f}
-              onClick={() => setFilter(f)}
-              className={`
-                flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl border-2 shadow-lg hover:shadow-xl transition-all font-bold uppercase tracking-wide
-                ${filter === f
-                  ? f === 'all'
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-indigo-500'
-                    : f === 'accepted'
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-500'
-                    : 'bg-gradient-to-r from-rose-500 to-red-600 text-white border-rose-500'
-                  : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
-                }
-              `}
-            >
-              {f === 'all' && <Archive className="w-5 h-5" />}
-              {f === 'accepted' && <CheckCircle className="w-5 h-5" />}
-              {f === 'rejected' && <XCircle className="w-5 h-5" />}
-              {f === 'all' ? 'Tutte' : f === 'accepted' ? 'Accettate' : 'Rifiutate'}
-            </button>
-          ))}
+          <div className="flex gap-4">
+            {(['all', 'accepted', 'rejected'] as ArchiveFilter[]).map((f) => (
+              <button
+                key={f}
+                data-filter={f}
+                onClick={() => setFilter(f)}
+                className={`
+                  flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl border-2 shadow-lg hover:shadow-xl transition-all font-bold uppercase tracking-wide
+                  ${filter === f
+                    ? f === 'all'
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-indigo-500'
+                      : f === 'accepted'
+                      ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-500'
+                      : 'bg-gradient-to-r from-rose-500 to-red-600 text-white border-rose-500'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+                  }
+                `}
+              >
+                {f === 'all' && <Archive className="w-5 h-5" />}
+                {f === 'accepted' && <CheckCircle className="w-5 h-5" />}
+                {f === 'rejected' && <XCircle className="w-5 h-5" />}
+                {f === 'all' ? 'Tutte' : f === 'accepted' ? 'Accettate' : 'Rifiutate'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Selettore Ordinamento */}
+        <div>
+          <label className="text-base font-bold text-warm-wood uppercase tracking-wide mb-4 block">
+            Ordina per
+          </label>
+
+          <div className="flex gap-4">
+            {([
+              { value: 'booking_date' as SortOrder, label: 'Data Prenotazione', icon: Calendar },
+              { value: 'created_at' as SortOrder, label: 'Data Creazione', icon: Clock }
+            ]).map((option) => {
+              const Icon = option.icon
+              return (
+                <button
+                  key={option.value}
+                  onClick={() => setSortOrder(option.value)}
+                  className={`
+                    flex-1 flex items-center justify-center gap-2 px-6 py-4 rounded-xl border-2 shadow-lg hover:shadow-xl transition-all font-bold uppercase tracking-wide
+                    ${sortOrder === option.value
+                      ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white border-blue-500'
+                      : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+                    }
+                  `}
+                >
+                  <Icon className="w-5 h-5" />
+                  {option.label}
+                </button>
+              )
+            })}
+          </div>
         </div>
       </div>
 
@@ -365,7 +461,7 @@ export const ArchiveTab: React.FC<ArchiveTabProps> = ({ onViewInCalendar }) => {
             </p>
           </div>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-[60px] pt-8">
             {filteredBookings.map((booking) => {
               return <ArchiveBookingCard key={booking.id} booking={booking} onViewInCalendar={onViewInCalendar} />
             })}

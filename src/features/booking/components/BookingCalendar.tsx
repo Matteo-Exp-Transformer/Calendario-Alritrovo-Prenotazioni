@@ -12,6 +12,7 @@ import { transformBookingsToCalendarEvents } from '../utils/bookingEventTransfor
 import { BookingDetailsModal } from './BookingDetailsModal'
 import { calculateDailyCapacity, getSlotsOccupiedByBooking } from '../utils/capacityCalculator'
 import { CollapsibleCard } from '@/components/ui/CollapsibleCard'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select'
 
 import { extractDateFromISO, extractTimeFromISO } from '../utils/dateUtils'
 import { getBookingEventTypeLabel } from '../utils/eventTypeLabels'
@@ -43,6 +44,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
     return initialDate || new Date().toISOString().split('T')[0]
   })
   const [calendarKey, setCalendarKey] = useState(0) // Force re-render key
+  const [currentView, setCurrentView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth')
 
   // Aggiorna il selectedBooking quando i bookings cambiano (dopo modifica)
   useEffect(() => {
@@ -139,11 +141,11 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
 
   const config = {
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
-    initialView: 'dayGridMonth',
+    initialView: currentView,
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
-      right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek',
+      right: '',
     },
     height: 'auto',
     locale: 'it',
@@ -256,25 +258,83 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
     },
   }
 
+  const handleViewChange = (view: typeof currentView) => {
+    setCurrentView(view)
+    const calendarApi = calendarRef.current?.getApi()
+    if (calendarApi) {
+      calendarApi.changeView(view)
+    }
+  }
+
+  const viewButtonClass = (view: typeof currentView) => {
+    const isActive = currentView === view
+    return `px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+      isActive
+        ? 'bg-warm-wood text-white shadow-md'
+        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+    }`
+  }
+
   return (
     <>
       <div className="space-y-6">
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-warm-beige">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-warm-wood to-warm-orange flex items-center justify-center shadow-md">
-              <Calendar className="h-7 w-7 text-white" />
+          {/* Header Responsive */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-6">
+            {/* Icona + Titolo */}
+            <div className="flex items-center gap-4 flex-1">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-warm-wood to-warm-orange flex items-center justify-center shadow-md">
+                <Calendar className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-serif font-bold text-warm-wood">
+                  Calendario Prenotazioni
+                </h2>
+                <p className="text-xs sm:text-sm text-gray-600 mt-1">
+                  Vista completa delle prenotazioni accettate
+                </p>
+              </div>
             </div>
-            <div className="flex-1">
-              <h2 className="text-3xl font-serif font-bold text-warm-wood">
-                Calendario Prenotazioni
-              </h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Vista completa delle prenotazioni accettate
-              </p>
+
+            {/* Badge + View Controls */}
+            <div className="flex items-center justify-between gap-6 sm:gap-8 w-full sm:w-auto">
+              {/* Badge conteggio */}
+              <span className="px-4 py-2 bg-gradient-to-r from-olive-green to-warm-wood text-white rounded-xl text-sm font-semibold shadow-md">
+                {bookings.length} prenotazioni
+              </span>
+
+              {/* Dropdown Vista - Mobile only */}
+              <Select value={currentView} onValueChange={handleViewChange}>
+                <SelectTrigger className="w-[140px] md:hidden">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent
+                  className="bg-white !bg-white bg-opacity-100"
+                  style={{ backgroundColor: '#ffffff', opacity: 1, zIndex: 9999 }}
+                >
+                  <SelectItem value="dayGridMonth">Mese</SelectItem>
+                  <SelectItem value="timeGridWeek">Settimana</SelectItem>
+                  <SelectItem value="timeGridDay">Giorno</SelectItem>
+                  <SelectItem value="listWeek">Lista</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Pulsanti Vista - Desktop only */}
+              <div className="hidden md:flex gap-2">
+                <button onClick={() => handleViewChange('dayGridMonth')} className={viewButtonClass('dayGridMonth')}>
+                  Mese
+                </button>
+                <button onClick={() => handleViewChange('timeGridWeek')} className={viewButtonClass('timeGridWeek')}>
+                  Settimana
+                </button>
+                <button onClick={() => handleViewChange('timeGridDay')} className={viewButtonClass('timeGridDay')}>
+                  Giorno
+                </button>
+                <button onClick={() => handleViewChange('listWeek')} className={viewButtonClass('listWeek')}>
+                  Lista
+                </button>
+              </div>
             </div>
-            <span className="px-5 py-2.5 bg-gradient-to-r from-olive-green to-warm-wood text-white rounded-xl text-base font-semibold shadow-md">
-              {bookings.length} prenotazioni
-            </span>
           </div>
 
           <FullCalendar ref={calendarRef} key={calendarKey} {...config} events={events} />

@@ -1,8 +1,8 @@
 # 📊 BookingDetailsModal - Complete Redesign Report
 
 **Data:** 2025-01-27 (creato) | 2025-01-19 (aggiornato)
-**Versione:** 3.1 (Responsive + Layout + Padding Fixed)
-**Status:** ✅ Tutti i Fix Implementati
+**Versione:** 3.3 (Responsive + Layout + Padding + Mobile Buttons + Scroll Fix Attempts)
+**Status:** ⚠️ Scroll Orizzontale Mobile NON RISOLTO
 
 ---
 
@@ -639,6 +639,187 @@ const InfoRow: React.FC<{ label: string; value: string | React.ReactNode }> =
 - ✅ Testo non più attaccato ai margini del modal
 - ✅ Spazio respirabile tra contenuto e bordi
 
+#### 4. ✅ Mobile Action Buttons Fixed
+
+**Problema:** Su mobile (< 375px) i pulsanti "Modifica" e "Elimina" causavano scroll orizzontale. Il tasto "Elimina" usciva fuori dallo schermo.
+
+**Causa:** Padding troppo grande (`px-6` = 24px) + gap (`gap-3` = 12px) + testo lungo
+
+**Soluzione implementata:** Responsive padding e spacing
+
+```typescript
+// BookingDetailsModal.tsx, lines 496-536
+<div className="border-t-2 border-gray-200 p-2 sm:p-3 bg-amber-100 flex-shrink-0">
+  <div className="flex gap-2"> {/* Ridotto da gap-3 */}
+    <button className="flex-1 px-3 sm:px-6 py-3 ..."> {/* px-3 mobile, px-6 desktop */}
+      <Edit className="h-5 w-5 flex-shrink-0" />
+      <span className="truncate">Modifica</span> {/* truncate previene overflow */}
+    </button>
+  </div>
+</div>
+```
+
+**Modifiche responsive:**
+- Footer padding: `p-2` mobile → `p-3` desktop
+- Button padding: `px-3` mobile → `px-6` desktop
+- Gap between buttons: `gap-2` (8px invece di 12px)
+- Font size: `text-sm` mobile → `text-base` desktop
+- Min height: `48px` mobile → `56px` desktop
+- Icons: `flex-shrink-0` per evitare compressione
+- Text: `truncate` per troncare se necessario
+
+**Risultato:**
+- ✅ Tutti i pulsanti visibili completamente su mobile
+- ✅ Nessuno scroll orizzontale richiesto
+- ✅ Testo dei pulsanti sempre leggibile
+- ✅ Layout ottimizzato per tutti i viewport
+
+#### 5. ✅ DetailsTab - Box Rimossi
+
+**Modifica:** Rimossi i quadrati grigi (`bg-gray-50`, `border`, `rounded-lg`, `p-4`) dalle sezioni in view mode
+
+**Risultato:**
+- ✅ Layout più pulito e minimale
+- ✅ Solo testo con titoli uppercase
+- ✅ Grid layout conservato
+- ✅ Edit mode mantiene box per usabilità input fields
+
+---
+
+## ⚠️ AGGIORNAMENTO 2025-01-19: Tentativo Fix Scroll Orizzontale Mobile - NON RISOLTO
+
+### 🔴 Problema Persistente
+
+**Issue:** Anche dopo tutte le modifiche responsive, il modal su mobile (< 375px) richiede ancora scroll orizzontale per visualizzare completamente il contenuto.
+
+**Feedback utente:** "il modal ancora non è come lo descrivi. devo fare scroll orizzontale"
+
+### 🛠️ Tentativi di Fix Implementati
+
+#### Tentativo 1: Overflow-X Hidden sul Modal Container
+```typescript
+// BookingDetailsModal.tsx, line 375
+<div style={{
+  // ... other styles
+  overflowX: 'hidden'  // ✅ Aggiunto
+}}>
+```
+
+**Risultato:** ❌ Non risolve il problema
+
+#### Tentativo 2: Padding Header Responsive
+```typescript
+// BookingDetailsModal.tsx, line 408
+<div className="bg-blue-50 border-b-2 border-blue-200 px-2 sm:px-4 py-3 flex-shrink-0">
+//                                                           ↑ px-2 mobile, px-4 desktop
+```
+
+**Risultato:** ❌ Non risolve il problema
+
+#### Tentativo 3: Close Button Ottimizzato
+```typescript
+// BookingDetailsModal.tsx, line 420
+<button
+  className="p-2 hover:bg-gray-100 rounded-full ... flex-shrink-0"
+  //        ↑ p-2 invece di p-2.5, aggiunto flex-shrink-0
+>
+```
+
+**Risultato:** ❌ Non risolve il problema
+
+#### Tentativo 4: Titolo Header Responsive con Truncate
+```typescript
+// BookingDetailsModal.tsx, lines 410-413
+<div className="flex-1 min-w-0 pr-2">
+  <h2 className="text-base sm:text-lg font-bold text-gray-900 truncate">
+    Dettagli Prenotazione
+  </h2>
+```
+
+**Modifiche:**
+- Container con `flex-1 min-w-0 pr-2` per permettere shrink
+- Titolo con `text-base` mobile → `text-lg` desktop
+- Aggiunto `truncate` per prevenire overflow testo
+
+**Risultato:** ❌ Non risolve il problema
+
+#### Tentativo 5: Body Scroll Lock quando Modal Aperto
+```typescript
+// BookingDetailsModal.tsx, lines 71-88
+useEffect(() => {
+  if (isOpen) {
+    // Save original overflow
+    const originalOverflow = document.body.style.overflow
+    const originalOverflowX = document.body.style.overflowX
+
+    // Lock scroll
+    document.body.style.overflow = 'hidden'
+    document.body.style.overflowX = 'hidden'
+
+    // Restore on cleanup
+    return () => {
+      document.body.style.overflow = originalOverflow
+      document.body.style.overflowX = originalOverflowX
+    }
+  }
+}, [isOpen])
+```
+
+**Obiettivo:** Prevenire scroll orizzontale causato dalla pagina sottostante (calendario/dashboard)
+
+**Risultato:** ❌ Non risolve il problema completamente
+
+### 📊 Test E2E Status
+
+**Test responsive passati (4/4):**
+- ✅ Mobile width = 375px (100% viewport)
+- ✅ Tablet width = 691px (~90% viewport)
+- ✅ Desktop width = 896px
+- ✅ Dynamic resize funziona
+
+**Nota:** I test verificano solo la **larghezza del modal**, non l'assenza di scroll orizzontale sulla pagina.
+
+### 🔍 Analisi Problema
+
+**Possibili cause non ancora investigate:**
+1. **Underlying page overflow:** Il calendario o l'admin dashboard potrebbero avere larghezza fissa che causa scroll
+2. **Viewport meta tag:** Potrebbe mancare o essere configurato male
+3. **Hidden elements:** Potrebbero esserci elementi invisibili con larghezza > viewport
+4. **Tab buttons min-width:** I pulsanti tab potrebbero avere constraint di larghezza minima
+5. **Content inside tabs:** Il contenuto del DetailsTab potrebbe avere elementi che sfuggono
+
+### 🎯 Modifiche Totali Applicate (Tentativo Fix)
+
+**File modificati:**
+- `BookingDetailsModal.tsx`:
+  - Line 375: Aggiunto `overflowX: 'hidden'` al modal container
+  - Line 408: Header padding responsive `px-2 sm:px-4`
+  - Lines 410-413: Titolo con `truncate` e sizing responsive
+  - Line 420: Close button `p-2` e `flex-shrink-0`
+  - Lines 71-88: Body scroll lock useEffect
+
+**E2E test aggiornati:**
+- `booking-details-modal-layout.spec.ts`: Test padding aggiornato per verificare inline styles (24px) invece di class `px-6`
+
+### ⚠️ Conclusione
+
+**Status finale:** ❌ PROBLEMA NON RISOLTO
+
+Nonostante 5 tentativi diversi e modifiche a:
+- Modal container overflow
+- Header padding e sizing
+- Titolo responsive
+- Close button size
+- Body scroll lock
+
+Il modal continua a richiedere scroll orizzontale su mobile secondo il feedback dell'utente.
+
+**Raccomandazione:** Necessaria ulteriore investigazione per identificare l'elemento specifico che causa l'overflow. Possibile approccio:
+1. Test con browser devtools mobile per identificare elemento overflowing
+2. Uso di CSS `* { outline: 1px solid red; }` per visualizzare tutti i box
+3. Controllo computed width di ogni elemento child del modal
+4. Verifica viewport meta tag in `index.html`
+
 ---
 
 ## 📝 Note Tecniche
@@ -720,5 +901,5 @@ Tutti i componenti hanno strict TypeScript interfaces:
 
 **Report creato:** 2025-01-27
 **Ultima modifica:** 2025-01-19
-**Versione:** 3.0
+**Versione:** 3.3
 **Autori:** Claude Code (frontend-developer agent, backend-specialist agent)
