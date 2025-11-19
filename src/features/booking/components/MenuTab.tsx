@@ -23,6 +23,7 @@ interface MenuTabProps {
     tiramisuTotal: number
     tiramisuKg: number
   }) => void
+  onPresetMenuChange?: (preset: PresetMenuType) => void
 }
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -53,7 +54,8 @@ export const MenuTab: React.FC<MenuTabProps> = ({
   presetMenu,
   isMenuExpanded,
   onMenuExpandToggle,
-  onMenuChange
+  onMenuChange,
+  onPresetMenuChange
 }) => {
   // Group menu items by category
   const groupedItems = useMemo(() => {
@@ -109,6 +111,9 @@ export const MenuTab: React.FC<MenuTabProps> = ({
       selectedItems={menuSelection?.items || []}
       numGuests={numGuests}
       onMenuChange={onMenuChange}
+      presetMenu={presetMenu as any}
+      onPresetMenuChange={onPresetMenuChange}
+      bookingType="rinfresco_laurea"
     />
   ) : (
     <div className="space-y-4">
@@ -166,12 +171,15 @@ export const MenuTab: React.FC<MenuTabProps> = ({
       )}
 
       {/* Collapsible Menu Section */}
-      {menuSelection?.items && menuSelection.items.length > 0 ? (
+      {isEditMode ? (
+        // In edit mode, always show MenuSelection (even if no items selected)
+        menuContent
+      ) : menuSelection?.items && menuSelection.items.length > 0 ? (
         <CollapsibleSection
           title="Menu Selezionato"
           icon="🍽️"
           summary={menuSummary}
-          isExpanded={isEditMode || isMenuExpanded}
+          isExpanded={isMenuExpanded}
           onToggle={onMenuExpandToggle}
         >
           {menuContent}

@@ -12,6 +12,8 @@ import { DetailsTab } from './DetailsTab'
 import { MenuTab } from './MenuTab'
 import { DietaryTab } from './DietaryTab'
 import type { SelectedMenuItem } from '@/types/menu'
+import { getPresetMenu, type PresetMenuType } from '../constants/presetMenus'
+import { useMenuItems } from '../hooks/useMenuItems'
 
 interface BookingDetailsModalProps {
   isOpen: boolean
@@ -98,6 +100,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   const updateMutation = useUpdateBooking()
   const cancelMutation = useCancelBooking()
   const { data: acceptedBookings = [] } = useAcceptedBookings()
+  const { data: menuItems = [] } = useMenuItems()
 
   // Initialize form data from booking
   const [formData, setFormData] = useState(() => {
@@ -342,7 +345,20 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       setShowTypeChangeWarning(true)
       setPendingBookingType(newType)
     } else {
-      setFormData(prev => ({ ...prev, booking_type: newType }))
+      // Quando si cambia a rinfresco_laurea, inizializza menu_selection se non esiste
+      if (newType === 'rinfresco_laurea' && !formData.menu_selection) {
+        setFormData(prev => ({
+          ...prev,
+          booking_type: newType,
+          menu_selection: {
+            items: [],
+            tiramisu_total: 0,
+            tiramisu_kg: 0
+          }
+        }))
+      } else {
+        setFormData(prev => ({ ...prev, booking_type: newType }))
+      }
     }
   }
 
@@ -370,6 +386,114 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         items: payload.items,
         tiramisu_total: payload.tiramisuTotal,
         tiramisu_kg: payload.tiramisuKg
+      }
+    }))
+  }
+
+  const handlePresetMenuChange = (presetType: PresetMenuType) => {
+    if (!presetType) {
+      // Reset menu se nessun preset
+      setFormData(prev => ({
+        ...prev,
+        preset_menu: null,
+        menu_selection: {
+          items: [],
+          tiramisu_total: 0,
+          tiramisu_kg: 0
+        }
+      }))
+      return
+    }
+
+    const preset = getPresetMenu(presetType)
+    if (!preset) return
+
+    // Helper per normalizzare i nomi per il matching (case-insensitive, ignora spazi extra)
+    const normalizeName = (name: string): string => {
+      return name.toLowerCase().trim().replace(/\s+/g, ' ').replace(/\//g, '/').replace(/\/\s*/g, '/').replace(/\s*\/\s*/g, '/')
+    }
+
+    // Helper per match flessibile - cerca anche varianti comuni
+    const matchesName = (itemName: string, presetName: string): boolean => {
+      const normalizedItem = normalizeName(itemName)
+      const normalizedPreset = normalizeName(presetName)
+      
+      // Match esatto normalizzato
+      if (normalizedItem === normalizedPreset) return true
+      
+      // Match per "Caraffe" - gestisci PRIMA il match parziale per evitare match errati
+      // IMPORTANTE: Gestire questo caso PRIMA del match parziale generico
+      const presetHasCaraffe = normalizedPreset.includes('caraffe')
+      const presetHasDrink = normalizedPreset.includes('drink')
+      const presetHasPremium = normalizedPreset.includes('premium')
+      
+      if (presetHasCaraffe) {
+        const hasCaraffe = normalizedItem.includes('caraffe')
+        const hasDrink = normalizedItem.includes('drink')
+        const hasPremium = normalizedItem.includes('premium')
+        
+        // Caso 1: Preset ha "Caraffe Premium" (senza "drink") - matcha "Caraffe Drink Premium" o "Caraffe / Drink Premium"
+        if (presetHasPremium && !presetHasDrink) {
+          if (hasCaraffe && hasPremium) return true
+          // NON matchare se l'item non ha premium
+          return false
+        }
+        
+        // Caso 2: Preset ha "Caraffe/Drink" (con "drink", senza premium) - matcha SOLO items senza premium
+        if (presetHasDrink && !presetHasPremium) {
+          if (hasCaraffe && hasDrink && !hasPremium) return true
+          // NON matchare se l'item ha premium
+          return false
+        }
+        
+        // Caso 3: Preset ha "Caraffe/Drink Premium" (con "drink" e "premium") - matcha SOLO items con premium
+        if (presetHasDrink && presetHasPremium) {
+          if (hasCaraffe && hasDrink && hasPremium) return true
+          // NON matchare se l'item non ha premium
+          return false
+        }
+      }
+      
+      // Match parziale per altri items (solo se non è un caso Caraffe)
+      if (normalizedItem.includes(normalizedPreset) || normalizedPreset.includes(normalizedItem)) return true
+      
+      return false
+    }
+
+    // Trova gli items nel database per nome (matching flessibile)
+    const selectedItems: SelectedMenuItem[] = menuItems
+      .filter(item => {
+        return preset.itemNames.some(presetName => matchesName(item.name, presetName))
+      })
+      .map(item => {
+        const isTiramisu = item.name.toLowerCase().includes('tiramis')
+        return {
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          category: item.category,
+          quantity: isTiramisu ? 1 : undefined,
+          totalPrice: isTiramisu ? item.price : item.price
+        }
+      })
+
+    // Calcola totale
+    const totalPerPerson = selectedItems
+      .filter(item => !item.name.toLowerCase().includes('tiramis'))
+      .reduce((sum, item) => sum + item.price, 0)
+
+    const tiramisuSelection = selectedItems.find((item) => item.name.toLowerCase().includes('tiramis'))
+    const tiramisuUnitPrice = tiramisuSelection?.price || 0
+    const tiramisuKg = tiramisuSelection?.quantity || 0
+    const tiramisuTotal = tiramisuKg > 0 ? tiramisuUnitPrice * tiramisuKg : 0
+
+    setFormData(prev => ({
+      ...prev,
+      preset_menu: presetType,
+      menu_selection: {
+        items: selectedItems,
+        tiramisu_total: tiramisuTotal,
+        tiramisu_kg: tiramisuKg
       }
     }))
   }
@@ -597,6 +721,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                 isMenuExpanded={isMenuExpanded}
                 onMenuExpandToggle={() => setIsMenuExpanded(!isMenuExpanded)}
                 onMenuChange={handleMenuChange}
+                onPresetMenuChange={handlePresetMenuChange}
               />
             )}
 
