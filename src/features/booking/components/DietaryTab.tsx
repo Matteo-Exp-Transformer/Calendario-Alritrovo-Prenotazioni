@@ -1,5 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import type { BookingRequest } from '@/types/booking'
+import { DIETARY_RESTRICTIONS, type DietaryRestrictionType } from '@/types/menu'
+import { Plus, Trash2 } from 'lucide-react'
 
 interface Props {
   booking: BookingRequest
@@ -14,14 +16,11 @@ interface Props {
   onSpecialRequestsChange: (value: string) => void
 }
 
-const DIETARY_RESTRICTIONS_OPTIONS = [
-  'No Lattosio',
-  'Vegano',
-  'Vegetariano',
-  'No Glutine',
-  'No Frutta secca',
-  'Altro'
-]
+interface DietaryRestriction {
+  restriction: string
+  guest_count: number
+  notes?: string
+}
 
 export const DietaryTab: React.FC<Props> = ({
   booking: _booking,
@@ -31,126 +30,165 @@ export const DietaryTab: React.FC<Props> = ({
   onDietaryRestrictionsChange,
   onSpecialRequestsChange
 }) => {
-  // Helper to check if a restriction is currently selected
-  const isRestrictionSelected = (restrictionName: string) => {
-    return dietaryRestrictions.some(r => r.restriction === restrictionName)
-  }
+  const [selectedRestriction, setSelectedRestriction] = useState<DietaryRestrictionType | 'Altro'>('No Lattosio')
+  const [guestCount, setGuestCount] = useState<number>(1)
+  const [otherNotes, setOtherNotes] = useState<string>('')
 
-  // Helper to get guest count for a restriction
-  const getGuestCount = (restrictionName: string): number => {
-    const restriction = dietaryRestrictions.find(r => r.restriction === restrictionName)
-    return restriction?.guest_count || 1
-  }
-
-  // Helper to get notes for a restriction
-  const getNotes = (restrictionName: string): string => {
-    const restriction = dietaryRestrictions.find(r => r.restriction === restrictionName)
-    return restriction?.notes || ''
-  }
-
-  // Handle checkbox change
-  const handleRestrictionToggle = (restrictionName: string, checked: boolean) => {
-    if (checked) {
-      // Add restriction
-      const newRestriction = {
-        restriction: restrictionName,
-        guest_count: 1,
-        notes: restrictionName === 'Altro' ? '' : undefined
-      }
-      onDietaryRestrictionsChange([...dietaryRestrictions, newRestriction])
-    } else {
-      // Remove restriction
-      onDietaryRestrictionsChange(dietaryRestrictions.filter(r => r.restriction !== restrictionName))
+  const handleAdd = () => {
+    if (guestCount < 1) {
+      alert('Il numero di ospiti deve essere almeno 1')
+      return
     }
+
+    if (selectedRestriction === 'Altro' && !otherNotes.trim()) {
+      alert('Inserisci una descrizione per "Altro"')
+      return
+    }
+
+    // IMPORTANTE: guest_count qui è separato da num_guests della prenotazione.
+    // Questo numero serve solo per associare quante persone hanno questa specifica intolleranza
+    // e non viene sommato al totale ospiti della prenotazione.
+    const newRestriction: DietaryRestriction = {
+      restriction: selectedRestriction,
+      guest_count: guestCount,
+      notes: selectedRestriction === 'Altro' ? otherNotes.trim() : undefined
+    }
+
+    // Aggiungi nuovo
+    onDietaryRestrictionsChange([...dietaryRestrictions, newRestriction])
+
+    // Reset form
+    setSelectedRestriction('No Lattosio')
+    setGuestCount(1)
+    setOtherNotes('')
   }
 
-  // Handle guest count change
-  const handleGuestCountChange = (restrictionName: string, count: number) => {
-    onDietaryRestrictionsChange(
-      dietaryRestrictions.map(r =>
-        r.restriction === restrictionName
-          ? { ...r, guest_count: count }
-          : r
-      )
-    )
-  }
-
-  // Handle notes change (for "Altro")
-  const handleNotesChange = (restrictionName: string, notes: string) => {
-    onDietaryRestrictionsChange(
-      dietaryRestrictions.map(r =>
-        r.restriction === restrictionName
-          ? { ...r, notes }
-          : r
-      )
-    )
+  const handleDelete = (index: number) => {
+    const updated = dietaryRestrictions.filter((_, i) => i !== index)
+    onDietaryRestrictionsChange(updated)
   }
 
   return (
     <div className="space-y-6">
       {/* Section 1: Dietary Restrictions */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
           <span>⚠️</span>
           <span>Intolleranze e Allergie</span>
         </h3>
 
         {isEditMode ? (
-          <div className="space-y-4">
-            {DIETARY_RESTRICTIONS_OPTIONS.map((restrictionName) => {
-              const isSelected = isRestrictionSelected(restrictionName)
-              const guestCount = getGuestCount(restrictionName)
-              const notes = getNotes(restrictionName)
-
-              return (
-                <div key={restrictionName} className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id={`restriction-${restrictionName}`}
-                      checked={isSelected}
-                      onChange={(e) => handleRestrictionToggle(restrictionName, e.target.checked)}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <label
-                      htmlFor={`restriction-${restrictionName}`}
-                      className="text-sm font-medium text-gray-700 flex-1"
-                    >
-                      {restrictionName}
+          <>
+            {/* Form Aggiunta/Modifica */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Intolleranza / Esigenza *
                     </label>
-                    {isSelected && (
-                      <div className="flex items-center gap-2">
-                        <label htmlFor={`count-${restrictionName}`} className="text-sm text-gray-600">
-                          Ospiti:
-                        </label>
-                        <input
-                          type="number"
-                          id={`count-${restrictionName}`}
-                          min="1"
-                          value={guestCount}
-                          onChange={(e) => handleGuestCountChange(restrictionName, parseInt(e.target.value) || 1)}
-                          className="w-20 px-2 py-1 border border-gray-300 rounded bg-white text-sm"
-                        />
-                      </div>
-                    )}
+                    <select
+                      value={selectedRestriction}
+                      onChange={(e) => {
+                        const value = e.target.value as DietaryRestrictionType | 'Altro'
+                        setSelectedRestriction(value)
+                        if (value !== 'Altro') {
+                          setOtherNotes('')
+                        }
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      {DIETARY_RESTRICTIONS.map((restriction) => (
+                        <option key={restriction} value={restriction}>{restriction}</option>
+                      ))}
+                    </select>
                   </div>
 
-                  {/* Notes field for "Altro" */}
-                  {isSelected && restrictionName === 'Altro' && (
-                    <div className="ml-7">
+                  {/* Campo Altro */}
+                  {selectedRestriction === 'Altro' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Specifica intolleranza / esigenza *
+                      </label>
                       <input
                         type="text"
-                        value={notes}
-                        onChange={(e) => handleNotesChange(restrictionName, e.target.value)}
-                        placeholder="Specifica l'intolleranza o esigenza"
+                        value={otherNotes}
+                        onChange={(e) => setOtherNotes(e.target.value)}
+                        placeholder="Descrivi l'intolleranza o esigenza"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
                     </div>
                   )}
                 </div>
-              )
-            })}
-          </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Numero ospiti con intolleranze alimentari *
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={guestCount}
+                      onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleAdd}
+                  className="flex items-center justify-center gap-2 px-4 py-2 text-white rounded-lg bg-green-600 hover:bg-green-700 transition-all shadow-md hover:shadow-lg"
+                >
+                  <Plus className="h-4 w-4" />
+                  Aggiungi
+                </button>
+              </div>
+
+              <p className="text-xs text-gray-600 mt-2">
+                Nota: Questo numero è solo per associare l'intolleranza specifica e non viene sommato al totale ospiti della prenotazione.
+              </p>
+            </div>
+
+            {/* Lista Recap */}
+            {dietaryRestrictions.length > 0 && (
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                  Intolleranze inserite:
+                </h4>
+                <div className="space-y-3">
+                  {dietaryRestrictions.map((restriction, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-lg border border-gray-200 bg-white"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium text-gray-900">{restriction.restriction}</span>
+                        {restriction.restriction === 'Altro' && restriction.notes && (
+                          <span className="text-sm text-gray-600 italic ml-2">({restriction.notes})</span>
+                        )}
+                        <span className="text-gray-600 ml-2">
+                          - {restriction.guest_count} {restriction.guest_count === 1 ? 'ospite' : 'ospiti'}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(index)}
+                          className="p-1.5 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-all"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         ) : (
           <div>
             {dietaryRestrictions.length > 0 ? (
