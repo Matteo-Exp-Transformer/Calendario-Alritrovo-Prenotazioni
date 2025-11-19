@@ -154,10 +154,10 @@ export const MenuTab: React.FC<MenuTabProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Preset Menu Badge (if applicable) */}
+      {/* Preset Menu Label (if applicable) */}
       {presetMenu && (
-        <div className="bg-blue-50 border-2 border-blue-200 rounded-xl px-4 py-3">
-          <p className="text-sm font-semibold text-blue-900">
+        <div>
+          <p className="text-sm font-semibold text-gray-900">
             📋 Menu Predefinito: <span className="uppercase">{presetMenu.replace('_', ' ')}</span>
           </p>
         </div>
@@ -175,8 +175,8 @@ export const MenuTab: React.FC<MenuTabProps> = ({
           {menuContent}
         </CollapsibleSection>
       ) : (
-        <div className="bg-gray-50 border-2 border-gray-200 rounded-xl px-4 py-6 text-center">
-          <p className="text-gray-600">Nessun menu selezionato</p>
+        <div className="text-center">
+          <p className="text-gray-600 italic">Nessun menu selezionato</p>
         </div>
       )}
     </div>

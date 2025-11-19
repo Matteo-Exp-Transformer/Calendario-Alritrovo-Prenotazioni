@@ -19,10 +19,10 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   children
 }) => {
   return (
-    <div className="border-2 border-gray-200 rounded-lg overflow-hidden bg-white">
+    <div className="overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+        className="w-full flex items-center justify-between py-2 hover:bg-gray-50 transition-colors"
       >
         <div className="flex items-center gap-3 flex-1 text-left">
           {icon && <span className="text-xl">{icon}</span>}
@@ -40,7 +40,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
         )}
       </button>
       {isExpanded && (
-        <div className="p-4 border-t border-gray-200">
+        <div className="pt-3">
           {children}
         </div>
       )}

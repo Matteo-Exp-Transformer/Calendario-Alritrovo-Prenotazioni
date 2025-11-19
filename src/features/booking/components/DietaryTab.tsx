@@ -96,7 +96,7 @@ export const DietaryTab: React.FC<Props> = ({
         </h3>
 
         {isEditMode ? (
-          <div className="space-y-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div className="space-y-4">
             {DIETARY_RESTRICTIONS_OPTIONS.map((restrictionName) => {
               const isSelected = isRestrictionSelected(restrictionName)
               const guestCount = getGuestCount(restrictionName)
@@ -152,7 +152,7 @@ export const DietaryTab: React.FC<Props> = ({
             })}
           </div>
         ) : (
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div>
             {dietaryRestrictions.length > 0 ? (
               <ul className="space-y-2">
                 {dietaryRestrictions.map((restriction, index) => (
@@ -178,7 +178,7 @@ export const DietaryTab: React.FC<Props> = ({
           <span>📝</span>
           <span>Note Speciali</span>
         </h3>
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <div>
           {isEditMode ? (
             <textarea
               value={specialRequests}

@@ -68,6 +68,31 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  // Lock body scroll when modal is open to prevent horizontal scroll from underlying page
+  useEffect(() => {
+    if (isOpen) {
+      // Save current overflow values
+      const originalBodyOverflow = document.body.style.overflow
+      const originalBodyOverflowX = document.body.style.overflowX
+      const originalHtmlOverflow = document.documentElement.style.overflow
+      const originalHtmlOverflowX = document.documentElement.style.overflowX
+
+      // Lock scroll on both body and html (but keep position static to avoid content cut-off)
+      document.body.style.overflow = 'hidden'
+      document.body.style.overflowX = 'hidden'
+      document.documentElement.style.overflow = 'hidden'
+      document.documentElement.style.overflowX = 'hidden'
+
+      // Restore on cleanup
+      return () => {
+        document.body.style.overflow = originalBodyOverflow
+        document.body.style.overflowX = originalBodyOverflowX
+        document.documentElement.style.overflow = originalHtmlOverflow
+        document.documentElement.style.overflowX = originalHtmlOverflowX
+      }
+    }
+  }, [isOpen])
+
   const updateMutation = useUpdateBooking()
   const cancelMutation = useCancelBooking()
   const { data: acceptedBookings = [] } = useAcceptedBookings()
@@ -383,7 +408,11 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
           bottom: 0,
           zIndex: 99999,
           overflow: 'hidden',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          overflowX: 'hidden',
+          overflowY: 'hidden',
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          width: '100vw',
+          height: '100vh'
         }}
         onClick={onClose}
       >
@@ -399,53 +428,56 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
             backgroundColor: '#fef3c7',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            overflowX: 'hidden'
           }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header - Sticky */}
-          <div className="bg-blue-50 border-b-2 border-blue-200 px-4 py-3 flex-shrink-0">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-gray-900">
+          <div className="bg-blue-50 border-b-2 border-blue-200 flex-shrink-0" style={{ paddingLeft: '8px', paddingRight: '8px', paddingTop: '12px', paddingBottom: '12px', overflow: 'hidden' }}>
+            <div className="flex items-center gap-2" style={{ width: '100%' }}>
+              <div className="flex-1 min-w-0" style={{ maxWidth: 'calc(100% - 40px)' }}>
+                <h2 className="text-sm sm:text-lg font-bold text-gray-900 truncate">
                   Dettagli Prenotazione
                 </h2>
-                <p className="text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-gray-600 truncate">
                   #{booking.id.slice(0, 8)}
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="p-2.5 hover:bg-gray-100 rounded-full transition-all hover:scale-110 shadow-sm border border-gray-300 bg-white sm:h-10 sm:w-10 max-sm:h-11 max-sm:w-11"
-                aria-label="Chiudi dettagli prenotazione"
+                className="p-1.5 hover:bg-gray-100 rounded-full transition-all shadow-sm border border-gray-300 bg-white flex-shrink-0"
+                aria-label="Chiudi"
+                style={{ width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
-                <X className="h-5 w-5 text-gray-600" />
+                <X className="h-4 w-4 text-gray-600" />
               </button>
             </div>
 
             {/* Status Badge */}
-            <div className="flex items-center space-x-2 mt-2">
-              <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+            <div className="flex items-center mt-2">
+              <span className="px-2 sm:px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs sm:text-sm font-medium">
                 ✓ Confermata
               </span>
             </div>
           </div>
 
           {/* Tab Navigation - Sticky */}
-          <div className="bg-white border-b-2 border-gray-200 px-2 py-2 flex-shrink-0">
+          <div className="bg-white border-b-2 border-gray-200 flex-shrink-0" style={{ paddingLeft: '8px', paddingRight: '8px', paddingTop: '8px', paddingBottom: '8px' }}>
             <div className="flex gap-1">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold transition-all min-h-[44px] flex items-center justify-center gap-1 ${
+                  className={`flex-1 px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all min-h-[40px] sm:min-h-[44px] flex items-center justify-center gap-1 ${
                     activeTab === tab.id
                       ? 'bg-blue-500 text-white shadow-md'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
+                  title={tab.label}
                 >
-                  <span className="text-base">{tab.icon}</span>
-                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="text-base flex-shrink-0">{tab.icon}</span>
+                  <span className="hidden sm:inline truncate">{tab.label}</span>
                 </button>
               ))}
             </div>
@@ -453,8 +485,15 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
           {/* Content Area - Scrollable */}
           <div
-            className="flex-1 overflow-y-auto py-4 bg-amber-100"
-            style={{ paddingLeft: '24px', paddingRight: '24px' }}
+            className="flex-1 bg-amber-100"
+            style={{
+              paddingLeft: '12px',
+              paddingRight: '12px',
+              paddingTop: '16px',
+              paddingBottom: '16px',
+              overflowY: 'auto',
+              overflowX: 'hidden'
+            }}
           >
             {activeTab === 'details' && (
               <DetailsTab
@@ -493,41 +532,41 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
           {/* Footer Actions - Sticky */}
           {!showCancelConfirm && (
-            <div className="border-t-2 border-gray-200 p-3 bg-amber-100 flex-shrink-0">
-              <div className="flex gap-3">
+            <div className="border-t-2 border-gray-200 bg-amber-100 flex-shrink-0" style={{ paddingLeft: '8px', paddingRight: '8px', paddingTop: '8px', paddingBottom: '8px' }}>
+              <div className="flex gap-1.5">
                 {isEditMode ? (
                   <>
                     <button
                       onClick={() => setIsEditMode(false)}
-                      className="flex-1 px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-all shadow hover:shadow-md flex items-center justify-center gap-2 font-semibold text-base"
+                      className="flex-1 px-2 sm:px-6 py-2.5 sm:py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-all shadow hover:shadow-md flex items-center justify-center gap-1 sm:gap-2 font-semibold text-xs sm:text-base"
                     >
-                      <X className="h-5 w-5" />
-                      Annulla
+                      <X className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                      <span className="truncate">Annulla</span>
                     </button>
                     <button
                       onClick={handleSave}
-                      className="flex-1 px-6 py-3 bg-al-ritrovo-primary text-white rounded-lg hover:bg-al-ritrovo-primary-dark transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 font-semibold text-base"
+                      className="flex-1 px-2 sm:px-6 py-2.5 sm:py-3 bg-al-ritrovo-primary text-white rounded-lg hover:bg-al-ritrovo-primary-dark transition-all shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-1 sm:gap-2 font-semibold text-xs sm:text-base"
                       disabled={updateMutation.isPending}
                     >
-                      <Save className="h-5 w-5" />
-                      {updateMutation.isPending ? 'Salvataggio...' : 'Salva'}
+                      <Save className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                      <span className="truncate">{updateMutation.isPending ? 'Salvataggio...' : 'Salva'}</span>
                     </button>
                   </>
                 ) : (
                   <>
                     <button
                       onClick={() => setIsEditMode(true)}
-                      className="flex-1 px-6 py-3 bg-blue-400 text-white rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 font-semibold text-base min-h-[56px]"
+                      className="flex-1 px-2 sm:px-6 py-2.5 sm:py-3 bg-blue-400 text-white rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1 sm:gap-2 font-semibold text-xs sm:text-base min-h-[44px] sm:min-h-[56px]"
                     >
-                      <Edit className="h-5 w-5" />
-                      Modifica
+                      <Edit className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                      <span className="truncate">Modifica</span>
                     </button>
                     <button
                       onClick={() => setShowCancelConfirm(true)}
-                      className="flex-1 px-6 py-3 bg-red-500 text-white rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 font-semibold text-base min-h-[56px]"
+                      className="flex-1 px-2 sm:px-6 py-2.5 sm:py-3 bg-red-500 text-white rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1 sm:gap-2 font-semibold text-xs sm:text-base min-h-[44px] sm:min-h-[56px]"
                     >
-                      <Trash2 className="h-5 w-5" />
-                      Elimina
+                      <Trash2 className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                      <span className="truncate">Elimina</span>
                     </button>
                   </>
                 )}

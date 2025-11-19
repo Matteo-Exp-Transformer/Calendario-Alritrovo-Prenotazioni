@@ -27,9 +27,9 @@ const capitalizeFirst = (str: string): string => {
 
 // Reusable component for label:value inline display
 const InfoRow: React.FC<{ label: string; value: string | React.ReactNode }> = ({ label, value }) => (
-  <div className="flex gap-2">
-    <span className="font-semibold text-gray-700">{label}:</span>
-    <span className="text-gray-900">{value}</span>
+  <div className="flex gap-2 min-w-0">
+    <span className="font-semibold text-gray-700 flex-shrink-0">{label}:</span>
+    <span className="text-gray-900 break-words overflow-wrap-anywhere min-w-0">{value}</span>
   </div>
 )
 
@@ -73,17 +73,9 @@ export const DetailsTab: React.FC<Props> = ({
             <option value="rinfresco_laurea">Rinfresco di Laurea</option>
           </select>
         ) : (
-          <div className="inline-block">
-            <span
-              className={`inline-block px-4 py-2 rounded-lg text-sm font-semibold ${
-                formData.booking_type === 'tavolo'
-                  ? 'bg-blue-100 text-blue-800'
-                  : 'bg-green-100 text-green-800'
-              }`}
-            >
-              {formData.booking_type === 'tavolo' ? 'Prenota un Tavolo' : 'Rinfresco di Laurea'}
-            </span>
-          </div>
+          <p className="text-gray-900 font-medium">
+            {formData.booking_type === 'tavolo' ? 'Prenota un Tavolo' : 'Rinfresco di Laurea'}
+          </p>
         )}
       </div>
 
@@ -129,7 +121,7 @@ export const DetailsTab: React.FC<Props> = ({
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 min-w-0">
             {/* View mode - grid layout without box */}
             <InfoRow label="Nome" value={formData.client_name} />
             <InfoRow label="Email" value={formData.client_email} />
@@ -194,10 +186,10 @@ export const DetailsTab: React.FC<Props> = ({
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-1 gap-3 min-w-0">
             {/* View mode - grid layout without box */}
             <InfoRow label="Data" value={formatDate(formData.date)} />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 min-w-0">
               <InfoRow label="Ora Inizio" value={formData.startTime} />
               <InfoRow label="Ora Fine" value={formData.endTime} />
             </div>
