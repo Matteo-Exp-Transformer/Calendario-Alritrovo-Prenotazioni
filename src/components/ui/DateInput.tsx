@@ -23,8 +23,9 @@ export const DateInput: React.FC<DateInputProps> = ({
     : [new Date().getFullYear(), 1, 1]
 
   // Generate arrays for dropdowns
+  // Only allow booking for current year or next year (current + 1)
   const currentYear = new Date().getFullYear()
-  const years = Array.from({ length: 2 }, (_, i) => currentYear + i) // Current year + 1 year ahead
+  const years = Array.from({ length: 2 }, (_, i) => currentYear + i) // Current year and next year only
   const months = [
     { value: 1, label: 'Gennaio' },
     { value: 2, label: 'Febbraio' },

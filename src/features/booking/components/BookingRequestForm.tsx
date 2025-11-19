@@ -41,13 +41,22 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     }
   }, [])
   
+  // Helper function to get current date in YYYY-MM-DD format
+  const getCurrentDate = (): string => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   const [formData, setFormData] = useState<BookingRequestInput>({
     client_name: '',
     client_email: '',
     client_phone: '',
     booking_type: 'tavolo',
-    desired_date: '',
-    desired_time: '',
+    desired_date: getCurrentDate(),
+    desired_time: '16:00',
     num_guests: 0,
     special_requests: '',
     menu_selection: {
@@ -405,7 +414,14 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       const today = new Date()
       today.setHours(0, 0, 0, 0)
 
-      if (selectedDate < today) {
+      // Validate year: only current year or next year allowed
+      const currentYear = today.getFullYear()
+      const selectedYear = selectedDate.getFullYear()
+      if (selectedYear < currentYear || selectedYear > currentYear + 1) {
+        newErrors.desired_date = 'Puoi prenotare solo per l\'anno corrente o il prossimo anno'
+        isValid = false
+        if (!firstErrorKey) firstErrorKey = 'desired_date'
+      } else if (selectedDate < today) {
         newErrors.desired_date = 'La data non può essere nel passato'
         isValid = false
         if (!firstErrorKey) firstErrorKey = 'desired_date'
@@ -583,14 +599,14 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         console.log('✅ [BookingForm] Mutation successful!')
         console.log('🔵 [BookingForm] Setting showSuccessModal to true')
         
-        // Reset form
+        // Reset form (keep default date and time)
         setFormData({
           client_name: '',
           client_email: '',
           client_phone: '',
           booking_type: 'tavolo',
-          desired_date: '',
-          desired_time: '',
+          desired_date: getCurrentDate(),
+          desired_time: '16:00',
           num_guests: 0,
           special_requests: '',
           menu_selection: {
@@ -843,7 +859,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           </label>
           <TimeInput
             id="desired_time"
-            value={formData.desired_time || '00:00'}
+            value={formData.desired_time || '16:00'}
             onChange={(newTime) => {
               setFormData({ ...formData, desired_time: newTime })
 
