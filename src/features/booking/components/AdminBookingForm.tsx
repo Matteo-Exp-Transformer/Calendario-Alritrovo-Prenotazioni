@@ -38,7 +38,6 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [selectedPreset, setSelectedPreset] = useState<PresetMenuType>(null)
-  const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [showCapacityWarning, setShowCapacityWarning] = useState(false)
 
   const { mutate, isPending } = useCreateAdminBooking()
@@ -683,8 +682,6 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
             onSpecialRequestsChange={(value) => {
               setFormData({ ...formData, special_requests: value })
             }}
-            privacyAccepted={privacyAccepted}
-            onPrivacyChange={setPrivacyAccepted}
           />
         </div>
       )}

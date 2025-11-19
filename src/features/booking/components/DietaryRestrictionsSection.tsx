@@ -15,8 +15,8 @@ interface DietaryRestrictionsSectionProps {
   onRestrictionsChange: (restrictions: DietaryRestriction[]) => void
   specialRequests: string
   onSpecialRequestsChange: (value: string) => void
-  privacyAccepted: boolean
-  onPrivacyChange: (value: boolean) => void
+  privacyAccepted?: boolean
+  onPrivacyChange?: (value: boolean) => void
 }
 
 export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProps> = ({
@@ -321,47 +321,49 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
         />
       </div>
 
-      {/* Privacy Policy */}
-      <div className="flex items-start gap-3" style={{ paddingTop: '0.5rem' }}>
-        <div className="relative flex-shrink-0">
-          <input
-            type="checkbox"
-            id="privacy-consent-dietary"
-            checked={privacyAccepted}
-            onChange={(e) => onPrivacyChange(e.target.checked)}
-            required
-            className="peer sr-only"
-          />
+      {/* Privacy Policy - Solo se privacyAccepted e onPrivacyChange sono forniti */}
+      {privacyAccepted !== undefined && onPrivacyChange && (
+        <div className="flex items-start gap-3" style={{ paddingTop: '0.5rem' }}>
+          <div className="relative flex-shrink-0">
+            <input
+              type="checkbox"
+              id="privacy-consent-dietary"
+              checked={privacyAccepted}
+              onChange={(e) => onPrivacyChange(e.target.checked)}
+              required
+              className="peer sr-only"
+            />
+            <label
+              htmlFor="privacy-consent-dietary"
+              className="flex h-5 w-5 cursor-pointer items-center justify-center border-2 border-warm-wood/40 shadow-sm transition-all duration-300 hover:border-warm-wood hover:shadow-md peer-checked:border-warm-orange peer-checked:shadow-lg peer-focus-visible:ring-4 peer-focus-visible:ring-warm-wood/20"
+              style={{ backgroundColor: privacyAccepted ? '#D2691E' : 'white' }}
+            >
+              <Check
+                className={`h-3.5 w-3.5 text-white transition-all duration-300 ${
+                  privacyAccepted ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+                }`}
+                strokeWidth={3}
+              />
+            </label>
+          </div>
           <label
             htmlFor="privacy-consent-dietary"
-            className="flex h-5 w-5 cursor-pointer items-center justify-center border-2 border-warm-wood/40 shadow-sm transition-all duration-300 hover:border-warm-wood hover:shadow-md peer-checked:border-warm-orange peer-checked:shadow-lg peer-focus-visible:ring-4 peer-focus-visible:ring-warm-wood/20"
-            style={{ backgroundColor: privacyAccepted ? '#D2691E' : 'white' }}
+            className="cursor-pointer text-sm text-gray-700"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', padding: '8px 16px', borderRadius: '8px', backdropFilter: 'blur(1px)' }}
           >
-            <Check
-              className={`h-3.5 w-3.5 text-white transition-all duration-300 ${
-                privacyAccepted ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
-              }`}
-              strokeWidth={3}
-            />
+            Accetto la{' '}
+            <Link
+              to="/privacy"
+              target="_blank"
+              className="text-al-ritrovo-primary hover:text-al-ritrovo-primary-dark underline font-medium"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Privacy Policy
+            </Link>
+            {' '}*
           </label>
         </div>
-        <label
-          htmlFor="privacy-consent-dietary"
-          className="cursor-pointer text-sm text-gray-700"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.85)', padding: '8px 16px', borderRadius: '8px', backdropFilter: 'blur(1px)' }}
-        >
-          Accetto la{' '}
-          <Link
-            to="/privacy"
-            target="_blank"
-            className="text-al-ritrovo-primary hover:text-al-ritrovo-primary-dark underline font-medium"
-            onClick={(e) => e.stopPropagation()}
-          >
-            Privacy Policy
-          </Link>
-          {' '}*
-        </label>
-      </div>
+      )}
 
       {/* Campi obbligatori */}
       <p className="text-xs text-gray-500 italic">
