@@ -43,7 +43,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
   const [cancellationReason, setCancellationReason] = useState('')
   const [endTimeManuallyModified, setEndTimeManuallyModified] = useState(false)
-  const [mouseDownInsideModal, setMouseDownInsideModal] = useState(false)
+  const [mouseDownTarget, setMouseDownTarget] = useState<EventTarget | null>(null)
 
   // Responsive width calculation
   const getResponsiveMaxWidth = () => {
@@ -264,15 +264,6 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       document.removeEventListener('keydown', handleEscape)
     }
   }, [showCancelConfirm])
-
-  // Reset mouseDownInsideModal on mouse up (global listener for text selection fix)
-  useEffect(() => {
-    const handleMouseUp = () => setMouseDownInsideModal(false)
-    document.addEventListener('mouseup', handleMouseUp)
-    return () => {
-      document.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [])
 
   // Capacity check function
   const checkCapacity = (date: string, startTime: string, endTime: string, numGuests: number): boolean => {
@@ -623,16 +614,16 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
           // Transizione smooth per il cambio di opacità
           transition: 'background-color 0.2s ease-in-out'
         }}
-        onClick={() => {
-          if (!mouseDownInsideModal) {
+        onMouseDown={(e) => setMouseDownTarget(e.target)}
+        onClick={(e) => {
+          if (e.target === mouseDownTarget) {
             onClose()
           }
-          setMouseDownInsideModal(false)
+          setMouseDownTarget(null)
         }}
       >
         {/* Modal Content */}
         <div
-          onMouseDown={() => setMouseDownInsideModal(true)}
           style={{
             position: 'absolute',
             right: 0,
