@@ -680,8 +680,8 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
         </div>
       )}
 
-      {/* Nota campi obbligatori e Submit Button */}
-      <div className="flex items-center justify-between gap-4 mt-4">
+      {/* Nota campi obbligatori */}
+      <div className="flex items-center justify-start gap-4 mt-4">
         <p
           className="text-xs text-gray-600"
           style={{
@@ -694,37 +694,39 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
         >
           * I campi contrassegnati sono obbligatori.
         </p>
-        <div className="flex justify-center flex-1">
-          <button
-            type="submit"
-            disabled={isPending}
-            style={{ backgroundColor: '#22c55e', paddingLeft: '256px', paddingRight: '256px', paddingTop: '25px', paddingBottom: '25px', borderRadius: '50px' }}
-            className="group relative overflow-hidden bg-green-600 px-[256px] py-6 text-2xl font-bold uppercase tracking-wide text-white shadow-2xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(34,197,94,0.4)] hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl md:w-auto"
-          >
-            {/* Glow effect on hover */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+      </div>
 
-            {/* Content */}
-            <div className="relative flex items-center justify-center gap-3 whitespace-nowrap">
-              {isPending ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span className="text-sm md:text-base">Creazione in corso...</span>
-                </>
-              ) : (
-                <>
-                  <span className="text-2xl">Crea Prenotazione</span>
-                  <Send className="h-6 w-6 transition-transform duration-300 group-hover:translate-x-1" />
-                </>
-              )}
-            </div>
+      {/* Submit Button - Responsive: full-width mobile, auto-width desktop */}
+      <div className="flex justify-center items-center mt-8 w-full">
+        <button
+          type="submit"
+          disabled={isPending}
+          className="group relative overflow-hidden px-12 md:px-20 text-xl md:text-2xl uppercase tracking-wide text-white rounded-full bg-green-600 hover:bg-green-700 shadow-2xl hover:shadow-[0_20px_40px_rgba(34,197,94,0.4)] hover:-translate-y-1 transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-2xl w-full md:w-auto max-w-md md:max-w-2xl"
+          style={{ fontWeight: '700', backgroundColor: '#16a34a', paddingTop: '28px', paddingBottom: '28px' }}
+        >
+          {/* Glow effect on hover */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
 
-            {/* Animated border glow */}
-            <div className="absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-              <div className="absolute inset-[-2px] rounded-full bg-gradient-to-r from-warm-wood via-warm-orange to-terracotta blur-sm"></div>
-            </div>
-          </button>
-        </div>
+          {/* Content */}
+          <div className="relative flex items-center justify-center gap-3 whitespace-nowrap">
+            {isPending ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span className="text-base md:text-lg">Creazione in corso...</span>
+              </>
+            ) : (
+              <>
+                <span className="text-xl md:text-2xl">Crea Prenotazione</span>
+                <Send className="h-6 w-6 md:h-7 md:w-7 transition-transform duration-300 group-hover:translate-x-1" />
+              </>
+            )}
+          </div>
+
+          {/* Animated border glow */}
+          <div className="absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <div className="absolute inset-[-2px] rounded-full bg-gradient-to-r from-warm-wood via-warm-orange to-terracotta blur-sm"></div>
+          </div>
+        </button>
       </div>
     </form>
 
