@@ -243,5 +243,208 @@ test.describe('Flusso Modifica Prenotazione', () => {
     console.log('\n✅ TEST COMPLETED: Modification flow verified');
     console.log('==============================================\n');
   });
+
+  test('Should allow clearing numGuests field during editing', async ({ page }) => {
+    console.log('🧪 TEST: Allow clearing numGuests field');
+    console.log('======================================\n');
+
+    // Login and navigate to calendar
+    const loginSuccess = await loginAsAdmin(page);
+    if (!loginSuccess) {
+      console.log('❌ Login failed - skipping test');
+      test.skip();
+      return;
+    }
+
+    const calendarTab = await waitForClickable(
+      page,
+      page.locator('button:has-text("Calendario")').first(),
+      { description: 'Calendar tab' }
+    );
+    await calendarTab.click();
+    await page.waitForTimeout(2000);
+
+    // Click on first event
+    const eventInCalendar = page.locator('[class*="fc-event"]').first();
+    if (await eventInCalendar.count() === 0) {
+      console.log('⚠️ No events found - skipping test');
+      test.skip();
+      return;
+    }
+
+    await eventInCalendar.click();
+    await page.waitForTimeout(1000);
+
+    // Enter edit mode if needed
+    const editButton = page.locator('button:has-text("Modifica")').first();
+    if (await editButton.isVisible()) {
+      await editButton.click();
+      await page.waitForTimeout(500);
+    }
+
+    // Find numGuests input
+    const numGuestsInput = page.locator('input[type="number"]').first();
+    await numGuestsInput.waitFor({ state: 'visible', timeout: 5000 });
+
+    const currentValue = await numGuestsInput.inputValue();
+    console.log(`📋 Current numGuests value: ${currentValue}`);
+
+    // Clear the field completely
+    await numGuestsInput.clear();
+    await page.waitForTimeout(300);
+
+    // Verify field is empty (value should be 0 or empty, NOT forced to 1)
+    const clearedValue = await numGuestsInput.inputValue();
+    console.log(`📝 After clearing, value is: "${clearedValue}"`);
+
+    // The field should be empty or "0", but NOT "1"
+    expect(clearedValue).not.toBe('1');
+    expect(['', '0']).toContain(clearedValue);
+
+    console.log('✅ Field can be cleared without forcing to 1');
+    console.log('✅ TEST PASSED\n');
+  });
+
+  test('Should show error when saving with numGuests = 0', async ({ page }) => {
+    console.log('🧪 TEST: Error validation for numGuests = 0');
+    console.log('==========================================\n');
+
+    // Login and navigate to calendar
+    const loginSuccess = await loginAsAdmin(page);
+    if (!loginSuccess) {
+      console.log('❌ Login failed - skipping test');
+      test.skip();
+      return;
+    }
+
+    const calendarTab = await waitForClickable(
+      page,
+      page.locator('button:has-text("Calendario")').first(),
+      { description: 'Calendar tab' }
+    );
+    await calendarTab.click();
+    await page.waitForTimeout(2000);
+
+    // Click on first event
+    const eventInCalendar = page.locator('[class*="fc-event"]').first();
+    if (await eventInCalendar.count() === 0) {
+      console.log('⚠️ No events found - skipping test');
+      test.skip();
+      return;
+    }
+
+    await eventInCalendar.click();
+    await page.waitForTimeout(1000);
+
+    // Enter edit mode if needed
+    const editButton = page.locator('button:has-text("Modifica")').first();
+    if (await editButton.isVisible()) {
+      await editButton.click();
+      await page.waitForTimeout(500);
+    }
+
+    // Find numGuests input
+    const numGuestsInput = page.locator('input[type="number"]').first();
+    await numGuestsInput.waitFor({ state: 'visible', timeout: 5000 });
+
+    // Set value to 0
+    await numGuestsInput.clear();
+    await numGuestsInput.fill('0');
+    await page.waitForTimeout(300);
+
+    console.log('📝 Set numGuests to 0');
+
+    // Try to save
+    const saveButton = page.locator('button:has-text("Salva")').first();
+    await saveButton.click();
+    console.log('💾 Clicked Save button');
+
+    await page.waitForTimeout(1000);
+
+    // Verify error toast appears
+    const errorToast = page.locator('text=/Inserisci un numero valido di ospiti/i');
+    await expect(errorToast).toBeVisible({ timeout: 5000 });
+
+    console.log('✅ Error message displayed correctly');
+
+    // Verify modal is still open (save failed, didn't close)
+    const modalTitle = page.locator('text=Dettagli Prenotazione');
+    await expect(modalTitle).toBeVisible();
+
+    console.log('✅ Modal still open after failed save');
+    console.log('✅ TEST PASSED\n');
+  });
+
+  test('Should save successfully with valid numGuests', async ({ page }) => {
+    console.log('🧪 TEST: Successful save with valid numGuests');
+    console.log('============================================\n');
+
+    // Login and navigate to calendar
+    const loginSuccess = await loginAsAdmin(page);
+    if (!loginSuccess) {
+      console.log('❌ Login failed - skipping test');
+      test.skip();
+      return;
+    }
+
+    const calendarTab = await waitForClickable(
+      page,
+      page.locator('button:has-text("Calendario")').first(),
+      { description: 'Calendar tab' }
+    );
+    await calendarTab.click();
+    await page.waitForTimeout(2000);
+
+    // Click on first event
+    const eventInCalendar = page.locator('[class*="fc-event"]').first();
+    if (await eventInCalendar.count() === 0) {
+      console.log('⚠️ No events found - skipping test');
+      test.skip();
+      return;
+    }
+
+    await eventInCalendar.click();
+    await page.waitForTimeout(1000);
+
+    // Enter edit mode if needed
+    const editButton = page.locator('button:has-text("Modifica")').first();
+    if (await editButton.isVisible()) {
+      await editButton.click();
+      await page.waitForTimeout(500);
+    }
+
+    // Find numGuests input
+    const numGuestsInput = page.locator('input[type="number"]').first();
+    await numGuestsInput.waitFor({ state: 'visible', timeout: 5000 });
+
+    // Set a valid value (50)
+    await numGuestsInput.clear();
+    await numGuestsInput.fill('50');
+    await page.waitForTimeout(300);
+
+    console.log('📝 Set numGuests to 50 (valid value)');
+
+    // Save
+    const saveButton = page.locator('button:has-text("Salva")').first();
+    await saveButton.click();
+    console.log('💾 Clicked Save button');
+
+    // Wait for API response
+    await page.waitForResponse(
+      (response) => response.url().includes('booking_requests') && response.status() === 200,
+      { timeout: 10000 }
+    ).catch(() => {
+      console.log('⚠️ No API response detected, continuing...');
+    });
+
+    await page.waitForTimeout(1000);
+
+    // Verify success toast (use .first() to handle multiple toasts)
+    const successToast = page.locator('text=/successo|success|modificata/i').first();
+    await expect(successToast).toBeVisible({ timeout: 5000 });
+
+    console.log('✅ Success message displayed');
+    console.log('✅ TEST PASSED\n');
+  });
 });
 

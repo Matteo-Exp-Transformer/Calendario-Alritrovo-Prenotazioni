@@ -181,7 +181,10 @@ export const DetailsTab: React.FC<Props> = ({
                 type="number"
                 min="1"
                 value={formData.numGuests}
-                onChange={(e) => onFormDataChange('numGuests', parseInt(e.target.value) || 1)}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? 0 : parseInt(e.target.value)
+                  onFormDataChange('numGuests', value)
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />

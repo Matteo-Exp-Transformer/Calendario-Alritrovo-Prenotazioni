@@ -43,6 +43,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   const [isMenuExpanded, setIsMenuExpanded] = useState(false)
   const [cancellationReason, setCancellationReason] = useState('')
   const [endTimeManuallyModified, setEndTimeManuallyModified] = useState(false)
+  const [mouseDownInsideModal, setMouseDownInsideModal] = useState(false)
 
   // Responsive width calculation
   const getResponsiveMaxWidth = () => {
@@ -263,6 +264,15 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       document.removeEventListener('keydown', handleEscape)
     }
   }, [showCancelConfirm])
+
+  // Reset mouseDownInsideModal on mouse up (global listener for text selection fix)
+  useEffect(() => {
+    const handleMouseUp = () => setMouseDownInsideModal(false)
+    document.addEventListener('mouseup', handleMouseUp)
+    return () => {
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [])
 
   // Capacity check function
   const checkCapacity = (date: string, startTime: string, endTime: string, numGuests: number): boolean => {
@@ -509,7 +519,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     }
 
     if (formData.numGuests < 1 || formData.numGuests > 110) {
-      toast.error('Il numero di ospiti deve essere tra 1 e 110')
+      toast.error('Inserisci un numero valido di ospiti (minimo 1, massimo 110)')
       return
     }
 
@@ -613,10 +623,16 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
           // Transizione smooth per il cambio di opacità
           transition: 'background-color 0.2s ease-in-out'
         }}
-        onClick={onClose}
+        onClick={() => {
+          if (!mouseDownInsideModal) {
+            onClose()
+          }
+          setMouseDownInsideModal(false)
+        }}
       >
         {/* Modal Content */}
         <div
+          onMouseDown={() => setMouseDownInsideModal(true)}
           style={{
             position: 'absolute',
             right: 0,
