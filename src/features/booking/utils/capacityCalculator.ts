@@ -64,6 +64,34 @@ export function getSlotsOccupiedByBooking(start: string, end: string): TimeSlot[
   return slots
 }
 
+// Get the time slot where a booking STARTS (for display purposes only)
+// Unlike getSlotsOccupiedByBooking, this returns only ONE slot based on start time
+// Capacity calculations should continue using getSlotsOccupiedByBooking
+export function getStartSlotForBooking(start: string): TimeSlot {
+  const startTime = extractTimeFromISO(start)
+  const startMinutes = parseTime(startTime)
+
+  const morningStart = parseTime(CAPACITY_CONFIG.MORNING_START) // 10:00
+  const morningEnd = parseTime(CAPACITY_CONFIG.MORNING_END) // 14:30
+  const afternoonStart = parseTime(CAPACITY_CONFIG.AFTERNOON_START) // 14:31
+  const afternoonEnd = parseTime(CAPACITY_CONFIG.AFTERNOON_END) // 18:30
+
+  // Check which slot the booking starts in
+  // Morning: 10:00 - 14:30
+  if (startMinutes >= morningStart && startMinutes <= morningEnd) {
+    return 'morning'
+  }
+
+  // Afternoon: 14:31 - 18:30
+  if (startMinutes >= afternoonStart && startMinutes <= afternoonEnd) {
+    return 'afternoon'
+  }
+
+  // Evening: 18:31 - 23:30
+  // Default to evening for any time >= 18:31
+  return 'evening'
+}
+
 // Calculate daily capacity for a specific date
 export function calculateDailyCapacity(date: string, bookings: BookingRequest[]): DailyCapacity {
   const morning: TimeSlotCapacity = { 
