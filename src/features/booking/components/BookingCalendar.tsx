@@ -128,8 +128,17 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
 
     for (const booking of dayBookings) {
       if (!booking.confirmed_start || !booking.confirmed_end) continue
+
+      // ✅ FIX: Use desired_time (accurate local time) instead of confirmed_start (UTC timestamp)
+      // confirmed_start may have timezone shift in production (UTC vs local time)
+      const startTime = booking.desired_time || extractTimeFromISO(booking.confirmed_start)
+
+      // Create a fake ISO string with the correct local time for getStartSlotForBooking
+      const fakeISOStart = `2025-01-01T${startTime}:00`
+
       // Display booking only in the slot where it STARTS
-      const startSlot = getStartSlotForBooking(booking.confirmed_start)
+      const startSlot = getStartSlotForBooking(fakeISOStart)
+
       if (startSlot === 'morning') morningBookings.push(booking)
       else if (startSlot === 'afternoon') afternoonBookings.push(booking)
       else if (startSlot === 'evening') eveningBookings.push(booking)
