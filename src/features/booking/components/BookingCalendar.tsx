@@ -16,8 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 import { extractDateFromISO, extractTimeFromISO } from '../utils/dateUtils'
 import { getBookingEventTypeLabel } from '../utils/eventTypeLabels'
-import { getMenuPriceDisplayFromBooking, applyCoverCharge, needsCoverCharge, COVER_CHARGE_PER_PERSON_EUR } from '../utils/menuPricing'
-import { formatBookingDateTime } from '../utils/formatDateTime'
+import { getMenuPriceDisplayFromBooking, applyCoverCharge, COVER_CHARGE_PER_PERSON_EUR } from '../utils/menuPricing'
 
 /**
  * Helper per ottenere l'orario accurato di una prenotazione
@@ -418,7 +417,6 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                         basePerPerson
                       }
                     }
-                    const creationDateLabel = formatBookingDateTime(booking.created_at)
                     return (
                       <React.Fragment key={booking.id}>
                       {index > 0 && (
@@ -628,7 +626,6 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                         basePerPerson
                       }
                     }
-                    const creationDateLabel = formatBookingDateTime(booking.created_at)
                     return (
                       <React.Fragment key={booking.id}>
                       {index > 0 && (
@@ -837,7 +834,6 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                         basePerPerson
                       }
                     }
-                    const creationDateLabel = formatBookingDateTime(booking.created_at)
                     return (
                       <React.Fragment key={booking.id}>
                       {index > 0 && (
