@@ -4,7 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
-import { Calendar, Users, Sunrise, Sun, Moon, Mail, Phone, Clock, UtensilsCrossed } from 'lucide-react'
+import { Calendar, Users, Sunrise, Sun, Moon, Mail, Phone, Clock, UtensilsCrossed, Tag, ScrollText, StickyNote } from 'lucide-react'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
 import type { BookingRequest } from '@/types/booking'
@@ -16,6 +16,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 import { extractDateFromISO, extractTimeFromISO } from '../utils/dateUtils'
 import { getBookingEventTypeLabel } from '../utils/eventTypeLabels'
+import { getMenuPriceDisplayFromBooking, applyCoverCharge, needsCoverCharge, COVER_CHARGE_PER_PERSON_EUR } from '../utils/menuPricing'
+import { formatBookingDateTime } from '../utils/formatDateTime'
 
 /**
  * Helper per ottenere l'orario accurato di una prenotazione
@@ -380,6 +382,33 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                 {selectedDateData.morningBookings.length > 0 ? (
                   selectedDateData.morningBookings.map((booking, index) => {
                     const eventTypeLabel = getBookingEventTypeLabel(booking)
+                    // Calcola come nel MenuTab: assicurati che il coperto sia incluso
+                    let menuPriceDisplay = getMenuPriceDisplayFromBooking(booking)
+                    if (menuPriceDisplay && booking.booking_type === 'rinfresco_laurea' && booking.menu_selection?.items) {
+                      // Ricalcola come nel MenuTab per essere sicuri che il coperto sia incluso
+                      const baseTotal = booking.menu_selection.items
+                        .filter((item) => !item.name.toLowerCase().includes('tiramis'))
+                        .reduce((sum, item) => sum + (item.totalPrice || item.price), 0)
+                      const perPersonWithCover = applyCoverCharge(baseTotal, booking.booking_type)
+                      const tiramisuTotal = booking.menu_selection.tiramisu_total || 0
+                      const totalBooking = perPersonWithCover * (booking.num_guests || 0) + tiramisuTotal
+                      
+                      // Ricrea menuPriceDisplay con i valori ricalcolati
+                      const basePerPerson = baseTotal
+                      const breakdownLabel = `(${basePerPerson.toFixed(2)} + ${COVER_CHARGE_PER_PERSON_EUR.toFixed(2)} coperto)`
+                      
+                      menuPriceDisplay = {
+                        prezzoMenu: perPersonWithCover,
+                        prezzoMenuLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
+                        breakdownLabel,
+                        prezzoTotale: totalBooking,
+                        prezzoTotaleLabel: `€${totalBooking.toFixed(2)}`,
+                        totalLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
+                        perPersonWithCover,
+                        basePerPerson
+                      }
+                    }
+                    const creationDateLabel = formatBookingDateTime(booking.created_at)
                     return (
                       <React.Fragment key={booking.id}>
                       {index > 0 && (
@@ -403,89 +432,123 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                           transform: 'translateY(-2px)',
                         }}
                       >
-                      {/* Nome cliente */}
-                      <div className="mb-4">
-                        <h4 className="font-bold text-xl text-gray-900">
-                          {booking.client_name}
-                        </h4>
-                      </div>
-
-                      {/* Two-column layout */}
-                      <div className="grid grid-cols-2 gap-6">
-                        {/* Left Column */}
-                        <div className="space-y-4">
-
-                          {/* Email */}
-                          <div className="flex items-center gap-10">
-                            <Mail className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                            <div className="flex-1 flex items-center gap-2">
-                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Email:</span>
-                              <span className="text-gray-700 truncate font-medium">{booking.client_email}</span>
+                      <div className="grid grid-cols-2 gap-4 md:gap-6">
+                        {/* Colonna Contatti */}
+                        <div className="space-y-3 md:space-y-4">
+                          <div>
+                            <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-green-800 bg-green-50 px-3 py-1 rounded-full">
+                              Contatti
+                            </span>
+                            <div className="mt-3 pb-3 border-b border-gray-200 flex items-center gap-3">
+                              <Users className="w-5 h-5 text-green-700 flex-shrink-0" />
+                              <h4 className="font-bold text-lg md:text-xl text-gray-900">
+                                {booking.client_name}
+                              </h4>
                             </div>
                           </div>
 
-                          {/* Phone */}
+                          <div className="flex items-start gap-4 md:gap-6">
+                            <Mail className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 flex items-start gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Email:</span>
+                              <span className="text-sm md:text-base text-gray-700 font-medium break-words">{booking.client_email}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-4 md:gap-6">
+                            <UtensilsCrossed className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 flex items-start gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Evento:</span>
+                              <span className="text-sm md:text-base text-gray-700 font-semibold uppercase tracking-wide">
+                                {eventTypeLabel || 'N/A'}
+                              </span>
+                            </div>
+                          </div>
+
                           {booking.client_phone && (
-                            <div className="flex items-center gap-10">
-                              <Phone className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                              <div className="flex-1 flex items-center gap-2">
-                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Telefono:</span>
-                                <span className="text-gray-700 font-medium">{booking.client_phone}</span>
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <Phone className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Telefono:</span>
+                                <span className="text-sm md:text-base text-gray-700 font-medium">{booking.client_phone}</span>
                               </div>
                             </div>
                           )}
                         </div>
 
-                        {/* Right Column */}
-                        <div className="space-y-4">
-                          {/* Time */}
+                        {/* Colonna Prenotazione */}
+                        <div className="space-y-3 md:space-y-4">
+                          <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-green-800 bg-green-100 px-3 py-1 rounded-full">
+                            Prenotazione
+                          </span>
+
                           {(booking.desired_time || booking.confirmed_start) && (
-                            <div className="flex items-center gap-10">
-                              <Clock className="w-5 h-5 text-green-600 flex-shrink-0" />
-                              <div className="flex-1 flex items-center gap-2">
-                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Orario:</span>
-                                <span className="text-gray-700 font-semibold">
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <Clock className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Orario:</span>
+                                <span className="text-sm md:text-base text-gray-800 font-semibold">
                                   {getAccurateTime(booking)} - {booking.confirmed_end && extractTimeFromISO(booking.confirmed_end)}
                                 </span>
                               </div>
                             </div>
                           )}
 
-                          {/* Event Type */}
-                          <div className="flex items-center gap-10">
-                            <UtensilsCrossed className="w-5 h-5 text-green-600 flex-shrink-0" />
-                            <div className="flex-1 flex items-center gap-2">
-                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Evento:</span>
-                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{eventTypeLabel || 'N/A'}</span>
+                          <div className="flex items-start gap-4 md:gap-6">
+                            <Users className="w-5 h-5 text-green-700 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 flex items-start gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Ospiti:</span>
+                              <span className="text-sm md:text-base font-bold text-green-800">{booking.num_guests}</span>
                             </div>
                           </div>
 
-                          {/* Guest Count */}
-                          <div className="flex items-center gap-10">
-                            <Users className="w-5 h-5 text-green-700 flex-shrink-0" />
-                            <div className="flex-1 flex items-center gap-2">
-                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Ospiti:</span>
-                              <span className="font-bold text-green-800">{booking.num_guests}</span>
+
+                          {menuPriceDisplay && (
+                            <>
+                              <div className="flex items-start gap-4 md:gap-6">
+                                <Tag className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                                <div className="flex-1 flex items-start gap-2">
+                                  <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Prezzo Menù:</span>
+                                  <span className="text-sm md:text-base font-semibold text-gray-900">
+                                    €{menuPriceDisplay.prezzoMenu.toFixed(2)}
+                                  </span>
+                                </div>
+                              </div>
+                              {menuPriceDisplay.prezzoTotaleLabel && (
+                                <div className="flex items-start gap-4 md:gap-6">
+                                  <Tag className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                                  <div className="flex-1 flex items-start gap-2">
+                                    <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Prezzo Totale:</span>
+                                    <span className="text-sm md:text-base font-semibold text-gray-900">
+                                      {menuPriceDisplay.prezzoTotaleLabel}
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          )}
+
+                          {booking.menu && (
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <ScrollText className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Menù:</span>
+                                <span className="text-sm md:text-base text-gray-700 leading-snug line-clamp-3">{booking.menu}</span>
+                              </div>
                             </div>
-                          </div>
+                          )}
+
+                          {booking.special_requests && (
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <StickyNote className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Note speciali:</span>
+                                <span className="text-sm md:text-base text-gray-700 italic leading-snug">{booking.special_requests}</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
-
-                      {/* Menu (se presente) */}
-                      {booking.menu && (
-                        <div className="mt-3">
-                          <p className="text-xs text-gray-500 font-semibold mb-1">Menù:</p>
-                          <p className="text-sm text-gray-700 line-clamp-3">{booking.menu}</p>
-                        </div>
-                      )}
-
-                      {/* Note speciali (se presenti) */}
-                      {booking.special_requests && (
-                        <div className="mt-3">
-                          <p className="text-xs text-gray-500 font-semibold mb-1">Note speciali:</p>
-                          <p className="text-sm text-gray-700 italic line-clamp-2">{booking.special_requests}</p>
-                        </div>
-                      )}
                       </div>
                       </React.Fragment>
                     )
@@ -529,6 +592,33 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                 {selectedDateData.afternoonBookings.length > 0 ? (
                   selectedDateData.afternoonBookings.map((booking, index) => {
                     const eventTypeLabel = getBookingEventTypeLabel(booking)
+                    // Calcola come nel MenuTab: assicurati che il coperto sia incluso
+                    let menuPriceDisplay = getMenuPriceDisplayFromBooking(booking)
+                    if (menuPriceDisplay && booking.booking_type === 'rinfresco_laurea' && booking.menu_selection?.items) {
+                      // Ricalcola come nel MenuTab per essere sicuri che il coperto sia incluso
+                      const baseTotal = booking.menu_selection.items
+                        .filter((item) => !item.name.toLowerCase().includes('tiramis'))
+                        .reduce((sum, item) => sum + (item.totalPrice || item.price), 0)
+                      const perPersonWithCover = applyCoverCharge(baseTotal, booking.booking_type)
+                      const tiramisuTotal = booking.menu_selection.tiramisu_total || 0
+                      const totalBooking = perPersonWithCover * (booking.num_guests || 0) + tiramisuTotal
+                      
+                      // Ricrea menuPriceDisplay con i valori ricalcolati
+                      const basePerPerson = baseTotal
+                      const breakdownLabel = `(${basePerPerson.toFixed(2)} + ${COVER_CHARGE_PER_PERSON_EUR.toFixed(2)} coperto)`
+                      
+                      menuPriceDisplay = {
+                        prezzoMenu: perPersonWithCover,
+                        prezzoMenuLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
+                        breakdownLabel,
+                        prezzoTotale: totalBooking,
+                        prezzoTotaleLabel: `€${totalBooking.toFixed(2)}`,
+                        totalLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
+                        perPersonWithCover,
+                        basePerPerson
+                      }
+                    }
+                    const creationDateLabel = formatBookingDateTime(booking.created_at)
                     return (
                       <React.Fragment key={booking.id}>
                       {index > 0 && (
@@ -552,88 +642,123 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                           transform: 'translateY(-2px)',
                         }}
                       >
-                      {/* Nome cliente */}
-                      <div className="mb-4">
-                        <h4 className="font-bold text-xl text-gray-900">
-                          {booking.client_name}
-                        </h4>
-                      </div>
-
-                      {/* Two-column layout */}
-                      <div className="grid grid-cols-2 gap-6">
-                        {/* Left Column */}
-                        <div className="space-y-4">
-
-                          {/* Email */}
-                          <div className="flex items-center gap-10">
-                            <Mail className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                            <div className="flex-1 flex items-center gap-2">
-                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Email:</span>
-                              <span className="text-gray-700 truncate font-medium">{booking.client_email}</span>
+                      <div className="grid grid-cols-2 gap-4 md:gap-6">
+                        {/* Colonna Contatti */}
+                        <div className="space-y-3 md:space-y-4">
+                          <div>
+                            <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-yellow-800 bg-yellow-50 px-3 py-1 rounded-full">
+                              Contatti
+                            </span>
+                            <div className="mt-3 pb-3 border-b border-gray-200 flex items-center gap-3">
+                              <Users className="w-5 h-5 text-yellow-700 flex-shrink-0" />
+                              <h4 className="font-bold text-lg md:text-xl text-gray-900">
+                                {booking.client_name}
+                              </h4>
                             </div>
                           </div>
 
-                          {/* Phone */}
+                          <div className="flex items-start gap-4 md:gap-6">
+                            <Mail className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 flex items-start gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Email:</span>
+                              <span className="text-sm md:text-base text-gray-700 font-medium break-words">{booking.client_email}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-4 md:gap-6">
+                            <UtensilsCrossed className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 flex items-start gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Evento:</span>
+                              <span className="text-sm md:text-base text-gray-700 font-semibold uppercase tracking-wide">
+                                {eventTypeLabel || 'N/A'}
+                              </span>
+                            </div>
+                          </div>
+
                           {booking.client_phone && (
-                            <div className="flex items-center gap-10">
-                              <Phone className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                              <div className="flex-1 flex items-center gap-2">
-                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Telefono:</span>
-                                <span className="text-gray-700 font-medium">{booking.client_phone}</span>
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <Phone className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Telefono:</span>
+                                <span className="text-sm md:text-base text-gray-700 font-medium">{booking.client_phone}</span>
                               </div>
                             </div>
                           )}
                         </div>
 
-                        {/* Right Column */}
-                        <div className="space-y-4">
-                          {/* Time */}
+                        {/* Colonna Prenotazione */}
+                        <div className="space-y-3 md:space-y-4">
+                          <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-yellow-800 bg-yellow-100 px-3 py-1 rounded-full">
+                            Prenotazione
+                          </span>
+
                           {(booking.desired_time || booking.confirmed_start) && (
-                            <div className="flex items-center gap-10">
-                              <Clock className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-                              <div className="flex-1 flex items-center gap-2">
-                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Orario:</span>
-                                <span className="text-gray-700 font-semibold">
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <Clock className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Orario:</span>
+                                <span className="text-sm md:text-base text-gray-800 font-semibold">
                                   {getAccurateTime(booking)} - {booking.confirmed_end && extractTimeFromISO(booking.confirmed_end)}
                                 </span>
                               </div>
                             </div>
                           )}
 
-                          {/* Event Type */}
-                          <div className="flex items-center gap-10">
-                            <UtensilsCrossed className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-                            <div className="flex-1 flex items-center gap-2">
-                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Evento:</span>
-                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{eventTypeLabel || 'N/A'}</span>
+                          <div className="flex items-start gap-4 md:gap-6">
+                            <Users className="w-5 h-5 text-yellow-700 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 flex items-start gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Ospiti:</span>
+                              <span className="text-sm md:text-base font-bold text-yellow-800">{booking.num_guests}</span>
                             </div>
                           </div>
 
-                          {/* Guest Count */}
-                          <div className="flex items-center gap-10">
-                            <Users className="w-5 h-5 text-yellow-700 flex-shrink-0" />
-                            <div className="flex-1 flex items-center gap-2">
-                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Ospiti:</span>
-                              <span className="font-bold text-yellow-800">{booking.num_guests}</span>
+
+                          {menuPriceDisplay && (
+                            <>
+                              <div className="flex items-start gap-4 md:gap-6">
+                                <Tag className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                                <div className="flex-1 flex items-start gap-2">
+                                  <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Prezzo Menù:</span>
+                                  <span className="text-sm md:text-base font-semibold text-gray-900">
+                                    €{menuPriceDisplay.prezzoMenu.toFixed(2)}
+                                  </span>
+                                </div>
+                              </div>
+                              {menuPriceDisplay.prezzoTotaleLabel && (
+                                <div className="flex items-start gap-4 md:gap-6">
+                                  <Tag className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                                  <div className="flex-1 flex items-start gap-2">
+                                    <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Prezzo Totale:</span>
+                                    <span className="text-sm md:text-base font-semibold text-gray-900">
+                                      {menuPriceDisplay.prezzoTotaleLabel}
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          )}
+
+                          {booking.menu && (
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <ScrollText className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Menù:</span>
+                                <span className="text-sm md:text-base text-gray-700 leading-snug line-clamp-3">{booking.menu}</span>
+                              </div>
                             </div>
-                          </div>
+                          )}
+
+                          {booking.special_requests && (
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <StickyNote className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Note speciali:</span>
+                                <span className="text-sm md:text-base text-gray-700 italic leading-snug">{booking.special_requests}</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
-                      {/* Menu (se presente) */}
-                      {booking.menu && (
-                        <div className="mt-3">
-                          <p className="text-xs text-gray-500 font-semibold mb-1">Menù:</p>
-                          <p className="text-sm text-gray-700 line-clamp-3">{booking.menu}</p>
-                        </div>
-                      )}
-
-                      {/* Note speciali (se presenti) */}
-                      {booking.special_requests && (
-                        <div className="mt-3">
-                          <p className="text-xs text-gray-500 font-semibold mb-1">Note speciali:</p>
-                          <p className="text-sm text-gray-700 italic line-clamp-2">{booking.special_requests}</p>
-                        </div>
-                      )}
                       </div>
                       </React.Fragment>
                     )
@@ -676,6 +801,33 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                 {selectedDateData.eveningBookings.length > 0 ? (
                   selectedDateData.eveningBookings.map((booking, index) => {
                     const eventTypeLabel = getBookingEventTypeLabel(booking)
+                    // Calcola come nel MenuTab: assicurati che il coperto sia incluso
+                    let menuPriceDisplay = getMenuPriceDisplayFromBooking(booking)
+                    if (menuPriceDisplay && booking.booking_type === 'rinfresco_laurea' && booking.menu_selection?.items) {
+                      // Ricalcola come nel MenuTab per essere sicuri che il coperto sia incluso
+                      const baseTotal = booking.menu_selection.items
+                        .filter((item) => !item.name.toLowerCase().includes('tiramis'))
+                        .reduce((sum, item) => sum + (item.totalPrice || item.price), 0)
+                      const perPersonWithCover = applyCoverCharge(baseTotal, booking.booking_type)
+                      const tiramisuTotal = booking.menu_selection.tiramisu_total || 0
+                      const totalBooking = perPersonWithCover * (booking.num_guests || 0) + tiramisuTotal
+                      
+                      // Ricrea menuPriceDisplay con i valori ricalcolati
+                      const basePerPerson = baseTotal
+                      const breakdownLabel = `(${basePerPerson.toFixed(2)} + ${COVER_CHARGE_PER_PERSON_EUR.toFixed(2)} coperto)`
+                      
+                      menuPriceDisplay = {
+                        prezzoMenu: perPersonWithCover,
+                        prezzoMenuLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
+                        breakdownLabel,
+                        prezzoTotale: totalBooking,
+                        prezzoTotaleLabel: `€${totalBooking.toFixed(2)}`,
+                        totalLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
+                        perPersonWithCover,
+                        basePerPerson
+                      }
+                    }
+                    const creationDateLabel = formatBookingDateTime(booking.created_at)
                     return (
                       <React.Fragment key={booking.id}>
                       {index > 0 && (
@@ -699,88 +851,123 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                           transform: 'translateY(-2px)',
                         }}
                       >
-                      {/* Nome cliente */}
-                      <div className="mb-4">
-                        <h4 className="font-bold text-xl text-gray-900">
-                          {booking.client_name}
-                        </h4>
-                      </div>
-
-                      {/* Two-column layout */}
-                      <div className="grid grid-cols-2 gap-6">
-                        {/* Left Column */}
-                        <div className="space-y-4">
-
-                          {/* Email */}
-                          <div className="flex items-center gap-10">
-                            <Mail className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                            <div className="flex-1 flex items-center gap-2">
-                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Email:</span>
-                              <span className="text-gray-700 truncate font-medium">{booking.client_email}</span>
+                      <div className="grid grid-cols-2 gap-4 md:gap-6">
+                        {/* Colonna Contatti */}
+                        <div className="space-y-3 md:space-y-4">
+                          <div>
+                            <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-blue-800 bg-blue-50 px-3 py-1 rounded-full">
+                              Contatti
+                            </span>
+                            <div className="mt-3 pb-3 border-b border-gray-200 flex items-center gap-3">
+                              <Users className="w-5 h-5 text-blue-700 flex-shrink-0" />
+                              <h4 className="font-bold text-lg md:text-xl text-gray-900">
+                                {booking.client_name}
+                              </h4>
                             </div>
                           </div>
 
-                          {/* Phone */}
+                          <div className="flex items-start gap-4 md:gap-6">
+                            <Mail className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 flex items-start gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Email:</span>
+                              <span className="text-sm md:text-base text-gray-700 font-medium break-words">{booking.client_email}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-4 md:gap-6">
+                            <UtensilsCrossed className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 flex items-start gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Evento:</span>
+                              <span className="text-sm md:text-base text-gray-700 font-semibold uppercase tracking-wide">
+                                {eventTypeLabel || 'N/A'}
+                              </span>
+                            </div>
+                          </div>
+
                           {booking.client_phone && (
-                            <div className="flex items-center gap-10">
-                              <Phone className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                              <div className="flex-1 flex items-center gap-2">
-                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Telefono:</span>
-                                <span className="text-gray-700 font-medium">{booking.client_phone}</span>
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <Phone className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Telefono:</span>
+                                <span className="text-sm md:text-base text-gray-700 font-medium">{booking.client_phone}</span>
                               </div>
                             </div>
                           )}
                         </div>
 
-                        {/* Right Column */}
-                        <div className="space-y-4">
-                          {/* Time */}
+                        {/* Colonna Prenotazione */}
+                        <div className="space-y-3 md:space-y-4">
+                          <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-blue-800 bg-blue-100 px-3 py-1 rounded-full">
+                            Prenotazione
+                          </span>
+
                           {(booking.desired_time || booking.confirmed_start) && (
-                            <div className="flex items-center gap-10">
-                              <Clock className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                              <div className="flex-1 flex items-center gap-2">
-                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Orario:</span>
-                                <span className="text-gray-700 font-semibold">
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <Clock className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Orario:</span>
+                                <span className="text-sm md:text-base text-gray-800 font-semibold">
                                   {getAccurateTime(booking)} - {booking.confirmed_end && extractTimeFromISO(booking.confirmed_end)}
                                 </span>
                               </div>
                             </div>
                           )}
 
-                          {/* Event Type */}
-                          <div className="flex items-center gap-10">
-                            <UtensilsCrossed className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                            <div className="flex-1 flex items-center gap-2">
-                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Evento:</span>
-                              <span className="text-gray-700 font-medium text-xs uppercase tracking-wide">{eventTypeLabel || 'N/A'}</span>
+                          <div className="flex items-start gap-4 md:gap-6">
+                            <Users className="w-5 h-5 text-blue-700 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 flex items-start gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Ospiti:</span>
+                              <span className="text-sm md:text-base font-bold text-blue-800">{booking.num_guests}</span>
                             </div>
                           </div>
 
-                          {/* Guest Count */}
-                          <div className="flex items-center gap-10">
-                            <Users className="w-5 h-5 text-blue-700 flex-shrink-0" />
-                            <div className="flex-1 flex items-center gap-2">
-                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Ospiti:</span>
-                              <span className="font-bold text-blue-800">{booking.num_guests}</span>
+
+                          {menuPriceDisplay && (
+                            <>
+                              <div className="flex items-start gap-4 md:gap-6">
+                                <Tag className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                                <div className="flex-1 flex items-start gap-2">
+                                  <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Prezzo Menù:</span>
+                                  <span className="text-sm md:text-base font-semibold text-gray-900">
+                                    €{menuPriceDisplay.prezzoMenu.toFixed(2)}
+                                  </span>
+                                </div>
+                              </div>
+                              {menuPriceDisplay.prezzoTotaleLabel && (
+                                <div className="flex items-start gap-4 md:gap-6">
+                                  <Tag className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                                  <div className="flex-1 flex items-start gap-2">
+                                    <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Prezzo Totale:</span>
+                                    <span className="text-sm md:text-base font-semibold text-gray-900">
+                                      {menuPriceDisplay.prezzoTotaleLabel}
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                            </>
+                          )}
+
+                          {booking.menu && (
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <ScrollText className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Menù:</span>
+                                <span className="text-sm md:text-base text-gray-700 leading-snug line-clamp-3">{booking.menu}</span>
+                              </div>
                             </div>
-                          </div>
+                          )}
+
+                          {booking.special_requests && (
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <StickyNote className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Note speciali:</span>
+                                <span className="text-sm md:text-base text-gray-700 italic leading-snug">{booking.special_requests}</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
-                      {/* Menu (se presente) */}
-                      {booking.menu && (
-                        <div className="mt-3">
-                          <p className="text-xs text-gray-500 font-semibold mb-1">Menù:</p>
-                          <p className="text-sm text-gray-700 line-clamp-3">{booking.menu}</p>
-                        </div>
-                      )}
-
-                      {/* Note speciali (se presenti) */}
-                      {booking.special_requests && (
-                        <div className="mt-3">
-                          <p className="text-xs text-gray-500 font-semibold mb-1">Note speciali:</p>
-                          <p className="text-sm text-gray-700 italic line-clamp-2">{booking.special_requests}</p>
-                        </div>
-                      )}
                       </div>
                       </React.Fragment>
                     )

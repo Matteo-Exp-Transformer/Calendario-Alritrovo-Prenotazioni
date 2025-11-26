@@ -6,6 +6,8 @@ import { Calendar, Clock, Users, Tag, MessageSquare, CheckCircle, XCircle, Utens
 import { getBookingEventTypeLabel } from '../utils/eventTypeLabels'
 import { getPresetMenuLabel } from '../constants/presetMenus'
 import type { PresetMenuType } from '../constants/presetMenus'
+import { getMenuPriceDisplayFromBooking } from '../utils/menuPricing'
+import { formatBookingDateTime } from '../utils/formatDateTime'
 
 interface BookingRequestCardProps {
   booking: BookingRequest
@@ -58,6 +60,8 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
   const EventIcon = eventConfig?.icon || UtensilsCrossed
   const eventIconColor = eventConfig?.color || 'bg-gray-500'
   const statusConfig = STATUS_CONFIG[booking.status] || STATUS_CONFIG.pending
+  const menuPriceDisplay = getMenuPriceDisplayFromBooking(booking)
+  const creationDateLabel = formatBookingDateTime(booking.created_at)
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -213,6 +217,10 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
                 </span>
               </div>
             )}
+            <div className="flex items-start gap-3 py-3 sm:col-span-2">
+              <span className="text-xs text-gray-500 w-24 font-medium uppercase tracking-wide">Data Creazione:</span>
+              <span className="text-sm font-medium text-gray-900">{creationDateLabel}</span>
+            </div>
           </div>
 
           {/* Menu Info - Solo per Rinfresco di Laurea */}
@@ -230,15 +238,24 @@ export const BookingRequestCard: React.FC<BookingRequestCardProps> = ({
               )}
               
               <div className="space-y-2">
-                {booking.menu_total_per_person && (
-                  <p className="text-sm font-bold text-warm-wood">
-                    €{booking.menu_total_per_person.toFixed(2)}/persona
-                    {booking.menu_total_booking && (
-                      <span className="text-gray-600 ml-2">
-                        (Totale: €{booking.menu_total_booking.toFixed(2)})
-                      </span>
+                {menuPriceDisplay && (
+                  <>
+                    <p className="text-sm font-bold text-warm-wood">
+                      <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold mr-2">Prezzo Menù:</span>
+                      {menuPriceDisplay.prezzoMenuLabel}
+                      {menuPriceDisplay.breakdownLabel && (
+                        <span className="text-gray-600 ml-2">
+                          {menuPriceDisplay.breakdownLabel}
+                        </span>
+                      )}
+                    </p>
+                    {menuPriceDisplay.prezzoTotaleLabel && (
+                      <p className="text-sm font-bold text-warm-wood">
+                        <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold mr-2">Prezzo Totale:</span>
+                        {menuPriceDisplay.prezzoTotaleLabel}
+                      </p>
                     )}
-                  </p>
+                  </>
                 )}
                 {Array.isArray(booking.menu_selection?.items) && booking.menu_selection.items.length > 0 && (
                   <div className="text-sm text-gray-700">
