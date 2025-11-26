@@ -10,7 +10,7 @@ import { it } from 'date-fns/locale'
 import type { BookingRequest } from '@/types/booking'
 import { transformBookingsToCalendarEvents } from '../utils/bookingEventTransform'
 import { BookingDetailsModal } from './BookingDetailsModal'
-import { calculateDailyCapacity, getSlotsOccupiedByBooking } from '../utils/capacityCalculator'
+import { calculateDailyCapacity, getStartSlotForBooking } from '../utils/capacityCalculator'
 import { CollapsibleCard } from '@/components/ui/CollapsibleCard'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select'
 
@@ -128,10 +128,11 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
 
     for (const booking of dayBookings) {
       if (!booking.confirmed_start || !booking.confirmed_end) continue
-      const slots = getSlotsOccupiedByBooking(booking.confirmed_start, booking.confirmed_end)
-      if (slots.includes('morning')) morningBookings.push(booking)
-      if (slots.includes('afternoon')) afternoonBookings.push(booking)
-      if (slots.includes('evening')) eveningBookings.push(booking)
+      // Display booking only in the slot where it STARTS
+      const startSlot = getStartSlotForBooking(booking.confirmed_start)
+      if (startSlot === 'morning') morningBookings.push(booking)
+      else if (startSlot === 'afternoon') afternoonBookings.push(booking)
+      else if (startSlot === 'evening') eveningBookings.push(booking)
     }
 
     return {
