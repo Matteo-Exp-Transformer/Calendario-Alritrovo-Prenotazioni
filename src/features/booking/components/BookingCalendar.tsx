@@ -16,6 +16,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 import { extractDateFromISO, extractTimeFromISO } from '../utils/dateUtils'
 import { getBookingEventTypeLabel } from '../utils/eventTypeLabels'
+import { getMenuPriceDisplayFromBooking } from '../utils/menuPricing'
+import { formatBookingDateTime } from '../utils/formatDateTime'
 
 /**
  * Helper per ottenere l'orario accurato di una prenotazione
@@ -380,6 +382,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                 {selectedDateData.morningBookings.length > 0 ? (
                   selectedDateData.morningBookings.map((booking, index) => {
                     const eventTypeLabel = getBookingEventTypeLabel(booking)
+                    const menuPriceDisplay = getMenuPriceDisplayFromBooking(booking)
+                    const creationDateLabel = formatBookingDateTime(booking.created_at)
+                    const menuTotalBooking = typeof booking.menu_total_booking === 'number' ? booking.menu_total_booking : null
                     return (
                       <React.Fragment key={booking.id}>
                       {index > 0 && (
@@ -468,6 +473,15 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                               <span className="font-bold text-green-800">{booking.num_guests}</span>
                             </div>
                           </div>
+
+                          {/* Creation Date */}
+                          <div className="flex items-center gap-10">
+                            <Calendar className="w-5 h-5 text-green-700 flex-shrink-0" />
+                            <div className="flex-1 flex items-center gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Data Creazione:</span>
+                              <span className="text-gray-700 font-medium">{creationDateLabel}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -476,6 +490,24 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                         <div className="mt-3">
                           <p className="text-xs text-gray-500 font-semibold mb-1">Menù:</p>
                           <p className="text-sm text-gray-700 line-clamp-3">{booking.menu}</p>
+                        </div>
+                      )}
+
+                      {/* Menu price */}
+                      {menuPriceDisplay && (
+                        <div className="mt-3">
+                          <p className="text-xs text-gray-500 font-semibold mb-1">Prezzo Menù:</p>
+                          <p className="text-sm font-bold text-gray-900">
+                            {menuPriceDisplay.totalLabel}
+                            {menuPriceDisplay.breakdownLabel && (
+                              <span className="text-gray-600 ml-2">{menuPriceDisplay.breakdownLabel}</span>
+                            )}
+                            {menuTotalBooking !== null && (
+                              <span className="text-gray-600 ml-2">
+                                (Totale: €{menuTotalBooking.toFixed(2)})
+                              </span>
+                            )}
+                          </p>
                         </div>
                       )}
 
@@ -529,6 +561,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                 {selectedDateData.afternoonBookings.length > 0 ? (
                   selectedDateData.afternoonBookings.map((booking, index) => {
                     const eventTypeLabel = getBookingEventTypeLabel(booking)
+                    const menuPriceDisplay = getMenuPriceDisplayFromBooking(booking)
+                    const creationDateLabel = formatBookingDateTime(booking.created_at)
+                    const menuTotalBooking = typeof booking.menu_total_booking === 'number' ? booking.menu_total_booking : null
                     return (
                       <React.Fragment key={booking.id}>
                       {index > 0 && (
@@ -617,6 +652,15 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                               <span className="font-bold text-yellow-800">{booking.num_guests}</span>
                             </div>
                           </div>
+
+                          {/* Creation Date */}
+                          <div className="flex items-center gap-10">
+                            <Calendar className="w-5 h-5 text-yellow-700 flex-shrink-0" />
+                            <div className="flex-1 flex items-center gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Data Creazione:</span>
+                              <span className="text-gray-700 font-medium">{creationDateLabel}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                       {/* Menu (se presente) */}
@@ -624,6 +668,24 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                         <div className="mt-3">
                           <p className="text-xs text-gray-500 font-semibold mb-1">Menù:</p>
                           <p className="text-sm text-gray-700 line-clamp-3">{booking.menu}</p>
+                        </div>
+                      )}
+
+                      {/* Menu price */}
+                      {menuPriceDisplay && (
+                        <div className="mt-3">
+                          <p className="text-xs text-gray-500 font-semibold mb-1">Prezzo Menù:</p>
+                          <p className="text-sm font-bold text-gray-900">
+                            {menuPriceDisplay.totalLabel}
+                            {menuPriceDisplay.breakdownLabel && (
+                              <span className="text-gray-600 ml-2">{menuPriceDisplay.breakdownLabel}</span>
+                            )}
+                            {menuTotalBooking !== null && (
+                              <span className="text-gray-600 ml-2">
+                                (Totale: €{menuTotalBooking.toFixed(2)})
+                              </span>
+                            )}
+                          </p>
                         </div>
                       )}
 
@@ -676,6 +738,9 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                 {selectedDateData.eveningBookings.length > 0 ? (
                   selectedDateData.eveningBookings.map((booking, index) => {
                     const eventTypeLabel = getBookingEventTypeLabel(booking)
+                    const menuPriceDisplay = getMenuPriceDisplayFromBooking(booking)
+                    const creationDateLabel = formatBookingDateTime(booking.created_at)
+                    const menuTotalBooking = typeof booking.menu_total_booking === 'number' ? booking.menu_total_booking : null
                     return (
                       <React.Fragment key={booking.id}>
                       {index > 0 && (
@@ -764,6 +829,15 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                               <span className="font-bold text-blue-800">{booking.num_guests}</span>
                             </div>
                           </div>
+
+                          {/* Creation Date */}
+                          <div className="flex items-center gap-10">
+                            <Calendar className="w-5 h-5 text-blue-700 flex-shrink-0" />
+                            <div className="flex-1 flex items-center gap-2">
+                              <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[70px]">Data Creazione:</span>
+                              <span className="text-gray-700 font-medium">{creationDateLabel}</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                       {/* Menu (se presente) */}
@@ -771,6 +845,24 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                         <div className="mt-3">
                           <p className="text-xs text-gray-500 font-semibold mb-1">Menù:</p>
                           <p className="text-sm text-gray-700 line-clamp-3">{booking.menu}</p>
+                        </div>
+                      )}
+
+                      {/* Menu price */}
+                      {menuPriceDisplay && (
+                        <div className="mt-3">
+                          <p className="text-xs text-gray-500 font-semibold mb-1">Prezzo Menù:</p>
+                          <p className="text-sm font-bold text-gray-900">
+                            {menuPriceDisplay.totalLabel}
+                            {menuPriceDisplay.breakdownLabel && (
+                              <span className="text-gray-600 ml-2">{menuPriceDisplay.breakdownLabel}</span>
+                            )}
+                            {menuTotalBooking !== null && (
+                              <span className="text-gray-600 ml-2">
+                                (Totale: €{menuTotalBooking.toFixed(2)})
+                              </span>
+                            )}
+                          </p>
                         </div>
                       )}
 

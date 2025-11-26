@@ -1,5 +1,6 @@
 import React from 'react'
 import type { BookingRequest } from '@/types/booking'
+import { formatBookingDateTime } from '../utils/formatDateTime'
 
 interface Props {
   booking: BookingRequest
@@ -34,7 +35,7 @@ const InfoRow: React.FC<{ label: string; value: string | React.ReactNode }> = ({
 )
 
 export const DetailsTab: React.FC<Props> = ({
-  booking: _booking,
+  booking,
   isEditMode,
   formData,
   onFormDataChange,
@@ -55,6 +56,8 @@ export const DetailsTab: React.FC<Props> = ({
       return dateString
     }
   }
+
+  const creationDateLabel = formatBookingDateTime(booking.created_at)
 
   return (
     <div className="space-y-6">
@@ -206,7 +209,15 @@ export const DetailsTab: React.FC<Props> = ({
         )}
       </div>
 
-      {/* Section 4: Special Notes (tavolo only) */}
+      {/* Section 4: Data Creazione */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
+          Data Creazione
+        </h3>
+        <p className="text-gray-900 font-medium">{creationDateLabel}</p>
+      </div>
+
+      {/* Section 5: Special Notes (tavolo only) */}
       {formData.booking_type === 'tavolo' && (
         <div className="space-y-3">
           <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">

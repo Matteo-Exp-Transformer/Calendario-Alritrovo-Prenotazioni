@@ -12,6 +12,7 @@ import { getPresetMenu, type PresetMenuType } from '../constants/presetMenus'
 import { useAcceptedBookings } from '../hooks/useBookingQueries'
 import { useCapacityCheck } from '../hooks/useCapacityCheck'
 import { CapacityWarningModal } from './CapacityWarningModal'
+import { applyCoverCharge } from '../utils/menuPricing'
 
 interface AdminBookingFormProps {
   onSubmit?: () => void
@@ -85,11 +86,11 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
       const value = parseInt(inputValue, 10)
       if (value >= 1) {
         const tiramisuTotal = formData.menu_selection?.tiramisu_total || 0
-        const perPerson = formData.menu_total_per_person || 0
+        const perPersonWithCover = formData.menu_total_per_person || 0
         const newFormData = {
           ...formData,
           num_guests: value,
-          menu_total_booking: perPerson * value + tiramisuTotal
+          menu_total_booking: perPersonWithCover * value + tiramisuTotal
         }
         setFormData(newFormData)
         setErrors({ ...errors, num_guests: '' })
@@ -208,6 +209,7 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
       .filter(item => !item.name.toLowerCase().includes('tiramis'))
       .reduce((sum, item) => sum + item.price, 0)
     const numGuests = formData.num_guests || 0
+    const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
 
     const tiramisuSelection = selectedItems.find((item) => item.name.toLowerCase().includes('tiramis'))
     const tiramisuUnitPrice = tiramisuSelection?.price || 0
@@ -222,8 +224,8 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
         tiramisu_total: tiramisuTotal,
         tiramisu_kg: tiramisuKg
       },
-      menu_total_per_person: totalPerPerson,
-      menu_total_booking: totalPerPerson * numGuests + tiramisuTotal
+      menu_total_per_person: perPersonWithCover,
+      menu_total_booking: perPersonWithCover * numGuests + tiramisuTotal
     })
   }
 
@@ -621,6 +623,7 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
             onPresetMenuChange={handlePresetMenuChange}
             onMenuChange={({ items, totalPerPerson, tiramisuTotal, tiramisuKg }) => {
               const numGuests = formData.num_guests || 0
+              const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
               // Mantieni preset_menu se gli items corrispondono ancora al preset
               const currentPreset = selectedPreset
               let updatedPreset: PresetMenuType = currentPreset
@@ -649,8 +652,8 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
                   tiramisu_total: tiramisuTotal,
                   tiramisu_kg: tiramisuKg
                 },
-                menu_total_per_person: totalPerPerson,
-                menu_total_booking: totalPerPerson * numGuests + tiramisuTotal
+                menu_total_per_person: perPersonWithCover,
+                menu_total_booking: perPersonWithCover * numGuests + tiramisuTotal
               })
               setErrors({ ...errors, menu: '' })
             }}

@@ -4,6 +4,7 @@ import { MenuSelection } from './MenuSelection'
 import type { SelectedMenuItem } from '@/types/menu'
 import { getPresetMenuLabel } from '../constants/presetMenus'
 import type { PresetMenuType } from '../constants/presetMenus'
+import { applyCoverCharge, COVER_CHARGE_PER_PERSON_EUR, needsCoverCharge } from '../utils/menuPricing'
 
 interface MenuTabProps {
   booking: any
@@ -47,7 +48,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 export const MenuTab: React.FC<MenuTabProps> = ({
-  booking: _booking,
+  booking,
   isEditMode,
   menuSelection,
   numGuests,
@@ -72,22 +73,26 @@ export const MenuTab: React.FC<MenuTabProps> = ({
   }, [menuSelection?.items])
 
   // Calculate totals
-  const { totalPerPerson, totalBooking, itemCount } = useMemo(() => {
-    if (!menuSelection?.items) return { totalPerPerson: 0, totalBooking: 0, itemCount: 0 }
+  const { baseTotal, perPersonWithCover, totalBooking, itemCount } = useMemo(() => {
+    if (!menuSelection?.items) {
+      return { baseTotal: 0, perPersonWithCover: 0, totalBooking: 0, itemCount: 0 }
+    }
 
     const baseTotal = menuSelection.items
       .filter((item) => !item.name.toLowerCase().includes('tiramis'))
       .reduce((sum, item) => sum + item.price, 0)
 
     const tiramisuTotal = menuSelection.tiramisu_total || 0
-    const totalBooking = baseTotal * numGuests + tiramisuTotal
+    const perPersonWithCover = applyCoverCharge(baseTotal, booking?.booking_type || 'rinfresco_laurea')
+    const totalBooking = perPersonWithCover * numGuests + tiramisuTotal
 
     return {
-      totalPerPerson: baseTotal,
+      baseTotal,
+      perPersonWithCover,
       totalBooking,
       itemCount: menuSelection.items.length
     }
-  }, [menuSelection, numGuests])
+  }, [menuSelection, numGuests, booking?.booking_type])
 
   // Menu summary (always visible)
   const menuSummary = (
@@ -96,7 +101,13 @@ export const MenuTab: React.FC<MenuTabProps> = ({
         {itemCount} {itemCount === 1 ? 'item selezionato' : 'items selezionati'}
       </p>
       <p className="text-gray-600">
-        Totale a persona: <span className="font-bold text-gray-900">€{totalPerPerson.toFixed(2)}</span>
+        Totale a persona:{' '}
+        <span className="font-bold text-gray-900">€{perPersonWithCover.toFixed(2)}</span>
+        {needsCoverCharge(booking?.booking_type || 'rinfresco_laurea') && (
+          <span className="text-gray-600 ml-2">
+            ({baseTotal.toFixed(2)} + {COVER_CHARGE_PER_PERSON_EUR.toFixed(2)} coperto)
+          </span>
+        )}
       </p>
       <p className="text-gray-600">
         Totale prenotazione: <span className="font-bold text-gray-900">€{totalBooking.toFixed(2)}</span>
