@@ -607,7 +607,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
           left: 0,
           right: 0,
           bottom: 0,
-          zIndex: 99999,
+          zIndex: 50,
           overflow: 'hidden',
           overflowX: 'hidden',
           overflowY: 'hidden',
@@ -795,7 +795,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
       {/* Booking Type Change Warning Modal */}
       {showTypeChangeWarning && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
           <div className="absolute inset-0 bg-black/75" onClick={() => setShowTypeChangeWarning(false)} />
           <div className="relative bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full mx-4 border-2 border-gray-300">
             <div className="flex items-center gap-4 mb-6">
@@ -844,10 +844,10 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
   // Render cancel confirmation modal separately to avoid z-index/overflow issues
   const cancelConfirmationPortal = showCancelConfirm ? createPortal(
-    <div 
-      className="fixed inset-0 flex items-center justify-center" 
-      style={{ 
-        zIndex: 100001,
+    <div
+      className="fixed inset-0 flex items-center justify-center"
+      style={{
+        zIndex: 60,
         position: 'fixed',
         top: 0,
         left: 0,
