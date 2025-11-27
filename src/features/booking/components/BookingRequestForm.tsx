@@ -14,6 +14,7 @@ import { isValidBookingDateTime, getDayOfWeek, formatHours } from '@/lib/busines
 import { toast } from 'react-toastify'
 import { getPresetMenu, type PresetMenuType } from '../constants/presetMenus'
 import { useMenuItems } from '../hooks/useMenuItems'
+import { applyCoverCharge } from '../utils/menuPricing'
 
 interface BookingRequestFormProps {
   onSubmit?: () => void
@@ -175,12 +176,11 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       const value = parseInt(inputValue, 10)
       if (value >= 1 && value <= 110) {
         const tiramisuTotal = formData.menu_selection?.tiramisu_total || 0
-        const perPerson = formData.menu_total_per_person || 0
-        const copertoTotal = formData.booking_type === 'rinfresco_laurea' ? 2.00 * value : 0
+        const perPersonWithCover = formData.menu_total_per_person || 0
         const newFormData = {
           ...formData,
           num_guests: value,
-          menu_total_booking: perPerson * value + copertoTotal + tiramisuTotal
+          menu_total_booking: perPersonWithCover * value + tiramisuTotal
         }
         setFormData(newFormData)
         setErrors({ ...errors, num_guests: '' })
@@ -288,7 +288,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       .filter(item => !item.name.toLowerCase().includes('tiramis'))
       .reduce((sum, item) => sum + item.price, 0)
     const numGuests = formData.num_guests || 0
-    const copertoTotal = formData.booking_type === 'rinfresco_laurea' ? 2.00 * numGuests : 0
+    const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
 
     const tiramisuSelection = selectedItems.find((item) => item.name.toLowerCase().includes('tiramis'))
     const tiramisuUnitPrice = tiramisuSelection?.price || 0
@@ -303,8 +303,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         tiramisu_total: tiramisuTotal,
         tiramisu_kg: tiramisuKg
       },
-      menu_total_per_person: totalPerPerson,
-      menu_total_booking: totalPerPerson * numGuests + copertoTotal + tiramisuTotal
+      menu_total_per_person: perPersonWithCover,
+      menu_total_booking: perPersonWithCover * numGuests + tiramisuTotal
     })
   }
 
@@ -933,7 +933,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             onPresetMenuChange={handlePresetMenuChange}
             onMenuChange={({ items, totalPerPerson, tiramisuTotal, tiramisuKg }) => {
               const numGuests = formData.num_guests || 0
-              const copertoTotal = 2.00 * numGuests
+              const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
               // Mantieni preset_menu se gli items corrispondono ancora al preset
               const currentPreset = selectedPreset
               let updatedPreset: PresetMenuType = currentPreset
@@ -962,8 +962,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
                   tiramisu_total: tiramisuTotal,
                   tiramisu_kg: tiramisuKg
                 },
-                menu_total_per_person: totalPerPerson,
-                menu_total_booking: totalPerPerson * numGuests + copertoTotal + tiramisuTotal
+                menu_total_per_person: perPersonWithCover,
+                menu_total_booking: perPersonWithCover * numGuests + tiramisuTotal
               })
               setErrors({ ...errors, menu: '' })
             }}

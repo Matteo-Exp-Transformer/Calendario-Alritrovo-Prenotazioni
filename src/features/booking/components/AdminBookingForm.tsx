@@ -4,7 +4,8 @@ import type { BookingRequestInput } from '@/types/booking'
 import { useCreateAdminBooking } from '../hooks/useAdminBookingRequests'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { Send, Loader2 } from 'lucide-react'
+import { Send, Loader2, MapPin } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select'
 import { MenuSelection } from './MenuSelection'
 import { DietaryRestrictionsSection } from './DietaryRestrictionsSection'
 import { useMenuItems } from '../hooks/useMenuItems'
@@ -12,6 +13,7 @@ import { getPresetMenu, type PresetMenuType } from '../constants/presetMenus'
 import { useAcceptedBookings } from '../hooks/useBookingQueries'
 import { useCapacityCheck } from '../hooks/useCapacityCheck'
 import { CapacityWarningModal } from './CapacityWarningModal'
+import { applyCoverCharge } from '../utils/menuPricing'
 
 interface AdminBookingFormProps {
   onSubmit?: () => void
@@ -33,7 +35,8 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
       tiramisu_kg: 0
     },
     dietary_restrictions: [],
-    preset_menu: null
+    preset_menu: null,
+    placement: ''
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -85,11 +88,11 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
       const value = parseInt(inputValue, 10)
       if (value >= 1) {
         const tiramisuTotal = formData.menu_selection?.tiramisu_total || 0
-        const perPerson = formData.menu_total_per_person || 0
+        const perPersonWithCover = formData.menu_total_per_person || 0
         const newFormData = {
           ...formData,
           num_guests: value,
-          menu_total_booking: perPerson * value + tiramisuTotal
+          menu_total_booking: perPersonWithCover * value + tiramisuTotal
         }
         setFormData(newFormData)
         setErrors({ ...errors, num_guests: '' })
@@ -208,6 +211,7 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
       .filter(item => !item.name.toLowerCase().includes('tiramis'))
       .reduce((sum, item) => sum + item.price, 0)
     const numGuests = formData.num_guests || 0
+    const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
 
     const tiramisuSelection = selectedItems.find((item) => item.name.toLowerCase().includes('tiramis'))
     const tiramisuUnitPrice = tiramisuSelection?.price || 0
@@ -222,8 +226,8 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
         tiramisu_total: tiramisuTotal,
         tiramisu_kg: tiramisuKg
       },
-      menu_total_per_person: totalPerPerson,
-      menu_total_booking: totalPerPerson * numGuests + tiramisuTotal
+      menu_total_per_person: perPersonWithCover,
+      menu_total_booking: perPersonWithCover * numGuests + tiramisuTotal
     })
   }
 
@@ -375,7 +379,8 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
             tiramisu_kg: 0
           },
           dietary_restrictions: [],
-          preset_menu: null
+          preset_menu: null,
+          placement: ''
         })
         setSelectedPreset(null)
         setErrors({})
@@ -607,6 +612,40 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
             )}
           </div>
 
+          {/* Posizionamento */}
+          <div className="space-y-3" style={{ paddingTop: '0.5rem' }}>
+            <label
+              htmlFor="placement"
+              className="block text-base md:text-lg text-warm-wood mb-2 flex items-center gap-2"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                backdropFilter: 'blur(1px)',
+                padding: '8px 16px',
+                borderRadius: '12px',
+                display: 'inline-flex',
+                fontWeight: '700',
+                marginBottom: '0.5rem'
+              }}
+            >
+              <MapPin className="w-4 h-4" />
+              Posizionamento (opzionale)
+            </label>
+            <Select
+              value={formData.placement || 'none'}
+              onValueChange={(value) => setFormData({ ...formData, placement: value === 'none' ? '' : value })}
+            >
+              <SelectTrigger id="placement">
+                <SelectValue placeholder="Seleziona sala (opzionale)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Nessuna preferenza</SelectItem>
+                <SelectItem value="Sala A">Sala A</SelectItem>
+                <SelectItem value="Sala B">Sala B</SelectItem>
+                <SelectItem value="Deorr">Deorr</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
         </div>
       </div>
 
@@ -621,6 +660,7 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
             onPresetMenuChange={handlePresetMenuChange}
             onMenuChange={({ items, totalPerPerson, tiramisuTotal, tiramisuKg }) => {
               const numGuests = formData.num_guests || 0
+              const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
               // Mantieni preset_menu se gli items corrispondono ancora al preset
               const currentPreset = selectedPreset
               let updatedPreset: PresetMenuType = currentPreset
@@ -649,8 +689,8 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
                   tiramisu_total: tiramisuTotal,
                   tiramisu_kg: tiramisuKg
                 },
-                menu_total_per_person: totalPerPerson,
-                menu_total_booking: totalPerPerson * numGuests + tiramisuTotal
+                menu_total_per_person: perPersonWithCover,
+                menu_total_booking: perPersonWithCover * numGuests + tiramisuTotal
               })
               setErrors({ ...errors, menu: '' })
             }}

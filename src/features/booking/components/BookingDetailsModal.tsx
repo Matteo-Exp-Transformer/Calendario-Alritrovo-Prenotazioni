@@ -14,6 +14,7 @@ import { DietaryTab } from './DietaryTab'
 import type { SelectedMenuItem } from '@/types/menu'
 import { getPresetMenu, type PresetMenuType } from '../constants/presetMenus'
 import { useMenuItems } from '../hooks/useMenuItems'
+import { applyCoverCharge } from '../utils/menuPricing'
 
 interface BookingDetailsModalProps {
   isOpen: boolean
@@ -131,7 +132,8 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         specialRequests: booking.special_requests || '',
         menu_selection: booking.menu_selection,
         dietary_restrictions: booking.dietary_restrictions || [],
-        preset_menu: booking.preset_menu
+        preset_menu: booking.preset_menu,
+        placement: booking.placement || ''
       }
     } catch (error) {
       console.error('[BookingDetailsModal] Error initializing form data:', error)
@@ -148,7 +150,8 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         specialRequests: booking.special_requests || '',
         menu_selection: booking.menu_selection,
         dietary_restrictions: booking.dietary_restrictions || [],
-        preset_menu: booking.preset_menu
+        preset_menu: booking.preset_menu,
+        placement: booking.placement || ''
       }
     }
   })
@@ -197,7 +200,8 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         specialRequests: booking.special_requests || '',
         menu_selection: booking.menu_selection,
         dietary_restrictions: booking.dietary_restrictions || [],
-        preset_menu: booking.preset_menu
+        preset_menu: booking.preset_menu,
+        placement: booking.placement || ''
       })
     } catch (error) {
       console.error('[BookingDetailsModal] Error updating form data:', error)
@@ -533,8 +537,9 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         .filter((item: any) => !item.name.toLowerCase().includes('tiramis'))
         .reduce((sum: number, item: any) => sum + item.price, 0)
       const tiramisuTotal = formData.menu_selection.tiramisu_total || 0
-      menuTotalPerPerson = baseTotal
-      menuTotalBooking = baseTotal * formData.numGuests + tiramisuTotal
+      const perPersonWithCover = applyCoverCharge(baseTotal, formData.booking_type)
+      menuTotalPerPerson = perPersonWithCover
+      menuTotalBooking = perPersonWithCover * formData.numGuests + tiramisuTotal
     }
 
     updateMutation.mutate(
@@ -556,7 +561,8 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         menu_total_per_person: menuTotalPerPerson,
         menu_total_booking: menuTotalBooking,
         dietary_restrictions: formData.booking_type === 'rinfresco_laurea' ? formData.dietary_restrictions : undefined,
-        preset_menu: formData.booking_type === 'rinfresco_laurea' ? (formData.preset_menu || undefined) : undefined
+        preset_menu: formData.booking_type === 'rinfresco_laurea' ? (formData.preset_menu || undefined) : undefined,
+        placement: formData.placement || undefined
       },
       {
         onSuccess: () => {

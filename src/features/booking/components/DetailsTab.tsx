@@ -1,5 +1,8 @@
 import React from 'react'
 import type { BookingRequest } from '@/types/booking'
+import { formatBookingDateTime } from '../utils/formatDateTime'
+import { MapPin } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select'
 
 interface Props {
   booking: BookingRequest
@@ -14,6 +17,7 @@ interface Props {
     endTime: string
     numGuests: number
     specialRequests: string
+    placement?: string | null
   }
   onFormDataChange: (field: string, value: any) => void
   onBookingTypeChange: (newType: 'tavolo' | 'rinfresco_laurea') => void
@@ -26,15 +30,20 @@ const capitalizeFirst = (str: string): string => {
 }
 
 // Reusable component for label:value inline display
-const InfoRow: React.FC<{ label: string; value: string | React.ReactNode }> = ({ label, value }) => (
+const InfoRow: React.FC<{
+  label: string;
+  value: string | React.ReactNode;
+  icon?: React.ComponentType<{ className?: string }>;
+}> = ({ label, value, icon: Icon }) => (
   <div className="flex gap-2 min-w-0">
+    {Icon && <Icon className="w-5 h-5 text-gray-600 flex-shrink-0 mt-0.5" />}
     <span className="font-semibold text-gray-700 flex-shrink-0">{label}:</span>
     <span className="text-gray-900 break-words overflow-wrap-anywhere min-w-0">{value}</span>
   </div>
 )
 
 export const DetailsTab: React.FC<Props> = ({
-  booking: _booking,
+  booking,
   isEditMode,
   formData,
   onFormDataChange,
@@ -55,6 +64,8 @@ export const DetailsTab: React.FC<Props> = ({
       return dateString
     }
   }
+
+  const creationDateLabel = formatBookingDateTime(booking.created_at)
 
   return (
     <div className="space-y-6">
@@ -189,6 +200,27 @@ export const DetailsTab: React.FC<Props> = ({
                 required
               />
             </div>
+
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                <MapPin className="w-4 h-4" />
+                Posizionamento
+              </label>
+              <Select
+                value={formData.placement || 'none'}
+                onValueChange={(value) => onFormDataChange('placement', value === 'none' ? null : value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleziona sala" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nessuna preferenza</SelectItem>
+                  <SelectItem value="Sala A">Sala A</SelectItem>
+                  <SelectItem value="Sala B">Sala B</SelectItem>
+                  <SelectItem value="Deorr">Deorr</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-3 min-w-0">
@@ -202,11 +234,24 @@ export const DetailsTab: React.FC<Props> = ({
               label="Numero Ospiti"
               value={`${formData.numGuests} ${formData.numGuests === 1 ? 'ospite' : 'ospiti'}`}
             />
+            <InfoRow
+              icon={MapPin}
+              label="Posizionamento"
+              value={booking.placement || 'Non specificato'}
+            />
           </div>
         )}
       </div>
 
-      {/* Section 4: Special Notes (tavolo only) */}
+      {/* Section 4: Data Creazione */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
+          Data Creazione
+        </h3>
+        <p className="text-gray-900 font-medium">{creationDateLabel}</p>
+      </div>
+
+      {/* Section 5: Special Notes (tavolo only) */}
       {formData.booking_type === 'tavolo' && (
         <div className="space-y-3">
           <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">

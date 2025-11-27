@@ -4,7 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
-import { Calendar, Users, Sunrise, Sun, Moon, Mail, Phone, Clock, UtensilsCrossed, Tag, ScrollText, StickyNote } from 'lucide-react'
+import { Calendar, Users, Sunrise, Sun, Moon, Mail, Phone, Clock, UtensilsCrossed, Tag, ScrollText, StickyNote, MapPin } from 'lucide-react'
 import { format } from 'date-fns'
 import { it } from 'date-fns/locale'
 import type { BookingRequest } from '@/types/booking'
@@ -473,6 +473,16 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                             </div>
                           </div>
 
+                          {booking.placement && (
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <MapPin className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Posizionamento:</span>
+                                <span className="text-sm md:text-base text-gray-700 font-medium">{booking.placement}</span>
+                              </div>
+                            </div>
+                          )}
+
                           {booking.client_phone && (
                             <div className="flex items-start gap-4 md:gap-6">
                               <Phone className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
@@ -682,6 +692,16 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                             </div>
                           </div>
 
+                          {booking.placement && (
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <MapPin className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Posizionamento:</span>
+                                <span className="text-sm md:text-base text-gray-700 font-medium">{booking.placement}</span>
+                              </div>
+                            </div>
+                          )}
+
                           {booking.client_phone && (
                             <div className="flex items-start gap-4 md:gap-6">
                               <Phone className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
@@ -889,6 +909,16 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                               </span>
                             </div>
                           </div>
+
+                          {booking.placement && (
+                            <div className="flex items-start gap-4 md:gap-6">
+                              <MapPin className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 flex items-start gap-2">
+                                <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Posizionamento:</span>
+                                <span className="text-sm md:text-base text-gray-700 font-medium">{booking.placement}</span>
+                              </div>
+                            </div>
+                          )}
 
                           {booking.client_phone && (
                             <div className="flex items-start gap-4 md:gap-6">
