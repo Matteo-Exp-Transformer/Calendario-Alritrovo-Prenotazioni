@@ -21,27 +21,54 @@ interface NavItemProps {
 const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, badge, onClick }) => (
   <button
     onClick={onClick}
-    className={`
-      relative flex items-center gap-3 px-4 md:px-6 py-3 rounded-lg transition-all duration-200 border-2 cursor-pointer min-h-[44px]
-      ${active
-        ? 'bg-white border-al-ritrovo-primary text-al-ritrovo-primary font-semibold shadow-sm'
-        : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 active:scale-[0.98]'
+    className="relative flex items-center gap-3 px-4 md:px-6 py-3 rounded-lg transition-all duration-200 border-2 cursor-pointer min-h-[44px] active:scale-[0.98]"
+    style={active ? {
+      backgroundColor: 'var(--theme-surface-nav-active)',
+      borderColor: 'var(--theme-border-nav-active)',
+      color: 'var(--theme-text-nav-active)',
+      fontWeight: 600,
+      boxShadow: 'var(--theme-shadow-sm)'
+    } : {
+      backgroundColor: 'var(--theme-surface-nav-inactive)',
+      borderColor: 'var(--theme-border-nav-inactive)',
+      color: 'var(--theme-text-nav-inactive)',
+    }}
+    onMouseEnter={(e) => {
+      if (!active) {
+        e.currentTarget.style.backgroundColor = 'var(--theme-surface-hover)'
+        e.currentTarget.style.borderColor = 'var(--theme-border-strong)'
       }
-    `}>
-    <div className={`
-      flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors
-      ${active
-        ? 'bg-al-ritrovo-primary/10'
-        : 'bg-gray-100'
+    }}
+    onMouseLeave={(e) => {
+      if (!active) {
+        e.currentTarget.style.backgroundColor = 'var(--theme-surface-nav-inactive)'
+        e.currentTarget.style.borderColor = 'var(--theme-border-nav-inactive)'
       }
-    `}>
-      <Icon className={`w-5 h-5 ${active ? 'text-al-ritrovo-primary' : 'text-gray-600'}`} />
+    }}
+  >
+    <div
+      className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+      style={{
+        backgroundColor: active ? 'var(--theme-accent-primary)' : 'var(--theme-surface-hover)',
+        opacity: active ? 0.1 : 1
+      }}
+    >
+      <Icon
+        className="w-5 h-5"
+        style={{ color: active ? 'var(--theme-text-nav-active)' : 'var(--theme-text-secondary)' }}
+      />
     </div>
 
     <span className="text-sm md:text-base font-medium">{label}</span>
 
     {badge && badge > 0 && (
-      <span className="ml-auto inline-flex items-center justify-center min-w-[24px] h-6 bg-al-ritrovo-primary text-white text-xs font-semibold px-2 rounded-full">
+      <span
+        className="ml-auto inline-flex items-center justify-center min-w-[24px] h-6 text-xs font-semibold px-2 rounded-full"
+        style={{
+          backgroundColor: 'var(--theme-accent-primary)',
+          color: '#ffffff'
+        }}
+      >
         {badge}
       </span>
     )}

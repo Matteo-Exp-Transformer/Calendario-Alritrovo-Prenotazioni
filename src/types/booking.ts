@@ -41,6 +41,7 @@ export interface BookingRequest {
   preset_menu?: PresetMenuType
   menu_total_per_person?: number
   menu_total_booking?: number
+  placement?: string
 
   // Status management
   status: BookingStatus
@@ -74,6 +75,7 @@ export interface BookingRequestInput {
   preset_menu?: PresetMenuType
   menu_total_per_person?: number
   menu_total_booking?: number
+  placement?: string
 }
 
 export interface AdminUser {

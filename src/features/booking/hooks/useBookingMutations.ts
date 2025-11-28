@@ -41,6 +41,7 @@ interface UpdateBookingInput {
   dietary_restrictions?: any[]
   preset_menu?: string
   menu?: string
+  placement?: string
 }
 
 // Mutation per accettare una prenotazione
