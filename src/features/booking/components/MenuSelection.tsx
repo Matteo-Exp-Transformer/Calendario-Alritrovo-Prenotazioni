@@ -782,10 +782,11 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
               borderRadius: '16px'
             }}
           >
-            <div className="flex items-center justify-between border-b border-warm-beige/60" style={{ paddingLeft: '22px', paddingRight: '22px', paddingTop: '22px', paddingBottom: '22px' }}>
+            <div className="flex items-center justify-between" style={{ paddingLeft: '22px', paddingRight: '22px', paddingTop: '22px', paddingBottom: '22px' }}>
               <h3 className="text-xl font-semibold text-warm-wood">Riepilogo Scelte</h3>
               <span className="text-sm font-medium text-gray-600">{selectedItems.length} elementi</span>
             </div>
+            <div style={{ height: '2px', backgroundColor: '#60a5fa', marginLeft: '22px', marginRight: '22px' }} />
             <div style={{ paddingLeft: '22px', paddingRight: '22px', paddingTop: '18px', paddingBottom: '18px' }}>
               <div className="flex flex-wrap" style={{ gap: '16px' }}>
                 {selectedItems.map((item) => {
@@ -797,10 +798,11 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                       key={item.id}
                       type="button"
                       onClick={() => handleRemoveSelectedItem(item.id)}
-                      className="group flex items-center gap-2 rounded-full border border-warm-wood/40 bg-white/80 px-4 py-2 text-sm font-semibold text-warm-wood shadow-sm transition-all hover:border-warm-wood hover:bg-warm-beige/30"
+                      className="group flex items-center gap-2 rounded-full border bg-white/80 px-4 py-2 text-sm font-semibold text-warm-wood shadow-sm transition-all hover:bg-warm-beige/30"
+                      style={{ borderColor: '#60a5fa' }}
                     >
                       <span className="truncate max-w-[180px] text-left">{chipLabel}</span>
-                      <X className="h-4 w-4 text-warm-wood/80 transition-colors group-hover:text-warm-wood" />
+                      <X className="h-4 w-4 transition-colors" style={{ color: '#60a5fa' }} />
                     </button>
                   )
                 })}
