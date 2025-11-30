@@ -782,12 +782,12 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
               borderRadius: '16px'
             }}
           >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-warm-beige/60">
+            <div className="flex items-center justify-between border-b border-warm-beige/60" style={{ paddingLeft: '22px', paddingRight: '22px', paddingTop: '22px', paddingBottom: '22px' }}>
               <h3 className="text-xl font-semibold text-warm-wood">Riepilogo Scelte</h3>
               <span className="text-sm font-medium text-gray-600">{selectedItems.length} elementi</span>
             </div>
-            <div className="px-5 py-4">
-              <div className="flex flex-wrap gap-3">
+            <div style={{ paddingLeft: '22px', paddingRight: '22px', paddingTop: '18px', paddingBottom: '18px' }}>
+              <div className="flex flex-wrap" style={{ gap: '16px' }}>
                 {selectedItems.map((item) => {
                   const isTiramisu = isTiramisuItem(item.name)
                   const quantityLabel = isTiramisu && item.quantity ? ` - ${item.quantity} Kg` : ''
@@ -822,7 +822,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
               borderRadius: '16px'
             }}
           >
-            <div className="px-6 py-6 space-y-4">
+            <div className="space-y-4" style={{ paddingLeft: '30px', paddingRight: '30px', paddingTop: '30px', paddingBottom: '30px' }}>
               <div className="flex items-center justify-between text-lg font-semibold text-warm-wood">
                 <span>Prezzo a persona</span>
                 <span>{formatCurrency(totalPerPerson)}</span>
