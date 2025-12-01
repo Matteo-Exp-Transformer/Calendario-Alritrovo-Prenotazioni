@@ -4,6 +4,7 @@ import { MenuSelection } from './MenuSelection'
 import type { SelectedMenuItem } from '@/types/menu'
 import { getPresetMenuLabel } from '../constants/presetMenus'
 import type { PresetMenuType } from '../constants/presetMenus'
+import { applyCoverCharge } from '../utils/menuPricing'
 
 interface MenuTabProps {
   booking: any
@@ -47,7 +48,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 
 export const MenuTab: React.FC<MenuTabProps> = ({
-  booking: _booking,
+  booking,
   isEditMode,
   menuSelection,
   numGuests,
@@ -82,12 +83,15 @@ export const MenuTab: React.FC<MenuTabProps> = ({
     const tiramisuTotal = menuSelection.tiramisu_total || 0
     const totalBooking = baseTotal * numGuests + tiramisuTotal
 
+    // Apply cover charge for rinfresco_laurea bookings
+    const totalPerPersonWithCover = applyCoverCharge(baseTotal, booking.booking_type)
+
     return {
-      totalPerPerson: baseTotal,
+      totalPerPerson: totalPerPersonWithCover,
       totalBooking,
       itemCount: menuSelection.items.length
     }
-  }, [menuSelection, numGuests])
+  }, [menuSelection, numGuests, booking.booking_type])
 
   // Menu summary (always visible)
   const menuSummary = (
