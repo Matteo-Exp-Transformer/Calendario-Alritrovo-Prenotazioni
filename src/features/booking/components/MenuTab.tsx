@@ -4,7 +4,7 @@ import { MenuSelection } from './MenuSelection'
 import type { SelectedMenuItem } from '@/types/menu'
 import { getPresetMenuLabel } from '../constants/presetMenus'
 import type { PresetMenuType } from '../constants/presetMenus'
-import { applyCoverCharge } from '../utils/menuPricing'
+import { applyCoverCharge, COVER_CHARGE_PER_PERSON_EUR } from '../utils/menuPricing'
 
 interface MenuTabProps {
   booking: any
@@ -73,14 +73,22 @@ export const MenuTab: React.FC<MenuTabProps> = ({
   }, [menuSelection?.items])
 
   // Calculate totals
-  const { totalPerPerson, totalBooking, itemCount } = useMemo(() => {
-    if (!menuSelection?.items) return { totalPerPerson: 0, totalBooking: 0, itemCount: 0 }
+  const { totalPerPerson, totalBooking, itemCount, baseTotal, tiramisuTotal, tiramisuKg } = useMemo(() => {
+    if (!menuSelection?.items) return {
+      totalPerPerson: 0,
+      totalBooking: 0,
+      itemCount: 0,
+      baseTotal: 0,
+      tiramisuTotal: 0,
+      tiramisuKg: 0
+    }
 
     const baseTotal = menuSelection.items
       .filter((item) => !item.name.toLowerCase().includes('tiramis'))
       .reduce((sum, item) => sum + item.price, 0)
 
     const tiramisuTotal = menuSelection.tiramisu_total || 0
+    const tiramisuKg = menuSelection.tiramisu_kg || 0
     const totalBooking = baseTotal * numGuests + tiramisuTotal
 
     // Apply cover charge for rinfresco_laurea bookings
@@ -89,7 +97,10 @@ export const MenuTab: React.FC<MenuTabProps> = ({
     return {
       totalPerPerson: totalPerPersonWithCover,
       totalBooking,
-      itemCount: menuSelection.items.length
+      itemCount: menuSelection.items.length,
+      baseTotal,
+      tiramisuTotal,
+      tiramisuKg
     }
   }, [menuSelection, numGuests, booking.booking_type])
 
@@ -160,6 +171,51 @@ export const MenuTab: React.FC<MenuTabProps> = ({
           </div>
         )
       })}
+
+      {/* Cost Breakdown Summary */}
+      {(() => {
+        const copertoTotal = COVER_CHARGE_PER_PERSON_EUR * numGuests
+        const prezzoPersonaTotal = baseTotal * numGuests
+        const totalRinfresco = prezzoPersonaTotal + copertoTotal + tiramisuTotal
+
+        return (
+          <div className="mt-6 pt-4 border-t-2 border-gray-300">
+            <h4 className="text-base font-bold text-gray-900 mb-3">RIEPILOGO COSTI</h4>
+
+            {/* Prezzo a persona × ospiti */}
+            <div className="flex justify-between items-center text-sm mb-2">
+              <span className="text-gray-700">
+                Prezzo a persona: €{baseTotal.toFixed(2)} × {numGuests} ospiti
+              </span>
+              <span className="font-bold text-gray-900">€{prezzoPersonaTotal.toFixed(2)}</span>
+            </div>
+
+            {/* Coperto × ospiti */}
+            <div className="flex justify-between items-center text-sm mb-2">
+              <span className="text-gray-700">
+                Coperto: €{COVER_CHARGE_PER_PERSON_EUR.toFixed(2)} × {numGuests} ospiti
+              </span>
+              <span className="font-bold text-gray-900">€{copertoTotal.toFixed(2)}</span>
+            </div>
+
+            {/* Tiramisù (only if selected) */}
+            {tiramisuTotal > 0 && (
+              <div className="flex justify-between items-center text-sm mb-2">
+                <span className="text-gray-700">
+                  Tiramisù ({tiramisuKg} Kg)
+                </span>
+                <span className="font-bold text-gray-900">€{tiramisuTotal.toFixed(2)}</span>
+              </div>
+            )}
+
+            {/* TOTALE RINFRESCO */}
+            <div className="flex justify-between items-center text-base font-bold mt-3 pt-3 border-t border-gray-300">
+              <span className="text-gray-900">TOTALE RINFRESCO</span>
+              <span className="text-gray-900">€{totalRinfresco.toFixed(2)}</span>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 
