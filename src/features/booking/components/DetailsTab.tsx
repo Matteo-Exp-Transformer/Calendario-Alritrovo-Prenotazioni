@@ -192,6 +192,7 @@ export const DetailsTab: React.FC<Props> = ({
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
+                autoComplete="off"
                 value={formData.numGuests > 0 ? formData.numGuests.toString() : ''}
                 onChange={(e) => {
                   const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0

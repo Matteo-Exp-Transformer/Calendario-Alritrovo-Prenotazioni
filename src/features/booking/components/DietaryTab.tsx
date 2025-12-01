@@ -31,7 +31,7 @@ export const DietaryTab: React.FC<Props> = ({
   onSpecialRequestsChange
 }) => {
   const [selectedRestriction, setSelectedRestriction] = useState<DietaryRestrictionType | 'Altro'>('No Lattosio')
-  const [guestCount, setGuestCount] = useState<number>(1)
+  const [guestCount, setGuestCount] = useState<number>(0)
   const [otherNotes, setOtherNotes] = useState<string>('')
 
   const handleAdd = () => {
@@ -127,10 +127,15 @@ export const DietaryTab: React.FC<Props> = ({
                       Numero ospiti con intolleranze alimentari *
                     </label>
                     <input
-                      type="number"
-                      min="1"
-                      value={guestCount}
-                      onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      autoComplete="off"
+                      value={guestCount > 0 ? guestCount.toString() : ''}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0
+                        setGuestCount(value)
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>

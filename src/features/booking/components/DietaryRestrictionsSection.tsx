@@ -28,7 +28,7 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
   onPrivacyChange
 }) => {
   const [selectedRestriction, setSelectedRestriction] = useState<DietaryRestrictionType | 'Altro'>('No Lattosio')
-  const [guestCount, setGuestCount] = useState<number>(1)
+  const [guestCount, setGuestCount] = useState<number>(0)
   const [otherNotes, setOtherNotes] = useState<string>('')
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
 
@@ -194,10 +194,15 @@ export const DietaryRestrictionsSection: React.FC<DietaryRestrictionsSectionProp
             </label>
             <div className="guest-card-mobile" style={{ marginTop: '0.5rem' }}>
               <Input
-                type="number"
-                min="1"
-                value={guestCount}
-                onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                autoComplete="off"
+                value={guestCount > 0 ? guestCount.toString() : ''}
+                onChange={(e) => {
+                  const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0
+                  setGuestCount(value)
+                }}
               />
             </div>
           </div>

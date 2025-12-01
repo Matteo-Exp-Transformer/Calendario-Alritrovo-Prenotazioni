@@ -233,11 +233,14 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">Numero ospiti *</label>
           <input
-            type="number"
-            min="1"
-            value={formData.numGuests || ''}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            autoComplete="off"
+            value={formData.numGuests > 0 ? formData.numGuests.toString() : ''}
             onChange={(e) => {
-              setFormData({ ...formData, numGuests: Number(e.target.value) })
+              const value = e.target.value === '' ? 0 : Number(e.target.value) || 0
+              setFormData({ ...formData, numGuests: value })
               setErrors({ ...errors, numGuests: '' })
             }}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-al-ritrovo-primary"

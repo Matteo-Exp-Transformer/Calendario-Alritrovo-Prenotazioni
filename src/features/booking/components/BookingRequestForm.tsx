@@ -164,17 +164,21 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
 
   // Reset num_guests to 0 when cleared - only allow numeric input
   const handleNumGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value
+    const inputValue = e.target.value.trim()
 
-    // Only allow numeric characters
+    // Only allow numeric characters or empty string
     if (inputValue === '') {
       const tiramisuTotal = formData.menu_selection?.tiramisu_total || 0
       const newFormData = { ...formData, num_guests: 0, menu_total_booking: tiramisuTotal }
       setFormData(newFormData)
       setErrors({ ...errors, num_guests: '' })
-    } else if (/^\d+$/.test(inputValue)) {
+      return
+    }
+    
+    // Only process if it's a valid number
+    if (/^\d+$/.test(inputValue)) {
       const value = parseInt(inputValue, 10)
-      if (value >= 1 && value <= 110) {
+      if (!isNaN(value) && value >= 1 && value <= 110) {
         const tiramisuTotal = formData.menu_selection?.tiramisu_total || 0
         const perPersonWithCover = formData.menu_total_per_person || 0
         const newFormData = {
@@ -182,6 +186,12 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           num_guests: value,
           menu_total_booking: perPersonWithCover * value + tiramisuTotal
         }
+        setFormData(newFormData)
+        setErrors({ ...errors, num_guests: '' })
+      } else if (value === 0) {
+        // Explicitly handle 0 to show empty
+        const tiramisuTotal = formData.menu_selection?.tiramisu_total || 0
+        const newFormData = { ...formData, num_guests: 0, menu_total_booking: tiramisuTotal }
         setFormData(newFormData)
         setErrors({ ...errors, num_guests: '' })
       }
@@ -903,8 +913,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
-              min="1"
-              value={formData.num_guests || ''}
+              autoComplete="off"
+              value={formData.num_guests > 0 ? formData.num_guests.toString() : ''}
               onChange={handleNumGuestsChange}
               onKeyPress={handleNumGuestsKeyPress}
               required
