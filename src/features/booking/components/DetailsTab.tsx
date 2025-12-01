@@ -189,11 +189,12 @@ export const DetailsTab: React.FC<Props> = ({
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">Numero Ospiti</label>
               <input
-                type="number"
-                min="1"
-                value={formData.numGuests}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={formData.numGuests > 0 ? formData.numGuests.toString() : ''}
                 onChange={(e) => {
-                  const value = e.target.value === '' ? 0 : parseInt(e.target.value)
+                  const value = e.target.value === '' ? 0 : parseInt(e.target.value) || 0
                   onFormDataChange('numGuests', value)
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent"

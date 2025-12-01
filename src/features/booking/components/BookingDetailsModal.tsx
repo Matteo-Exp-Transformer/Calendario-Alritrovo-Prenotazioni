@@ -549,20 +549,22 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         client_name: formData.client_name,
         // Email: se vuota, salviamo null (per cancellarla)
         // Se inserita, deve essere valida (già validata sopra)
-        // Se undefined, non viene aggiornata (mantiene quella esistente)
-        client_email: formData.client_email?.trim() === '' ? undefined : (formData.client_email?.trim() || undefined),
-        client_phone: formData.client_phone || undefined,
+        client_email: formData.client_email?.trim() === '' ? null : (formData.client_email?.trim() || null),
+        // Phone: se vuoto, salviamo null (per cancellarlo)
+        client_phone: formData.client_phone?.trim() === '' ? null : (formData.client_phone || null),
         confirmedStart,
         confirmedEnd,
         numGuests: formData.numGuests,
-        specialRequests: formData.specialRequests,
+        // Special requests: se vuoto, salviamo null
+        specialRequests: formData.specialRequests?.trim() === '' ? null : (formData.specialRequests || null),
         desiredTime: formData.startTime,
         menu_selection: formData.booking_type === 'rinfresco_laurea' ? formData.menu_selection : undefined,
         menu_total_per_person: menuTotalPerPerson,
         menu_total_booking: menuTotalBooking,
         dietary_restrictions: formData.booking_type === 'rinfresco_laurea' ? formData.dietary_restrictions : undefined,
         preset_menu: formData.booking_type === 'rinfresco_laurea' ? (formData.preset_menu || undefined) : undefined,
-        placement: formData.placement || undefined
+        // Placement: se vuoto, salviamo null
+        placement: formData.placement?.trim() === '' ? null : (formData.placement || null)
       },
       {
         onSuccess: () => {

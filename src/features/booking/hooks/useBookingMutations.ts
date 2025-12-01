@@ -28,12 +28,12 @@ interface UpdateBookingInput {
   bookingId: string
   booking_type?: 'tavolo' | 'rinfresco_laurea'
   client_name?: string
-  client_email?: string
-  client_phone?: string
+  client_email?: string | null
+  client_phone?: string | null
   confirmedStart: string
   confirmedEnd: string
   numGuests: number
-  specialRequests?: string
+  specialRequests?: string | null
   desiredTime?: string
   menu_selection?: any
   menu_total_per_person?: number
@@ -41,7 +41,7 @@ interface UpdateBookingInput {
   dietary_restrictions?: any[]
   preset_menu?: string
   menu?: string
-  placement?: string
+  placement?: string | null
 }
 
 // Mutation per accettare una prenotazione
@@ -223,7 +223,12 @@ export const useUpdateBooking = () => {
       if (input.preset_menu !== undefined) {
         updateData.preset_menu = input.preset_menu || null
       }
-      
+
+      // Update placement if provided
+      if (input.placement !== undefined) {
+        updateData.placement = input.placement || null
+      }
+
       console.log('🔵 [useUpdateBooking] Update payload:', updateData)
 
       const { data, error } = await supabase
