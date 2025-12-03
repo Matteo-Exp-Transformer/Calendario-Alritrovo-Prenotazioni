@@ -4,7 +4,7 @@ import type { BookingRequest } from '@/types/booking'
 import { format } from 'date-fns'
 import { useCapacityCheck } from '../hooks/useCapacityCheck'
 import { toast } from 'react-toastify'
-import { createBookingDateTime } from '../utils/dateUtils'
+import { createBookingDateTime, calculateEndTimeFromStart } from '../utils/dateUtils'
 import { CapacityWarningModal } from './CapacityWarningModal'
 
 interface AcceptBookingModalProps {
@@ -16,6 +16,7 @@ interface AcceptBookingModalProps {
     confirmedStart: string
     confirmedEnd: string
     numGuests: number
+    desiredTime: string
   }) => void
   isLoading?: boolean
 }
@@ -58,9 +59,8 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
       const normalizedStartMinutes = startMinutes === 0 || startMinutes === 30 ? startMinutes : 0
       const startTime = `${startHours.toString().padStart(2, '0')}:${normalizedStartMinutes.toString().padStart(2, '0')}`
       
-      // Calculate end time (default +3 hours) with normalized minutes
-      const endHours = (startHours + 3) % 24
-      const endTime = `${endHours.toString().padStart(2, '0')}:${normalizedStartMinutes.toString().padStart(2, '0')}`
+      // Calculate end time (default +3 hours) with normalized minutes via helper
+      const endTime = calculateEndTimeFromStart(startTime)
 
       setFormData({
         date: date,
@@ -162,6 +162,7 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
       confirmedStart,
       confirmedEnd,
       numGuests: formData.numGuests,
+      desiredTime: formData.startTime,
     })
     console.log('✅ [AcceptModal] onConfirm called successfully')
   }

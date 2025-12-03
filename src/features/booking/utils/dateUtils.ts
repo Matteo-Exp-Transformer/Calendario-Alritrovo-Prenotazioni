@@ -1,3 +1,5 @@
+import type { BookingRequest } from '@/types/booking'
+
 /**
  * Utility functions for handling booking dates, especially when crossing midnight
  */
@@ -105,5 +107,53 @@ export function extractTimeFromISO(isoString: string | null | undefined): string
   if (!isoString) return ''
   const match = isoString.match(/T(\d{2}):(\d{2})/)
   return match ? `${match[1]}:${match[2]}` : ''
+}
+
+/**
+ * Calculates the end time string starting from startTime adding a number of hours.
+ * Keeps the result within the same 24h window (wraps if it crosses midnight).
+ */
+export function calculateEndTimeFromStart(startTime: string, hoursToAdd: number = 3): string {
+  if (!startTime) return ''
+
+  const [hours, minutes] = startTime.split(':').map(Number)
+  const totalMinutes = hours * 60 + minutes + hoursToAdd * 60
+  const wrappedMinutes = ((totalMinutes % (24 * 60)) + (24 * 60)) % (24 * 60)
+  const endHours = Math.floor(wrappedMinutes / 60)
+  const endMinutes = wrappedMinutes % 60
+
+  return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`
+}
+
+/**
+ * Returns the most accurate start time for a booking, preferring desired_time (TIME)
+ * to avoid timezone conversions. Falls back to confirmed_start if needed.
+ */
+export function getAccurateStartTime(booking: BookingRequest): string {
+  if (booking.desired_time) {
+    return booking.desired_time.split(':').slice(0, 2).join(':')
+  }
+  if (booking.confirmed_start) {
+    return extractTimeFromISO(booking.confirmed_start)
+  }
+  return ''
+}
+
+/**
+ * Returns the most accurate end time for a booking.
+ * Prefers confirmed_end (since it's the authoritative value),
+ * otherwise derives it from the accurate start time adding 3 hours.
+ */
+export function getAccurateEndTime(booking: BookingRequest): string {
+  if (booking.confirmed_end) {
+    return extractTimeFromISO(booking.confirmed_end)
+  }
+
+  const startTime = getAccurateStartTime(booking)
+  if (startTime) {
+    return calculateEndTimeFromStart(startTime)
+  }
+
+  return ''
 }
 

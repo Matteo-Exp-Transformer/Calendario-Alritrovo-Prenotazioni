@@ -14,22 +14,9 @@ import { calculateDailyCapacity, getStartSlotForBooking } from '../utils/capacit
 import { CollapsibleCard } from '@/components/ui/CollapsibleCard'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select'
 
-import { extractDateFromISO, extractTimeFromISO } from '../utils/dateUtils'
+import { extractDateFromISO, getAccurateStartTime, getAccurateEndTime } from '../utils/dateUtils'
 import { getBookingEventTypeLabel } from '../utils/eventTypeLabels'
 import { getMenuPriceDisplayFromBooking, applyCoverCharge, COVER_CHARGE_PER_PERSON_EUR } from '../utils/menuPricing'
-
-/**
- * Helper per ottenere l'orario accurato di una prenotazione
- * Preferisce desired_time (TIME senza timezone) a confirmed_start (TIMESTAMP WITH TIME ZONE)
- * per evitare shift timezone in production
- */
-const getAccurateTime = (booking: BookingRequest): string => {
-  // Preferisci desired_time (accurato, senza conversioni timezone)
-  if (booking.desired_time) return booking.desired_time
-  // Fallback a confirmed_start (può avere shift timezone in production)
-  if (booking.confirmed_start) return extractTimeFromISO(booking.confirmed_start)
-  return ''
-}
 
 interface BookingCalendarProps {
   bookings: BookingRequest[]
@@ -128,9 +115,8 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
     for (const booking of dayBookings) {
       if (!booking.confirmed_start || !booking.confirmed_end) continue
 
-      // ✅ FIX: Use desired_time (accurate local time) instead of confirmed_start (UTC timestamp)
-      // confirmed_start may have timezone shift in production (UTC vs local time)
-      const startTime = booking.desired_time || extractTimeFromISO(booking.confirmed_start)
+      // ✅ Use centralized helper to avoid timezone discrepancies
+      const startTime = getAccurateStartTime(booking)
 
       // Create a fake ISO string with the correct local time for getStartSlotForBooking
       const fakeISOStart = `2025-01-01T${startTime}:00`
@@ -262,7 +248,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
             {(booking.desired_time || booking.confirmed_start) && (
               <>
                 <span>•</span>
-                <span>{getAccurateTime(booking)}</span>
+                <span>{getAccurateStartTime(booking)}</span>
               </>
             )}
           </div>
@@ -506,7 +492,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                               <div className="flex-1 flex items-start gap-2">
                                 <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Orario:</span>
                                 <span className="text-sm md:text-base text-gray-800 font-semibold">
-                                  {getAccurateTime(booking)} - {booking.confirmed_end && extractTimeFromISO(booking.confirmed_end)}
+                                  {getAccurateStartTime(booking)} - {getAccurateEndTime(booking)}
                                 </span>
                               </div>
                             </div>
@@ -725,7 +711,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                               <div className="flex-1 flex items-start gap-2">
                                 <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Orario:</span>
                                 <span className="text-sm md:text-base text-gray-800 font-semibold">
-                                  {getAccurateTime(booking)} - {booking.confirmed_end && extractTimeFromISO(booking.confirmed_end)}
+                                  {getAccurateStartTime(booking)} - {getAccurateEndTime(booking)}
                                 </span>
                               </div>
                             </div>
@@ -943,7 +929,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                               <div className="flex-1 flex items-start gap-2">
                                 <span className="text-xs text-gray-500 uppercase tracking-wide font-semibold min-w-[80px] shrink-0">Orario:</span>
                                 <span className="text-sm md:text-base text-gray-800 font-semibold">
-                                  {getAccurateTime(booking)} - {booking.confirmed_end && extractTimeFromISO(booking.confirmed_end)}
+                                  {getAccurateStartTime(booking)} - {getAccurateEndTime(booking)}
                                 </span>
                               </div>
                             </div>

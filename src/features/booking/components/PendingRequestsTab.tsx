@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 import type { BookingRequest } from '@/types/booking'
 import { getSlotsOccupiedByBooking } from '../utils/capacityCalculator'
 import { CAPACITY_CONFIG } from '../constants/capacity'
-import { createBookingDateTime, extractDateFromISO } from '../utils/dateUtils'
+import { createBookingDateTime, extractDateFromISO, calculateEndTimeFromStart } from '../utils/dateUtils'
 
 export const PendingRequestsTab: React.FC = () => {
   const { data: pendingBookings, isLoading, error, refetch } = usePendingBookings()
@@ -119,18 +119,12 @@ export const PendingRequestsTab: React.FC = () => {
     const date = booking.desired_date
     const startTime = booking.desired_time
     console.log('🔵 [PendingRequestsTab] Using desired_time:', startTime)
-    // Calculate end time (default +3 hours)
-    const [hours, minutes] = startTime.split(':').map(Number)
-    const endHours = (hours + 3) % 24
-    const endTime = `${endHours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
     
     // Ensure time format is HH:mm (not HH:mm:ss)
     const startTimeFormatted = startTime.includes(':') 
       ? startTime.split(':').slice(0, 2).join(':') 
       : startTime
-    const endTimeFormatted = endTime.includes(':')
-      ? endTime.split(':').slice(0, 2).join(':')
-      : endTime
+    const endTimeFormatted = calculateEndTimeFromStart(startTimeFormatted)
     console.log(startTimeFormatted, endTimeFormatted);
     
     // Create ISO strings handling midnight crossover

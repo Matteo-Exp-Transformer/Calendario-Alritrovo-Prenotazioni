@@ -2,20 +2,7 @@ import type { BookingRequest } from '@/types/booking'
 import type { CalendarEvent } from '@/types/booking'
 
 import { CAPACITY_CONFIG } from '../constants/capacity'
-import { extractDateFromISO, extractTimeFromISO } from './dateUtils'
-
-/**
- * Helper per ottenere l'orario accurato di una prenotazione
- * Preferisce desired_time (TIME senza timezone) a confirmed_start (TIMESTAMP WITH TIME ZONE)
- * per evitare shift timezone in production
- */
-const getAccurateTime = (booking: BookingRequest): string => {
-  // Preferisci desired_time (accurato, senza conversioni timezone)
-  if (booking.desired_time) return booking.desired_time
-  // Fallback a confirmed_start (può avere shift timezone in production)
-  if (booking.confirmed_start) return extractTimeFromISO(booking.confirmed_start)
-  return ''
-}
+import { extractDateFromISO, getAccurateStartTime, getAccurateEndTime } from './dateUtils'
 
 // Colori in base alla fascia oraria (delicati e leggibili)
 const TIME_SLOT_COLORS = {
@@ -66,10 +53,9 @@ function getTimeSlotColor(startDate: Date): { bg: string; border: string; text: 
 export const transformBookingToCalendarEvent = (
   booking: BookingRequest
 ): CalendarEvent => {
-  // ✅ FIX: Usa desired_time (TIME senza timezone) invece di confirmed_start (TIMESTAMP WITH TIME ZONE)
-  // per evitare shift timezone in production
-  const startTimeStr = getAccurateTime(booking)
-  const endTimeStr = booking.confirmed_end ? extractTimeFromISO(booking.confirmed_end) : ''
+  // Usa helper centralizzati per evitare shift timezone
+  const startTimeStr = getAccurateStartTime(booking)
+  const endTimeStr = getAccurateEndTime(booking)
   const dateStr = booking.confirmed_start ? extractDateFromISO(booking.confirmed_start) : ''
 
   let startDate: Date

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import { Check, X } from 'lucide-react'
 import { useMenuItems } from '../hooks/useMenuItems'
 import type { MenuCategory, SelectedMenuItem } from '@/types/menu'
@@ -263,25 +263,10 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
     }
   }, [tiramisuKg])
 
-  // Auto-add or remove Vol-au-vent based on threshold
-  useEffect(() => {
-    const currentHasVolAuVent = selectedItems.some(isVolAuVentItem)
-
-    if (shouldHaveVolAuVent && !currentHasVolAuVent) {
-      // Add Vol-au-vent
-      const updatedItems = [...selectedItems, createVirtualVolAuVentItem()]
-      emitMenuSelectionChange(updatedItems)
-    } else if (!shouldHaveVolAuVent && currentHasVolAuVent) {
-      // Remove Vol-au-vent
-      const updatedItems = selectedItems.filter(item => !isVolAuVentItem(item))
-      emitMenuSelectionChange(updatedItems)
-    }
-  }, [shouldHaveVolAuVent, selectedItems])
-
   // Rimosso useEffect che causava loop infinito
   // Il callback viene chiamato direttamente da handleItemToggle e handleBisPrimiToggle
 
-  const emitMenuSelectionChange = (items: SelectedMenuItem[]) => {
+  const emitMenuSelectionChange = useCallback((items: SelectedMenuItem[]) => {
     // GUARD: Prevent infinite loops by checking if items actually changed
     const itemsChanged = items.length !== selectedItems.length ||
       items.some((item, index) => {
@@ -327,7 +312,22 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
       tiramisuTotal: tiramisuTotalValue,
       tiramisuKg: tiramisuQuantity
     })
-  }
+  }, [selectedItems, tiramisuUnitPrice, onMenuChange])
+
+  // Auto-add or remove Vol-au-vent based on threshold
+  useEffect(() => {
+    const currentHasVolAuVent = selectedItems.some(isVolAuVentItem)
+
+    if (shouldHaveVolAuVent && !currentHasVolAuVent) {
+      // Add Vol-au-vent
+      const updatedItems = [...selectedItems, createVirtualVolAuVentItem()]
+      emitMenuSelectionChange(updatedItems)
+    } else if (!shouldHaveVolAuVent && currentHasVolAuVent) {
+      // Remove Vol-au-vent
+      const updatedItems = selectedItems.filter(item => !isVolAuVentItem(item))
+      emitMenuSelectionChange(updatedItems)
+    }
+  }, [shouldHaveVolAuVent, selectedItems, emitMenuSelectionChange])
 
   const handleItemToggle = (item: NormalizedMenuItem) => {
     const isSelected = selectedItems.some(selected => selected.id === item.id)

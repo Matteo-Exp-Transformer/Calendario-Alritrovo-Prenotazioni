@@ -18,6 +18,9 @@ import {
   createBookingDateTime,
   extractDateFromISO,
   extractTimeFromISO,
+  getAccurateStartTime,
+  getAccurateEndTime,
+  calculateEndTimeFromStart,
 } from '../dateUtils'
 import { transformBookingToCalendarEvent } from '../bookingEventTransform'
 import type { BookingRequest } from '@/types/booking'
@@ -185,9 +188,9 @@ describe('Booking Flow: Data Transcription Verification', () => {
       cancelled_by: null,
     }
 
-    // BookingCalendar usa extractTimeFromISO per mostrare l'orario
-    const displayedStartTime = extractTimeFromISO(booking.confirmed_start)
-    const displayedEndTime = extractTimeFromISO(booking.confirmed_end)
+    // BookingCalendar usa helper centralizzati per mostrare l'orario
+    const displayedStartTime = getAccurateStartTime(booking)
+    const displayedEndTime = getAccurateEndTime(booking)
 
     expect(displayedStartTime).toBe('20:00')
     expect(displayedEndTime).toBe('23:00')
@@ -216,15 +219,74 @@ describe('Booking Flow: Data Transcription Verification', () => {
       cancelled_by: null,
     }
 
-    // BookingDetailsModal usa extractDateFromISO e extractTimeFromISO
+    // BookingDetailsModal usa helper centralizzati per popolare i campi
     const formDataDate = extractDateFromISO(booking.confirmed_start)
-    const formDataStartTime = extractTimeFromISO(booking.confirmed_start)
-    const formDataEndTime = extractTimeFromISO(booking.confirmed_end)
+    const formDataStartTime = getAccurateStartTime(booking)
+    const formDataEndTime = getAccurateEndTime(booking)
 
     // Deve essere identico a quello inserito
     expect(formDataDate).toBe('2025-01-15')
     expect(formDataStartTime).toBe('20:00')
     expect(formDataEndTime).toBe('23:00')
+  })
+})
+
+describe('Centralized time helpers', () => {
+  test('calculateEndTimeFromStart adds 3 hours and wraps after midnight', () => {
+    expect(calculateEndTimeFromStart('20:00')).toBe('23:00')
+    expect(calculateEndTimeFromStart('22:30')).toBe('01:30')
+  })
+
+  test('getAccurateStartTime prefers desired_time over confirmed_start', () => {
+    const booking: BookingRequest = {
+      id: '1',
+      created_at: '',
+      updated_at: '',
+      client_name: '',
+      client_email: null,
+      client_phone: null,
+      event_type: 'cena',
+      desired_date: '2025-01-15',
+      desired_time: '19:45',
+      num_guests: 0,
+      special_requests: null,
+      menu: null,
+      status: 'accepted',
+      confirmed_start: '2025-01-15T18:45:00+00:00',
+      confirmed_end: null,
+      rejection_reason: null,
+      cancellation_reason: null,
+      cancelled_at: null,
+      cancelled_by: null,
+    }
+
+    expect(getAccurateStartTime(booking)).toBe('19:45')
+  })
+
+  test('getAccurateEndTime falls back to startTime + 3h when confirmed_end missing', () => {
+    const booking: BookingRequest = {
+      id: '1',
+      created_at: '',
+      updated_at: '',
+      client_name: '',
+      client_email: null,
+      client_phone: null,
+      event_type: 'cena',
+      desired_date: '2025-01-15',
+      desired_time: '18:00',
+      num_guests: 0,
+      special_requests: null,
+      menu: null,
+      status: 'accepted',
+      confirmed_start: null,
+      confirmed_end: null,
+      rejection_reason: null,
+      cancellation_reason: null,
+      cancelled_at: null,
+      cancelled_by: null,
+    }
+
+    expect(getAccurateEndTime(booking)).toBe('21:00')
   })
 })
 

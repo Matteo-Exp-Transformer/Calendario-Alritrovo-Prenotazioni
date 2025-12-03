@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { BookingRequest, BookingRequestInput } from '@/types/booking'
 import { toast } from 'react-toastify'
+import { createBookingDateTime, calculateEndTimeFromStart } from '../utils/dateUtils'
 
 // Hook for creating booking requests directly as ACCEPTED (admin only)
 export const useCreateAdminBooking = () => {
@@ -16,17 +17,12 @@ export const useCreateAdminBooking = () => {
         ? data.desired_time.split(':').slice(0, 2).join(':')
         : null
       
-      // Extract time from normalized desired_time string
-      const timeMatch = normalizedTime?.match(/^(\d{2}):(\d{2})/)
-      const hours = timeMatch ? parseInt(timeMatch[1]) : 12
-      const minutes = timeMatch ? parseInt(timeMatch[2]) : 0
+      const fallbackTime = '20:00'
+      const startTime = normalizedTime || fallbackTime
+      const endTime = calculateEndTimeFromStart(startTime)
       
-      // Create confirmed_start datetime
-      const confirmedStart = new Date(`${data.desired_date}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`)
-      
-      // Calculate confirmed_end (add 2 hours by default)
-      const confirmedEnd = new Date(confirmedStart)
-      confirmedEnd.setHours(confirmedEnd.getHours() + 2)
+      const confirmedStart = createBookingDateTime(data.desired_date, startTime, true)
+      const confirmedEnd = createBookingDateTime(data.desired_date, endTime, false, startTime)
       
       const insertData = {
         client_name: data.client_name,
@@ -44,8 +40,8 @@ export const useCreateAdminBooking = () => {
         preset_menu: data.preset_menu || null,
         dietary_restrictions: data.dietary_restrictions || null,
         status: 'accepted' as const,
-        confirmed_start: confirmedStart.toISOString(),
-        confirmed_end: confirmedEnd.toISOString()
+        confirmed_start: confirmedStart,
+        confirmed_end: confirmedEnd
       }
 
       console.log('🔵 [useCreateAdminBooking] Insert data:', insertData)
