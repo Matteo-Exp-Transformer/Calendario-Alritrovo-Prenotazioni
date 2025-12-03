@@ -90,7 +90,7 @@ const VOL_AU_VENT_THRESHOLD_EUR = 17.00
 
 const createVirtualVolAuVentItem = (): SelectedMenuItem => ({
   id: VIRTUAL_VOL_AU_VENT_ID,
-  name: 'Vol-au-vent Misti',
+  name: 'Mini Rustici Misti',
   price: 0,
   category: 'antipasti',
   totalPrice: 0
@@ -596,7 +596,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
               marginBottom: '0.5rem'
             }}
           >
-            Raggiungi 17€ a persona e ti omaggiamo dei Vol-au-vent!
+            Raggiungi 17€ a persona e ti omaggiamo dei Mini Rustici Misti!
           </label>
           <select
             id="preset_menu"
