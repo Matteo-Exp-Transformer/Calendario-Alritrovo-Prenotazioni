@@ -4,7 +4,7 @@ import { X, Edit, Trash2, Save } from 'lucide-react'
 import { useUpdateBooking, useCancelBooking } from '../hooks/useBookingMutations'
 import { useAcceptedBookings } from '../hooks/useBookingQueries'
 import type { BookingRequest } from '@/types/booking'
-import { extractDateFromISO, extractTimeFromISO, createBookingDateTime } from '../utils/dateUtils'
+import { extractDateFromISO, createBookingDateTime, getAccurateStartTime, getAccurateEndTime, calculateEndTimeFromStart } from '../utils/dateUtils'
 import { getSlotsOccupiedByBooking } from '../utils/capacityCalculator'
 import { CAPACITY_CONFIG } from '../constants/capacity'
 import { toast } from 'react-toastify'
@@ -45,6 +45,9 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   const [cancellationReason, setCancellationReason] = useState('')
   const [endTimeManuallyModified, setEndTimeManuallyModified] = useState(false)
   const [mouseDownTarget, setMouseDownTarget] = useState<EventTarget | null>(null)
+
+  // Ref to track previous booking ID to prevent unnecessary recalculations
+  const previousBookingIdRef = React.useRef<string>(booking.id)
 
   // Responsive width calculation
   const getResponsiveMaxWidth = () => {
@@ -107,18 +110,8 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   // Initialize form data from booking
   const [formData, setFormData] = useState(() => {
     try {
-      const startTime = booking.desired_time
-        ? booking.desired_time.split(':').slice(0, 2).join(':')
-        : extractTimeFromISO(booking.confirmed_start || '')
-
-      let endTime: string
-      if (booking.desired_time) {
-        const [hours, minutes] = booking.desired_time.split(':').map(Number)
-        const endHours = (hours + 3) % 24
-        endTime = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
-      } else {
-        endTime = extractTimeFromISO(booking.confirmed_end || '')
-      }
+      const startTime = getAccurateStartTime(booking)
+      const endTime = getAccurateEndTime(booking)
 
       return {
         booking_type: (booking.booking_type || 'tavolo') as 'tavolo' | 'rinfresco_laurea',
@@ -164,29 +157,15 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       return
     }
 
-    try {
-      // Preferisci confirmed_start/confirmed_end se disponibili (sono i dati più aggiornati)
-      // Usa desired_time solo come fallback se confirmed_start non è disponibile
-      const startTime = booking.confirmed_start
-        ? extractTimeFromISO(booking.confirmed_start)
-        : (booking.desired_time
-          ? booking.desired_time.split(':').slice(0, 2).join(':')
-          : '')
+    // GUARD AGGIUNTIVO: Non ricalcolare se l'ID booking non è cambiato
+    // Questo previene ricalcoli non necessari su aggiornamenti di stato come placement
+    if (formData.date && booking.id === previousBookingIdRef.current) {
+      return
+    }
 
-      // Per endTime, usa sempre confirmed_end se disponibile (è il dato più aggiornato)
-      // Calcola da desired_time solo se confirmed_end non è disponibile
-      let endTime: string
-      if (booking.confirmed_end) {
-        // Usa confirmed_end che è il dato più aggiornato
-        endTime = extractTimeFromISO(booking.confirmed_end)
-      } else if (booking.desired_time) {
-        // Fallback: calcola da desired_time solo se confirmed_end non esiste
-        const [hours, minutes] = booking.desired_time.split(':').map(Number)
-        const endHours = (hours + 3) % 24
-        endTime = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
-      } else {
-        endTime = ''
-      }
+    try {
+      const startTime = getAccurateStartTime(booking)
+      const endTime = getAccurateEndTime(booking)
 
       setFormData({
         booking_type: (booking.booking_type || 'tavolo') as 'tavolo' | 'rinfresco_laurea',
@@ -207,6 +186,11 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       console.error('[BookingDetailsModal] Error updating form data:', error)
     }
   }, [booking, isEditMode])
+
+  // Update ref to track current booking ID
+  useEffect(() => {
+    previousBookingIdRef.current = booking.id
+  }, [booking.id])
 
   // Dynamic tabs based on booking_type
   const tabs = useMemo<Tab[]>(() => {
@@ -328,10 +312,8 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         let newEndTime = prev.endTime
         
         if (!endTimeManuallyModified) {
-          // Calcola endTime = startTime + 3 ore
-          const [hours, minutes] = newStartTime.split(':').map(Number)
-          const endHours = (hours + 3) % 24
-          newEndTime = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`
+          // Calcola endTime = startTime + 3 ore usando helper centralizzato
+          newEndTime = calculateEndTimeFromStart(newStartTime)
         }
         
         return { ...prev, [field]: value, endTime: newEndTime }

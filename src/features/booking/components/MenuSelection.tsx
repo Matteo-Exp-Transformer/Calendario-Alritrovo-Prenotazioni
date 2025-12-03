@@ -84,6 +84,21 @@ const TIRAMISU_MIN_KG = 1
 const TIRAMISU_MAX_KG = 7
 const DEFAULT_TIRAMISU_KG = 1
 
+// Virtual promotional item for Vol-au-vent
+const VIRTUAL_VOL_AU_VENT_ID = 'virtual-vol-au-vent-promo'
+const VOL_AU_VENT_THRESHOLD_EUR = 17.00
+
+const createVirtualVolAuVentItem = (): SelectedMenuItem => ({
+  id: VIRTUAL_VOL_AU_VENT_ID,
+  name: 'Vol-au-vent Misti',
+  price: 0,
+  category: 'antipasti',
+  totalPrice: 0
+})
+
+const isVolAuVentItem = (item: SelectedMenuItem): boolean =>
+  item.id === VIRTUAL_VOL_AU_VENT_ID
+
 const clampTiramisuQuantity = (qty: number): number => {
   if (Number.isNaN(qty) || qty <= 0) {
     return 0
@@ -223,6 +238,16 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
     }
   }, [selectedItems, tiramisuUnitPrice])
 
+  // Check if Vol-au-vent promotion threshold is met
+  const meetsVolAuVentThreshold = useMemo(() => {
+    return totalPerPerson >= VOL_AU_VENT_THRESHOLD_EUR
+  }, [totalPerPerson])
+
+  const shouldHaveVolAuVent = useMemo(() => {
+    if (bookingType !== 'rinfresco_laurea') return false
+    return meetsVolAuVentThreshold
+  }, [meetsVolAuVentThreshold, bookingType])
+
   // Stato locale per l'input del tiramisù per permettere digitazione libera
   const [localTiramisuValue, setLocalTiramisuValue] = useState<string>('')
   const isInitializedRef = React.useRef<boolean>(false)
@@ -238,10 +263,38 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
     }
   }, [tiramisuKg])
 
+  // Auto-add or remove Vol-au-vent based on threshold
+  useEffect(() => {
+    const currentHasVolAuVent = selectedItems.some(isVolAuVentItem)
+
+    if (shouldHaveVolAuVent && !currentHasVolAuVent) {
+      // Add Vol-au-vent
+      const updatedItems = [...selectedItems, createVirtualVolAuVentItem()]
+      emitMenuSelectionChange(updatedItems)
+    } else if (!shouldHaveVolAuVent && currentHasVolAuVent) {
+      // Remove Vol-au-vent
+      const updatedItems = selectedItems.filter(item => !isVolAuVentItem(item))
+      emitMenuSelectionChange(updatedItems)
+    }
+  }, [shouldHaveVolAuVent, selectedItems])
+
   // Rimosso useEffect che causava loop infinito
   // Il callback viene chiamato direttamente da handleItemToggle e handleBisPrimiToggle
 
   const emitMenuSelectionChange = (items: SelectedMenuItem[]) => {
+    // GUARD: Prevent infinite loops by checking if items actually changed
+    const itemsChanged = items.length !== selectedItems.length ||
+      items.some((item, index) => {
+        const existing = selectedItems[index]
+        return !existing ||
+          item.id !== existing.id ||
+          item.quantity !== existing.quantity
+      })
+
+    if (!itemsChanged) {
+      return
+    }
+
     const itemsWithTotals = items.map((selected) => {
       if (isTiramisuItem(selected.name)) {
         const rawQuantity = selected.quantity ?? DEFAULT_TIRAMISU_KG
@@ -543,7 +596,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
               marginBottom: '0.5rem'
             }}
           >
-            Menù Consigliati dallo Staff
+            Raggiungi 17€ a persona e ti omaggiamo dei Vol-au-vent!
           </label>
           <select
             id="preset_menu"
@@ -645,11 +698,13 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                 </span>
               ) : null}
             </h3>
-            <div 
+            <div
               className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full justify-items-center md:max-w-5xl mx-auto"
               style={{ paddingTop: '0.5rem', marginTop: '0' }}
             >
-              {items.map((item) => {
+              {items
+                .filter(item => item.id !== VIRTUAL_VOL_AU_VENT_ID)
+                .map((item) => {
                 const isSelected = selectedItems.some(selected => selected.id === item.id)
                 const isTiramisu = isTiramisuItem(item.name)
                 return (
@@ -791,8 +846,10 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
               <div className="flex flex-wrap" style={{ gap: '16px' }}>
                 {selectedItems.map((item) => {
                   const isTiramisu = isTiramisuItem(item.name)
+                  const isPromoItem = isVolAuVentItem(item)
                   const quantityLabel = isTiramisu && item.quantity ? ` - ${item.quantity} Kg` : ''
                   const chipLabel = `${item.name}${quantityLabel}`
+                  const displayLabel = isPromoItem ? `${chipLabel} (In regalo)` : chipLabel
                   return (
                     <button
                       key={item.id}
@@ -801,7 +858,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                       className="group flex items-center gap-2 rounded-full border bg-white/80 px-4 py-2 text-sm font-semibold text-warm-wood shadow-sm transition-all hover:bg-warm-beige/30"
                       style={{ borderColor: '#60a5fa' }}
                     >
-                      <span className="truncate max-w-[180px] text-left">{chipLabel}</span>
+                      <span className="truncate max-w-[180px] text-left">{displayLabel}</span>
                       <X className="h-4 w-4 transition-colors" style={{ color: '#60a5fa' }} />
                     </button>
                   )
