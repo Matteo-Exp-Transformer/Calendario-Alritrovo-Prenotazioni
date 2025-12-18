@@ -71,6 +71,8 @@ export interface Database {
           cancellation_reason: string | null
           cancelled_at: string | null
           cancelled_by: string | null
+          placement: string | null
+          booking_source: string
         }
         Insert: {
           id?: string
@@ -97,6 +99,8 @@ export interface Database {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          placement?: string | null
+          booking_source?: string
         }
         Update: {
           id?: string
@@ -123,6 +127,8 @@ export interface Database {
           cancellation_reason?: string | null
           cancelled_at?: string | null
           cancelled_by?: string | null
+          placement?: string | null
+          booking_source?: string
         }
       }
       menu_items: {

@@ -638,9 +638,19 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                 <h2 className="text-sm sm:text-lg font-bold text-gray-900 truncate">
                   Dettagli Prenotazione
                 </h2>
-                <p className="text-xs sm:text-sm text-gray-600 truncate">
-                  #{booking.id.slice(0, 8)}
-                </p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-xs sm:text-sm text-gray-600 truncate">
+                    #{booking.id.slice(0, 8)}
+                  </p>
+                  {/* Badge origine prenotazione */}
+                  <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                    booking.booking_source === 'admin' 
+                      ? 'bg-green-100 text-green-700' 
+                      : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    {booking.booking_source === 'admin' ? '👤 Admin' : '📞 Prenota'}
+                  </span>
+                </div>
               </div>
               <button
                 onClick={onClose}

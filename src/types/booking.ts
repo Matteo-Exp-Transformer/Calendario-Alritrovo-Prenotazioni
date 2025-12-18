@@ -53,6 +53,9 @@ export interface BookingRequest {
   cancellation_reason?: string
   cancelled_at?: string
   cancelled_by?: string
+
+  // Booking source tracking
+  booking_source?: 'public' | 'admin'
 }
 
 export interface BookingRequestInput {
@@ -76,6 +79,7 @@ export interface BookingRequestInput {
   menu_total_per_person?: number
   menu_total_booking?: number
   placement?: string
+  booking_source?: 'public' | 'admin'
 }
 
 export interface AdminUser {

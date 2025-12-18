@@ -107,6 +107,7 @@ export const useCreateBookingRequest = () => {
           desired_time: normalizedTime,
           num_guests: data.num_guests,
           special_requests: data.special_requests || null,
+          booking_source: 'public',
           status: 'pending' as const
         }
 

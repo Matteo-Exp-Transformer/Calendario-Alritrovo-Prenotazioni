@@ -125,9 +125,12 @@ export const transformBookingToCalendarEvent = (
     eventEnd.setHours(23, 59, 59, 0)
   }
 
+  // Aggiungi icona per distinguere l'origine della prenotazione
+  const sourceIcon = booking.booking_source === 'admin' ? '👤 ' : '📞 '
+  
   const event: CalendarEvent = {
     id: booking.id,
-    title: `${booking.client_name} - ${booking.num_guests} ospiti`,
+    title: `${sourceIcon}${booking.client_name} - ${booking.num_guests} ospiti`,
     start: startDate,
     end: eventEnd,
     backgroundColor: color.bg,
