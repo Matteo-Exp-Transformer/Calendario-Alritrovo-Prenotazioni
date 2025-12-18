@@ -78,6 +78,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, badge, onC
 
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('calendar')
+  const [calendarTargetDate, setCalendarTargetDate] = useState<string | null>(null)
   const [showNewBookingPanel, setShowNewBookingPanel] = useState(false)
   const { data: stats } = useBookingStats()
   const { user } = useAdminAuth()
@@ -85,6 +86,12 @@ export const AdminDashboard: React.FC = () => {
   // Chiudi il pannello nuova prenotazione quando cambi tab (se necessario)
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab)
+  }
+
+  // Handler per navigazione da Archivio a Calendario
+  const handleViewInCalendar = (date: string) => {
+    setCalendarTargetDate(date)
+    setActiveTab('calendar')
   }
 
   return (
@@ -202,9 +209,9 @@ export const AdminDashboard: React.FC = () => {
 
         {/* Tab Content */}
         <div className="bg-white rounded-lg shadow-sm p-6 md:p-8 min-h-[600px] border border-gray-200">
-          {activeTab === 'calendar' && <BookingCalendarTab />}
+          {activeTab === 'calendar' && <BookingCalendarTab initialDate={calendarTargetDate} />}
           {activeTab === 'pending' && <PendingRequestsTab />}
-          {activeTab === 'archive' && <ArchiveTab />}
+          {activeTab === 'archive' && <ArchiveTab onViewInCalendar={handleViewInCalendar} />}
         </div>
       </main>
 
