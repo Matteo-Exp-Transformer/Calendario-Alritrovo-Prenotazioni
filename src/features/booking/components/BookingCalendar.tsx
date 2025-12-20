@@ -31,7 +31,6 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
     // Set today's date as default, or initialDate if provided
     return initialDate || new Date().toISOString().split('T')[0]
   })
-  const [calendarKey, setCalendarKey] = useState(0) // Force re-render key
   const [currentView, setCurrentView] = useState<'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek'>('dayGridMonth')
 
   // Aggiorna il selectedBooking quando i bookings cambiano (dopo modifica)
@@ -46,24 +45,17 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
     }
   }, [bookings, isModalOpen])
 
-  // Force calendar re-render when selectedDate changes
-  useEffect(() => {
-    setCalendarKey(prev => prev + 1)
-  }, [selectedDate])
-
   // Navigate to initialDate when it changes (from Archive)
   useEffect(() => {
     if (initialDate && calendarRef.current) {
       try {
         const calendarApi = calendarRef.current.getApi()
-        // Parse date in local timezone to avoid timezone issues
         const [year, month, day] = initialDate.split('-').map(Number)
         const targetDate = new Date(year, month - 1, day)
         calendarApi.gotoDate(targetDate)
         setSelectedDate(initialDate)
-        console.log('✅ [BookingCalendar] Navigated to date:', initialDate)
       } catch (error) {
-        console.error('❌ [BookingCalendar] Error navigating to date:', error)
+        console.error('Error navigating to calendar date:', error)
       }
     }
   }, [initialDate])
@@ -91,8 +83,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
     const month = String(d.getMonth() + 1).padStart(2, '0')
     const day = String(d.getDate()).padStart(2, '0')
     const date = `${year}-${month}-${day}`
-    
-    console.log('Date clicked:', date, 'clickInfo.dateStr:', clickInfo.dateStr, 'arg.date:', clickInfo.date)
+
     setSelectedDate(date)
   }
 
@@ -336,7 +327,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
             </div>
           </div>
 
-          <FullCalendar ref={calendarRef} key={calendarKey} {...config} events={events} />
+          <FullCalendar ref={calendarRef} {...config} events={events} />
         </div>
 
         {/* Sezione Disponibilità */}
