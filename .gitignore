@@ -68,3 +68,6 @@ dev-server.pid
 dev-server.log
 
 .vercel
+
+# Archive folder - development materials (kept locally)
+_archive/
