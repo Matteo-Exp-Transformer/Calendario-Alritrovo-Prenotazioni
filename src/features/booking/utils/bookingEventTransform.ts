@@ -70,15 +70,15 @@ export const transformBookingToCalendarEvent = (
     // Crea date con orari estratti direttamente (no timezone conversion)
     startDate = new Date(year, month - 1, day, startHour, startMinute, 0)
 
-    // Gestisci attraversamento mezzanotte: se endHour < startHour, è il giorno dopo
-    let endDay = day
-    if (endHour < startHour || (endHour === startHour && startHour >= 22)) {
-      const nextDay = new Date(year, month - 1, day)
-      nextDay.setDate(nextDay.getDate() + 1)
-      endDay = nextDay.getDate()
+    // Crea endDate sullo stesso giorno e spostalo al giorno dopo se attraversa mezzanotte.
+    // NOTE: usare setDate evita bug a fine mese/anno (es. 31 -> 1 del mese successivo).
+    endDate = new Date(year, month - 1, day, endHour, endMinute, 0)
+    if (
+      endHour < startHour ||
+      (endHour === startHour && endMinute <= startMinute)
+    ) {
+      endDate.setDate(endDate.getDate() + 1)
     }
-
-    endDate = new Date(year, month - 1, endDay, endHour, endMinute, 0)
   } else {
     // Fallback al vecchio metodo se mancano i campi
     const startStr = booking.confirmed_start!
@@ -115,14 +115,18 @@ export const transformBookingToCalendarEvent = (
 
   const color = getTimeSlotColor(startDate)
 
-  // Ensure event ends before midnight of the same day to prevent overflow
-  const sameDay = startDate.toISOString().split('T')[0] === endDate.toISOString().split('T')[0]
+  // Ensure event ends before midnight of the same day to prevent overflow.
+  // IMPORTANT: confronta la data in locale (non UTC) per evitare bug di timezone con toISOString().
+  const sameDay =
+    startDate.getFullYear() === endDate.getFullYear() &&
+    startDate.getMonth() === endDate.getMonth() &&
+    startDate.getDate() === endDate.getDate()
   
   // If the event is multi-day, clamp it to end at 23:59:59 of the start day
   let eventEnd = endDate
   if (!sameDay) {
     eventEnd = new Date(startDate)
-    eventEnd.setHours(23, 59, 59, 0)
+    eventEnd.setHours(23, 59, 59, 999)
   }
 
   // Aggiungi icona per distinguere l'origine della prenotazione
@@ -133,6 +137,7 @@ export const transformBookingToCalendarEvent = (
     title: `${sourceIcon}${booking.client_name} - ${booking.num_guests} ospiti`,
     start: startDate,
     end: eventEnd,
+    allDay: false,
     backgroundColor: color.bg,
     borderColor: color.border,
     extendedProps: booking,
