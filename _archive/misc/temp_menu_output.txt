@@ -1,0 +1,56 @@
+MENU ITEMS IN DATABASE:
+================================================================================
+
+ANTIPASTI
+================================================================================
+  Farinata                                           | EUR 1.50 | sort: 4
+  Salumi con piadina                                 | EUR 6.00 | sort: 5
+  Caprese                                            | EUR 4.00 | sort: 6
+
+BEVANDE
+================================================================================
+  Caraffe Drink
+                                     | EUR 5.00 | sort: 2
+  Caraffe Drink  Premium                             | EUR 7.00 | sort: 3
+
+DOLCI
+================================================================================
+  Cannoli siciliani                                  | EUR 4.00 | sort: 10
+  Tiramisù                                           | EUR 25.00 | sort: 20
+
+FRITTI
+================================================================================
+  Olive Ascolana                                     | EUR 1.50 | sort: 1
+  Anelli di Cipolla                                  | EUR 1.50 | sort: 2
+  Patatine fritte                                    | EUR 1.50 | sort: 3
+  Camembert                                          | EUR 2.00 | sort: 4
+  Nachos con cheddar                                 | EUR 2.00 | sort: 5
+  Jalapeños con formaggio                            | EUR 2.00 | sort: 6
+  Pulled Pork                                        | EUR 2.50 | sort: 7
+  Panelle                                            | EUR 2.00 | sort: 8
+  Falafel                                            | EUR 2.00 | sort: 9
+  Verdure Pastellate                                 | EUR 2.00 | sort: 11
+  Scamorzine Pugliesi
+                               | EUR 2.00 | sort: 12
+
+PIZZA
+================================================================================
+  Pizza Margherita                                   | EUR 4.00 | sort: 10
+  Focaccia Rosmarino                                 | EUR 4.00 | sort: 10
+  Pizza rossa                                        | EUR 4.00 | sort: 10
+
+PRIMI
+================================================================================
+  Lasagne Ragù                                       | EUR 10.00 | sort: 1
+  Cannelloni Ricotta e Spinaci                       | EUR 9.00 | sort: 2
+
+SECONDI
+================================================================================
+  Polpette di carne                                  | EUR 6.00 | sort: 1
+  Polpette di melanzane                              | EUR 6.00 | sort: 2
+  Polpette Patate e Mortadella                       | EUR 6.00 | sort: 3
+  Polpette Salsiccia e friarielli                    | EUR 6.00 | sort: 4
+  Polpette Vegane di Lenticchie e Curry              | EUR 6.00 | sort: 5
+
+================================================================================
+TOTAL ITEMS: 28
