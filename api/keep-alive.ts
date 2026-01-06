@@ -37,8 +37,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const supabaseUrl = process.env.SUPABASE_URL
   const supabaseKey = process.env.SUPABASE_ANON_KEY
   
+  // Debug: verifica quali variabili sono disponibili
+  console.log('[Keep-Alive] Environment check:', {
+    hasSUPABASE_URL: !!supabaseUrl,
+    hasSUPABASE_ANON_KEY: !!supabaseKey,
+    hasVITE_SUPABASE_URL: !!process.env.VITE_SUPABASE_URL,
+    hasVITE_SUPABASE_ANON_KEY: !!process.env.VITE_SUPABASE_ANON_KEY
+  })
+  
   if (!supabaseUrl || !supabaseKey) {
     console.error('[Keep-Alive] Missing Supabase environment variables')
+    console.error('[Keep-Alive] Available env keys:', Object.keys(process.env).filter(k => k.includes('SUPABASE')))
     return res.status(500).json({ 
       success: false,
       error: 'Missing Supabase configuration',
