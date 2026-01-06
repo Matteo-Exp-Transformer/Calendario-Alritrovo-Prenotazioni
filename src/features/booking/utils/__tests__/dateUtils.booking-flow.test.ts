@@ -128,6 +128,48 @@ describe('Booking Flow: Data Transcription Verification', () => {
     expect(endDate.getMinutes()).toBe(0)
   })
 
+  test('Midnight crossover: calendar display is clamped to start day (no next-day rendering)', () => {
+    // Prenotazione che finisce dopo mezzanotte (es. 21:00 → 00:30)
+    const booking: BookingRequest = {
+      id: 'test-midnight',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      client_name: 'Test User',
+      client_email: 'test@example.com',
+      client_phone: '123456789',
+      event_type: 'cena',
+      desired_date: '2025-01-15',
+      desired_time: '21:00',
+      num_guests: 4,
+      special_requests: null,
+      menu: null,
+      status: 'accepted',
+      confirmed_start: '2025-01-15T21:00:00+00:00',
+      confirmed_end: '2025-01-16T00:30:00+00:00',
+      rejection_reason: null,
+      cancellation_reason: null,
+      cancelled_at: null,
+      cancelled_by: null,
+    }
+
+    const calendarEvent = transformBookingToCalendarEvent(booking)
+
+    const start = new Date(calendarEvent.start)
+    const end = new Date(calendarEvent.end)
+
+    // Deve terminare entro il giorno di inizio (clamp a fine giornata)
+    expect(end.getFullYear()).toBe(start.getFullYear())
+    expect(end.getMonth()).toBe(start.getMonth())
+    expect(end.getDate()).toBe(start.getDate())
+    expect(end.getHours()).toBe(23)
+    expect(end.getMinutes()).toBe(59)
+    expect(end.getSeconds()).toBe(59)
+    expect(end.getMilliseconds()).toBe(999)
+
+    // FullCalendar safety: non è un allDay/multi-day event
+    expect(calendarEvent.allDay).toBe(false)
+  })
+
   test('RED: Midnight crossover: end time moves to next day correctly', () => {
     // Utente inserisce prenotazione che attraversa mezzanotte
     const date = '2025-01-15'
