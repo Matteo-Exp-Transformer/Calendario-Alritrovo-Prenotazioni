@@ -86,7 +86,7 @@ const DEFAULT_TIRAMISU_KG = 1
 
 // Virtual promotional item for Vol-au-vent
 const VIRTUAL_VOL_AU_VENT_ID = 'virtual-vol-au-vent-promo'
-const VOL_AU_VENT_THRESHOLD_EUR = 17.00
+const VOL_AU_VENT_THRESHOLD_EUR = 15.00
 
 const createVirtualVolAuVentItem = (): SelectedMenuItem => ({
   id: VIRTUAL_VOL_AU_VENT_ID,
@@ -596,7 +596,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
               marginBottom: '0.5rem'
             }}
           >
-            Raggiungi 17€ a persona e ti omaggiamo dei Mini Rustici Misti!
+            Raggiungi 15€ a persona e ti omaggiamo dei Mini Rustici Misti!
           </label>
           <select
             id="preset_menu"
