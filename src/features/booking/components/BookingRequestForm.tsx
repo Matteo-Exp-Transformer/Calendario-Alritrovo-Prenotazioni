@@ -55,7 +55,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     client_name: '',
     client_email: '',
     client_phone: '',
-    booking_type: 'tavolo',
+    booking_type: 'rinfresco_laurea',
     desired_date: getCurrentDate(),
     desired_time: '16:00',
     num_guests: 0,
@@ -741,7 +741,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           Dettagli Prenotazione
         </h2>
 
-        {/* Tipologia di Prenotazione - DROPDOWN */}
+        {/* Tipologia di Prenotazione - DROPDOWN: disabilitato, sempre rinfresco di laurea
         <div style={{ marginBottom: '0' }}>
           <label
             className="block text-base md:text-lg text-warm-wood mb-2"
@@ -786,6 +786,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             <p className="text-sm text-red-500">{errors.booking_type}</p>
           )}
         </div>
+        */}
 
         {/* Data */}
         <div className="space-y-3" style={{ paddingTop: '0.5rem' }}>
