@@ -71,3 +71,7 @@ dev-server.log
 
 # Archive folder - development materials (kept locally)
 _archive/
+
+# Session credentials and verification screenshot (never commit)
+Sessioni di lavoro/**/ADMIN-LOGIN.md
+Sessioni di lavoro/**/admin-verification.png

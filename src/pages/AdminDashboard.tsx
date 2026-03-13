@@ -20,6 +20,8 @@ interface NavItemProps {
 
 const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, badge, onClick }) => (
   <button
+    type="button"
+    aria-selected={active}
     onClick={onClick}
     className="relative flex items-center gap-3 px-4 md:px-6 py-3 rounded-lg transition-all duration-200 border-2 cursor-pointer min-h-[44px] active:scale-[0.98]"
     style={active ? {
@@ -61,7 +63,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, badge, onC
 
     <span className="text-sm md:text-base font-medium">{label}</span>
 
-    {badge && badge > 0 && (
+    {badge != null && badge > 0 && (
       <span
         className="ml-auto inline-flex items-center justify-center min-w-[24px] h-6 text-xs font-semibold px-2 rounded-full"
         style={{

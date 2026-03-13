@@ -144,13 +144,17 @@ Edge Function Supabase: `supabase/functions/send-email/`
 
 ### Vercel
 
+Vercel è collegato al branch **main**: ogni push su `main` triggera il deploy in produzione.
+
 ```bash
-# Deploy automatico via Git push
+# Deploy in produzione (solo quando le modifiche sono pronte!)
 git push origin main
 
 # O deploy manuale
 vercel --prod
 ```
+
+**Per non rompere la build**: fai le modifiche su un branch diverso (es. `layout-improvements` o `develop`) e fai push solo su quel branch; merge su `main` solo quando sei pronto per andare in produzione. Vedi [Workflow branch](docs/development/BRANCH-WORKFLOW.md).
 
 ### Configurazione Vercel
 
@@ -187,12 +191,11 @@ node scripts/utility/query_menu.js
 ✅ Calendario integrato
 ✅ Security & GDPR
 
-## 🤝 Contribuire
+## 🤝 Contribuire / Sviluppo
 
-1. Crea un branch per la feature
-2. Implementa le modifiche
-3. Testa con `npm run test:e2e`
-4. Crea PR
+1. **Lavora su un branch diverso da `main`** (es. `layout-improvements`, `develop`, o `feature/nome`) così Vercel non rifà deploy in produzione.
+2. Implementa le modifiche e testa con `npm run test:e2e`.
+3. Quando sei pronto: merge su `main` e push (o apri PR). Vedi [Workflow branch](docs/development/BRANCH-WORKFLOW.md).
 
 ## 📞 Supporto
 
