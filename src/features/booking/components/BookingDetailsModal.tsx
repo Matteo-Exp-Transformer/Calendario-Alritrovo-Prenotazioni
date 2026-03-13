@@ -15,7 +15,6 @@ import type { SelectedMenuItem } from '@/types/menu'
 import { getPresetMenu, type PresetMenuType } from '../constants/presetMenus'
 import { useMenuItems } from '../hooks/useMenuItems'
 import { applyCoverCharge } from '../utils/menuPricing'
-import { getCaraffeSurchargeForSelection } from '../utils/caraffePricing'
 
 interface BookingDetailsModalProps {
   isOpen: boolean
@@ -520,8 +519,7 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         .filter((item: any) => !item.name.toLowerCase().includes('tiramis'))
         .reduce((sum: number, item: any) => sum + item.price, 0)
       const tiramisuTotal = formData.menu_selection.tiramisu_total || 0
-      const caraffeSurcharge = getCaraffeSurchargeForSelection(formData.menu_selection.items as any)
-      const perPersonWithCover = applyCoverCharge(baseTotal + caraffeSurcharge, formData.booking_type)
+      const perPersonWithCover = applyCoverCharge(baseTotal, formData.booking_type)
       menuTotalPerPerson = perPersonWithCover
       menuTotalBooking = perPersonWithCover * formData.numGuests + tiramisuTotal
     }

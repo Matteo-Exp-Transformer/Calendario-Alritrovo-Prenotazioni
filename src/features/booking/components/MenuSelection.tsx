@@ -3,7 +3,7 @@ import { Check, X } from 'lucide-react'
 import { useMenuItems } from '../hooks/useMenuItems'
 import type { MenuCategory, SelectedMenuItem } from '@/types/menu'
 import type { PresetMenuType } from '../constants/presetMenus'
-import { getCaraffeSurchargeForSelection, isCaraffeDrinkPremium, isCaraffeDrinkStandard } from '../utils/caraffePricing'
+import { isCaraffeDrinkPremium, isCaraffeDrinkStandard } from '../utils/caraffePricing'
 
 interface MenuSelectionProps {
   selectedItems: SelectedMenuItem[]
@@ -209,8 +209,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
       .filter((item) => !isTiramisuItem(item.name))
       .reduce((sum, item) => sum + item.price, 0)
 
-    const caraffeSurcharge = getCaraffeSurchargeForSelection(selectedItems)
-    const totalPerPerson = baseTotal + caraffeSurcharge
+    const totalPerPerson = baseTotal
 
     return {
       totalPerPerson,
@@ -287,12 +286,9 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
       .filter((item) => !isTiramisuItem(item.name))
       .reduce((sum, item) => sum + item.price, 0)
 
-    const caraffeSurcharge = getCaraffeSurchargeForSelection(itemsWithTotals)
-    const totalPerPersonWithCaraffe = baseTotal + caraffeSurcharge
-
     onMenuChange({
       items: itemsWithTotals,
-      totalPerPerson: totalPerPersonWithCaraffe,
+      totalPerPerson: baseTotal,
       tiramisuTotal: tiramisuTotalValue,
       tiramisuKg: tiramisuQuantity
     })

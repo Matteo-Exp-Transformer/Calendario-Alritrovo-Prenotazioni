@@ -15,7 +15,6 @@ import { toast } from 'react-toastify'
 import { getPresetMenu, type PresetMenuType } from '../constants/presetMenus'
 import { useMenuItems } from '../hooks/useMenuItems'
 import { applyCoverCharge } from '../utils/menuPricing'
-import { getCaraffeSurchargeForSelection } from '../utils/caraffePricing'
 
 interface BookingRequestFormProps {
   onSubmit?: () => void
@@ -294,14 +293,12 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         }
       })
 
-    // Calcola totale
-    const totalPerPersonBase = selectedItems
+    // Calcola totale (solo somma prezzi schede, nessun surcharge)
+    const totalPerPerson = selectedItems
       .filter(item => !item.name.toLowerCase().includes('tiramis'))
       .reduce((sum, item) => sum + item.price, 0)
-    const caraffeSurcharge = getCaraffeSurchargeForSelection(selectedItems)
-    const totalPerPerson = totalPerPersonBase + caraffeSurcharge
     const numGuests = formData.num_guests || 0
-      const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
+    const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
 
     const tiramisuSelection = selectedItems.find((item) => item.name.toLowerCase().includes('tiramis'))
     const tiramisuUnitPrice = tiramisuSelection?.price || 0
@@ -947,9 +944,7 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             onPresetMenuChange={handlePresetMenuChange}
             onMenuChange={({ items, totalPerPerson, tiramisuTotal, tiramisuKg }) => {
               const numGuests = formData.num_guests || 0
-              const caraffeSurcharge = getCaraffeSurchargeForSelection(items)
-              const totalPerPersonWithCaraffe = totalPerPerson + caraffeSurcharge
-              const perPersonWithCover = applyCoverCharge(totalPerPersonWithCaraffe, formData.booking_type)
+              const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
               // Mantieni preset_menu se gli items corrispondono ancora al preset
               const currentPreset = selectedPreset
               let updatedPreset: PresetMenuType = currentPreset
