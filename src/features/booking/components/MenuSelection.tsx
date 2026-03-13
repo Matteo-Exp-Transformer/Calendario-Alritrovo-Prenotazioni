@@ -3,6 +3,7 @@ import { Check, X } from 'lucide-react'
 import { useMenuItems } from '../hooks/useMenuItems'
 import type { MenuCategory, SelectedMenuItem } from '@/types/menu'
 import type { PresetMenuType } from '../constants/presetMenus'
+import { getCaraffeSurchargeForSelection, isCaraffeDrinkPremium, isCaraffeDrinkStandard } from '../utils/caraffePricing'
 
 interface MenuSelectionProps {
   selectedItems: SelectedMenuItem[]
@@ -104,29 +105,6 @@ const clampTiramisuQuantity = (qty: number): number => {
     return 0
   }
   return Math.min(TIRAMISU_MAX_KG, Math.max(TIRAMISU_MIN_KG, qty))
-}
-
-// Helper functions for menu validation
-// IMPORTANT: Premium check MUST come first because "Caraffe / Drink Premium" contains "Caraffe / Drink"
-// NOTA: I nomi possono avere variazioni: "Caraffe / Drink", "Caraffe drink", "Caraffe Drink Premium", ecc.
-const isCaraffeDrinkPremium = (itemName: string): boolean => {
-  const nameLower = itemName.toLowerCase().trim()
-  // Cerca varianti di Premium (con o senza slash, case insensitive)
-  return nameLower.includes('premium') && 
-         (nameLower.includes('caraffe') || nameLower.includes('drink'))
-}
-
-const isCaraffeDrinkStandard = (itemName: string): boolean => {
-  const nameLower = itemName.toLowerCase().trim()
-  // NON è premium
-  if (isCaraffeDrinkPremium(itemName)) {
-    return false
-  }
-  // Contiene "caraffe" e "drink" ma NON "premium"
-  return (nameLower.includes('caraffe') || nameLower.includes('drink')) &&
-         !nameLower.includes('premium') &&
-         !nameLower.includes('caffè') && // Escludi "Caffè"
-         !nameLower.includes('caffe')     // Escludi anche varianti
 }
 
 const PIZZA_ITEM_NAMES = ['Pizza Margherita', 'Pizza rossa', 'Focaccia Rosmarino']
@@ -231,8 +209,11 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
       .filter((item) => !isTiramisuItem(item.name))
       .reduce((sum, item) => sum + item.price, 0)
 
+    const caraffeSurcharge = getCaraffeSurchargeForSelection(selectedItems)
+    const totalPerPerson = baseTotal + caraffeSurcharge
+
     return {
-      totalPerPerson: baseTotal,
+      totalPerPerson,
       tiramisuKg: quantity,
       tiramisuTotal: totalForTiramisu
     }
@@ -306,9 +287,12 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
       .filter((item) => !isTiramisuItem(item.name))
       .reduce((sum, item) => sum + item.price, 0)
 
+    const caraffeSurcharge = getCaraffeSurchargeForSelection(itemsWithTotals)
+    const totalPerPersonWithCaraffe = baseTotal + caraffeSurcharge
+
     onMenuChange({
       items: itemsWithTotals,
-      totalPerPerson: baseTotal,
+      totalPerPerson: totalPerPersonWithCaraffe,
       tiramisuTotal: tiramisuTotalValue,
       tiramisuKg: tiramisuQuantity
     })
@@ -886,12 +870,6 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
                 <span>Prezzo a persona</span>
                 <span>{formatCurrency(totalPerPerson)}</span>
               </div>
-              {numGuests > 0 && (
-                <div className="flex items-center justify-between text-lg font-semibold text-warm-wood">
-                  <span>Coperto ({numGuests} {numGuests === 1 ? 'persona' : 'persone'})</span>
-                  <span>{formatCurrency(2.00 * numGuests)}</span>
-                </div>
-              )}
               {tiramisuTotal > 0 && (
                 <div className="flex items-center justify-between text-lg font-semibold text-warm-wood">
                   <span>Tiramisù</span>
@@ -902,7 +880,7 @@ export const MenuSelection: React.FC<MenuSelectionProps> = ({
               <div className="flex items-center justify-between text-2xl font-bold text-warm-wood">
                 <span>Prezzo totale rinfresco</span>
                 <span>
-                  {formatCurrency(totalPerPerson * Math.max(numGuests, 0) + (2.00 * Math.max(numGuests, 0)) + tiramisuTotal)}
+                  {formatCurrency(totalPerPerson * Math.max(numGuests, 0) + tiramisuTotal)}
                 </span>
               </div>
             </div>

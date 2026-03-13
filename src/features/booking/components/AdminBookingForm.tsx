@@ -14,6 +14,7 @@ import { useAcceptedBookings } from '../hooks/useBookingQueries'
 import { useCapacityCheck } from '../hooks/useCapacityCheck'
 import { CapacityWarningModal } from './CapacityWarningModal'
 import { applyCoverCharge } from '../utils/menuPricing'
+import { getCaraffeSurchargeForSelection } from '../utils/caraffePricing'
 
 interface AdminBookingFormProps {
   onSubmit?: () => void
@@ -217,9 +218,11 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
     console.log('🔵 [AdminBookingForm] Items trovati e selezionati:', selectedItems.map(i => `${i.name} (${i.id})`))
 
     // Calcola totale
-    const totalPerPerson = selectedItems
+    const totalPerPersonBase = selectedItems
       .filter(item => !item.name.toLowerCase().includes('tiramis'))
       .reduce((sum, item) => sum + item.price, 0)
+    const caraffeSurcharge = getCaraffeSurchargeForSelection(selectedItems)
+    const totalPerPerson = totalPerPersonBase + caraffeSurcharge
     const numGuests = formData.num_guests || 0
     const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
 
@@ -670,7 +673,9 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
             onPresetMenuChange={handlePresetMenuChange}
             onMenuChange={({ items, totalPerPerson, tiramisuTotal, tiramisuKg }) => {
               const numGuests = formData.num_guests || 0
-              const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
+              const caraffeSurcharge = getCaraffeSurchargeForSelection(items)
+              const totalPerPersonWithCaraffe = totalPerPerson + caraffeSurcharge
+              const perPersonWithCover = applyCoverCharge(totalPerPersonWithCaraffe, formData.booking_type)
               // Mantieni preset_menu se gli items corrispondono ancora al preset
               const currentPreset = selectedPreset
               let updatedPreset: PresetMenuType = currentPreset

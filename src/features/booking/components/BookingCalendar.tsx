@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 import { extractDateFromISO, getAccurateStartTime, getAccurateEndTime } from '../utils/dateUtils'
 import { getBookingEventTypeLabel } from '../utils/eventTypeLabels'
-import { getMenuPriceDisplayFromBooking, applyCoverCharge, COVER_CHARGE_PER_PERSON_EUR } from '../utils/menuPricing'
+import { getMenuPriceDisplayFromBooking, applyCoverCharge } from '../utils/menuPricing'
 
 interface BookingCalendarProps {
   bookings: BookingRequest[]
@@ -368,25 +368,20 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                 {selectedDateData.morningBookings.length > 0 ? (
                   selectedDateData.morningBookings.map((booking, index) => {
                     const eventTypeLabel = getBookingEventTypeLabel(booking)
-                    // Calcola come nel MenuTab: assicurati che il coperto sia incluso
                     let menuPriceDisplay = getMenuPriceDisplayFromBooking(booking)
                     if (menuPriceDisplay && booking.booking_type === 'rinfresco_laurea' && booking.menu_selection?.items) {
-                      // Ricalcola come nel MenuTab per essere sicuri che il coperto sia incluso
                       const baseTotal = booking.menu_selection.items
                         .filter((item) => !item.name.toLowerCase().includes('tiramis'))
                         .reduce((sum, item) => sum + (item.totalPrice || item.price), 0)
                       const perPersonWithCover = applyCoverCharge(baseTotal, booking.booking_type)
                       const tiramisuTotal = booking.menu_selection.tiramisu_total || 0
                       const totalBooking = perPersonWithCover * (booking.num_guests || 0) + tiramisuTotal
-                      
-                      // Ricrea menuPriceDisplay con i valori ricalcolati
                       const basePerPerson = baseTotal
-                      const breakdownLabel = `(${basePerPerson.toFixed(2)} + ${COVER_CHARGE_PER_PERSON_EUR.toFixed(2)} coperto)`
-                      
+
                       menuPriceDisplay = {
                         prezzoMenu: perPersonWithCover,
                         prezzoMenuLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
-                        breakdownLabel,
+                        breakdownLabel: undefined,
                         prezzoTotale: totalBooking,
                         prezzoTotaleLabel: `€${totalBooking.toFixed(2)}`,
                         totalLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
@@ -587,25 +582,20 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                 {selectedDateData.afternoonBookings.length > 0 ? (
                   selectedDateData.afternoonBookings.map((booking, index) => {
                     const eventTypeLabel = getBookingEventTypeLabel(booking)
-                    // Calcola come nel MenuTab: assicurati che il coperto sia incluso
                     let menuPriceDisplay = getMenuPriceDisplayFromBooking(booking)
                     if (menuPriceDisplay && booking.booking_type === 'rinfresco_laurea' && booking.menu_selection?.items) {
-                      // Ricalcola come nel MenuTab per essere sicuri che il coperto sia incluso
                       const baseTotal = booking.menu_selection.items
                         .filter((item) => !item.name.toLowerCase().includes('tiramis'))
                         .reduce((sum, item) => sum + (item.totalPrice || item.price), 0)
                       const perPersonWithCover = applyCoverCharge(baseTotal, booking.booking_type)
                       const tiramisuTotal = booking.menu_selection.tiramisu_total || 0
                       const totalBooking = perPersonWithCover * (booking.num_guests || 0) + tiramisuTotal
-                      
-                      // Ricrea menuPriceDisplay con i valori ricalcolati
                       const basePerPerson = baseTotal
-                      const breakdownLabel = `(${basePerPerson.toFixed(2)} + ${COVER_CHARGE_PER_PERSON_EUR.toFixed(2)} coperto)`
-                      
+
                       menuPriceDisplay = {
                         prezzoMenu: perPersonWithCover,
                         prezzoMenuLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
-                        breakdownLabel,
+                        breakdownLabel: undefined,
                         prezzoTotale: totalBooking,
                         prezzoTotaleLabel: `€${totalBooking.toFixed(2)}`,
                         totalLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
@@ -805,25 +795,20 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                 {selectedDateData.eveningBookings.length > 0 ? (
                   selectedDateData.eveningBookings.map((booking, index) => {
                     const eventTypeLabel = getBookingEventTypeLabel(booking)
-                    // Calcola come nel MenuTab: assicurati che il coperto sia incluso
                     let menuPriceDisplay = getMenuPriceDisplayFromBooking(booking)
                     if (menuPriceDisplay && booking.booking_type === 'rinfresco_laurea' && booking.menu_selection?.items) {
-                      // Ricalcola come nel MenuTab per essere sicuri che il coperto sia incluso
                       const baseTotal = booking.menu_selection.items
                         .filter((item) => !item.name.toLowerCase().includes('tiramis'))
                         .reduce((sum, item) => sum + (item.totalPrice || item.price), 0)
                       const perPersonWithCover = applyCoverCharge(baseTotal, booking.booking_type)
                       const tiramisuTotal = booking.menu_selection.tiramisu_total || 0
                       const totalBooking = perPersonWithCover * (booking.num_guests || 0) + tiramisuTotal
-                      
-                      // Ricrea menuPriceDisplay con i valori ricalcolati
                       const basePerPerson = baseTotal
-                      const breakdownLabel = `(${basePerPerson.toFixed(2)} + ${COVER_CHARGE_PER_PERSON_EUR.toFixed(2)} coperto)`
-                      
+
                       menuPriceDisplay = {
                         prezzoMenu: perPersonWithCover,
                         prezzoMenuLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
-                        breakdownLabel,
+                        breakdownLabel: undefined,
                         prezzoTotale: totalBooking,
                         prezzoTotaleLabel: `€${totalBooking.toFixed(2)}`,
                         totalLabel: `€${perPersonWithCover.toFixed(2)}/persona`,

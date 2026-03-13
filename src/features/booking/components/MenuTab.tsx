@@ -4,7 +4,7 @@ import { MenuSelection } from './MenuSelection'
 import type { SelectedMenuItem } from '@/types/menu'
 import { getPresetMenuLabel } from '../constants/presetMenus'
 import type { PresetMenuType } from '../constants/presetMenus'
-import { applyCoverCharge, COVER_CHARGE_PER_PERSON_EUR } from '../utils/menuPricing'
+import { applyCoverCharge } from '../utils/menuPricing'
 
 interface MenuTabProps {
   booking: any
@@ -174,9 +174,8 @@ export const MenuTab: React.FC<MenuTabProps> = ({
 
       {/* Cost Breakdown Summary */}
       {(() => {
-        const copertoTotal = COVER_CHARGE_PER_PERSON_EUR * numGuests
         const prezzoPersonaTotal = baseTotal * numGuests
-        const totalRinfresco = prezzoPersonaTotal + copertoTotal + tiramisuTotal
+        const totalRinfresco = prezzoPersonaTotal + tiramisuTotal
 
         return (
           <div className="mt-6 pt-4 border-t-2 border-gray-300">
@@ -188,14 +187,6 @@ export const MenuTab: React.FC<MenuTabProps> = ({
                 Prezzo a persona: €{baseTotal.toFixed(2)} × {numGuests} ospiti
               </span>
               <span className="font-bold text-gray-900">€{prezzoPersonaTotal.toFixed(2)}</span>
-            </div>
-
-            {/* Coperto × ospiti */}
-            <div className="flex justify-between items-center text-sm mb-2">
-              <span className="text-gray-700">
-                Coperto: €{COVER_CHARGE_PER_PERSON_EUR.toFixed(2)} × {numGuests} ospiti
-              </span>
-              <span className="font-bold text-gray-900">€{copertoTotal.toFixed(2)}</span>
             </div>
 
             {/* Tiramisù (only if selected) */}

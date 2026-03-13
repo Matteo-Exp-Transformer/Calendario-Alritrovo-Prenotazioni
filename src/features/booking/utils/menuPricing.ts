@@ -2,19 +2,19 @@ import type { BookingRequest } from '@/types/booking'
 
 export type BookingTypeWithCover = 'tavolo' | 'rinfresco_laurea' | undefined
 
-export const COVER_CHARGE_PER_PERSON_EUR = 2
+// Legacy constant kept for backward-compatibility with stored data and types
+export const COVER_CHARGE_PER_PERSON_EUR = 0
 
-export const needsCoverCharge = (bookingType?: BookingTypeWithCover): boolean =>
-  bookingType === 'rinfresco_laurea'
+export const needsCoverCharge = (_bookingType?: BookingTypeWithCover): boolean => false
 
-export const applyCoverCharge = (baseAmount: number, bookingType?: BookingTypeWithCover): number =>
-  needsCoverCharge(bookingType) ? baseAmount + COVER_CHARGE_PER_PERSON_EUR : baseAmount
+export const applyCoverCharge = (baseAmount: number, _bookingType?: BookingTypeWithCover): number =>
+  baseAmount
 
-export const removeCoverCharge = (amount: number, bookingType?: BookingTypeWithCover): number =>
-  needsCoverCharge(bookingType) ? Math.max(amount - COVER_CHARGE_PER_PERSON_EUR, 0) : amount
+export const removeCoverCharge = (amount: number, _bookingType?: BookingTypeWithCover): number =>
+  amount
 
 export interface MenuPriceDisplay {
-  // Prezzo Menù: prezzo a persona (con coperto incluso se presente)
+  // Prezzo Menù: prezzo a persona
   prezzoMenu: number
   prezzoMenuLabel: string
   breakdownLabel?: string
@@ -31,23 +31,18 @@ export interface MenuPriceDisplay {
 
 export const buildMenuPriceDisplay = (
   menu_total_per_person?: number | null,
-  bookingType?: BookingTypeWithCover,
+  _bookingType?: BookingTypeWithCover,
   menu_total_booking?: number | null
 ): MenuPriceDisplay | null => {
   if (!menu_total_per_person || menu_total_per_person <= 0) {
     return null
   }
 
-  const hasCoverCharge = needsCoverCharge(bookingType)
   const prezzoMenu = menu_total_per_person
-  const basePerPerson = hasCoverCharge
-    ? removeCoverCharge(prezzoMenu, bookingType)
-    : prezzoMenu
+  const basePerPerson = prezzoMenu
   
   const prezzoMenuLabel = `€${prezzoMenu.toFixed(2)}/persona`
-  const breakdownLabel = hasCoverCharge
-    ? `(${basePerPerson.toFixed(2)} + ${COVER_CHARGE_PER_PERSON_EUR.toFixed(2)} coperto)`
-    : undefined
+  const breakdownLabel = undefined
 
   const prezzoTotale = menu_total_booking ?? null
   const prezzoTotaleLabel = prezzoTotale !== null
