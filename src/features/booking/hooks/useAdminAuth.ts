@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react'
 import { supabase, handleSupabaseError } from '@/lib/supabase'
-import type { AdminRole } from '@/types/booking'
 import { useNavigate } from 'react-router-dom'
 
 interface AdminAuthUser {
   id: string
   email: string
   name?: string
-  role: AdminRole
 }
 
 interface UseAdminAuthReturn {
@@ -48,7 +46,7 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
       // Verify user exists in admin_users table
       const { data: adminUser, error: adminError } = await (supabase
         .from('admin_users') as any)
-        .select('role, name')
+        .select('name')
         .eq('email', session.user.email)
         .single()
 
@@ -61,8 +59,7 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
       setUser({
         id: session.user.id,
         email: session.user.email,
-        name: (adminUser as any).name || undefined,
-        role: ((adminUser as any).role as AdminRole) || 'admin'
+        name: (adminUser as any).name || undefined
       })
 
     } catch (error) {
@@ -100,7 +97,7 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
       // Verify user exists in admin_users table
       const { data: adminUser, error: adminError } = await (supabase
         .from('admin_users') as any)
-        .select('role, name')
+        .select('name')
         .eq('email', authData.user.email || '')
         .single()
 
@@ -115,8 +112,7 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
       setUser({
         id: authData.user.id,
         email: authData.user.email || '',
-        name: (adminUser as any).name || undefined,
-        role: ((adminUser as any).role as AdminRole) || 'admin'
+        name: (adminUser as any).name || undefined
       })
 
       return { success: true }

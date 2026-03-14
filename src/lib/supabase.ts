@@ -50,20 +50,16 @@ export async function getCurrentUser() {
   return user
 }
 
-// Helper function to check if user is admin
-export async function isAdmin() {
+// Helper function to check if user is authorized
+export async function isAuthorizedUser() {
   const user = await getCurrentUser()
   if (!user || !user.email) return false
 
   const { data, error } = await supabase
     .from('admin_users')
-    .select('role')
+    .select('email')
     .eq('email', user.email)
     .single()
 
-  if (error || !data) return false
-
-  // Type assertion since we know the structure from our database schema
-  const adminData = data as { role: string }
-  return adminData.role === 'admin' || adminData.role === 'staff'
+  return !error && !!data
 }

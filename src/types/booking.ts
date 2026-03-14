@@ -4,7 +4,6 @@ import type { PresetMenuType } from '../features/booking/constants/presetMenus'
 
 export type BookingStatus = 'pending' | 'accepted' | 'rejected' | 'deleted'
 export type EventType = 'cena' | 'aperitivo' | 'evento' | 'laurea' | 'drink_caraffe' | 'drink_rinfresco_leggero' | 'drink_rinfresco_completo' | 'drink_rinfresco_completo_primo' | 'menu_pranzo_cena'
-export type AdminRole = 'admin' | 'staff'
 
 export interface DietaryRestriction {
   restriction: string
@@ -85,8 +84,6 @@ export interface BookingRequestInput {
 export interface AdminUser {
   id: string
   email: string
-  password_hash: string
-  role: AdminRole
   name?: string
   created_at: string
   updated_at: string
