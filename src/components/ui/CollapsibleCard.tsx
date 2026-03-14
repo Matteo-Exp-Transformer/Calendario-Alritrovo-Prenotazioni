@@ -290,7 +290,6 @@ export const CollapsibleCard = ({
                 
                 // Debug log
                 if (isExceeded) {
-                  console.log('🔴 [CollapsibleCard] Capacity exceeded:', { available, capacity, isExceeded })
                 }
                 
                 // If capacity is exceeded, show negative available value (e.g., -18)

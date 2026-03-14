@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase, handleSupabaseError } from '@/lib/supabase'
 import type { BookingRequest } from '@/types/booking'
@@ -6,7 +5,6 @@ import { toast } from 'react-toastify'
 import {
   sendBookingAcceptedEmail,
   sendBookingRejectedEmail,
-  sendBookingCancelledEmail,
   areEmailNotificationsEnabled,
 } from './useEmailNotifications'
 
@@ -62,9 +60,9 @@ export const useAcceptBooking = () => {
         updateData.desired_time = input.desiredTime
       }
 
-      const { data, error } = await supabase
-        .from('booking_requests')
-        .update(updateData)
+      const { data, error } = await (supabase
+        .from('booking_requests') as any)
+        .update(updateData as any)
         .eq('id', input.bookingId)
         .select()
         .single()
@@ -84,23 +82,17 @@ export const useAcceptBooking = () => {
         queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'], refetchType: 'all' }),
         queryClient.invalidateQueries({ queryKey: ['bookings', 'stats'], refetchType: 'all' }),
       ])
-      console.log('✅ [useAcceptBooking] All bookings queries invalidated - calendar should refresh automatically')
 
       // Send email notification
-      console.log('🔵 [useAcceptBooking] Checking email notifications...')
       const emailEnabled = areEmailNotificationsEnabled()
-      console.log('🔵 [useAcceptBooking] Email enabled:', emailEnabled)
       
       if (emailEnabled) {
-        console.log('🔵 [useAcceptBooking] Sending email to:', booking.client_email)
         try {
-          const emailResult = await sendBookingAcceptedEmail(booking)
-          console.log('✅ [useAcceptBooking] Email sent:', emailResult)
+          await sendBookingAcceptedEmail(booking)
         } catch (error) {
           console.error('❌ [useAcceptBooking] Email error:', error)
         }
       } else {
-        console.log('⚠️ [useAcceptBooking] Email disabled')
       }
     },
     onError: (error: Error) => {
@@ -116,13 +108,13 @@ export const useRejectBooking = () => {
 
   return useMutation({
     mutationFn: async (input: RejectBookingInput) => {
-      const { data, error } = await supabase
-        .from('booking_requests')
+      const { data, error } = await (supabase
+        .from('booking_requests') as any)
         .update({
           status: 'rejected',
           rejection_reason: input.rejectionReason || null,
           updated_at: new Date().toISOString(),
-        })
+        } as any)
         .eq('id', input.bookingId)
         .select()
         .single()
@@ -142,7 +134,6 @@ export const useRejectBooking = () => {
         queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'], refetchType: 'all' }),
         queryClient.invalidateQueries({ queryKey: ['bookings', 'stats'], refetchType: 'all' }),
       ])
-      console.log('✅ [useRejectBooking] All bookings queries invalidated - calendar should refresh automatically')
       
       // Send email notification
       if (areEmailNotificationsEnabled()) {
@@ -162,8 +153,6 @@ export const useUpdateBooking = () => {
 
   return useMutation({
     mutationFn: async (input: UpdateBookingInput) => {
-      console.log('🔵 [useUpdateBooking] Updating booking:', input.bookingId)
-      console.log('🔵 [useUpdateBooking] Data:', input)
       
       const updateData: any = {
         updated_at: new Date().toISOString(),
@@ -229,27 +218,22 @@ export const useUpdateBooking = () => {
         updateData.placement = input.placement || null
       }
 
-      console.log('🔵 [useUpdateBooking] Update payload:', updateData)
 
-      const { data, error } = await supabase
-        .from('booking_requests')
-        .update(updateData)
+      const { data, error } = await (supabase
+        .from('booking_requests') as any)
+        .update(updateData as any)
         .eq('id', input.bookingId)
         .select()
         .single()
-
-      console.log('🔵 [useUpdateBooking] Supabase response:', { data, error })
 
       if (error) {
         console.error('❌ [useUpdateBooking] Error:', error)
         throw new Error(handleSupabaseError(error))
       }
 
-      console.log('✅ [useUpdateBooking] Booking updated successfully:', data)
       return data as BookingRequest
     },
     onSuccess: async (data) => {
-      console.log('✅ [useUpdateBooking] onSuccess triggered:', data)
       
       // Aggiorna direttamente la cache con i dati aggiornati per tutte le query che potrebbero contenere questa prenotazione
       // Usa un approccio sicuro che gestisce diversi formati di dati nella cache
@@ -298,7 +282,6 @@ export const useUpdateBooking = () => {
       await queryClient.invalidateQueries({ queryKey: ['bookings'] })
       await queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'] })
       await queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'] })
-      console.log('✅ [useUpdateBooking] Cache updated and queries invalidated')
       toast.success('Prenotazione aggiornata con successo!')
     },
     onError: (error: Error) => {
@@ -314,14 +297,13 @@ export const useRestoreBooking = () => {
 
   return useMutation({
     mutationFn: async (bookingId: string) => {
-      console.log('🔵 [useRestoreBooking] Restoring booking:', bookingId)
 
-      const { data, error } = await supabase
-        .from('booking_requests')
+      const { data, error } = await (supabase
+        .from('booking_requests') as any)
         .update({
           status: 'accepted',
           updated_at: new Date().toISOString(),
-        })
+        } as any)
         .eq('id', bookingId)
         .select()
         .single()
@@ -331,7 +313,6 @@ export const useRestoreBooking = () => {
         throw new Error(handleSupabaseError(error))
       }
 
-      console.log('✅ [useRestoreBooking] Booking restored:', data)
       return data as BookingRequest
     },
     onSuccess: async () => {
@@ -339,7 +320,6 @@ export const useRestoreBooking = () => {
       await queryClient.invalidateQueries({ queryKey: ['bookings'] })
       await queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'] })
       await queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'] })
-      console.log('✅ [useRestoreBooking] All bookings queries invalidated')
       toast.success('Prenotazione reinserita con successo!')
     },
     onError: (error: Error) => {
@@ -354,16 +334,15 @@ export const useCancelBooking = () => {
 
   return useMutation({
     mutationFn: async ({ bookingId, cancellationReason }: { bookingId: string; cancellationReason?: string }) => {
-      console.log('🔵 [useCancelBooking] Cancelling booking:', bookingId)
       
-      const { data, error } = await supabase
-        .from('booking_requests')
+      const { data, error } = await (supabase
+        .from('booking_requests') as any)
         .update({
           status: 'deleted',
           cancellation_reason: cancellationReason || null,
           cancelled_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        })
+        } as any)
         .eq('id', bookingId)
         .select()
         .single()
@@ -373,19 +352,14 @@ export const useCancelBooking = () => {
         throw new Error(handleSupabaseError(error))
       }
 
-      console.log('✅ [useCancelBooking] Booking cancelled:', data)
       return data as BookingRequest
     },
-    onSuccess: async (booking: BookingRequest) => {
+    onSuccess: async () => {
       // Invalida tutte le queries per refresh automatico completo
       await queryClient.invalidateQueries({ queryKey: ['bookings'] })
       await queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'] })
       await queryClient.invalidateQueries({ queryKey: ['bookings', 'accepted'] })
-      console.log('✅ [useCancelBooking] All bookings queries invalidated')
       toast.success('Prenotazione cancellata con successo!')
-
-      // Email notification disabled for cancellation
-      // No email will be sent when a booking is cancelled
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Errore nella cancellazione della prenotazione')

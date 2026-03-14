@@ -149,7 +149,6 @@ export const SettingsTab: React.FC = () => {
             variant="solid"
             size="lg"
             onClick={() => {
-              console.log('🔵 [SettingsTab] Clicked View Email Logs, opening modal')
               setShowEmailLogs(true)
             }}
             className="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg hover:scale-105 transition-all"

@@ -15,13 +15,9 @@ export const getPDFAttachment = (): PDFAttachment | null => {
     const pdfBase64 = import.meta.env.VITE_MENU_PDF_BASE64
     
     if (!pdfBase64) {
-      console.warn('[PDF] No PDF configured - skipping attachment')
       return null
     }
 
-    console.log('[PDF] PDF attachment loaded successfully')
-    console.log('[PDF] PDF size:', pdfBase64.length, 'chars')
-    console.log('[PDF] First 50 chars:', pdfBase64.substring(0, 50))
     
     return {
       filename: 'Menu_Regolamento_Al_Ritrovo.pdf',

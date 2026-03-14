@@ -119,9 +119,6 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
-    console.log('🔵 [AcceptModal] handleSubmit called')
-    console.log('🔵 [AcceptModal] formData:', formData)
-    console.log('🔵 [AcceptModal] booking:', booking)
     
     if (!validate() || !booking) {
       console.error('❌ [AcceptModal] Validation failed or no booking')
@@ -130,7 +127,6 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
 
     // Check capacity before submitting - show modal if capacity exceeded
     if (!capacityCheck.isAvailable && capacityCheck.exceededSlots && capacityCheck.exceededSlots.length > 0) {
-      console.log('⚠️ [AcceptModal] Capacity exceeded, showing warning modal')
       setShowCapacityWarning(true)
       return
     }
@@ -142,7 +138,6 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
       return
     }
     
-    console.log('✅ [AcceptModal] Validation passed')
     confirmBooking()
   }
 
@@ -151,20 +146,13 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
     const confirmedStart = createBookingDateTime(formData.date, formData.startTime, true)
     const confirmedEnd = createBookingDateTime(formData.date, formData.endTime, false, formData.startTime)
     
-    console.log('🔵 [AcceptModal] Submitting with:', { 
-      confirmedStart, 
-      confirmedEnd, 
-      numGuests: formData.numGuests 
-    })
 
-    console.log('🔵 [AcceptModal] Calling onConfirm callback...')
     onConfirm({
       confirmedStart,
       confirmedEnd,
       numGuests: formData.numGuests,
       desiredTime: formData.startTime,
     })
-    console.log('✅ [AcceptModal] onConfirm called successfully')
   }
 
   if (!booking) return null

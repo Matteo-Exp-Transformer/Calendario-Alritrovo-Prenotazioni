@@ -13,7 +13,7 @@ import { getPresetMenu, type PresetMenuType } from '../constants/presetMenus'
 import { useAcceptedBookings } from '../hooks/useBookingQueries'
 import { useCapacityCheck } from '../hooks/useCapacityCheck'
 import { CapacityWarningModal } from './CapacityWarningModal'
-import { applyCoverCharge } from '../utils/menuPricing'
+
 
 interface AdminBookingFormProps {
   onSubmit?: () => void
@@ -92,11 +92,11 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
       const value = parseInt(inputValue, 10)
       if (!isNaN(value) && value >= 1) {
         const tiramisuTotal = formData.menu_selection?.tiramisu_total || 0
-        const perPersonWithCover = formData.menu_total_per_person || 0
+        const totalPerPerson = formData.menu_total_per_person || 0
         const newFormData = {
           ...formData,
           num_guests: value,
-          menu_total_booking: perPersonWithCover * value + tiramisuTotal
+          menu_total_booking: totalPerPerson * value + tiramisuTotal
         }
         setFormData(newFormData)
         setErrors({ ...errors, num_guests: '' })
@@ -195,7 +195,6 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
         
         // Log per debug Caraffe/Drink
         if (matches && (normalizeName(item.name).includes('caraffe') || normalizeName(item.name).includes('drink'))) {
-          console.log('✅ [AdminBookingForm] Trovato Caraffe/Drink:', item.name, 'match con preset:', presetType)
         }
         
         return matches
@@ -212,17 +211,12 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
         }
       })
 
-    console.log('🔵 [AdminBookingForm] Preset selezionato:', presetType)
-    console.log('🔵 [AdminBookingForm] Items nel preset:', preset.itemNames)
-    console.log('🔵 [AdminBookingForm] Items trovati e selezionati:', selectedItems.map(i => `${i.name} (${i.id})`))
 
     // Calcola totale (solo somma prezzi schede, nessun surcharge)
     const totalPerPerson = selectedItems
       .filter(item => !item.name.toLowerCase().includes('tiramis'))
       .reduce((sum, item) => sum + item.price, 0)
     const numGuests = formData.num_guests || 0
-    const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
-
     const tiramisuSelection = selectedItems.find((item) => item.name.toLowerCase().includes('tiramis'))
     const tiramisuUnitPrice = tiramisuSelection?.price || 0
     const tiramisuKg = tiramisuSelection?.quantity || 0
@@ -236,8 +230,8 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
         tiramisu_total: tiramisuTotal,
         tiramisu_kg: tiramisuKg
       },
-      menu_total_per_person: perPersonWithCover,
-      menu_total_booking: perPersonWithCover * numGuests + tiramisuTotal
+      menu_total_per_person: totalPerPerson,
+      menu_total_booking: totalPerPerson * numGuests + tiramisuTotal
     })
   }
 
@@ -332,16 +326,9 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
 
     // Check capacity before submitting - show modal if capacity exceeded
     if (!capacityCheck.isAvailable) {
-      console.log('🔵 [AdminBookingForm] Capacity check failed:', {
-        isAvailable: capacityCheck.isAvailable,
-        exceededSlots: capacityCheck.exceededSlots,
-        errorMessage: capacityCheck.errorMessage,
-        slotsStatus: capacityCheck.slotsStatus
-      })
       
       // Check if we have exceeded slots info
       if (capacityCheck.exceededSlots && capacityCheck.exceededSlots.length > 0) {
-        console.log('⚠️ [AdminBookingForm] Opening capacity warning modal with exceeded slots')
         setShowCapacityWarning(true)
         return
       }
@@ -353,7 +340,6 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
       })
       
       if (affectedSlots.length > 0) {
-        console.log('⚠️ [AdminBookingForm] Opening capacity warning modal (calculated from slotsStatus)')
         setShowCapacityWarning(true)
         return
       }
@@ -397,7 +383,6 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
         
         // Invalidate and refetch all booking-related queries
         // This will refresh the calendar automatically
-        console.log('🔄 [AdminBookingForm] Invalidating booking queries to refresh calendar...')
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ['bookings'], refetchType: 'all' }),
           queryClient.invalidateQueries({ queryKey: ['bookings', 'pending'], refetchType: 'all' }),
@@ -405,7 +390,6 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
           queryClient.invalidateQueries({ queryKey: ['bookings', 'stats'], refetchType: 'all' }),
           queryClient.invalidateQueries({ queryKey: ['bookings', 'all'], refetchType: 'all' }),
         ])
-        console.log('✅ [AdminBookingForm] Booking queries invalidated - calendar should refresh automatically')
         
         onSubmit?.()
       },
@@ -670,7 +654,6 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
             onPresetMenuChange={handlePresetMenuChange}
             onMenuChange={({ items, totalPerPerson, tiramisuTotal, tiramisuKg }) => {
               const numGuests = formData.num_guests || 0
-              const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
               // Mantieni preset_menu se gli items corrispondono ancora al preset
               const currentPreset = selectedPreset
               let updatedPreset: PresetMenuType = currentPreset
@@ -699,8 +682,8 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
                   tiramisu_total: tiramisuTotal,
                   tiramisu_kg: tiramisuKg
                 },
-                menu_total_per_person: perPersonWithCover,
-                menu_total_booking: perPersonWithCover * numGuests + tiramisuTotal
+                menu_total_per_person: totalPerPerson,
+                menu_total_booking: totalPerPerson * numGuests + tiramisuTotal
               })
               setErrors({ ...errors, menu: '' })
             }}
@@ -786,14 +769,12 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
         return null
       }
       
-      console.log('🔵 [AdminBookingForm] Rendering capacity warning modal, showCapacityWarning:', showCapacityWarning)
       
       // Get exceeded slot info from capacityCheck or calculate it
       let exceededSlot = null
       
       if (capacityCheck.exceededSlots && capacityCheck.exceededSlots.length > 0) {
         exceededSlot = capacityCheck.exceededSlots[0]
-        console.log('✅ [AdminBookingForm] Using exceededSlots from capacityCheck:', exceededSlot)
       } else if (!capacityCheck.isAvailable && capacityCheck.slotsStatus) {
         // Calculate from slotsStatus as fallback
         const affectedSlot = capacityCheck.slotsStatus.find(slot => {
@@ -812,36 +793,25 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
             totalOccupied,
             capacity: affectedSlot.capacity
           }
-          console.log('✅ [AdminBookingForm] Calculated exceededSlot from slotsStatus:', exceededSlot)
         }
       }
       
       if (!exceededSlot) {
-        console.warn('⚠️ [AdminBookingForm] Cannot show capacity warning - no exceeded slot info', {
-          isAvailable: capacityCheck.isAvailable,
-          exceededSlots: capacityCheck.exceededSlots,
-          slotsStatus: capacityCheck.slotsStatus,
-          numGuests: formData.num_guests
-        })
         return null
       }
       
-      console.log('✅ [AdminBookingForm] Rendering CapacityWarningModal with:', exceededSlot)
       
       return (
         <CapacityWarningModal
           isOpen={showCapacityWarning}
           onClose={() => {
-            console.log('🔵 [AdminBookingForm] Closing capacity warning modal')
             setShowCapacityWarning(false)
           }}
           onConfirm={() => {
-            console.log('✅ [AdminBookingForm] User confirmed to proceed despite capacity warning')
             setShowCapacityWarning(false)
             createBooking()
           }}
           onCancel={() => {
-            console.log('❌ [AdminBookingForm] User cancelled capacity warning')
             setShowCapacityWarning(false)
           }}
           exceededBy={exceededSlot.exceededBy}

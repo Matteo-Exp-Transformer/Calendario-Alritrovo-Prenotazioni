@@ -1,4 +1,3 @@
-// @ts-nocheck - Supabase auto-generated types
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase, handleSupabaseError } from '@/lib/supabase'
 import type { MenuItem, MenuItemInput } from '@/types/menu'
@@ -9,8 +8,8 @@ export const useMenuItems = () => {
   return useQuery({
     queryKey: ['menu-items'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('menu_items')
+      const { data, error } = await (supabase
+        .from('menu_items') as any)
         .select('*')
         .order('category', { ascending: true })
         .order('sort_order', { ascending: true })
@@ -29,8 +28,8 @@ export const useMenuItemsByCategory = (category?: string) => {
   return useQuery({
     queryKey: ['menu-items', category],
     queryFn: async () => {
-      let query = supabase
-        .from('menu_items')
+      let query = (supabase
+        .from('menu_items') as any)
         .select('*')
         .order('sort_order', { ascending: true })
 
@@ -56,8 +55,8 @@ export const useCreateMenuItem = () => {
 
   return useMutation({
     mutationFn: async (item: MenuItemInput) => {
-      const { data, error } = await supabase
-        .from('menu_items')
+      const { data, error } = await ((supabase
+        .from('menu_items') as any) as any)
         .insert({
           name: item.name,
           category: item.category,
@@ -90,8 +89,8 @@ export const useUpdateMenuItem = () => {
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<MenuItem> & { id: string }) => {
-      const { data, error } = await supabase
-        .from('menu_items')
+      const { data, error } = await ((supabase
+        .from('menu_items') as any) as any)
         .update({
           ...updates,
           updated_at: new Date().toISOString()
@@ -122,8 +121,8 @@ export const useDeleteMenuItem = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('menu_items')
+      const { error } = await (supabase
+        .from('menu_items') as any)
         .delete()
         .eq('id', id)
 

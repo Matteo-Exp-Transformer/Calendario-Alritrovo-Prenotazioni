@@ -1,4 +1,3 @@
-// @ts-nocheck - Supabase auto-generated types are incomplete
 import { useMutation } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { BookingRequest, BookingRequestInput } from '@/types/booking'
@@ -9,8 +8,6 @@ import { createBookingDateTime, calculateEndTimeFromStart } from '../utils/dateU
 export const useCreateAdminBooking = () => {
   return useMutation({
     mutationFn: async (data: BookingRequestInput) => {
-      console.log('🔵 [useCreateAdminBooking] Starting mutation...')
-      console.log('🔵 [useCreateAdminBooking] Input data:', data)
       
       // Normalizza desired_time a formato HH:MM (rimuove secondi se presenti)
       const normalizedTime = data.desired_time 
@@ -46,24 +43,20 @@ export const useCreateAdminBooking = () => {
         confirmed_end: confirmedEnd
       }
 
-      console.log('🔵 [useCreateAdminBooking] Insert data:', insertData)
-      console.log('🔵 [useCreateAdminBooking] Calling Supabase insert...')
 
       // Use authenticated supabase client (admin only)
-      const { data: result, error } = await supabase
-        .from('booking_requests')
-        .insert(insertData)
+      const { data: result, error } = await (supabase
+        .from('booking_requests') as any)
+        .insert(insertData as any)
         .select()
         .single()
 
-      console.log('🔵 [useCreateAdminBooking] Supabase response:', { result, error })
 
       if (error) {
         console.error('❌ [useCreateAdminBooking] Error:', error)
         throw new Error(error.message)
       }
 
-      console.log('✅ [useCreateAdminBooking] Success! Result:', result)
       return result as BookingRequest
     },
     onError: (error: Error) => {

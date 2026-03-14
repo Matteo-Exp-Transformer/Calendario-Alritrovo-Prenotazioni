@@ -22,15 +22,9 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
   // Reset form when modal closes
   useEffect(() => {
     if (isOpen) {
-      console.log('✅ [RejectModal] Modal opened!', {
-        isOpen,
-        hasBooking: !!booking,
-        bookingId: booking?.id
-      })
       document.body.style.overflow = 'hidden'
     } else {
       setRejectionReason('')
-      console.log('🔵 [RejectModal] Modal closed, resetting form')
       document.body.style.overflow = 'unset'
     }
 
@@ -56,8 +50,6 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('🔵 [RejectModal] handleSubmit called')
-    console.log('🔵 [RejectModal] rejectionReason:', rejectionReason)
     onConfirm(rejectionReason)
   }
 
@@ -65,7 +57,6 @@ export const RejectBookingModal: React.FC<RejectBookingModalProps> = ({
     return null
   }
 
-  console.log('✅ [RejectModal] Rendering modal', { isOpen, bookingId: booking.id })
 
   return (
     <div 
