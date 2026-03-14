@@ -12,6 +12,7 @@ interface CapacityWarningModalProps {
   slotName: string
   totalOccupied: number
   capacity: number
+  variant?: 'new_booking' | 'edit_booking'
 }
 
 export const CapacityWarningModal: React.FC<CapacityWarningModalProps> = ({
@@ -23,6 +24,7 @@ export const CapacityWarningModal: React.FC<CapacityWarningModalProps> = ({
   slotName,
   totalOccupied,
   capacity,
+  variant = 'new_booking',
 }) => {
   useEffect(() => {
     if (isOpen) {
@@ -150,7 +152,9 @@ export const CapacityWarningModal: React.FC<CapacityWarningModalProps> = ({
               <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div className="flex-1 min-w-0">
                 <p className="text-base font-semibold text-red-800 mb-2">
-                  La prenotazione supera la capienza massima disponibile
+                  {variant === 'edit_booking'
+                    ? 'Stai modificando una prenotazione: il numero di posti richiesti supera la capienza del locale (overbooking). Puoi salvare comunque.'
+                    : 'La prenotazione supera la capienza massima disponibile'}
                 </p>
                 <div className="space-y-1 text-sm text-red-700">
                   <p>
