@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react'
 import { supabase, handleSupabaseError } from '@/lib/supabase'
-import type { AdminRole } from '@/types/booking'
 import { useNavigate } from 'react-router-dom'
 
 interface AdminAuthUser {
   id: string
   email: string
   name?: string
-  role: AdminRole
 }
 
 interface UseAdminAuthReturn {
@@ -45,12 +43,23 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
         return
       }
 
-      // Set user from Supabase Auth session (simplified approach)
+      // Verify user exists in admin_users table
+      const { data: adminUser, error: adminError } = await (supabase
+        .from('admin_users') as any)
+        .select('name')
+        .eq('email', session.user.email)
+        .single()
+
+      if (adminError || !adminUser) {
+        setUser(null)
+        setIsLoading(false)
+        return
+      }
+
       setUser({
         id: session.user.id,
         email: session.user.email,
-        name: undefined,
-        role: 'admin' as AdminRole
+        name: (adminUser as any).name || undefined
       })
 
     } catch (error) {
@@ -85,15 +94,25 @@ export const useAdminAuth = (): UseAdminAuthReturn => {
         }
       }
 
-      // 2. For now, just set user from Supabase Auth (simplified approach)
-      // TODO: In production, verify user exists in admin_users table
-      
-      // Set user state from Supabase Auth user
+      // Verify user exists in admin_users table
+      const { data: adminUser, error: adminError } = await (supabase
+        .from('admin_users') as any)
+        .select('name')
+        .eq('email', authData.user.email || '')
+        .single()
+
+      if (adminError || !adminUser) {
+        await supabase.auth.signOut()
+        return {
+          success: false,
+          error: 'Utente non autorizzato'
+        }
+      }
+
       setUser({
         id: authData.user.id,
         email: authData.user.email || '',
-        name: undefined,
-        role: 'admin' as AdminRole
+        name: (adminUser as any).name || undefined
       })
 
       return { success: true }

@@ -14,7 +14,8 @@ import { DietaryTab } from './DietaryTab'
 import type { SelectedMenuItem } from '@/types/menu'
 import { getPresetMenu, type PresetMenuType } from '../constants/presetMenus'
 import { useMenuItems } from '../hooks/useMenuItems'
-import { applyCoverCharge } from '../utils/menuPricing'
+import { CapacityWarningModal } from './CapacityWarningModal'
+
 
 interface BookingDetailsModalProps {
   isOpen: boolean
@@ -45,6 +46,13 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   const [cancellationReason, setCancellationReason] = useState('')
   const [endTimeManuallyModified, setEndTimeManuallyModified] = useState(false)
   const [mouseDownTarget, setMouseDownTarget] = useState<EventTarget | null>(null)
+  const [showOverbookingConfirm, setShowOverbookingConfirm] = useState(false)
+  const [overbookingSlotInfo, setOverbookingSlotInfo] = useState<{
+    slotName: string
+    totalOccupied: number
+    capacity: number
+    exceededBy: number
+  } | null>(null)
 
   // Ref to track previous booking ID to prevent unnecessary recalculations
   const previousBookingIdRef = React.useRef<string>(booking.id)
@@ -304,6 +312,76 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     return true
   }
 
+  // Returns first exceeded slot info for CapacityWarningModal when editing leads to overbooking
+  const getExceededSlotInfo = (
+    date: string,
+    startTime: string,
+    endTime: string,
+    numGuests: number
+  ): { slotName: string; totalOccupied: number; capacity: number; exceededBy: number } | null => {
+    const dayBookings = acceptedBookings.filter((b) => {
+      if (b.id === booking.id) return false
+      if (!b.confirmed_start) return false
+      const bookingDate = extractDateFromISO(b.confirmed_start)
+      return bookingDate === date
+    })
+
+    const confirmedStart = `${date}T${startTime}:00`
+    const confirmedEnd = `${date}T${endTime}:00`
+    const newBookingSlots = getSlotsOccupiedByBooking(confirmedStart, confirmedEnd)
+
+    const morning = { capacity: CAPACITY_CONFIG.MORNING_CAPACITY, occupied: 0 }
+    const afternoon = { capacity: CAPACITY_CONFIG.AFTERNOON_CAPACITY, occupied: 0 }
+    const evening = { capacity: CAPACITY_CONFIG.EVENING_CAPACITY, occupied: 0 }
+
+    for (const existingBooking of dayBookings) {
+      if (!existingBooking.confirmed_start || !existingBooking.confirmed_end) continue
+
+      const slots = getSlotsOccupiedByBooking(existingBooking.confirmed_start, existingBooking.confirmed_end)
+      const guests = existingBooking.num_guests || 0
+
+      for (const slot of slots) {
+        if (slot === 'morning') morning.occupied += guests
+        else if (slot === 'afternoon') afternoon.occupied += guests
+        else if (slot === 'evening') evening.occupied += guests
+      }
+    }
+
+    for (const slot of newBookingSlots) {
+      let occupied: number
+      let capacity: number
+      let slotName: string
+
+      if (slot === 'morning') {
+        occupied = morning.occupied
+        capacity = morning.capacity
+        slotName = 'mattina'
+      } else if (slot === 'afternoon') {
+        occupied = afternoon.occupied
+        capacity = afternoon.capacity
+        slotName = 'pomeriggio'
+      } else if (slot === 'evening') {
+        occupied = evening.occupied
+        capacity = evening.capacity
+        slotName = 'sera'
+      } else {
+        continue
+      }
+
+      const totalOccupied = occupied + numGuests
+      if (totalOccupied > capacity) {
+        return {
+          slotName,
+          totalOccupied,
+          capacity,
+          exceededBy: totalOccupied - capacity
+        }
+      }
+    }
+
+    return null
+  }
+
   const handleFormDataChange = (field: string, value: any) => {
     if (field === 'startTime') {
       // Quando cambia startTime, ricalcola automaticamente endTime se non è stato modificato manualmente
@@ -480,6 +558,55 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
     }))
   }
 
+  const performSave = () => {
+    const confirmedStart = createBookingDateTime(formData.date, formData.startTime, true)
+    const confirmedEnd = createBookingDateTime(formData.date, formData.endTime, false, formData.startTime)
+
+    let menuTotalPerPerson = undefined
+    let menuTotalBooking = undefined
+    if (formData.booking_type === 'rinfresco_laurea' && formData.menu_selection) {
+      const baseTotal = formData.menu_selection.items
+        .filter((item: any) => !item.name.toLowerCase().includes('tiramis'))
+        .reduce((sum: number, item: any) => sum + item.price, 0)
+      const tiramisuTotal = formData.menu_selection.tiramisu_total || 0
+      menuTotalPerPerson = baseTotal
+      menuTotalBooking = baseTotal * formData.numGuests + tiramisuTotal
+    }
+
+    updateMutation.mutate(
+      {
+        bookingId: booking.id,
+        booking_type: formData.booking_type,
+        client_name: formData.client_name,
+        client_email: formData.client_email?.trim() === '' ? null : (formData.client_email?.trim() || null),
+        client_phone: formData.client_phone?.trim() === '' ? null : (formData.client_phone || null),
+        confirmedStart,
+        confirmedEnd,
+        numGuests: formData.numGuests,
+        specialRequests: formData.specialRequests?.trim() === '' ? null : (formData.specialRequests || null),
+        desiredTime: formData.startTime,
+        menu_selection: formData.booking_type === 'rinfresco_laurea' ? formData.menu_selection : undefined,
+        menu_total_per_person: menuTotalPerPerson,
+        menu_total_booking: menuTotalBooking,
+        dietary_restrictions: formData.booking_type === 'rinfresco_laurea' ? formData.dietary_restrictions : undefined,
+        preset_menu: formData.booking_type === 'rinfresco_laurea' ? (formData.preset_menu || undefined) : undefined,
+        placement: formData.placement?.trim() === '' ? null : (formData.placement || null)
+      },
+      {
+        onSuccess: () => {
+          setIsEditMode(false)
+          setEndTimeManuallyModified(false)
+          setShowOverbookingConfirm(false)
+          setOverbookingSlotInfo(null)
+          toast.success('Prenotazione modificata con successo!')
+        },
+        onError: (error) => {
+          console.error('❌ [BookingDetailsModal] Save failed:', error)
+        },
+      }
+    )
+  }
+
   const handleSave = () => {
     if (!booking.confirmed_start) return
 
@@ -489,7 +616,6 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       return
     }
 
-    // Email è opzionale, ma se inserita deve essere valida
     if (formData.client_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.client_email)) {
       toast.error('Inserisci un indirizzo email valido')
       return
@@ -500,65 +626,20 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
       return
     }
 
-    const confirmedStart = createBookingDateTime(formData.date, formData.startTime, true)
-    const confirmedEnd = createBookingDateTime(formData.date, formData.endTime, false, formData.startTime)
-
-    // Check capacity
     const hasCapacity = checkCapacity(formData.date, formData.startTime, formData.endTime, formData.numGuests)
-    
+
     if (!hasCapacity) {
+      const exceededInfo = getExceededSlotInfo(formData.date, formData.startTime, formData.endTime, formData.numGuests)
+      if (exceededInfo) {
+        setOverbookingSlotInfo(exceededInfo)
+        setShowOverbookingConfirm(true)
+        return
+      }
       toast.error(`❌ Posti non disponibili! La modifica richiede ${formData.numGuests} posti ma non ci sono abbastanza posti liberi nella fascia oraria selezionata.`)
       return
     }
 
-    // Calculate menu totals if rinfresco_laurea
-    let menuTotalPerPerson = undefined
-    let menuTotalBooking = undefined
-    if (formData.booking_type === 'rinfresco_laurea' && formData.menu_selection) {
-      const baseTotal = formData.menu_selection.items
-        .filter((item: any) => !item.name.toLowerCase().includes('tiramis'))
-        .reduce((sum: number, item: any) => sum + item.price, 0)
-      const tiramisuTotal = formData.menu_selection.tiramisu_total || 0
-      const perPersonWithCover = applyCoverCharge(baseTotal, formData.booking_type)
-      menuTotalPerPerson = perPersonWithCover
-      menuTotalBooking = perPersonWithCover * formData.numGuests + tiramisuTotal
-    }
-
-    updateMutation.mutate(
-      {
-        bookingId: booking.id,
-        booking_type: formData.booking_type,
-        client_name: formData.client_name,
-        // Email: se vuota, salviamo null (per cancellarla)
-        // Se inserita, deve essere valida (già validata sopra)
-        client_email: formData.client_email?.trim() === '' ? null : (formData.client_email?.trim() || null),
-        // Phone: se vuoto, salviamo null (per cancellarlo)
-        client_phone: formData.client_phone?.trim() === '' ? null : (formData.client_phone || null),
-        confirmedStart,
-        confirmedEnd,
-        numGuests: formData.numGuests,
-        // Special requests: se vuoto, salviamo null
-        specialRequests: formData.specialRequests?.trim() === '' ? null : (formData.specialRequests || null),
-        desiredTime: formData.startTime,
-        menu_selection: formData.booking_type === 'rinfresco_laurea' ? formData.menu_selection : undefined,
-        menu_total_per_person: menuTotalPerPerson,
-        menu_total_booking: menuTotalBooking,
-        dietary_restrictions: formData.booking_type === 'rinfresco_laurea' ? formData.dietary_restrictions : undefined,
-        preset_menu: formData.booking_type === 'rinfresco_laurea' ? (formData.preset_menu || undefined) : undefined,
-        // Placement: se vuoto, salviamo null
-        placement: formData.placement?.trim() === '' ? null : (formData.placement || null)
-      },
-      {
-        onSuccess: () => {
-          setIsEditMode(false)
-          setEndTimeManuallyModified(false) // Reset flag quando si salva
-          toast.success('Prenotazione modificata con successo!')
-        },
-        onError: (error) => {
-          console.error('❌ [BookingDetailsModal] Save failed:', error)
-        },
-      }
-    )
+    performSave()
   }
 
   const handleCancelBooking = () => {
@@ -583,6 +664,29 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
   const modalContent = (
     <>
+      {overbookingSlotInfo && (
+        <CapacityWarningModal
+          isOpen={showOverbookingConfirm}
+          onClose={() => {
+            setShowOverbookingConfirm(false)
+            setOverbookingSlotInfo(null)
+          }}
+          onConfirm={() => {
+            performSave()
+            setShowOverbookingConfirm(false)
+            setOverbookingSlotInfo(null)
+          }}
+          onCancel={() => {
+            setShowOverbookingConfirm(false)
+            setOverbookingSlotInfo(null)
+          }}
+          exceededBy={overbookingSlotInfo.exceededBy}
+          slotName={overbookingSlotInfo.slotName}
+          totalOccupied={overbookingSlotInfo.totalOccupied}
+          capacity={overbookingSlotInfo.capacity}
+          variant="edit_booking"
+        />
+      )}
       {/* Main Modal */}
       <div
         style={{

@@ -29,7 +29,6 @@
   "include": ["src"],
   "exclude": [
     "node_modules",
-    "src/features/calendar/**/*",
     "**/__tests__/**/*",
     "**/*.test.ts",
     "**/*.spec.ts"

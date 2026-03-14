@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 import { extractDateFromISO, getAccurateStartTime, getAccurateEndTime } from '../utils/dateUtils'
 import { getBookingEventTypeLabel } from '../utils/eventTypeLabels'
-import { getMenuPriceDisplayFromBooking, applyCoverCharge } from '../utils/menuPricing'
+import { getMenuPriceDisplayFromBooking } from '../utils/menuPricing'
 
 interface BookingCalendarProps {
   bookings: BookingRequest[]
@@ -373,20 +373,18 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                       const baseTotal = booking.menu_selection.items
                         .filter((item) => !item.name.toLowerCase().includes('tiramis'))
                         .reduce((sum, item) => sum + (item.totalPrice || item.price), 0)
-                      const perPersonWithCover = applyCoverCharge(baseTotal, booking.booking_type)
                       const tiramisuTotal = booking.menu_selection.tiramisu_total || 0
-                      const totalBooking = perPersonWithCover * (booking.num_guests || 0) + tiramisuTotal
-                      const basePerPerson = baseTotal
+                      const totalBooking = baseTotal * (booking.num_guests || 0) + tiramisuTotal
 
                       menuPriceDisplay = {
-                        prezzoMenu: perPersonWithCover,
-                        prezzoMenuLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
+                        prezzoMenu: baseTotal,
+                        prezzoMenuLabel: `€${baseTotal.toFixed(2)}/persona`,
                         breakdownLabel: undefined,
                         prezzoTotale: totalBooking,
                         prezzoTotaleLabel: `€${totalBooking.toFixed(2)}`,
-                        totalLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
-                        perPersonWithCover,
-                        basePerPerson
+                        totalLabel: `€${baseTotal.toFixed(2)}/persona`,
+                        totalPerPerson: baseTotal,
+                        basePerPerson: baseTotal
                       }
                     }
                     return (
@@ -587,20 +585,18 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                       const baseTotal = booking.menu_selection.items
                         .filter((item) => !item.name.toLowerCase().includes('tiramis'))
                         .reduce((sum, item) => sum + (item.totalPrice || item.price), 0)
-                      const perPersonWithCover = applyCoverCharge(baseTotal, booking.booking_type)
                       const tiramisuTotal = booking.menu_selection.tiramisu_total || 0
-                      const totalBooking = perPersonWithCover * (booking.num_guests || 0) + tiramisuTotal
-                      const basePerPerson = baseTotal
+                      const totalBooking = baseTotal * (booking.num_guests || 0) + tiramisuTotal
 
                       menuPriceDisplay = {
-                        prezzoMenu: perPersonWithCover,
-                        prezzoMenuLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
+                        prezzoMenu: baseTotal,
+                        prezzoMenuLabel: `€${baseTotal.toFixed(2)}/persona`,
                         breakdownLabel: undefined,
                         prezzoTotale: totalBooking,
                         prezzoTotaleLabel: `€${totalBooking.toFixed(2)}`,
-                        totalLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
-                        perPersonWithCover,
-                        basePerPerson
+                        totalLabel: `€${baseTotal.toFixed(2)}/persona`,
+                        totalPerPerson: baseTotal,
+                        basePerPerson: baseTotal
                       }
                     }
                     return (
@@ -800,20 +796,18 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({ bookings, init
                       const baseTotal = booking.menu_selection.items
                         .filter((item) => !item.name.toLowerCase().includes('tiramis'))
                         .reduce((sum, item) => sum + (item.totalPrice || item.price), 0)
-                      const perPersonWithCover = applyCoverCharge(baseTotal, booking.booking_type)
                       const tiramisuTotal = booking.menu_selection.tiramisu_total || 0
-                      const totalBooking = perPersonWithCover * (booking.num_guests || 0) + tiramisuTotal
-                      const basePerPerson = baseTotal
+                      const totalBooking = baseTotal * (booking.num_guests || 0) + tiramisuTotal
 
                       menuPriceDisplay = {
-                        prezzoMenu: perPersonWithCover,
-                        prezzoMenuLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
+                        prezzoMenu: baseTotal,
+                        prezzoMenuLabel: `€${baseTotal.toFixed(2)}/persona`,
                         breakdownLabel: undefined,
                         prezzoTotale: totalBooking,
                         prezzoTotaleLabel: `€${totalBooking.toFixed(2)}`,
-                        totalLabel: `€${perPersonWithCover.toFixed(2)}/persona`,
-                        perPersonWithCover,
-                        basePerPerson
+                        totalLabel: `€${baseTotal.toFixed(2)}/persona`,
+                        totalPerPerson: baseTotal,
+                        basePerPerson: baseTotal
                       }
                     }
                     return (

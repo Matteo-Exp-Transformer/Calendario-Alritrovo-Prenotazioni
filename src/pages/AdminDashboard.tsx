@@ -123,7 +123,7 @@ export const AdminDashboard: React.FC = () => {
                       <Shield className="w-2 h-2 text-yellow-900" />
                     </div>
                     <p className="text-[9px] font-semibold text-gray-600 uppercase">
-                      {user?.role === 'admin' ? 'Admin' : 'Staff'}
+                      Utente
                     </p>
                   </div>
                 </div>

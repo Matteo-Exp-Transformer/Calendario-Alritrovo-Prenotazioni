@@ -27,7 +27,6 @@ export const PendingRequestsTab: React.FC = () => {
     const seenIds = new Set<string>()
     return pendingBookings.filter((booking) => {
       if (seenIds.has(booking.id)) {
-        console.warn('⚠️ [PendingRequestsTab] Duplicate booking detected:', booking.id, booking.client_email)
         return false // Filtra duplicato
       }
       seenIds.add(booking.id)
@@ -106,7 +105,6 @@ export const PendingRequestsTab: React.FC = () => {
   }
 
   const handleAccept = (booking: BookingRequest) => {
-    console.log('🔵 [PendingRequestsTab] handleAccept called with:', booking)
 
     // ✅ VALIDAZIONE: desired_time deve essere presente
     if (!booking.desired_time || booking.desired_time.trim() === '') {
@@ -118,21 +116,17 @@ export const PendingRequestsTab: React.FC = () => {
     // Calcola i dati per l'accettazione usando la stessa logica del modale
     const date = booking.desired_date
     const startTime = booking.desired_time
-    console.log('🔵 [PendingRequestsTab] Using desired_time:', startTime)
     
     // Ensure time format is HH:mm (not HH:mm:ss)
     const startTimeFormatted = startTime.includes(':') 
       ? startTime.split(':').slice(0, 2).join(':') 
       : startTime
     const endTimeFormatted = calculateEndTimeFromStart(startTimeFormatted)
-    console.log(startTimeFormatted, endTimeFormatted);
     
     // Create ISO strings handling midnight crossover
     const confirmedStart = createBookingDateTime(date, startTimeFormatted, true)
     const confirmedEnd = createBookingDateTime(date, endTimeFormatted, false, startTimeFormatted)
-    console.log(confirmedStart, confirmedEnd);
     // ✅ CHECK CAPACITY BEFORE ACCEPTING
-    console.log('🔵 [PendingRequestsTab] Checking capacity before accepting...')
     const hasCapacity = checkCapacity(booking, startTimeFormatted, endTimeFormatted)
     
     if (!hasCapacity) {
@@ -141,15 +135,8 @@ export const PendingRequestsTab: React.FC = () => {
       return
     }
     
-    console.log('✅ [PendingRequestsTab] Capacity check passed!')
     
-    console.log('🔵 [PendingRequestsTab] Submitting with:', {
-      confirmedStart,
-      confirmedEnd,
-      numGuests: booking.num_guests,
-    })
     
-    console.log('🔵 [PendingRequestsTab] Calling acceptMutation.mutate...')
     acceptMutation.mutate(
       {
         bookingId: booking.id,
@@ -160,11 +147,9 @@ export const PendingRequestsTab: React.FC = () => {
       },
       {
         onSuccess: async () => {
-          console.log('✅ [PendingRequestsTab] Accept mutation success')
           toast.success('Prenotazione accettata con successo!')
           // Forza il refetch delle richieste pending
           await refetch()
-          console.log('✅ [PendingRequestsTab] Pending bookings refetched')
         },
         onError: (error) => {
           console.error('❌ [PendingRequestsTab] Accept mutation error:', error)
@@ -176,18 +161,12 @@ export const PendingRequestsTab: React.FC = () => {
 
   // Apre il modal quando si clicca su "Rifiuta"
   const handleReject = (booking: BookingRequest) => {
-    console.log('🔵 [PendingRequestsTab] handleReject called with:', booking.id)
-    console.log('🔵 [PendingRequestsTab] Booking data:', booking)
     
     // Imposta entrambi gli stati contemporaneamente
     // React batching li applicherà insieme
     setSelectedBookingForReject(booking)
     setRejectModalOpen(true)
     
-    console.log('✅ [PendingRequestsTab] Modal state updated:', {
-      rejectModalOpen: true,
-      selectedBookingId: booking.id
-    })
   }
 
   // Conferma il rifiuto con il motivo inserito dall'admin
@@ -197,7 +176,6 @@ export const PendingRequestsTab: React.FC = () => {
       return
     }
 
-    console.log('🔵 [PendingRequestsTab] handleRejectConfirm called with reason:', rejectionReason)
     
     try {
       await rejectMutation.mutateAsync({
@@ -205,7 +183,6 @@ export const PendingRequestsTab: React.FC = () => {
         rejectionReason: rejectionReason || undefined,
       })
       
-      console.log('✅ [PendingRequestsTab] Reject mutation success')
       toast.success('Prenotazione rifiutata con successo!')
       
       // Chiudi il modal e resetta lo stato
@@ -214,7 +191,6 @@ export const PendingRequestsTab: React.FC = () => {
       
       // Forza il refetch delle richieste pending
       await refetch()
-      console.log('✅ [PendingRequestsTab] Pending bookings refetched')
     } catch (error) {
       console.error('❌ [PendingRequestsTab] Reject mutation error:', error)
       toast.error('Errore nel rifiuto della prenotazione')

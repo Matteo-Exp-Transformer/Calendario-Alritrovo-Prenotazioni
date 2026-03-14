@@ -14,34 +14,13 @@ import { isValidBookingDateTime, getDayOfWeek, formatHours } from '@/lib/busines
 import { toast } from 'react-toastify'
 import { getPresetMenu, type PresetMenuType } from '../constants/presetMenus'
 import { useMenuItems } from '../hooks/useMenuItems'
-import { applyCoverCharge } from '../utils/menuPricing'
+
 
 interface BookingRequestFormProps {
   onSubmit?: () => void
 }
 
-// Contatore globale per tracciare mount del componente (debug React StrictMode)
-let componentMountCount = 0
-let lastMountTime = 0
-
 export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit }) => {
-  // Traccia mount per debug
-  React.useEffect(() => {
-    componentMountCount++
-    const now = Date.now()
-    const timeSinceLastMount = now - lastMountTime
-    lastMountTime = now
-    
-    console.log(`🔄 [BookingForm] Component MOUNTED #${componentMountCount}`, {
-      timeSinceLastMount: timeSinceLastMount < 1000 ? `${timeSinceLastMount}ms (possibile StrictMode)` : 'normal',
-      timestamp: new Date().toISOString()
-    })
-    
-    return () => {
-      console.log(`🔄 [BookingForm] Component UNMOUNTED #${componentMountCount}`)
-    }
-  }, [])
-  
   // Helper function to get current date in YYYY-MM-DD format
   const getCurrentDate = (): string => {
     const now = new Date()
@@ -101,11 +80,6 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         
         if (lockAge < LOCK_TIMEOUT) {
           // Lock valido - BLOCCATO
-          console.warn('⚠️ [BookingForm] Lock già presente (acquired by another instance)', {
-            lockAge: `${lockAge}ms`,
-            remaining: `${LOCK_TIMEOUT - lockAge}ms`,
-            existingLock: existingLock.substring(0, 30) + '...'
-          })
           return null
         }
         // Lock scaduto, rimuovilo
@@ -133,10 +107,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       // Verifica doppia: controlla immediatamente dopo l'impostazione
       // Se due chiamate arrivano simultaneamente, solo una vedrà il proprio ID
       
-      console.log('✅ [BookingForm] Global lock ACQUISITO e VERIFICATO con ID:', lockId.substring(0, 30))
       return lockId
     } catch (error) {
-      console.warn('⚠️ [BookingForm] sessionStorage non disponibile:', error)
       return null
     }
   }
@@ -149,15 +121,9 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       // Rilascia solo se è il nostro lock (non quello di un'altra istanza)
       if (currentLock === lockId) {
         sessionStorage.removeItem(GLOBAL_LOCK_KEY)
-        console.log('✅ [BookingForm] Global lock rilasciato:', lockId)
       } else {
-        console.warn('⚠️ [BookingForm] Tentativo di rilasciare lock non nostro:', {
-          ourId: lockId,
-          currentLock
-        })
       }
     } catch (error) {
-      console.warn('⚠️ [BookingForm] Errore nel release lock:', error)
     }
   }
   
@@ -180,11 +146,11 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       const value = parseInt(inputValue, 10)
       if (!isNaN(value) && value >= 1 && value <= 110) {
         const tiramisuTotal = formData.menu_selection?.tiramisu_total || 0
-        const perPersonWithCover = formData.menu_total_per_person || 0
+        const totalPerPerson = formData.menu_total_per_person || 0
         const newFormData = {
           ...formData,
           num_guests: value,
-          menu_total_booking: perPersonWithCover * value + tiramisuTotal
+          menu_total_booking: totalPerPerson * value + tiramisuTotal
         }
         setFormData(newFormData)
         setErrors({ ...errors, num_guests: '' })
@@ -298,8 +264,6 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       .filter(item => !item.name.toLowerCase().includes('tiramis'))
       .reduce((sum, item) => sum + item.price, 0)
     const numGuests = formData.num_guests || 0
-    const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
-
     const tiramisuSelection = selectedItems.find((item) => item.name.toLowerCase().includes('tiramis'))
     const tiramisuUnitPrice = tiramisuSelection?.price || 0
     const tiramisuKg = tiramisuSelection?.quantity || 0
@@ -313,8 +277,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         tiramisu_total: tiramisuTotal,
         tiramisu_kg: tiramisuKg
       },
-      menu_total_per_person: perPersonWithCover,
-      menu_total_booking: perPersonWithCover * numGuests + tiramisuTotal
+      menu_total_per_person: totalPerPerson,
+      menu_total_booking: totalPerPerson * numGuests + tiramisuTotal
     })
   }
 
@@ -503,11 +467,9 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
       newErrors.privacyAccepted = 'È necessario accettare la Privacy Policy per inviare la richiesta'
       isValid = false
       if (!firstErrorKey) firstErrorKey = 'privacyAccepted'
-      console.log('❌ [BookingForm] Privacy non accettata, errore impostato:', newErrors.privacyAccepted)
     }
 
     setErrors(newErrors)
-    console.log('🔵 [BookingForm] Errors state dopo validazione:', newErrors)
 
     // If validation failed, show toast and scroll to first error
     if (!isValid) {
@@ -538,37 +500,30 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     // Questo è fondamentale per prevenire race conditions sincronizzate
     const lockId = acquireGlobalLock()
     if (!lockId) {
-      console.warn('❌ [BookingForm] Lock globale già acquisito, BLOCCATO immediatamente')
       return
     }
     
     // Salva lockId immediatamente nel ref
     ;(isSubmittingRef as any).currentLockId = lockId
     
-    console.log('🔵 [BookingForm] Submit click - Lock ID:', lockId)
-    console.log('🔵 [BookingForm] Form data:', formData)
-    console.log('🔵 [BookingForm] Privacy accepted:', privacyAccepted)
     
     // ✅ PROTEZIONE MULTI-LIVELLO CONTRO DOPPI SUBMIT
     // IMPORTANTE: Il lock globale è già acquisito, ora verifica gli altri controlli
     
     // 1. Controllo stato locale (protezione istanza componente - triggera re-render)
     if (isSubmitting) {
-      console.warn('⚠️ [BookingForm] Submit già in corso (state lock), rilasciando lock e ignorando')
       releaseGlobalLock(lockId)
       return
     }
     
     // 2. Controllo ref locale (backup - per casi edge)
     if (isSubmittingRef.current) {
-      console.warn('⚠️ [BookingForm] Submit già in corso (ref lock), rilasciando lock e ignorando')
       releaseGlobalLock(lockId)
       return
     }
     
     // 3. Controllo mutation state (protezione React Query)
     if (isPending) {
-      console.warn('⚠️ [BookingForm] Mutation già in corso (mutation state), rilasciando lock e ignorando')
       releaseGlobalLock(lockId)
       return
     }
@@ -590,20 +545,10 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
     isSubmittingRef.current = true
     setIsSubmitting(true) // Triggera re-render per disabilitare button immediatamente
     
-    console.log('✅ [BookingForm] Validation passed, calling mutate...')
-    console.log('🔵 [BookingForm] Lock state:', {
-      lockId,
-      globalLock: sessionStorage.getItem(GLOBAL_LOCK_KEY),
-      refLock: isSubmittingRef.current,
-      stateLock: isSubmitting,
-      isPending
-    })
     
     // Chiama mutate - il lock globale e la mutation lock prevengono doppi insert
     mutate(formData, {
       onSuccess: () => {
-        console.log('✅ [BookingForm] Mutation successful!')
-        console.log('🔵 [BookingForm] Setting showSuccessModal to true')
         
         // Reset form (keep default date and time)
         setFormData({
@@ -636,7 +581,6 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
         
         // Mostra la modal di conferma invece del toast
         setShowSuccessModal(true)
-        console.log('✅ [BookingForm] showSuccessModal set to true')
         onSubmit?.()
       },
       onError: (error) => {
@@ -944,7 +888,6 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
             onPresetMenuChange={handlePresetMenuChange}
             onMenuChange={({ items, totalPerPerson, tiramisuTotal, tiramisuKg }) => {
               const numGuests = formData.num_guests || 0
-              const perPersonWithCover = applyCoverCharge(totalPerPerson, formData.booking_type)
               // Mantieni preset_menu se gli items corrispondono ancora al preset
               const currentPreset = selectedPreset
               let updatedPreset: PresetMenuType = currentPreset
@@ -973,8 +916,8 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
                   tiramisu_total: tiramisuTotal,
                   tiramisu_kg: tiramisuKg
                 },
-                menu_total_per_person: perPersonWithCover,
-                menu_total_booking: perPersonWithCover * numGuests + tiramisuTotal
+                menu_total_per_person: totalPerPerson,
+                menu_total_booking: totalPerPerson * numGuests + tiramisuTotal
               })
               setErrors({ ...errors, menu: '' })
             }}
@@ -1129,7 +1072,6 @@ export const BookingRequestForm: React.FC<BookingRequestFormProps> = ({ onSubmit
           </p>
           <button
             onClick={() => {
-              console.log('🔴 [Modal] Closing via button')
               setShowSuccessModal(false)
               setTimeout(() => {
                 // Reindirizza al sito Wix di Al Ritrovo

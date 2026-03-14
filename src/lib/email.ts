@@ -26,9 +26,6 @@ interface EmailLog {
  */
 export const sendEmail = async (options: SendEmailOptions): Promise<{ success: boolean; error?: string }> => {
   try {
-    console.log('🔵 [sendEmail] Attempting to send via Supabase Edge Function...')
-    console.log('🔵 [sendEmail] To:', options.to)
-    console.log('🔵 [sendEmail] Subject:', options.subject)
 
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
     if (!supabaseUrl) {
@@ -36,7 +33,6 @@ export const sendEmail = async (options: SendEmailOptions): Promise<{ success: b
     }
 
     const edgeFunctionUrl = `${supabaseUrl}/functions/v1/send-email`
-    console.log('🔵 [sendEmail] Calling Edge Function:', edgeFunctionUrl)
 
     const payload = {
       to: options.to,
@@ -46,10 +42,6 @@ export const sendEmail = async (options: SendEmailOptions): Promise<{ success: b
       emailType: options.emailType || 'manual',
     }
 
-    console.log('🔵 [sendEmail] Payload being sent:', {
-      to: payload.to,
-      subject: payload.subject,
-    })
 
     // Call Supabase Edge Function for email sending
     const response = await fetch(edgeFunctionUrl, {
@@ -61,11 +53,9 @@ export const sendEmail = async (options: SendEmailOptions): Promise<{ success: b
       body: JSON.stringify(payload),
     })
 
-    console.log('🔵 [sendEmail] Edge Function response status:', response.status)
 
     const data = await response.json()
 
-    console.log('[Email] Edge Function response:', data)
 
     if (!response.ok) {
       console.error('[Email] Edge Function error:', data)
@@ -78,7 +68,6 @@ export const sendEmail = async (options: SendEmailOptions): Promise<{ success: b
       return { success: false, error: data.error }
     }
 
-    console.log('[Email] Email sent successfully via Edge Function, ID:', data.id)
     return { success: true }
   } catch (error) {
     console.error('[Email] Exception:', error)
@@ -91,7 +80,6 @@ export const sendEmail = async (options: SendEmailOptions): Promise<{ success: b
  */
 export const logEmailToDatabase = async (log: EmailLog): Promise<void> => {
   try {
-    console.log('🔵 [logEmailToDatabase] Using authenticated supabase client...')
     const { supabase } = await import('./supabase')
 
     const logData = {
@@ -103,14 +91,11 @@ export const logEmailToDatabase = async (log: EmailLog): Promise<void> => {
       error_message: log.error_message || null,
     }
 
-    console.log('🔵 [logEmailToDatabase] Inserting log:', logData)
 
-    const { data, error } = await supabase.from('email_logs').insert(logData as any).select()
+    const { error } = await supabase.from('email_logs').insert(logData as any)
 
     if (error) {
       console.error('❌ [logEmailToDatabase] Error:', error)
-    } else {
-      console.log('✅ [logEmailToDatabase] Log inserted successfully:', data)
     }
   } catch (error) {
     console.error('❌ [logEmailToDatabase] Exception:', error)
@@ -124,10 +109,6 @@ export const sendAndLogEmail = async (
   options: SendEmailOptions,
   emailType: string
 ): Promise<{ success: boolean; error?: string }> => {
-  console.log('🔵 [sendAndLogEmail] Starting email send...')
-  console.log('🔵 [sendAndLogEmail] To:', options.to)
-  console.log('🔵 [sendAndLogEmail] Type:', emailType)
-  console.log('🔵 [sendAndLogEmail] Booking ID:', options.bookingId)
 
   // For logging, if to is an array, join with comma or use first email
   const recipientEmail = Array.isArray(options.to) ? options.to.join(', ') : options.to
@@ -139,7 +120,6 @@ export const sendAndLogEmail = async (
     status: 'pending',
   }
 
-  console.log('🔵 [sendAndLogEmail] Calling sendEmail (Edge Function)...')
   const emailOptions = {
     to: options.to,
     subject: options.subject,
@@ -149,21 +129,17 @@ export const sendAndLogEmail = async (
   
   // Set emailType for Edge Function
   const result = await sendEmail({ ...emailOptions, emailType })
-  console.log('🔵 [sendAndLogEmail] Send result:', result)
 
   if (result.success) {
     log.status = 'sent'
     log.provider_response = { success: true }
-    console.log('✅ [sendAndLogEmail] Email sent successfully')
   } else {
     log.status = 'failed'
     log.error_message = result.error
     console.error('❌ [sendAndLogEmail] Email failed:', result.error)
   }
 
-  console.log('🔵 [sendAndLogEmail] Saving log to database:', log)
   await logEmailToDatabase(log)
-  console.log('✅ [sendAndLogEmail] Log saved to database')
 
   return result
 }

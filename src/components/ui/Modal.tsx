@@ -71,11 +71,9 @@ export const Modal: React.FC<ModalProps> = ({
   }, [isOpen, onClose, closeOnEscape])
 
   if (!isOpen) {
-    console.log('🔵 [Modal] Not rendering - isOpen is false')
     return null
   }
 
-  console.log('✅ [Modal] Rendering modal!', { title, size, position, isOpen })
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (closeOnOverlayClick && e.target === e.currentTarget) {

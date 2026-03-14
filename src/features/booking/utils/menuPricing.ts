@@ -1,18 +1,5 @@
 import type { BookingRequest } from '@/types/booking'
 
-export type BookingTypeWithCover = 'tavolo' | 'rinfresco_laurea' | undefined
-
-// Legacy constant kept for backward-compatibility with stored data and types
-export const COVER_CHARGE_PER_PERSON_EUR = 0
-
-export const needsCoverCharge = (_bookingType?: BookingTypeWithCover): boolean => false
-
-export const applyCoverCharge = (baseAmount: number, _bookingType?: BookingTypeWithCover): number =>
-  baseAmount
-
-export const removeCoverCharge = (amount: number, _bookingType?: BookingTypeWithCover): number =>
-  amount
-
 export interface MenuPriceDisplay {
   // Prezzo Menù: prezzo a persona
   prezzoMenu: number
@@ -25,13 +12,12 @@ export interface MenuPriceDisplay {
   
   // Campi legacy per retrocompatibilità
   totalLabel: string
-  perPersonWithCover: number
+  totalPerPerson: number
   basePerPerson: number
 }
 
 export const buildMenuPriceDisplay = (
   menu_total_per_person?: number | null,
-  _bookingType?: BookingTypeWithCover,
   menu_total_booking?: number | null
 ): MenuPriceDisplay | null => {
   if (!menu_total_per_person || menu_total_per_person <= 0) {
@@ -57,7 +43,7 @@ export const buildMenuPriceDisplay = (
     prezzoTotaleLabel,
     // Legacy fields per retrocompatibilità
     totalLabel: prezzoMenuLabel,
-    perPersonWithCover: prezzoMenu,
+    totalPerPerson: prezzoMenu,
     basePerPerson
   }
 }
@@ -65,7 +51,6 @@ export const buildMenuPriceDisplay = (
 export const getMenuPriceDisplayFromBooking = (booking: BookingRequest): MenuPriceDisplay | null => {
   return buildMenuPriceDisplay(
     booking.menu_total_per_person,
-    booking.booking_type,
     booking.menu_total_booking
   )
 }

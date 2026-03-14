@@ -6,7 +6,6 @@ import type { Database } from '../types/database'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-console.log('🔧 [Supabase Public Client] Using ANON_KEY for public inserts')
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('❌ [Supabase Public Client] Credenziali mancanti!')
@@ -33,5 +32,4 @@ export const supabasePublic = createClient<Database>(
   }
 )
 
-console.log('✅ [Supabase Public Client] Client creato per form pubblico')
 

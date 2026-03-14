@@ -4,8 +4,6 @@ import type { Database } from '../types/database'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-console.log('🔧 [Supabase Client] URL:', supabaseUrl ? '✅ Configurato' : '❌ Mancante')
-console.log('🔧 [Supabase Client] Anon Key:', supabaseAnonKey ? '✅ Configurato' : '❌ Mancante')
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('❌ [Supabase Client] Credenziali mancanti!')
@@ -33,7 +31,6 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   }
 })
 
-console.log('✅ [Supabase Client] Client creato con successo')
 
 // Helper function to handle Supabase errors
 export function handleSupabaseError(error: any): string {
@@ -53,20 +50,16 @@ export async function getCurrentUser() {
   return user
 }
 
-// Helper function to check if user is admin
-export async function isAdmin() {
+// Helper function to check if user is authorized
+export async function isAuthorizedUser() {
   const user = await getCurrentUser()
   if (!user || !user.email) return false
 
   const { data, error } = await supabase
     .from('admin_users')
-    .select('role')
+    .select('email')
     .eq('email', user.email)
     .single()
 
-  if (error || !data) return false
-
-  // Type assertion since we know the structure from our database schema
-  const adminData = data as { role: string }
-  return adminData.role === 'admin' || adminData.role === 'staff'
+  return !error && !!data
 }

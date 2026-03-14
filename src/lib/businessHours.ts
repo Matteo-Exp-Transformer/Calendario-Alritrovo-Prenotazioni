@@ -163,14 +163,12 @@ export function parseBusinessHours(settingValue: any): BusinessHours | null {
     
     for (const day of dayNames) {
       if (hours[day] !== null && !Array.isArray(hours[day])) {
-        console.warn(`Invalid business_hours structure for ${day}`)
         return null
       }
       
       if (Array.isArray(hours[day])) {
         for (const slot of hours[day] as BusinessHourSlot[]) {
           if (!slot.open || !slot.close) {
-            console.warn(`Invalid slot structure for ${day}`)
             return null
           }
         }
