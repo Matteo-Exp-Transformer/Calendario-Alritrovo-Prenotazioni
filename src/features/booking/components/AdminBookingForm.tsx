@@ -345,10 +345,10 @@ export const AdminBookingForm: React.FC<AdminBookingFormProps> = ({ onSubmit }) 
       }
     }
 
-    // If capacity check failed but no exceeded slots, proceed normally (shouldn't happen)
+    // If capacity check failed but no exceeded slots, proceed anyway (never block)
     if (!capacityCheck.isAvailable) {
-      toast.error(`❌ Capacità insufficiente! ${capacityCheck.errorMessage || 'Non ci sono abbastanza posti disponibili nella fascia oraria selezionata.'}`)
-      return
+      console.warn('⚠️ [AdminBookingForm] Capacity check failed but no slot details available, proceeding anyway')
+      toast.warn(`⚠️ Attenzione: la capienza potrebbe essere superata. La prenotazione verrà comunque creata.`)
     }
 
     // Proceed with booking creation

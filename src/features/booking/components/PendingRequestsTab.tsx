@@ -3,6 +3,7 @@ import { usePendingBookings, useAcceptedBookings } from '../hooks/useBookingQuer
 import { useAcceptBooking, useRejectBooking } from '../hooks/useBookingMutations'
 import { BookingRequestCard } from './BookingRequestCard'
 import { RejectBookingModal } from './RejectBookingModal'
+import { CapacityWarningModal } from './CapacityWarningModal'
 import { toast } from 'react-toastify'
 import type { BookingRequest } from '@/types/booking'
 import { getSlotsOccupiedByBooking } from '../utils/capacityCalculator'
@@ -19,6 +20,16 @@ export const PendingRequestsTab: React.FC = () => {
   const [rejectModalOpen, setRejectModalOpen] = useState(false)
   const [selectedBookingForReject, setSelectedBookingForReject] = useState<BookingRequest | null>(null)
 
+  // Stato per gestire il modal di overbooking
+  const [showOverbookingConfirm, setShowOverbookingConfirm] = useState(false)
+  const [overbookingSlotInfo, setOverbookingSlotInfo] = useState<{
+    slotName: string; totalOccupied: number; capacity: number; exceededBy: number
+  } | null>(null)
+  const [pendingAcceptData, setPendingAcceptData] = useState<{
+    bookingId: string; confirmedStart: string; confirmedEnd: string;
+    desiredTime: string; numGuests: number
+  } | null>(null)
+
   // ✅ FIX: Deduplicazione prenotazioni pending per evitare visualizzazioni doppie
   // Usa Set per tracciare ID già visti e filtra duplicati
   const uniquePendingBookings = useMemo(() => {
@@ -34,46 +45,31 @@ export const PendingRequestsTab: React.FC = () => {
     })
   }, [pendingBookings])
 
-  // Function to check if there are enough seats available
-  const checkCapacity = (booking: BookingRequest, startTime: string, endTime: string): boolean => {
+  // Returns exceeded slot info if capacity would be exceeded, null if within capacity
+  const getExceededSlotInfo = (
+    booking: BookingRequest, startTime: string, endTime: string
+  ): { slotName: string; totalOccupied: number; capacity: number; exceededBy: number } | null => {
     const date = booking.desired_date
     const numGuests = booking.num_guests || 0
-    
-    // Get accepted bookings for this date
+
     const dayBookings = acceptedBookings.filter((b) => {
       if (!b.confirmed_start) return false
       const bookingDate = extractDateFromISO(b.confirmed_start)
       return bookingDate === date
     })
 
-    // Build the confirmed dates
     const confirmedStart = `${date}T${startTime}:00`
     const confirmedEnd = `${date}T${endTime}:00`
-
-    // Get which slots this new booking would occupy
     const newBookingSlots = getSlotsOccupiedByBooking(confirmedStart, confirmedEnd)
-    
-    // Initialize slot capacities
-    const morning: { capacity: number; occupied: number } = { 
-      capacity: CAPACITY_CONFIG.MORNING_CAPACITY, 
-      occupied: 0 
-    }
-    const afternoon: { capacity: number; occupied: number } = { 
-      capacity: CAPACITY_CONFIG.AFTERNOON_CAPACITY, 
-      occupied: 0 
-    }
-    const evening: { capacity: number; occupied: number } = { 
-      capacity: CAPACITY_CONFIG.EVENING_CAPACITY, 
-      occupied: 0 
-    }
 
-    // Calculate occupied seats for each slot from existing bookings
+    const morning = { capacity: CAPACITY_CONFIG.MORNING_CAPACITY, occupied: 0 }
+    const afternoon = { capacity: CAPACITY_CONFIG.AFTERNOON_CAPACITY, occupied: 0 }
+    const evening = { capacity: CAPACITY_CONFIG.EVENING_CAPACITY, occupied: 0 }
+
     for (const existingBooking of dayBookings) {
       if (!existingBooking.confirmed_start || !existingBooking.confirmed_end) continue
-      
       const slots = getSlotsOccupiedByBooking(existingBooking.confirmed_start, existingBooking.confirmed_end)
       const guests = existingBooking.num_guests || 0
-
       for (const slot of slots) {
         if (slot === 'morning') morning.occupied += guests
         else if (slot === 'afternoon') afternoon.occupied += guests
@@ -81,27 +77,20 @@ export const PendingRequestsTab: React.FC = () => {
       }
     }
 
-    // Check if new booking would exceed capacity in any slot
     for (const slot of newBookingSlots) {
-      let available: number
-      
-      if (slot === 'morning') {
-        available = morning.capacity - morning.occupied
-      } else if (slot === 'afternoon') {
-        available = afternoon.capacity - afternoon.occupied
-      } else if (slot === 'evening') {
-        available = evening.capacity - evening.occupied
-      } else {
-        continue // Unknown slot
-      }
+      let occupied: number, capacity: number, slotName: string
+      if (slot === 'morning') { occupied = morning.occupied; capacity = morning.capacity; slotName = 'mattina' }
+      else if (slot === 'afternoon') { occupied = afternoon.occupied; capacity = afternoon.capacity; slotName = 'pomeriggio' }
+      else if (slot === 'evening') { occupied = evening.occupied; capacity = evening.capacity; slotName = 'sera' }
+      else continue
 
-      // If not enough seats available in this slot
-      if (available < numGuests) {
-        return false
+      const totalOccupied = occupied + numGuests
+      if (totalOccupied > capacity) {
+        return { slotName, totalOccupied, capacity, exceededBy: totalOccupied - capacity }
       }
     }
 
-    return true
+    return null
   }
 
   const handleAccept = (booking: BookingRequest) => {
@@ -126,17 +115,23 @@ export const PendingRequestsTab: React.FC = () => {
     // Create ISO strings handling midnight crossover
     const confirmedStart = createBookingDateTime(date, startTimeFormatted, true)
     const confirmedEnd = createBookingDateTime(date, endTimeFormatted, false, startTimeFormatted)
-    // ✅ CHECK CAPACITY BEFORE ACCEPTING
-    const hasCapacity = checkCapacity(booking, startTimeFormatted, endTimeFormatted)
-    
-    if (!hasCapacity) {
-      console.error('❌ [PendingRequestsTab] Not enough seats available!')
-      toast.error(`❌ Posti non disponibili! La prenotazione richiede ${booking.num_guests} posti ma non ci sono abbastanza posti liberi nella fascia oraria selezionata.`)
+    // ✅ CHECK CAPACITY - show warning modal if exceeded, but never block
+    const exceededInfo = getExceededSlotInfo(booking, startTimeFormatted, endTimeFormatted)
+
+    if (exceededInfo) {
+      // Store data for later use when user confirms via modal
+      setPendingAcceptData({
+        bookingId: booking.id,
+        confirmedStart,
+        confirmedEnd,
+        desiredTime: startTimeFormatted,
+        numGuests: booking.num_guests,
+      })
+      setOverbookingSlotInfo(exceededInfo)
+      setShowOverbookingConfirm(true)
       return
     }
-    
-    
-    
+
     acceptMutation.mutate(
       {
         bookingId: booking.id,
@@ -256,6 +251,54 @@ export const PendingRequestsTab: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Modal per overbooking (solo avviso, non blocca) */}
+      {overbookingSlotInfo && (
+        <CapacityWarningModal
+          isOpen={showOverbookingConfirm}
+          onClose={() => {
+            setShowOverbookingConfirm(false)
+            setOverbookingSlotInfo(null)
+            setPendingAcceptData(null)
+          }}
+          onConfirm={() => {
+            if (pendingAcceptData) {
+              acceptMutation.mutate(
+                {
+                  bookingId: pendingAcceptData.bookingId,
+                  confirmedStart: pendingAcceptData.confirmedStart,
+                  confirmedEnd: pendingAcceptData.confirmedEnd,
+                  desiredTime: pendingAcceptData.desiredTime,
+                  numGuests: pendingAcceptData.numGuests,
+                },
+                {
+                  onSuccess: async () => {
+                    toast.success('Prenotazione accettata con successo!')
+                    await refetch()
+                  },
+                  onError: (error) => {
+                    console.error('❌ [PendingRequestsTab] Accept mutation error:', error)
+                    toast.error('Errore nell\'accettazione della prenotazione')
+                  },
+                }
+              )
+            }
+            setShowOverbookingConfirm(false)
+            setOverbookingSlotInfo(null)
+            setPendingAcceptData(null)
+          }}
+          onCancel={() => {
+            setShowOverbookingConfirm(false)
+            setOverbookingSlotInfo(null)
+            setPendingAcceptData(null)
+          }}
+          exceededBy={overbookingSlotInfo.exceededBy}
+          slotName={overbookingSlotInfo.slotName}
+          totalOccupied={overbookingSlotInfo.totalOccupied}
+          capacity={overbookingSlotInfo.capacity}
+          variant="new_booking"
+        />
+      )}
 
       {/* Modal per il rifiuto con motivo */}
       <RejectBookingModal

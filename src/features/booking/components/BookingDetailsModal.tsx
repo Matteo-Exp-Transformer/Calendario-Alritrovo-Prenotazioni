@@ -635,8 +635,9 @@ export const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
         setShowOverbookingConfirm(true)
         return
       }
-      toast.error(`❌ Posti non disponibili! La modifica richiede ${formData.numGuests} posti ma non ci sono abbastanza posti liberi nella fascia oraria selezionata.`)
-      return
+      // No slot details available, but never block — proceed with warning
+      console.warn('⚠️ [BookingDetailsModal] Capacity exceeded but no slot details, proceeding anyway')
+      toast.warn(`⚠️ Attenzione: la capienza potrebbe essere superata. La modifica verrà comunque salvata.`)
     }
 
     performSave()

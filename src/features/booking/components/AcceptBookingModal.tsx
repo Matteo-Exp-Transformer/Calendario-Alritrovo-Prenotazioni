@@ -131,11 +131,10 @@ export const AcceptBookingModal: React.FC<AcceptBookingModalProps> = ({
       return
     }
 
-    // If capacity check failed but no exceeded slots, show error
+    // If capacity check failed but no exceeded slots, proceed anyway (never block)
     if (!capacityCheck.isAvailable) {
-      console.error('❌ [AcceptModal] Capacity check failed')
-      toast.error(`❌ Posti non disponibili! La prenotazione richiede ${formData.numGuests} posti ma non ci sono abbastanza posti liberi nella fascia oraria selezionata.`)
-      return
+      console.warn('⚠️ [AcceptModal] Capacity check failed but no slot details available, proceeding anyway')
+      toast.warn('⚠️ Attenzione: la capienza potrebbe essere superata. La prenotazione verrà comunque accettata.')
     }
     
     confirmBooking()
